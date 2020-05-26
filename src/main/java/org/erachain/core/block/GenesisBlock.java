@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 // import org.slf4j.LoggerFactory;
@@ -84,10 +85,11 @@ public class GenesisBlock extends Block {
 
             Account leftRecipiend = null;
             BigDecimal totalSended = BigDecimal.ZERO;
-            JSONArray holders = (JSONArray) Settings.genesisJSON.get(2);
+            List<List<Object>> holders = (List) Settings.genesisJSON.get(2);
+
             if (!Settings.ERA_COMPU_ALL_UP) {
                 for (int i = 0; i < holders.size(); i++) {
-                    JSONArray holder = (JSONArray) holders.get(i);
+                    List holder = holders.get(i);
 
                     sideSettingString += holder.get(0).toString();
                     sideSettingString += holder.get(1).toString();

@@ -34,7 +34,7 @@ ext {
 
 //String versionEra = "4.11.08-${git.head().abbreviatedId}"
 String versionEra = "5.0"
-archivesBaseName = 'Erachain'
+archivesBaseName = 'Exochain'
 group 'org.erachain'
 //version versionEra
 sourceCompatibility = 1.8
@@ -108,7 +108,7 @@ jar {
 //        configurations.runtime
 //    }
 
-    baseName = "erachain"
+    baseName = "Exochain"
     destinationDir project.file('build/libs/Erachain')
 
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
@@ -204,12 +204,12 @@ task CreateZip(type: Zip) {
     exclude 'Erachain/datatemp'
     exclude 'Erachain/dataWallet'
     exclude 'Erachain/walletKeys'
-    archiveName 'Erachain' + '.zip'
+    archiveName 'Exochain' + '.zip'
     destinationDir(file('build/libs/'))
 }
 
 //task copyToLib(type: Copy){
-//    into "build/libs/Erachain/libs"
+//    into "build/libs/Exochain/libs"
 //    from configurations.runtime
 //}
 
