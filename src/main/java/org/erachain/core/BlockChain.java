@@ -192,7 +192,7 @@ public class BlockChain {
     public static final int GENESIS_WIN_VALUE = TEST_MODE ? 3000 : ERA_COMPU_ALL_UP ? 10000 : 22000;
 
     public static final String[] GENESIS_ADMINS = !ERA_COMPU_ALL_UP && SIDE_MODE ? new String[]{
-            (((JSONArray) ((JSONArray) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()}
+            (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()}
             : new String[]{"78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5",
             "7B3gTXXKB226bxTxEHi8cJNfnjSbuuDoMC"};
 
