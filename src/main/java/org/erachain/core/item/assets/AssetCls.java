@@ -25,8 +25,8 @@ public abstract class AssetCls extends ItemCls {
 
     // CORE KEY
     public static final long ERA_KEY = 1l;
-    public static final String ERA_ABBREV = "ERA"; // ERA (main rights units)
-    public static final String ERA_NAME = "ERA";
+    public static final String ERA_ABBREV = "TOR"; // ERA (main rights units)
+    public static final String ERA_NAME = "TOR";
     public static final String ERA_DESCR = "Основная учётная единица, мера собственности и управления данной средой - \"правовая\", \"управляющая\"" + ": "
             + ERA_NAME + "(" + ERA_ABBREV + "). "
             + "Именно единицы Эра позволяют собирать блоки и получать комиссию с упакованных в них транзакций"
@@ -41,16 +41,16 @@ public abstract class AssetCls extends ItemCls {
 
     // FEE KEY
     public static final long FEE_KEY = 2l;
-    public static final String FEE_ABBREV = "CMP"; // COMPU (compute units)
-    public static final String FEE_NAME = "COMPU";
+    public static final String FEE_ABBREV = "EXO"; // COMPU (compute units)
+    public static final String FEE_NAME = "EXO";
     public static final String FEE_DESCR = "Основная учётная единица среды, используемая для оплаты комиссий за внесение записей в среду - \"рабочая\", \"оплатная\"" + ": "
             + FEE_NAME + "(" + FEE_ABBREV + "). ";
 
     // TRUST KEY
     public static final long TRUST_KEY = 3l;
-    public static final String TRUST_ABBREV = "АЗЫ"; // COMPU (compute units)
-    public static final String TRUST_NAME = "АЗЫ";
-    public static final String TRUST_DESCR = "Честь, доблесть и доверие" + ": "
+    public static final String TRUST_ABBREV = "ES"; // COMPU (compute units)
+    public static final String TRUST_NAME = "ES";
+    public static final String TRUST_DESCR = "?" + ": "
             + TRUST_NAME + "(" + TRUST_ABBREV + "). ";
 
     // REAL KEY
