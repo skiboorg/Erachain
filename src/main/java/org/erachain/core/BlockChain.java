@@ -449,9 +449,9 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (SIDE_MODE) {
-            File file = new File("sidePROTOCOL.json");
+            File file = new File("chainPROTOCOL.json");
             if (file.exists()) {
-                LOGGER.info("sidePROTOCOL.json USED");
+                LOGGER.info("chainPROTOCOL.json USED");
                 // START SIDE CHAIN
                 String jsonString = "";
                 try {
