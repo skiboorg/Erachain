@@ -48,8 +48,8 @@ public abstract class AssetCls extends ItemCls {
 
     // TRUST KEY
     public static final long TRUST_KEY = 3l;
-    public static final String TRUST_ABBREV = "ES"; // COMPU (compute units)
-    public static final String TRUST_NAME = "ES";
+    public static final String TRUST_ABBREV = "AS"; // COMPU (compute units)
+    public static final String TRUST_NAME = "AS";
     public static final String TRUST_DESCR = "?" + ": "
             + TRUST_NAME + "(" + TRUST_ABBREV + "). ";
 
