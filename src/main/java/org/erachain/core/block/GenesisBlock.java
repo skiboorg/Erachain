@@ -618,7 +618,7 @@ public class GenesisBlock extends Block {
         //asset1 = makeAsset(AssetCls.FEE_KEY);
         //transactions.add(new GenesisIssueAssetTransaction(asset1));
         // ASSET OTHER
-        for (int i = 1; i <= AssetCls.REAL_KEY + 5; i++) {
+        for (int i = 1; i <= BlockChain.SKIP_BASE_ASSETS_AFTER; i++) {
             AssetVenture asset = makeAsset(i);
             // MAKE OLD STYLE ASSET with DEVISIBLE:
             // PROP1 = 0 (unMOVABLE, SCALE = 8, assetTYPE = 1 (divisible)
@@ -628,11 +628,11 @@ public class GenesisBlock extends Block {
         }
 
         ///// TEMPLATES
-        for (int i = 1; i <= TemplateCls.UNHIRING_KEY; i++)
+        for (int i = 1; i < TemplateCls.EMPTY_KEY; i++)
             transactions.add(new GenesisIssueTemplateRecord(makeTemplate(i)));
 
         ///// STATUSES
-        for (int i = 1; i <= StatusCls.MEMBER_KEY; i++)
+        for (int i = 1; i < StatusCls.RIGHTS_KEY; i++)
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
     }
 
