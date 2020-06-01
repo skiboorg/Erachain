@@ -805,7 +805,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
                     case ACTION_SEND: // SEND ASSET
 
-                        if (absKey == RIGHTS_KEY) {
+                        if (key == RIGHTS_KEY) {
 
                             if (true) {
                                 return INVALID_TRANSFER_TYPE;
@@ -841,6 +841,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                             return Transaction.INVALID_CLAIM_RECIPIENT;
                         }
 
+                        if (key == 3L) {
+                            return INVALID_TRANSFER_TYPE;
+                        }
 
                         // if asset is unlimited and me is creator of this
                         // asset
@@ -849,10 +852,6 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         if (unLimited) {
                             ;
                         } else if (absKey == FEE_KEY) {
-
-                            if (true) {
-                                return INVALID_TRANSFER_TYPE;
-                            }
 
 
                             if ((flags & Transaction.NOT_VALIDATE_FLAG_BALANCE) == 0
