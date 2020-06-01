@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=erachain
+set app=exochain
 set jpars=
 set pars= -pass=123456789 -dbschain=mapdb
 
