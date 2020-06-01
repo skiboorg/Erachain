@@ -70,10 +70,6 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
 
     public void process(Block block, int asDeal) {
 
-        if (this.dcSet.getItemAssetMap().size() >= BlockChain.SKIP_BASE_ASSETS_AFTER)
-            // SKIP all base TOKENS
-            return;
-
         super.process(block, asDeal);
 
     }

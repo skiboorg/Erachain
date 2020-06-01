@@ -21,6 +21,7 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
+import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 
 import java.io.File;
@@ -634,6 +635,15 @@ public class GenesisBlock extends Block {
         ///// STATUSES
         for (int i = 1; i < StatusCls.RIGHTS_KEY; i++)
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
+
+        AssetVenture asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "AS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "EUR",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
     }
 
     //GETTERS
