@@ -807,6 +807,10 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
                         if (absKey == RIGHTS_KEY) {
 
+                            if (true) {
+                                return INVALID_TRANSFER_TYPE;
+                            }
+
                             // byte[] ss = this.creator.getAddress();
                             if (height > BlockChain.FREEZE_FROM
                                     && BlockChain.FOUNDATION_ADDRESSES.contains(this.creator.getAddress())) {
@@ -845,6 +849,11 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         if (unLimited) {
                             ;
                         } else if (absKey == FEE_KEY) {
+
+                            if (true) {
+                                return INVALID_TRANSFER_TYPE;
+                            }
+
 
                             if ((flags & Transaction.NOT_VALIDATE_FLAG_BALANCE) == 0
                                     && this.creator.getBalance(dcSet, FEE_KEY, ACTION_SEND).b
