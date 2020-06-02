@@ -43,27 +43,27 @@ public class Settings {
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
-            Arrays.asList("744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW", "1000000"),
-            Arrays.asList("78bLvKGdbhUsQREw4SdMbKYCb1vetxQBkt", "450000"),
-            Arrays.asList("79e27XPZf1ZhQJbB3nNV9gAnJZCBP9TSUY", "450000"),
-            Arrays.asList("78Caoo5VL9SNZVwdQWnGi29qTX2vD8WH4v", "450000"),
-            Arrays.asList("7GLbL8Zh6L18CeSJnVRVhyi7CByazSDWtK", "450000"),
-            Arrays.asList("7AyNnJaRFzQi4amfbKCWW8jLa5Y7WNNDua", "450000"),
-            Arrays.asList("73vrijgp92p3KaGFvSCzoGRFPA4s1bgZDc", "450000"),
-            Arrays.asList("77nD6ErChNqdsCcxSzRPmh8qVt38uWnCmJ", "450000"),
-            Arrays.asList("75REN3wqdhdWKrWm4nXyKUye6Ydwp1dUy1", "450000"),
-            Arrays.asList("7NU9kxiRFZmmPZSruDkN2uukjs3k86KSKt", "450000"),
-            Arrays.asList("7LT3PoYGePdJeRG8g6YM8ijPigb8sb2kCX", "450000"),
-            Arrays.asList("7Rqf6eBKENcAmELwuJjcd7T1rraUMk5pit", "450000"),
-            Arrays.asList("76pWtC8EA7qKf4JKbVC1Q88u1cFjT5361i", "450000"),
-            Arrays.asList("7KpoMJVV1phYuDkkREpCKaFC8dhjU7zoUE", "450000"),
-            Arrays.asList("7Nv6LcKGYHhedY7L7tifRbw68WhAaVrGGQ", "450000"),
-            Arrays.asList("7QNUie7UggSEAuzNTXyZtrj1PRrqHh7ain", "450000"),
-            Arrays.asList("762azBNNDAdLPitwNnWsCPrdT3HwAsjVk2", "450000"),
-            Arrays.asList("76e2P2zDc2EWFV71zMuVKMLumMz4inyNef", "450000"),
-            Arrays.asList("7B33HFMnf8MGPZALoRrhh1bXg71ZGT17kw", "450000"),
-            Arrays.asList("7QzvggWZZbVb1GBiwtYiAauskPWcMwZHay", "450000"),
-            Arrays.asList("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5", "450000")
+            Arrays.asList("744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW", "10000000"),
+            Arrays.asList("78bLvKGdbhUsQREw4SdMbKYCb1vetxQBkt", "4500000"),
+            Arrays.asList("79e27XPZf1ZhQJbB3nNV9gAnJZCBP9TSUY", "4500000"),
+            Arrays.asList("78Caoo5VL9SNZVwdQWnGi29qTX2vD8WH4v", "4500000"),
+            Arrays.asList("7GLbL8Zh6L18CeSJnVRVhyi7CByazSDWtK", "4500000"),
+            Arrays.asList("7AyNnJaRFzQi4amfbKCWW8jLa5Y7WNNDua", "4500000"),
+            Arrays.asList("73vrijgp92p3KaGFvSCzoGRFPA4s1bgZDc", "4500000"),
+            Arrays.asList("77nD6ErChNqdsCcxSzRPmh8qVt38uWnCmJ", "4500000"),
+            Arrays.asList("75REN3wqdhdWKrWm4nXyKUye6Ydwp1dUy1", "4500000"),
+            Arrays.asList("7NU9kxiRFZmmPZSruDkN2uukjs3k86KSKt", "4500000"),
+            Arrays.asList("7LT3PoYGePdJeRG8g6YM8ijPigb8sb2kCX", "4500000"),
+            Arrays.asList("7Rqf6eBKENcAmELwuJjcd7T1rraUMk5pit", "4500000"),
+            Arrays.asList("76pWtC8EA7qKf4JKbVC1Q88u1cFjT5361i", "4500000"),
+            Arrays.asList("7KpoMJVV1phYuDkkREpCKaFC8dhjU7zoUE", "4500000"),
+            Arrays.asList("7Nv6LcKGYHhedY7L7tifRbw68WhAaVrGGQ", "4500000"),
+            Arrays.asList("7QNUie7UggSEAuzNTXyZtrj1PRrqHh7ain", "4500000"),
+            Arrays.asList("762azBNNDAdLPitwNnWsCPrdT3HwAsjVk2", "4500000"),
+            Arrays.asList("76e2P2zDc2EWFV71zMuVKMLumMz4inyNef", "4500000"),
+            Arrays.asList("7B33HFMnf8MGPZALoRrhh1bXg71ZGT17kw", "4500000"),
+            Arrays.asList("7QzvggWZZbVb1GBiwtYiAauskPWcMwZHay", "4500000"),
+            Arrays.asList("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5", "4500000")
         );
 
     public static String peersURL = "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json";

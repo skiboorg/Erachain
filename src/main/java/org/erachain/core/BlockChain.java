@@ -125,7 +125,7 @@ public class BlockChain {
      */
     public static final boolean ANONIM_SERT_USE = TEST_MODE || BlockChain.ERA_COMPU_ALL_UP;
 
-    public static final int MAX_ORPHAN = 10000; // max orphan blocks in chain for 30 sec
+    public static final int MAX_ORPHAN = 1000; // max orphan blocks in chain for 30 sec
     public static final int SYNCHRONIZE_PACKET = 300; // when synchronize - get blocks packet by transactions
 
     /**
@@ -140,7 +140,7 @@ public class BlockChain {
     public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 15 : SIDE_MODE ? 15 : 40; // GENESIS START TOP ACCOUNTS
 
     // RIGHTs
-    public static final int GENESIS_ERA_TOTAL = 10000000;
+    public static final int GENESIS_ERA_TOTAL = 100000000;
     public static final int GENERAL_ERA_BALANCE = GENESIS_ERA_TOTAL / 100;
     public static final int MAJOR_ERA_BALANCE = 33000;
     public static final int MINOR_ERA_BALANCE = 1000;
