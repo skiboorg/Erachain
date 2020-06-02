@@ -805,7 +805,11 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
                     case ACTION_SEND: // SEND ASSET
 
-                        if (absKey == RIGHTS_KEY) {
+                        if (key == RIGHTS_KEY) {
+
+                            if (true) {
+                                return INVALID_TRANSFER_TYPE;
+                            }
 
                             // byte[] ss = this.creator.getAddress();
                             if (height > BlockChain.FREEZE_FROM
@@ -837,6 +841,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                             return Transaction.INVALID_CLAIM_RECIPIENT;
                         }
 
+                        if (key == 3L) {
+                            return INVALID_TRANSFER_TYPE;
+                        }
 
                         // if asset is unlimited and me is creator of this
                         // asset
@@ -845,6 +852,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         if (unLimited) {
                             ;
                         } else if (absKey == FEE_KEY) {
+
 
                             if ((flags & Transaction.NOT_VALIDATE_FLAG_BALANCE) == 0
                                     && this.creator.getBalance(dcSet, FEE_KEY, ACTION_SEND).b

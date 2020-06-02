@@ -25,8 +25,8 @@ public abstract class AssetCls extends ItemCls {
 
     // CORE KEY
     public static final long ERA_KEY = 1l;
-    public static final String ERA_ABBREV = "ERA"; // ERA (main rights units)
-    public static final String ERA_NAME = "ERA";
+    public static final String ERA_ABBREV = "DAR"; // ERA (main rights units)
+    public static final String ERA_NAME = "DAR";
     public static final String ERA_DESCR = "Основная учётная единица, мера собственности и управления данной средой - \"правовая\", \"управляющая\"" + ": "
             + ERA_NAME + "(" + ERA_ABBREV + "). "
             + "Именно единицы Эра позволяют собирать блоки и получать комиссию с упакованных в них транзакций"
@@ -41,16 +41,16 @@ public abstract class AssetCls extends ItemCls {
 
     // FEE KEY
     public static final long FEE_KEY = 2l;
-    public static final String FEE_ABBREV = "CMP"; // COMPU (compute units)
-    public static final String FEE_NAME = "COMPU";
+    public static final String FEE_ABBREV = "EXO"; // COMPU (compute units)
+    public static final String FEE_NAME = "EXO";
     public static final String FEE_DESCR = "Основная учётная единица среды, используемая для оплаты комиссий за внесение записей в среду - \"рабочая\", \"оплатная\"" + ": "
             + FEE_NAME + "(" + FEE_ABBREV + "). ";
 
     // TRUST KEY
     public static final long TRUST_KEY = 3l;
-    public static final String TRUST_ABBREV = "АЗЫ"; // COMPU (compute units)
-    public static final String TRUST_NAME = "АЗЫ";
-    public static final String TRUST_DESCR = "Честь, доблесть и доверие" + ": "
+    public static final String TRUST_ABBREV = "AS"; // COMPU (compute units)
+    public static final String TRUST_NAME = "AS";
+    public static final String TRUST_DESCR = "?" + ": "
             + TRUST_NAME + "(" + TRUST_ABBREV + "). ";
 
     // REAL KEY
@@ -407,9 +407,9 @@ public abstract class AssetCls extends ItemCls {
     public String viewDescription() {
         switch ((int) this.key) {
             case 1:
-                return "<b>ERA</b> is an <u>Accounting Unit</u> allowing a User, that has a sufficient amount of such units and with such sufficiency threshold preset in the ERACHAIN Software, to use the ERACHAIN Software for making his Request Entries to the Log, including provision of such service to other Users, receiving it for the COMPU Accounting Units and producing new COMPU Accounting Units as per the ERACHAIN Software rules and operating procedure available on the Erachain.org website. For more information see Erachain Licence Agreement on the <a href=\"http://erachain.org\">Erachain.org</a>.";
+                return "" + AssetCls.ERA_NAME + " ++";
             case 2:
-                return "<b>COMPU</b> is an <u>Accounting Unit</u> allowing a User that has a sufficient amount of such units, with such sufficiency threshold computed in the ERACHAIN Software, to use the ERACHAIN Software for entering that User’s Request Entries on the Log, both on his own and by having such service provided by other Users. The COMPU Accounting Unit operates on the Log as a unit used to pay for the provision of service of making an entry to the Log. For more information see Erachain Licence Agreementon the <a href=\"http://erachain.org\">Erachain.org</a>.";
+                return "" + AssetCls.FEE_NAME + " ++";
         }
 
         return this.description;
@@ -417,28 +417,40 @@ public abstract class AssetCls extends ItemCls {
 
     @Override
     public byte[] getIcon() {
-        switch ((int) (long) key) {
+        switch ((int) key) {
             case 1:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ERA.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/DAR.png"));
                 } catch (Exception e) {
                 }
                 return icon;
             case 2:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/COMPU.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/EXO.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 14:
+            case 3:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ETH.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/AS.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 12:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/BTC.gif"));
                 } catch (Exception e) {
                 }
                 return icon;
             case 92:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/RUB.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 94:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/EUR.png"));
                 } catch (Exception e) {
                 }
                 return icon;

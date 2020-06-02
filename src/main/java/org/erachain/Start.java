@@ -103,23 +103,33 @@ public class Start {
         }
 
         ///////////////////  SIDECHAINS ///////////
-        file = new File("sideGENESIS.json");
-        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0 && file.exists()) {
+        file = null; ///new File("sideGENESIS.json");
+        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0
+                /// && file.exists()
+                ) {
             // START SIDE CHAIN
-            LOGGER.info("sideGENESIS.json USED");
-            try {
-                List<String> lines = Files.readLines(file, Charsets.UTF_8);
-
-                String jsonString = "";
-                for (String line : lines) {
-                    if (line.trim().startsWith("//")) {
-                        // пропускаем //
-                        continue;
-                    }
-                    jsonString += line;
-                }
 
                 if (false) {
+
+                    LOGGER.info("sideGENESIS.json USED");
+
+                    List<String> lines;
+                    String jsonString = "";
+                    try {
+                        lines = Files.readLines(file, Charsets.UTF_8);
+                        for (String line : lines) {
+                            if (line.trim().startsWith("//")) {
+                                // пропускаем //
+                                continue;
+                            }
+                            jsonString += line;
+                        }
+                    } catch (Exception e) {
+                        LOGGER.info("Error while reading " + file.getAbsolutePath());
+                        LOGGER.error(e.getMessage(), e);
+                        System.exit(3);
+                    }
+
                     Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
                     List appArray = (List) Settings.genesisJSON.get(0);
                     Settings.APP_NAME = appArray.get(0).toString();
@@ -149,11 +159,6 @@ public class Start {
 
                 Settings.NET_MODE = Settings.NET_MODE_SIDE;
 
-            } catch (Exception e) {
-                LOGGER.info("Error while reading " + file.getAbsolutePath());
-                LOGGER.error(e.getMessage(), e);
-                System.exit(3);
-            }
         }
 
         Settings.getInstance();

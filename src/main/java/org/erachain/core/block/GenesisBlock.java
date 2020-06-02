@@ -21,6 +21,7 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
+import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 
 import java.io.File;
@@ -618,7 +619,7 @@ public class GenesisBlock extends Block {
         //asset1 = makeAsset(AssetCls.FEE_KEY);
         //transactions.add(new GenesisIssueAssetTransaction(asset1));
         // ASSET OTHER
-        for (int i = 1; i <= AssetCls.REAL_KEY + 5; i++) {
+        for (int i = 1; i <= BlockChain.SKIP_BASE_ASSETS_AFTER; i++) {
             AssetVenture asset = makeAsset(i);
             // MAKE OLD STYLE ASSET with DEVISIBLE:
             // PROP1 = 0 (unMOVABLE, SCALE = 8, assetTYPE = 1 (divisible)
@@ -628,12 +629,25 @@ public class GenesisBlock extends Block {
         }
 
         ///// TEMPLATES
-        for (int i = 1; i <= TemplateCls.UNHIRING_KEY; i++)
+        for (int i = 1; i < TemplateCls.EMPTY_KEY; i++)
             transactions.add(new GenesisIssueTemplateRecord(makeTemplate(i)));
 
         ///// STATUSES
-        for (int i = 1; i <= StatusCls.MEMBER_KEY; i++)
+        for (int i = 1; i < StatusCls.RIGHTS_KEY; i++)
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
+
+        AssetVenture asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "AS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "BTC",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "EUR",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
     }
 
     //GETTERS
