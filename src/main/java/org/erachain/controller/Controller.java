@@ -91,7 +91,7 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "5.0";
+    public static String version = "5.0.01 DEV";
     public static String buildTime = "2020-05-06 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
@@ -190,7 +190,8 @@ public class Controller extends Observable {
                         put("ru", Transaction.makeDBRef(159727, 1));
                     }
                 };
-        APP_NAME = "Erachain" + "-" + Settings.getInstance().APP_NAME;
+
+        APP_NAME = Settings.getInstance().FORK_APP_Name;
 
     }
 

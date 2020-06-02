@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=erachain
+set app=exochain
 set xms=2048
 set xmx=4096
 set pars=-nogui

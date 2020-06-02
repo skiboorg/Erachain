@@ -22,20 +22,49 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1487844793333L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1588932600000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1590865200000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1590865200000L; // DEMO Net
 
-    public static String APP_NAME = "";
-    public static String APP_FULL_NAME = "";
+    public static String FORK_APP_Name = "Exochain";
+    public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
+    public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
+
+    public static String APP_NAME = FORK_APP_Name;
+    public static String APP_FULL_NAME = FORK_APP_NAME;
     public static boolean ERA_COMPU_ALL_UP;
 
     // FOR TEST by default
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
+
+    public final static List<List<Object>> HOLDERS = Arrays.asList(
+            Arrays.asList("744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW", "1000000"),
+            Arrays.asList("78bLvKGdbhUsQREw4SdMbKYCb1vetxQBkt", "450000"),
+            Arrays.asList("79e27XPZf1ZhQJbB3nNV9gAnJZCBP9TSUY", "450000"),
+            Arrays.asList("78Caoo5VL9SNZVwdQWnGi29qTX2vD8WH4v", "450000"),
+            Arrays.asList("7GLbL8Zh6L18CeSJnVRVhyi7CByazSDWtK", "450000"),
+            Arrays.asList("7AyNnJaRFzQi4amfbKCWW8jLa5Y7WNNDua", "450000"),
+            Arrays.asList("73vrijgp92p3KaGFvSCzoGRFPA4s1bgZDc", "450000"),
+            Arrays.asList("77nD6ErChNqdsCcxSzRPmh8qVt38uWnCmJ", "450000"),
+            Arrays.asList("75REN3wqdhdWKrWm4nXyKUye6Ydwp1dUy1", "450000"),
+            Arrays.asList("7NU9kxiRFZmmPZSruDkN2uukjs3k86KSKt", "450000"),
+            Arrays.asList("7LT3PoYGePdJeRG8g6YM8ijPigb8sb2kCX", "450000"),
+            Arrays.asList("7Rqf6eBKENcAmELwuJjcd7T1rraUMk5pit", "450000"),
+            Arrays.asList("76pWtC8EA7qKf4JKbVC1Q88u1cFjT5361i", "450000"),
+            Arrays.asList("7KpoMJVV1phYuDkkREpCKaFC8dhjU7zoUE", "450000"),
+            Arrays.asList("7Nv6LcKGYHhedY7L7tifRbw68WhAaVrGGQ", "450000"),
+            Arrays.asList("7QNUie7UggSEAuzNTXyZtrj1PRrqHh7ain", "450000"),
+            Arrays.asList("762azBNNDAdLPitwNnWsCPrdT3HwAsjVk2", "450000"),
+            Arrays.asList("76e2P2zDc2EWFV71zMuVKMLumMz4inyNef", "450000"),
+            Arrays.asList("7B33HFMnf8MGPZALoRrhh1bXg71ZGT17kw", "450000"),
+            Arrays.asList("7QzvggWZZbVb1GBiwtYiAauskPWcMwZHay", "450000"),
+            Arrays.asList("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5", "450000")
+        );
 
     public static String peersURL = "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json";
     public static String sideLicense; // see sidePROTOCOL_example.json
