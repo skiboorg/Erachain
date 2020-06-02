@@ -2520,6 +2520,7 @@ public class BlockExplorer {
         } else {
             // BTC
             list.add(new Pair<Long, Long>(12L, 95L));
+            list.add(new Pair<Long, Long>(12L, 94L));
             list.add(new Pair<Long, Long>(12L, 92L));
             // ERA
             list.add(new Pair<Long, Long>(1L, 2L));
@@ -2539,6 +2540,10 @@ public class BlockExplorer {
             list.add(new Pair<Long, Long>(3L, 95L));
             list.add(new Pair<Long, Long>(3L, 94L));
             list.add(new Pair<Long, Long>(3L, 92L));
+
+            // EUR
+            list.add(new Pair<Long, Long>(92L, 94L));
+            list.add(new Pair<Long, Long>(94L, 95L));
 
             //GOLD
             list.add(new Pair<Long, Long>(21L, 12L));
