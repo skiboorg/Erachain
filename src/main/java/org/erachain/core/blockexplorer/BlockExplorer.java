@@ -2525,16 +2525,25 @@ public class BlockExplorer {
             list.add(new Pair<Long, Long>(1L, 2L));
             list.add(new Pair<Long, Long>(1L, 12L));
             list.add(new Pair<Long, Long>(1L, 95L));
+            list.add(new Pair<Long, Long>(1L, 94L));
             list.add(new Pair<Long, Long>(1L, 92L));
 
             // COMPU
             list.add(new Pair<Long, Long>(2L, 12L));
             list.add(new Pair<Long, Long>(2L, 95L));
+            list.add(new Pair<Long, Long>(2L, 94L));
             list.add(new Pair<Long, Long>(2L, 92L));
+
+            // AS
+            list.add(new Pair<Long, Long>(3L, 12L));
+            list.add(new Pair<Long, Long>(3L, 95L));
+            list.add(new Pair<Long, Long>(3L, 94L));
+            list.add(new Pair<Long, Long>(3L, 92L));
 
             //GOLD
             list.add(new Pair<Long, Long>(21L, 12L));
             list.add(new Pair<Long, Long>(21L, 95L));
+            list.add(new Pair<Long, Long>(21L, 94L));
             list.add(new Pair<Long, Long>(21L, 92L));
 
             list.add(new Pair<Long, Long>(1010L, 92L));
