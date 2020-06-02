@@ -442,6 +442,12 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
+            case 94:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/EUR.png"));
+                } catch (Exception e) {
+                }
+                return icon;
             case 95:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/USD.png"));

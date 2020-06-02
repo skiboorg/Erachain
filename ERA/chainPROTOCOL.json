@@ -9,7 +9,7 @@
   "sideLicense": "Sidechain Licence Agreement.pdf",
 
   "startKey": {
-    "assets": -1,
+    "assets": -1000,
     "persons": 1000,
     "polls": -1,
     "statuses": -1

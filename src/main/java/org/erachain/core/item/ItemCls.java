@@ -15,6 +15,7 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
+import org.erachain.settings.Settings;
 import org.erachain.utils.Pair;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
@@ -645,7 +646,10 @@ public abstract class ItemCls implements ExplorerJsonLine {
      */
     public long isNovaAsset(Account creator, DCSet dcSet) {
         Object item = getNovaItems().get(this.name);
-        if (item != null && creator.equals(getNovaItemCreator(item))) {
+        if (item != null &&
+                (creator.equals(getNovaItemCreator(item))
+                    || true || creator.equals(Settings.HOLDERS.get(0).get(0)))
+                ) {
             ItemMap dbMap = this.getDBMap(dcSet);
             Long key = (Long) getNovaItemKey(item);
             if (dbMap.contains(key)) {
