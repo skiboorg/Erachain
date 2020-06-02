@@ -23,6 +23,7 @@ public class AboutFrame extends JDialog implements Observer {
     protected boolean user_close = true;
     private AboutPanel aboutPanel;
     private JTextField console_Text;
+    public JLabel lblAuthorsLabel;
 
     public AboutFrame() {
         //CREATE FRAME
@@ -72,7 +73,7 @@ public class AboutFrame extends JDialog implements Observer {
         gbl_aboutPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         aboutPanel.setLayout(gbl_aboutPanel);
 
-        JLabel lblAuthorsLabel = new JLabel(Lang.getInstance().translate("Author") + ": "
+        lblAuthorsLabel = new JLabel(Lang.getInstance().translate("Author") + ": "
                 //+ "Ермолаев Дмитрий Сергеевич");
                 + Lang.getInstance().translate("ERACHAIN WORLD PTE LTD.")); //"Dmitrii Ermolaev"));
         lblAuthorsLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));
@@ -84,12 +85,13 @@ public class AboutFrame extends JDialog implements Observer {
         gbc_lblAuthorsLabel.anchor = GridBagConstraints.NORTHWEST;
         gbc_lblAuthorsLabel.gridx = 1;
         gbc_lblAuthorsLabel.gridy = 1;
+        lblAuthorsLabel.setVisible(false);
         aboutPanel.add(lblAuthorsLabel, gbc_lblAuthorsLabel);
 
         int gridy = 2;
         if (BlockChain.SIDE_MODE) {
-            JLabel appNameLabel = new JLabel(Lang.getInstance().translate("sidechain") + ": "
-                    + Controller.getInstance().APP_NAME);
+            JLabel appNameLabel = new JLabel(//Lang.getInstance().translate("sidechain") + ": " +
+                    Controller.getInstance().APP_NAME);
             appNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));
             appNameLabel.setForeground(Color.RED);
             appNameLabel.setHorizontalAlignment(SwingConstants.CENTER);

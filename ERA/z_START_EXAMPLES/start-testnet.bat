@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=erachain
+set app=exochain
 set jpars=-Xms512m
 
 // USE new TESTNET chain

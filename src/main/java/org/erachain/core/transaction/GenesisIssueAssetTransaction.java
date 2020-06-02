@@ -1,5 +1,6 @@
 package org.erachain.core.transaction;
 
+import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.block.Block;
 import org.erachain.core.item.assets.AssetCls;
@@ -69,7 +70,7 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
 
     public void process(Block block, int asDeal) {
 
-        if (this.dcSet.getItemAssetMap().size() > 1)
+        if (this.dcSet.getItemAssetMap().size() >= BlockChain.SKIP_BASE_ASSETS_AFTER)
             // SKIP all base TOKENS
             return;
 

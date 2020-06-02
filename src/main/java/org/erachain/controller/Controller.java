@@ -190,7 +190,8 @@ public class Controller extends Observable {
                         put("ru", Transaction.makeDBRef(159727, 1));
                     }
                 };
-        APP_NAME = "Erachain" + "-" + Settings.getInstance().APP_NAME;
+
+        APP_NAME = Settings.getInstance().FORK_APP_Name;
 
     }
 
