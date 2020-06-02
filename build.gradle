@@ -108,7 +108,7 @@ jar {
 //        configurations.runtime
 //    }
 
-    baseName = "Darachain"
+    baseName = "darachain"
     destinationDir project.file('build/libs/Darachain')
 
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'

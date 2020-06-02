@@ -1,6 +1,6 @@
 @ECHO OFF
 
-set app=exochain
+set app=darachain
 
 rem set pars=-opi -nocalculated -hardwork=4 -nodatawallet -compactdc-
 set pars=-nogui -opi -nocalculated -hardwork=4 -nodatawallet -dbschain=rocksdb
