@@ -2524,12 +2524,14 @@ public class BlockExplorer {
             list.add(new Pair<Long, Long>(12L, 92L));
             // ERA
             list.add(new Pair<Long, Long>(1L, 2L));
+            list.add(new Pair<Long, Long>(1L, 3L));
             list.add(new Pair<Long, Long>(1L, 12L));
             list.add(new Pair<Long, Long>(1L, 95L));
             list.add(new Pair<Long, Long>(1L, 94L));
             list.add(new Pair<Long, Long>(1L, 92L));
 
             // COMPU
+            list.add(new Pair<Long, Long>(2L, 3L));
             list.add(new Pair<Long, Long>(2L, 12L));
             list.add(new Pair<Long, Long>(2L, 95L));
             list.add(new Pair<Long, Long>(2L, 94L));
