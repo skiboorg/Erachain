@@ -12,6 +12,7 @@ import org.erachain.gui.items.assets.WithdrawExchange;
 import org.erachain.gui.records.VouchRecordDialog;
 import org.erachain.gui2.MainPanel;
 import org.erachain.lang.Lang;
+import org.erachain.settings.Settings;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -21,18 +22,20 @@ public class MenuExchange extends JMenu {
 
     public MenuExchange() {
 
-        /// DEPOSIT
-        JMenuItem deposit = new JMenuItem(Lang.getInstance().translate("Deposit or Buy"));
-        deposit.getAccessibleContext().setAccessibleDescription(Lang.getInstance().translate("Deposit funds to Exchange"));
-        deposit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                //
-                MainPanel.getInstance().addTab(DepositExchange.class.getSimpleName());
-            }
-        });
-        add(deposit);
+        if (Settings.EXCHANGE_IN_OUT) {
+            /// DEPOSIT
+            JMenuItem deposit = new JMenuItem(Lang.getInstance().translate("Deposit or Buy"));
+            deposit.getAccessibleContext().setAccessibleDescription(Lang.getInstance().translate("Deposit funds to Exchange"));
+            deposit.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    //
+                    MainPanel.getInstance().addTab(DepositExchange.class.getSimpleName());
+                }
+            });
+            add(deposit);
 
-        addSeparator();
+            addSeparator();
+        }
 
         // TRADE
         JMenuItem trade = new JMenuItem(Lang.getInstance().translate("Trade on DEX"));
@@ -56,17 +59,20 @@ public class MenuExchange extends JMenu {
         });
         add(orders);
 
-        addSeparator();
+        if (Settings.EXCHANGE_IN_OUT) {
 
-        // WITHDRAW
-        JMenuItem withdraw = new JMenuItem(Lang.getInstance().translate("Withdraw or Sell"));
-        withdraw.getAccessibleContext().setAccessibleDescription(Lang.getInstance().translate("Withdraw funds from Exchange"));
-        withdraw.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                //
-                MainPanel.getInstance().addTab(WithdrawExchange.class.getSimpleName());
-            }
-        });
-        add(withdraw);
+            addSeparator();
+
+            // WITHDRAW
+            JMenuItem withdraw = new JMenuItem(Lang.getInstance().translate("Withdraw or Sell"));
+            withdraw.getAccessibleContext().setAccessibleDescription(Lang.getInstance().translate("Withdraw funds from Exchange"));
+            withdraw.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    //
+                    MainPanel.getInstance().addTab(WithdrawExchange.class.getSimpleName());
+                }
+            });
+            add(withdraw);
+        }
     }
 }
