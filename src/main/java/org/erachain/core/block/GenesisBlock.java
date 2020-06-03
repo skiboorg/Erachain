@@ -644,9 +644,38 @@ public class GenesisBlock extends Block {
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "GOLD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "UAH",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "KZT",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "KGS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "BYN",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "CNY",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "RUB",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
         asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "EUR",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "USD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
 
     }
 
