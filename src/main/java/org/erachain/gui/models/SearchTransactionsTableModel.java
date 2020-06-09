@@ -81,7 +81,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
         if (account != null) {
             // ИЩЕМ по СЧЕТУ
-            list.addAll(((TransactionFinalMap) map).getTransactionsByAddressLimit(account.getShortAddressBytes(), 1000, true));
+            list.addAll(((TransactionFinalMap) map).getTransactionsByAddressLimit(account.getShortAddressBytes(), 1000, true, descending));
 
         }
 
@@ -100,7 +100,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
         String fromWord = null;
         if (false) {
             // TODO сделать поиск по Transaction.searchTransactions
-            Fun.Tuple3<Long, Long, List<Transaction>> result = Transaction.searchTransactions(dcSet, filter, false, 10000, fromID, start);
+            Fun.Tuple3<Long, Long, List<Transaction>> result = Transaction.searchTransactions(dcSet, filter, false, 10000, fromID, start, true);
         } else {
             list.addAll(((FilteredByStringArray) dcSet.getTransactionFinalMap())
                     .getKeysByFilterAsArray(filter, fromWord, fromID, start, step, false));
