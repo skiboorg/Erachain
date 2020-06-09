@@ -1,15 +1,9 @@
 package org.erachain.gui.library;
 
-import org.erachain.controller.Controller;
-import org.erachain.core.item.assets.AssetCls;
-import org.erachain.datachain.DCSet;
-import org.erachain.gui.MainFrame;
-import org.erachain.gui.items.accounts.*;
 import org.erachain.gui.items.assets.DepositExchange;
 import org.erachain.gui.items.assets.ExchangePanel;
 import org.erachain.gui.items.assets.MyOrderTab;
 import org.erachain.gui.items.assets.WithdrawExchange;
-import org.erachain.gui.records.VouchRecordDialog;
 import org.erachain.gui2.MainPanel;
 import org.erachain.lang.Lang;
 import org.erachain.settings.Settings;

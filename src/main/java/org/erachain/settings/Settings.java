@@ -180,6 +180,8 @@ public class Settings {
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
+        EXCHANGE_IN_OUT = isMainNet();
+
         File file = new File("");
         //TRY READ PEERS.JSON
         try {
