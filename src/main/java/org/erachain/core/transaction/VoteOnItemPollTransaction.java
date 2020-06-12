@@ -76,27 +76,33 @@ public class VoteOnItemPollTransaction extends Transaction implements Itemable {
     }
 
     @Override
-    public ItemCls getItem()
-    {
+    public ItemCls getItem() {
         if (poll == null) {
-            poll = (PollCls) dcSet.getItemPersonMap().get(key);
+            poll = (PollCls) dcSet.getItemPollMap().get(key);
         }
         return this.poll;
     }
 
-    public void setDC(DCSet dcSet, int asDeal, int blockHeight, int seqNo) {
-        super.setDC(dcSet, asDeal, blockHeight, seqNo);
+    public void setDC(DCSet dcSet, int asDeal, int blockHeight, int seqNo, boolean andSetup) {
+        super.setDC(dcSet, asDeal, blockHeight, seqNo, false);
 
         this.poll = (PollCls) this.dcSet.getItemPollMap().get(this.key);
+
+        if (andSetup)
+            setupFromStateDB();
     }
 
     public int getOption() {
         return this.option;
     }
 
+    public String viewOption() {
+        return ((PollCls) getItem()).viewOption(option);
+    }
+
     @Override
     public String getTitle() {
-        return "##" + option + " > " + ItemCls.getItemTypeChar(ItemCls.POLL_TYPE, key);
+        return "##" + viewOption() + " > " + ItemCls.getItemTypeChar(ItemCls.POLL_TYPE, key);
     }
 
     @Override
