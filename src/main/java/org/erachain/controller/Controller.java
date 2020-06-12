@@ -1795,7 +1795,7 @@ public class Controller extends Observable {
         int seq = 0;
         for (Transaction transaction : transactions) {
 
-            transaction.setDC(dcSet);
+            transaction.setDC(dcSet, true);
 
             // FOR ALL ACCOUNTS
             synchronized (accounts) {
