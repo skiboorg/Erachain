@@ -636,17 +636,47 @@ public class GenesisBlock extends Block {
         for (int i = 1; i < StatusCls.RIGHTS_KEY; i++)
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
 
-        AssetVenture asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "AS",
+        PublicKeyAccount coinsOwner = new PublicKeyAccount("AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6");
+        AssetVenture asset = new AssetVenture((byte) 0, coinsOwner, "AS",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "BTC",
+        asset = new AssetVenture((byte) 0, coinsOwner, "BTC",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"), "EUR",
+        asset = new AssetVenture((byte) 0, coinsOwner, "GOLD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "UAH",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "KZT",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "KGS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "BYN",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "CNY",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "RUB",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "EUR",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "USD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
 
     }
 

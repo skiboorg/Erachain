@@ -28,7 +28,7 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1590865200000L; // MAIN Net
+    public static final long DEFAULT_MAINNET_STAMP = 1591199580000L; // MAIN Net
     public static final long DEFAULT_DEMO_NET_STAMP = 1590865200000L; // DEMO Net
 
     public static String FORK_APP_Name = "Darachain";
@@ -39,7 +39,7 @@ public class Settings {
     public static String APP_FULL_NAME = FORK_APP_NAME;
     public static boolean ERA_COMPU_ALL_UP;
 
-    public static boolean EXCHANGE_IN_OUT = true;
+    public static boolean EXCHANGE_IN_OUT = false;
 
     // FOR TEST by default
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
