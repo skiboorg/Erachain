@@ -1,6 +1,6 @@
 {
   // peers from external source
-  "peersURL": "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json",
+  //"peersURL": "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json",
   // Blocks period [sec], minumum: 3, default: 30
   "blockPeriod": 60,
   // external Block Explorer
@@ -148,11 +148,5 @@
 
   "persons": [
     // PERSON KEY, NAME, BIRTH TIMESTAMP, CREATOR
-    [
-      1001,
-      "DMITRII ERMOLAEV",
-      148293470000,
-      "7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh"
-    ]
   ]
 }
