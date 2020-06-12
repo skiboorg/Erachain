@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=erachain
-set task=erachain-test
+set app=darachain
+set task=darachain-test
 
 set pars=-testnet
 

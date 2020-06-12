@@ -191,11 +191,7 @@ public class Controller extends Observable {
                     }
                 };
 
-        if (Settings.getInstance().isSideNet()) {
-            APP_NAME = "Erachain-" + Settings.getInstance().APP_NAME;
-        } else {
-            APP_NAME = "Erachain";
-        }
+        APP_NAME = Settings.getInstance().FORK_APP_Name;
 
     }
 
