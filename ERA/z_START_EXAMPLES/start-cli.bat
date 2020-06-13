@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=erachain
+set app=darachain
 set xms=128
 set xmx=256
 set pars=-cli

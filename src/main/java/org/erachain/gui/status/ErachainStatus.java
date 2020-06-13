@@ -13,7 +13,7 @@ public class ErachainStatus extends JLabel {
 
 
     public ErachainStatus() {
-        super("<HTML><a href =''> Erachain.org </a>&nbsp;|");
+        super("<HTML><a href =''> Darachain.org </a>&nbsp;|");
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         this.addMouseListener(new MouseListener() {
@@ -49,7 +49,7 @@ public class ErachainStatus extends JLabel {
                 Desktop d = Desktop.getDesktop();
 
                 try {
-                    d.browse(new URI("http://Erachain.org/"));
+                    d.browse(new URI("http://Darachain.org/"));
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
