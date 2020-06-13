@@ -144,7 +144,7 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
             }
         }
 
-        if (andSetup)
+        if (false && andSetup && !isWiped())
             setupFromStateDB();
     }
 

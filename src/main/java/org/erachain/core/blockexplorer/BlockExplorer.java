@@ -3225,7 +3225,6 @@ public class BlockExplorer {
         int seqNo = 0;
         for (Transaction transaction : block.getTransactions()) {
             transaction.setDC(dcSet, block.heightBlock, block.heightBlock, ++seqNo, true);
-            transaction.setupFromStateDB();
             all.add(transaction);
             txsTypeCount[transaction.getType() - 1]++;
         }
