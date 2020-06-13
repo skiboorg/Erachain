@@ -1184,7 +1184,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         JSONArray transactionsArray = new JSONArray();
 
         for (Transaction transaction : this.getTransactions()) {
-            transaction.setDC(dcSet);
+            transaction.setDC(dcSet, true);
             transactionsArray.add(transaction.toJson());
         }
 
@@ -1667,12 +1667,6 @@ public class Block implements Closeable, ExplorerJsonLine {
                     this.txCalculated = new ArrayList<RCalculated>();
                 }
             } else {
-                long processTiming = System.nanoTime();
-                processTiming = (System.nanoTime() - processTiming) / 1000;
-                if (processTiming < 999999999999l) {
-                    LOGGER.debug("VALIDATING[" + this.heightBlock + "]="
-                            + this.transactionCount + " db.FORK: " + processTiming + "[us]");
-                }
                 this.txCalculated = null;
             }
 
@@ -1754,7 +1748,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                         return INVALID_BLOCK_VERSION;
                     }
 
-                    transaction.setDC(dcSetPlace, Transaction.FOR_NETWORK, this.heightBlock, seqNo);
+                    transaction.setDC(dcSetPlace, Transaction.FOR_NETWORK, this.heightBlock, seqNo, false);
 
                     //CHECK IF VALID
                     // так как мы в блоке такие транзакции уже проверяем то коллизию с неподтвержденными не проверяем
@@ -1787,7 +1781,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
                 } else {
 
-                    transaction.setDC(dcSetPlace, Transaction.FOR_NETWORK, this.heightBlock, seqNo);
+                    transaction.setDC(dcSetPlace, Transaction.FOR_NETWORK, this.heightBlock, seqNo, false);
 
                     //UPDATE REFERENCE OF SENDER
                     transaction.getCreator().setLastTimestamp(
@@ -1853,7 +1847,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
                 } else {
 
-                    // for some TRANSACTIONs need add to FINAM MAP etc.
+                    // for some TRANSACTIONS need add to FINAL MAP etc.
                     // RSertifyPubKeys - in same BLOCK with IssuePersonRecord
 
                     processTimingLocal = System.nanoTime();
@@ -2258,9 +2252,8 @@ public class Block implements Closeable, ExplorerJsonLine {
         }
 
         // for DEBUG
-        if (this.heightBlock == 65431
-                || this.heightBlock == 86549) {
-            int rrrr = 0;
+        if (this.heightBlock == 97815) {
+            boolean debug = true;
         }
 
         //PROCESS TRANSACTIONS
@@ -2303,7 +2296,8 @@ public class Block implements Closeable, ExplorerJsonLine {
                 //logger.debug("[" + seqNo + "] record is process" );
 
                 // NEED set DC for WIPED too
-                transaction.setDC(dcSet, Transaction.FOR_NETWORK, this.heightBlock, seqNo);
+                transaction.setDC(dcSet, Transaction.FOR_NETWORK, this.heightBlock, seqNo,
+                        false); // здесь ще нет ничего в базе данных - нечего наращивать
 
                 //PROCESS
                 if (transaction.isWiped()
@@ -2480,6 +2474,9 @@ public class Block implements Closeable, ExplorerJsonLine {
         this.getTransactions();
         //ORPHAN ALL TRANSACTIONS IN DB BACK TO FRONT
         int seqNo;
+        if (heightBlock == 97856) {
+            boolean debug = true;
+        }
         for (int i = this.transactionCount - 1; i >= 0; i--) {
             seqNo = i + 1;
             if (cnt.isOnStopping()) {
@@ -2490,7 +2487,8 @@ public class Block implements Closeable, ExplorerJsonLine {
             //logger.debug("<<< core.block.Block.orphanTransactions\n" + transaction.toJson());
 
             // (!) seqNo = i + 1
-            transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, seqNo);
+            transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, seqNo,
+                    true); // тут наращиваем мясо - чтобы ключи удалялись правильно
 
             if (!transaction.isWiped()) {
                 transaction.orphan(this, Transaction.FOR_NETWORK);
