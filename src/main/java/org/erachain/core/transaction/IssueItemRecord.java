@@ -183,7 +183,7 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
 
     //@Override
     @Override
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         if (height < BlockChain.ALL_VALID_BEFORE) {
             return VALIDATE_OK;
@@ -236,17 +236,17 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
             return INVALID_DESCRIPTION_LENGTH_MAX;
         }
 
-        return super.isValid(asDeal, flags);
+        return super.isValid(forDeal, flags);
 
     }
 
     //PROCESS/ORPHAN
     //@Override
     @Override
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.process(block, asDeal);
+        super.process(block, forDeal);
 
         //INSERT INTO DATABASE
         key = this.item.insertToMap(this.dcSet, this.item.getStartKey());
@@ -255,9 +255,9 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
 
     //@Override
     @Override
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.orphan(block, asDeal);
+        super.orphan(block, forDeal);
 
         //DELETE FROM DATABASE
         key = this.item.deleteFromMap(this.dcSet, item.getStartKey());
@@ -282,11 +282,7 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
     @Override
     public boolean isInvolved(Account account) {
 
-        String address = account.getAddress();
-
-        if (address.equals(this.creator.getAddress())) {
-            return true;
-        } else if (address.equals(this.item.getOwner().getAddress())) {
+        if (account.equals(this.creator) || account.equals(this.item.getOwner())) {
             return true;
         }
 

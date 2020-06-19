@@ -80,7 +80,7 @@ public class SendTableModel extends JTable implements Observer {
             }
         }
 
-        for (Account account : Controller.getInstance().getAccounts()) {
+        for (Account account : Controller.getInstance().getWalletAccounts()) {
             transactions.addAll(DCSet.getInstance().getTransactionFinalMap().getTransactionsByAddressAndType(account.getShortAddressBytes(), Transaction.SEND_ASSET_TRANSACTION, 0, 0));
         }
 
@@ -330,7 +330,7 @@ public class SendTableModel extends JTable implements Observer {
                 if (!is) {
                     
                     Transaction messagetx = (Transaction)message.getValue();
-                    messagetx.setDC(DCSet.getInstance(), Transaction.FOR_NETWORK, DCSet.getInstance().getBlockMap().size() + 1, 1, true);
+                    messagetx.setDC(DCSet.getInstance(), false);
 
                     addMessage(0, (RSend) messagetx);
 
