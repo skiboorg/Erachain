@@ -237,10 +237,10 @@ public class RecoverWalletFrame extends JFrame {
             seed = null;
         }
 
-        if (seed == null || seed.length < Crypto.HASH_LENGTH - 5 || seed.length > Crypto.HASH_LENGTH) {
+        if (seed == null || seed.length < Crypto.HASH_LENGTH - 3 || seed.length > Crypto.HASH_LENGTH) {
             //INVALID SEED
-            String message = Lang.getInstance().translate("Invalid or incorrect seed! " + (seed == null ? "NULL" : "LEN: " + seed.length));
-            JOptionPane.showMessageDialog(new JFrame(), message, Lang.getInstance().translate("Invalid seed"), JOptionPane.ERROR_MESSAGE);
+            String message = Lang.getInstance().translate("Invalid or incorrect seed!") + " - " + (seed == null ? "NULL" : "byte[" + seed.length + "]");
+            JOptionPane.showMessageDialog(new JFrame(), message, Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 

@@ -68,7 +68,7 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
 
     }
 
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         super.process(block, asDeal);
 

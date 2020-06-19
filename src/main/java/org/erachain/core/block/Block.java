@@ -1985,7 +1985,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         if (transactions != null) {
             try {
                 // ОЧЕНЬ ВАЖНО чтобы Finalizer мог спокойно удалять их и DCSet.fork
-                // иначе Финализер не можеи зацикленные сслки порвать и не очищает HEAP
+                // иначе Финализер не может зацикленные ссылки порвать и не очищает HEAP
                 for (Transaction transaction : transactions) {
                     transaction.resetDCSet();
                 }
@@ -2512,6 +2512,9 @@ public class Block implements Closeable, ExplorerJsonLine {
                     transFinalMapSinds.delete(itemSignature);
                 }
             }
+
+            // сбросим данные блока - для правильного отображения неподтвержденных
+            transaction.resetSeqNo();
         }
 
         // DELETE ALL CALCULATED
