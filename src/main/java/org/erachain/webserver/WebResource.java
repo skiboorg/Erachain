@@ -68,7 +68,7 @@ public class WebResource {
     private static final Logger logger = LoggerFactory.getLogger(WebResource.class);
     @Context
     HttpServletRequest request;
-    String[] imgsArray = {"Erachain.org.png", "logo_header.png", "Erachain.org-user.png",
+    String[] imgsArray = {"ERA.png", "logo_header.png", "ERA-user.png",
             "logo_bottom.png", "banner_01.png", "loading.gif",
             "00_generating.png", "01_genesis.jpg", "02_payment_in.png",
             "02_payment_out.png", "03_name_registration.png",

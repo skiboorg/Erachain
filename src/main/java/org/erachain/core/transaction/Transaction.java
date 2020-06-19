@@ -612,6 +612,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     /**
      * Нарастить мясо на скелет из базы состояния - нужно например для созданим вторичных ключей и Номер Сущности
+     *
      */
     public void setupFromStateDB() {
     }

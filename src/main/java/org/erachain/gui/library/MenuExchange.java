@@ -54,6 +54,7 @@ public class MenuExchange extends JMenu {
         add(orders);
 
         if (Settings.EXCHANGE_IN_OUT) {
+
             addSeparator();
 
             // WITHDRAW
