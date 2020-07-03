@@ -90,8 +90,8 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "5.0.01 DEV";
-    public static String buildTime = "2020-05-06 12:00:00 UTC";
+    public static String version = "2.0";
+    public static String buildTime = "2020-06-12 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
     public static final char GROUPING_SEPARATOR = '`';
@@ -190,11 +190,7 @@ public class Controller extends Observable {
                     }
                 };
 
-        if (Settings.getInstance().isSideNet()) {
-            APP_NAME = "Erachain-" + Settings.getInstance().APP_NAME;
-        } else {
-            APP_NAME = "Erachain";
-        }
+        APP_NAME = Settings.getInstance().FORK_APP_Name;
 
     }
 

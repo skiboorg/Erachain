@@ -1,0 +1,152 @@
+{
+  // peers from external source
+  //"peersURL": "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json",
+  // Blocks period [sec], minumum: 3, default: 30
+  "blockPeriod": 60,
+  // external Block Explorer
+  "explorer": "http://my-sidechain.dom:9057",
+
+  "sideLicense": "Sidechain Licence Agreement.pdf",
+
+  "startKey": {
+    "assets": -1,
+    "persons": 1000,
+    "polls": -1,
+    "statuses": -1
+  },
+
+  // switch ON multi-level referals system. Default is true
+  "referalsOn": true,
+
+  // Set valid all transactions before the height. Defaul = 0
+  "allValidBefore": 0,
+
+  // Protect from send assets from personal account to anonymous address. Default = true
+  "protectSendToAnonymous": false,
+
+  //
+  "assets": [
+    // **** ASSET KEY, NAME, QUALITY, CREATOR ****
+    /////// CRYPTOCURRENCY
+    [
+      12,
+      "BTC",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    /////// COMMODITY
+    [
+      21,
+      "GOLD",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      22,
+      "OIL",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      23,
+      "GAS",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      24,
+      "BREND",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    /////// FIATCURRENCY
+    [
+      82,
+      "UAH",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      83,
+      "KZT",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      84,
+      "KGS",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      85,
+      "BYN",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      86,
+      "TRY",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      87,
+      "SGD",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      88,
+      "AUD",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      89,
+      "CHF",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      90,
+      "GBP",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      91,
+      "JPY",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      92,
+      "RUB",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      93,
+      "CNY",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      94,
+      "EUR",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      95,
+      "USD",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ]
+  ],
+
+  "persons": [
+    // PERSON KEY, NAME, BIRTH TIMESTAMP, CREATOR
+  ]
+}
