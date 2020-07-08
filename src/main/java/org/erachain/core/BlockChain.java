@@ -80,7 +80,7 @@ public class BlockChain {
     public static PrivateKeyAccount[] TEST_DB_ACCOUNTS = TEST_DB == 0 ? null : new PrivateKeyAccount[1000];
     public static final boolean NOT_CHECK_SIGNS = TEST_DB > 0 && false;
 
-    static public int CHECK_BUGS = TEST_DB > 0 ? 0 : 5;
+    static public int CHECK_BUGS = TEST_DB > 0 ? 0 : Settings.CHECK_BUGS;
 
     static public int SKIP_BASE_ASSETS_AFTER = 2;
 
@@ -90,7 +90,7 @@ public class BlockChain {
     public static final byte[] START_PEER = null; //new byte[]{(byte)138, (byte)197, (byte)135, (byte)122};
 
     /**
-     * Защита от платажей с удостоверенного на анонима
+     * Защита от платжей с удостоверенного на анонима
      */
     public static boolean PERSON_SEND_PROTECT = true;
 
@@ -253,12 +253,14 @@ public class BlockChain {
 
     public HashSet<String> trustedPeers = new HashSet<>();
 
+    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+
     public static final HashSet<Integer> validBlocks = new HashSet<>();
 
     /**
      * Записи которые удалены
      */
-    public static final HashSet<Long> WIPED_RECORDS =  new HashSet<>();
+    public static final HashSet<Long> WIPED_RECORDS = new HashSet<>();
 
     /*
      *  SEE in concrete TRANSACTIONS
@@ -1307,7 +1309,13 @@ public class BlockChain {
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            Controller.getInstance().stopAll(1104);
+            if (BlockChain.CHECK_BUGS > 9) {
+                // тут нельзя выходить так как просто битым блоком смогут все ноды убить при атаке
+                Controller.getInstance().stopAll(1104);
+            } else {
+                noValid = 999;
+                peer.ban(30, "Block ERROR: " + e.getMessage());
+            }
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             Controller.getInstance().stopAll(1105);
@@ -1329,9 +1337,9 @@ public class BlockChain {
                 LOGGER.error("MY WinBlock is INVALID! ignore...");
             }
 
-            // сперва в блоке трнзакции освобождаем и ссылку базу
+            // сперва в блоке транзакции освобождаем и ссылку базу
             block.close();
-            // тепеь сам фор базы закрываем - освободим память и чистильщиков кеша внутренние у MapDB
+            // теперь сам фор базы закрываем - освободим память и чистильщиков кеша внутренние у MapDB
             fork.close();
             return false;
         }

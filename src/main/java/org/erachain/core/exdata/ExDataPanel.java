@@ -1,6 +1,7 @@
 package org.erachain.core.exdata;
 
-import org.erachain.core.BlockChain;
+import org.erachain.core.account.Account;
+import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.item.templates.TemplateCls;
 import org.erachain.gui.items.link_hashes.TableModelIssueHashes;
 import org.erachain.gui.library.*;
@@ -41,7 +42,7 @@ public class ExDataPanel extends javax.swing.JPanel {
     public MTable jTable_Params_Message_Public;
     protected TemplateCls sel_Template;
     private TableModelIssueHashes hashes_Table_Model;
-    private DefaultTableModel attached_Files_Model;
+    private AttacheFilesModel attached_Files_Model;
     private ParamsTemplateModel params_Template_Model;
     private ExDataPanel th;
     // Variables declaration - do not modify
@@ -67,7 +68,7 @@ public class ExDataPanel extends javax.swing.JPanel {
     private javax.swing.JTabbedPane jTabbedPane_Other;
     private MTable jTable_Attached_Files;
     private MTable jTable_Other_Hashes;
-    private javax.swing.JTextPane jTextPane_Message_Private;
+    private javax.swing.JTextPane jTextPane_Message;
     private MImprintEDITPane jTextPane_Message_Public;
     /**
      * Creates new form IssueDocumentPanel
@@ -287,7 +288,7 @@ public class ExDataPanel extends javax.swing.JPanel {
         jScrollPane_Params_Template_Public_TextPane = new javax.swing.JScrollPane();
         jPanel_Message = new javax.swing.JPanel();
         jScrollPane_Message_TextPane = new javax.swing.JScrollPane();
-        jTextPane_Message_Private = new javax.swing.JTextPane();
+        jTextPane_Message = new javax.swing.JTextPane();
         jTabbedPane_Other = new javax.swing.JTabbedPane();
         jPanel_Attached_Files = new javax.swing.JPanel();
         jScrollPane_Attached_Files_Table = new javax.swing.JScrollPane();
@@ -353,21 +354,16 @@ public class ExDataPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        // jPanel_Message_Public.add(jCheckBox_Message_Public,
-        // gridBagConstraints);
 
-        if (BlockChain.TEST_MODE) {
-            jTabbedPane_Message.addTab(Lang.getInstance().translate("Recipients"), multipleRecipientsPanel);
-            // jTabbedPane_Message.addTab(Lang.getInstance().translate("Public
-            // Part"), jPanel_Message_Public);
-        }
+        jTabbedPane_Message.addTab(Lang.getInstance().translate("Recipients"), multipleRecipientsPanel);
 
         fill_Template_Panel = new MFillTemplatePanel();
         jTabbedPane_Message.addTab(Lang.getInstance().translate("Template"), fill_Template_Panel);
 
         jPanel_Message.setLayout(new java.awt.GridBagLayout());
 
-        jScrollPane_Message_TextPane.setViewportView(jTextPane_Message_Private);
+        ////////////
+        jScrollPane_Message_TextPane.setViewportView(jTextPane_Message);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -455,9 +451,6 @@ public class ExDataPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         jPanel_Attached_Files.add(jPanel_Other_Attached_Files_Work, gridBagConstraints);
 
-        // if (BlockChain.DEVELOP_USE == true)
-        jTabbedPane_Message.addTab(Lang.getInstance().translate("Attached Files"), jPanel_Attached_Files);
-
         jPanel_Other_Hashes.setLayout(new java.awt.GridBagLayout());
 
         jScrollPane_Hashes_Files_Tale.setOpaque(false);
@@ -506,6 +499,8 @@ public class ExDataPanel extends javax.swing.JPanel {
         jPanel_Other_Hashes.add(jButton_Remove_Other_Hashes, gridBagConstraints);
 
         jTabbedPane_Message.addTab(Lang.getInstance().translate("Hashes"), jPanel_Other_Hashes);
+
+        jTabbedPane_Message.addTab(Lang.getInstance().translate("Attached Files"), jPanel_Attached_Files);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -721,7 +716,10 @@ public class ExDataPanel extends javax.swing.JPanel {
 
     }
 
-    public byte[] getExData() throws Exception {
+    public byte[] makeExData(PrivateKeyAccount creator, boolean isEncrypted) throws Exception {
+
+        Account[] recipients = multipleRecipientsPanel.recipientsTableModel.getRecipients();
+        boolean signCanOnlyRecipients = multipleRecipientsPanel.signCanRecipientsCheckBox.isSelected();
 
         // hashes StandardCharsets.UTF_8
         HashMap<String, String> hashes_Map = new HashMap<String, String>();
@@ -737,8 +735,10 @@ public class ExDataPanel extends javax.swing.JPanel {
                     (Boolean) attached_Files_Model.getValueAt(i, 2), (byte[]) attached_Files_Model.getValueAt(i, 5)));
         }
 
-        return ExData.toByte(jTextField_Title_Message.getText(), (TemplateCls) fill_Template_Panel.sel_Template,
-                this.fill_Template_Panel.get_Params(), hashes_Map, jTextPane_Message_Private.getText(), files_1);
+        return ExData.make(creator, jTextField_Title_Message.getText(),
+                signCanOnlyRecipients, recipients, isEncrypted,
+                (TemplateCls) fill_Template_Panel.sel_Template,
+                this.fill_Template_Panel.get_Params(), hashes_Map, jTextPane_Message.getText(), files_1);
 
     }
     // End of variables declaration

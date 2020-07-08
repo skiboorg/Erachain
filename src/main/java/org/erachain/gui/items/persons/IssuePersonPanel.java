@@ -10,6 +10,7 @@ import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.item.persons.PersonHuman;
 import org.erachain.core.transaction.IssuePersonRecord;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.items.TypeOfImage;
 import org.erachain.gui.library.AddImageLabel;
@@ -50,7 +51,7 @@ public class IssuePersonPanel extends JPanel  {
     protected JDateChooser txtDeathday;
     protected JComboBox<String> comboBoxGender = new JComboBox<>();
     //protected JTextField textPersonNumber = new JTextField();
-    protected JTextField txtBirthLatitude = new JTextField();
+    protected JTextField txtBirthLatitude = new JTextField("0, 0");
     protected JTextField txtBirthLongitudeLatitude = new JTextField("0");
     protected JTextField txtSkinColor = new JTextField();
     protected JTextField txtEyeColor = new JTextField();
@@ -127,8 +128,10 @@ public class IssuePersonPanel extends JPanel  {
         GridBagConstraints gridBagConstraints;
         setLayout(new BorderLayout());
 
+        jLabelFee.setVisible(Gui.SHOW_FEE_POWER);
         txtFeePow.setModel(new DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
 
         copyButton = new MButton(Lang.getInstance().translate("Create Person and copy to clipboard"), 2);
         copyButton.addActionListener(e -> onIssueClick(false));
@@ -196,7 +199,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 18, 0, 0);
-        mainPanel.add(jlabelhairColor, gridBagConstraints);
+        //mainPanel.add(jlabelhairColor, gridBagConstraints);
 
         //BirthLatitude
         gridBagConstraints = new GridBagConstraints();
@@ -204,7 +207,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 18, 0, 0);
-        mainPanel.add(jLabelBirthLatitudeLongtitude, gridBagConstraints);
+        //mainPanel.add(jLabelBirthLatitudeLongtitude, gridBagConstraints);
 
         //Fee
         gridBagConstraints = new GridBagConstraints();
@@ -212,7 +215,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 16;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 18, 0, 0);
-        mainPanel.add(jLabelFee, gridBagConstraints);
+        //mainPanel.add(jLabelFee, gridBagConstraints);
 
 
         gridBagConstraints = new GridBagConstraints();
@@ -227,7 +230,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 6;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
@@ -238,7 +241,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 8;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 1;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.1;
@@ -251,7 +254,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
-        mainPanel.add(txtHairColor, gridBagConstraints);
+        //mainPanel.add(txtHairColor, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -260,7 +263,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
-        mainPanel.add(txtBirthLatitude, gridBagConstraints);
+        //mainPanel.add(txtBirthLatitude, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -270,7 +273,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new Insets(0, 0, 0, 1);
-        mainPanel.add(txtFeePow, gridBagConstraints);
+        //mainPanel.add(txtFeePow, gridBagConstraints);
 
 
 
@@ -280,14 +283,14 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 10, 0, 0);
-        mainPanel.add(aliveCheckBox, gridBagConstraints);
+        //mainPanel.add(aliveCheckBox, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 10, 0, 0);
-        mainPanel.add(jLabelDead, gridBagConstraints);
+        //mainPanel.add(jLabelDead, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 7;
@@ -302,7 +305,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 10, 0, 0);
-        mainPanel.add(jLabelEyeColor, gridBagConstraints);
+        //mainPanel.add(jLabelEyeColor, gridBagConstraints);
 
         // Height
         gridBagConstraints = new GridBagConstraints();
@@ -310,7 +313,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new Insets(0, 10, 0, 0);
-        mainPanel.add(jLabelHeight, gridBagConstraints);
+        //mainPanel.add(jLabelHeight, gridBagConstraints);
 
 
 
@@ -321,7 +324,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new Insets(0, 0, 0, 16);
-        mainPanel.add(txtDeathday, gridBagConstraints);
+       // mainPanel.add(txtDeathday, gridBagConstraints);
         txtDeathday.setFont(UIManager.getFont("TextField.font"));
 
         gridBagConstraints = new GridBagConstraints();
@@ -342,7 +345,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new Insets(0, 0, 0, 16);
-        mainPanel.add(txtEyeColor, gridBagConstraints);
+        //mainPanel.add(txtEyeColor, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 8;
@@ -352,7 +355,7 @@ public class IssuePersonPanel extends JPanel  {
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new Insets(0, 0, 0, 16);
-        mainPanel.add(txtHeight, gridBagConstraints);
+        //mainPanel.add(txtHeight, gridBagConstraints);
 
         /* Added Copy, Paste in GEO (by Samartsev. 18.03.2019) */
         JPopupMenu popup = new JPopupMenu();

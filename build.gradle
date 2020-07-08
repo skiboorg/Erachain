@@ -33,7 +33,7 @@ ext {
 }
 
 //String versionEra = "4.11.08-${git.head().abbreviatedId}"
-String versionEra = "2.0.01"
+String versionEra = "2.0.02"
 archivesBaseName = 'Darachain'
 group 'org.erachain'
 //version versionEra
@@ -156,7 +156,7 @@ task CopyResourse {
     copy {
         from 'ERA'
         into 'build/libs/Darachain'
-        include 'Licence*'
+        include '*Licence*'
         include 'chainPROTOCOL*'
         include 'peers*'
         include 'start*'
