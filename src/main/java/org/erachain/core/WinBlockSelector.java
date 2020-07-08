@@ -130,22 +130,33 @@ public class WinBlockSelector extends MonitoredThread {
 
         while (runned) {
             try {
-                processMessage(blockingQueue.take());
+                Message message = blockingQueue.take();
+                processMessage(message);
             } catch (java.lang.OutOfMemoryError e) {
                 LOGGER.error(e.getMessage(), e);
-                blockingQueue = null;
-                Controller.getInstance().stopAll(566);
-                break;
+                if (BlockChain.CHECK_BUGS > 7) {
+                    // тут нельзя выходить так как просто битым блоком смогут все ноды убить при атаке
+                    Controller.getInstance().stopAll(566);
+                    break;
+                }
             } catch (java.lang.IllegalMonitorStateException e) {
                 blockingQueue = null;
                 Controller.getInstance().stopAll(567);
                 break;
             } catch (java.lang.InterruptedException e) {
-                blockingQueue = null;
                 break;
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                if (BlockChain.CHECK_BUGS > 9) {
+                    // тут нельзя выходить так как просто битым блоком смогут все ноды убить при атаке
+                    Controller.getInstance().stopAll(569);
+                    break;
+                }
             }
 
         }
+
+        blockingQueue = null;
 
         LOGGER.info("WinBlock Selector halted");
     }

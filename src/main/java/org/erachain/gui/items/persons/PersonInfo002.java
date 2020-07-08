@@ -315,8 +315,8 @@ public class PersonInfo002 extends javax.swing.JPanel {
 
         }
 
-        descript = descript + "<br>" + Lang.getInstance().translate("Coordinates of Birth") + ": " + ((Float) person.getBirthLatitude()).toString() + "," + ((Float) person.getBirthLongitude()).toString();
-        descript = descript + "<br>" + Lang.getInstance().translate("P.Height") + ": " + person.getHeight();
+        //descript = descript + "<br>" + Lang.getInstance().translate("Coordinates of Birth") + ": " + ((Float) person.getBirthLatitude()).toString() + "," + ((Float) person.getBirthLongitude()).toString();
+        //descript = descript + "<br>" + Lang.getInstance().translate("P.Height") + ": " + person.getHeight();
 
         descript = descript + "<br>" + Library.to_HTML(person.getDescription());
         jTextArea_Description.setText(descript);

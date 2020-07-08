@@ -12,6 +12,7 @@ import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.RSertifyPubKeys;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
+import org.erachain.gui.Gui;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.library.MButton;
@@ -76,7 +77,7 @@ public class PersonConfirmDialog extends JDialog {
 
         initComponents(person, publicKey);
 
-        this.setTitle(Lang.getInstance().translate("Person confirm"));
+        this.setTitle(Lang.getInstance().translate("Certification of Account"));
         this.setResizable(true);
         this.setModal(true);
 
@@ -118,7 +119,7 @@ public class PersonConfirmDialog extends JDialog {
         Tuple4<Long, Integer, Integer, Integer> addressDuration = account.getPersonDuration(DCSet.getInstance());
 
         if (addressDuration == null) {
-            personDetails += "<b>" + Lang.getInstance().translate("Ready for personalize") + "</b>";
+            personDetails += "<b>" + Lang.getInstance().translate("Account is valid for certification") + "</b>";
         } else {
             // TEST TIME and EXPIRE TIME
             long current_time = NTP.getTime();
@@ -223,7 +224,7 @@ public class PersonConfirmDialog extends JDialog {
 
         String Status_text = "";
         IssueConfirmDialog dd = new IssueConfirmDialog(MainFrame.getInstance(), true, transaction,
-                Lang.getInstance().translate("Send Mail"), (int) (this.getWidth() / 1.2),
+                Lang.getInstance().translate("Certification of Account"), (int) (this.getWidth() / 1.2),
                 (int) (this.getHeight() / 1.2), Status_text, Lang.getInstance().translate("Confirmation Transaction"));
         SertifyPubKeysDetailsFrame ww = new SertifyPubKeysDetailsFrame((RSertifyPubKeys) transaction);
         dd.jScrollPane1.setViewportView(ww);
@@ -507,6 +508,7 @@ public class PersonConfirmDialog extends JDialog {
         //getContentPane().add(jTextField_addDays, gridBagConstraints);
 
         jLabel_Fee.setText(Lang.getInstance().translate("Fee Power") + ":");
+        jLabel_Fee.setVisible(Gui.SHOW_FEE_POWER);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 16;
@@ -521,6 +523,7 @@ public class PersonConfirmDialog extends JDialog {
         // jFormattedTextField_Fee.setMinimumSize(new java.awt.Dimension(100,
         // 20));
         jFormattedTextField_Fee.setText("0");
+        jFormattedTextField_Fee.setVisible(Gui.SHOW_FEE_POWER);
         // jFormattedTextField_Fee.setPreferredSize(new java.awt.Dimension(100,
         // 20));
         jFormattedTextField_Fee.addActionListener(new java.awt.event.ActionListener() {

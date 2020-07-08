@@ -42,6 +42,9 @@ public class RendererIcon extends DefaultTableCellRenderer {
 
         // Get icon to use for the list item value
         ItemCls item = (ItemCls)value;
+        if (item == null)
+            return;
+
         byte[] iconBytes = item.getIcon();
         if (iconBytes != null && iconBytes.length > 0) {
             ImageIcon image = new ImageIcon(iconBytes);

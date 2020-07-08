@@ -7,6 +7,7 @@ import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.exdata.ExDataPanel;
 import org.erachain.core.transaction.RSignNote;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.library.IssueConfirmDialog;
@@ -33,6 +34,7 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
     private MButton jButton_Work_OK;
     private MButton jButton_Work_OK1;
     private javax.swing.JComboBox jComboBox_Account_Work;
+    public JCheckBox encryptCheckBox;
     private javax.swing.JLabel jLabel_Account_Work;
     private javax.swing.JLabel jLabel_Fee_Work;
     private javax.swing.JPanel jPanel_Work;
@@ -45,8 +47,10 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
         th = this;
         initComponents();
 
-        txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8" }));
+        txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
+
         jLabel_Account_Work.setText(Lang.getInstance().translate("Select account") + ":");
         jButton_Work_OK.setText(Lang.getInstance().translate("Sign and Send"));
         jButton_Work_OK.addActionListener(new ActionListener() {
@@ -56,7 +60,7 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
         });
         jButton_Work_OK1.setText(Lang.getInstance().translate("Sign and Pack"));
 
-        jLabel_Fee_Work.setText(Lang.getInstance().translate("Fee") + ":");
+        jLabel_Fee_Work.setText(Lang.getInstance().translate("Fee Power") + ":");
         this.jButton_Work_Cancel.setVisible(false);
     }
 
@@ -69,9 +73,14 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel_Work = new javax.swing.JPanel();
-        jLabel_Account_Work = new javax.swing.JLabel();
+        jLabel_Account_Work = new javax.swing.JLabel(Lang.getInstance().translate("Account") + ": ");
         jComboBox_Account_Work = new JComboBox<Account>(new AccountsComboBoxModel());
-        jLabel_Fee_Work = new javax.swing.JLabel();
+        encryptCheckBox = new JCheckBox(Lang.getInstance().translate("Encrypt"));
+        encryptCheckBox.setSelected(true);
+
+        jLabel_Fee_Work = new javax.swing.JLabel(Lang.getInstance().translate("FeePow") + ": ");
+        jLabel_Fee_Work.setVisible(Gui.SHOW_FEE_POWER);
+
         txtFeePow = new javax.swing.JComboBox();
         jButton_Work_Cancel = new MButton();
         jButton_Work_OK = new MButton();
@@ -96,7 +105,6 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
 
         jPanel_Work.setLayout(new java.awt.GridBagLayout());
 
-        jLabel_Account_Work.setText("Account: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 0);
@@ -112,16 +120,22 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
         jPanel_Work.add(jComboBox_Account_Work, gridBagConstraints);
 
-        jLabel_Fee_Work.setText("Fee: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 0);
+        jPanel_Work.add(encryptCheckBox, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 0);
         jPanel_Work.add(jLabel_Fee_Work, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(8, 8, 8, 8);
@@ -184,6 +198,7 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
             }
         }
 
+
         // READ SENDER
         Account sender = (Account) this.jComboBox_Account_Work.getSelectedItem();
         int feePow = 0;
@@ -199,18 +214,6 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
             // READ FEE
             parsing = 2;
             feePow = Integer.parseInt((String)this.txtFeePow.getSelectedItem());
-            // read byte[] from exData Panel
-            messageBytes = exData_Panel.getExData();
-
-            if (messageBytes.length < 10 || messageBytes.length > BlockChain.MAX_REC_DATA_BYTES) {
-                JOptionPane.showMessageDialog(new JFrame(),
-                        Lang.getInstance().translate("Message size exceeded! 10...MAX"),
-                        Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
-
-                return null;
-            }
-
-            parsing = 5;
 
         } catch (Exception e) {
             // CHECK WHERE PARSING ERROR HAPPENED
@@ -236,10 +239,15 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
             return null;
         }
 
-        // CREATE TX MESSAGE
-        byte version = (byte) 2;
-        byte property1 = (byte) 0;
-        byte property2 = (byte) 0;
+        Account[] recipients = exData_Panel.multipleRecipientsPanel.recipientsTableModel.getRecipients();
+        for (int i = 0; i < recipients.length; i++) {
+            Account recipient = recipients[i];
+            if (recipient == null) {
+                JOptionPane.showMessageDialog(new JFrame(), "Recipient[" + (i + 1) + "] is wrong",
+                        Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+        }
 
         PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
         if (creator == null) {
@@ -249,15 +257,46 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
             return null;
         }
 
+        try {
+            messageBytes = exData_Panel.makeExData(creator, encryptCheckBox.isSelected());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(new JFrame(), e.getMessage(),
+                    Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        if (messageBytes == null) {
+            return null;
+        } else if (messageBytes.length < 10) {
+            JOptionPane.showMessageDialog(new JFrame(),
+                    Lang.getInstance().translate("Message is so short"),
+                    Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
+
+            return null;
+        } else if (messageBytes.length > BlockChain.MAX_REC_DATA_BYTES) {
+            JOptionPane.showMessageDialog(new JFrame(),
+                    Lang.getInstance().translate("Message size exceeded %1 kB")
+                            .replace("%1", "" + (BlockChain.MAX_REC_DATA_BYTES >> 10)),
+                    Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
+
+            return null;
+        }
+
+        parsing = 5;
+
+        // CREATE TX MESSAGE
+        byte version = (byte) 3;
+        byte property1 = (byte) 0;
+        byte property2 = (byte) 0;
+
         RSignNote issueDoc = (RSignNote) Controller.getInstance().r_SignNote(version, property1, property2, forDeal,
-                creator, feePow, key, messageBytes,
-                new byte[]{1}, new byte[]{0});
+                creator, feePow, key, messageBytes
+        );
 
         // Issue_Asset_Confirm_Dialog cont = new
         // Issue_Asset_Confirm_Dialog(issueAssetTransaction);
         String text = "<HTML><body>";
         text += Lang.getInstance().translate("Confirmation Transaction") + ":&nbsp;"
-                + Lang.getInstance().translate("Issue Asset") + "<br><br><br>";
+                + Lang.getInstance().translate("Issue Note") + "<br><br><br>";
         text += Lang.getInstance().translate("Creator") + ":&nbsp;" + issueDoc.getCreator() + "<br>";
         // text += Lang.getInstance().translate("Name") +":&nbsp;"+
         // issueDoc.getItem().viewName() +"<br>";
@@ -288,7 +327,7 @@ public class IssueDocumentPanel extends javax.swing.JPanel {
                 (int) (th.getWidth() / 1.2), (int) (th.getHeight() / 1.2), Status_text,
                 Lang.getInstance().translate("Confirmation transaction issue document"));
 
-        StatementInfo ww = new StatementInfo(issueDoc);
+        RNoteInfo ww = new RNoteInfo(issueDoc);
         ww.jPanel2.setVisible(false);
         dd.jScrollPane1.setViewportView(ww);
         dd.setLocationRelativeTo(th);
