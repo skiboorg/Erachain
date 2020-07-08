@@ -97,7 +97,7 @@ public class TransactionsResource {
         }
 
         // GET TRANSACTIONS
-        List<Pair<Account, Transaction>> transactions = Controller.getInstance().getLastTransactions(limit);
+        List<Pair<Account, Transaction>> transactions = Controller.getInstance().getLastWalletTransactions(limit);
 
         // ORGANIZE TRANSACTIONS
         Map<Account, List<Transaction>> orderedTransactions = new HashMap<Account, List<Transaction>>();
@@ -145,13 +145,13 @@ public class TransactionsResource {
         }
 
         // CHECK ACCOUNT IN WALLET
-        Account account = Controller.getInstance().getAccountByAddress(address);
+        Account account = Controller.getInstance().getWalletAccountByAddress(address);
         if (account == null) {
             throw ApiErrorFactory.getInstance().createError(ApiErrorFactory.ERROR_WALLET_ADDRESS_NO_EXISTS);
         }
 
         JSONArray array = new JSONArray();
-        for (Transaction transaction : Controller.getInstance().getLastTransactions(account, limit)) {
+        for (Transaction transaction : Controller.getInstance().getLastWalletTransactions(account, limit)) {
             array.add(transaction.toJson());
         }
 
@@ -205,7 +205,7 @@ public class TransactionsResource {
         DCSet dcSet = DCSet.getInstance();
 
         for (Transaction record : dcSet.getTransactionTab().getIncomedTransactions(address, type, from, count, descending)) {
-            record.setDC(dcSet);
+            record.setDC(dcSet, false);
             array.add(record.toJson());
         }
 
@@ -509,7 +509,7 @@ public class TransactionsResource {
                 key = (Long) iterator.next();
                 Fun.Tuple2<Integer, Integer> pair = Transaction.parseDBRef(key);
                 transaction = map.get(key);
-                transaction.setDC(dcSet, Transaction.FOR_NETWORK, pair.a, pair.b);
+                transaction.setDC(dcSet, Transaction.FOR_NETWORK, pair.a, pair.b, true);
                 array.add(transaction.toJson());
             }
 
@@ -610,7 +610,7 @@ public class TransactionsResource {
         }
 
         // GET ACCOUNTS
-        List<Account> accounts = Controller.getInstance().getAccounts();
+        List<Account> accounts = Controller.getInstance().getWalletAccounts();
 
         JSONArray array = new JSONArray();
         DCSet dcSet = DCSet.getInstance();
@@ -620,7 +620,7 @@ public class TransactionsResource {
             // FOR ALL ACCOUNTS
             synchronized (accounts) {
                 for (Account account : accounts) {
-                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo);
+                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo, true);
                     // CHECK IF INVOLVED
                     if (!account.equals(transaction.getCreator()) && transaction.isInvolved(account)) {
                         array.add(transaction.toJson());
@@ -659,12 +659,12 @@ public class TransactionsResource {
 
         int seqNo = 0;
         for (Transaction transaction : block.getTransactions()) {
-            transaction.setDC(dcSet);
+            transaction.setDC(dcSet, true);
             // TODO: тут наверное поиск быстрее по HsahSet будет
             HashSet<Account> recipients = transaction.getRecipientAccounts();
             for (Account recipient : recipients) {
                 if (recipient.equals(address)) {
-                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo);
+                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo, true);
                     array.add(transaction.toJson());
                     break;
                 }
@@ -709,12 +709,12 @@ public class TransactionsResource {
 
         int seqNo = 0;
         for (Transaction transaction : block.getTransactions()) {
-            transaction.setDC(dcSet);
+            transaction.setDC(dcSet, true);
             HashSet<Account> recipients = transaction.getRecipientAccounts();
             for (Account recipient : recipients) {
                 if (recipient.equals(address)) {
 
-                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo);
+                    transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, ++seqNo, true);
                     JSONObject json = transaction.toJson();
 
                     if (transaction instanceof RSend) {
@@ -863,7 +863,7 @@ public class TransactionsResource {
         Transaction transaction;
         try {
             transaction = Controller.getInstance().r_Send(
-                    Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress()), 0, recip, asset1, amount,
+                    Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress()), 0, recip, asset1, amount,
                     head, message.getBytes(StandardCharsets.UTF_8), isTextByte, encrypted, 0);
             // test result = new Pair<Transaction, Integer>(null,
             // Transaction.VALIDATE_OK);
@@ -923,7 +923,7 @@ public class TransactionsResource {
         JSONObject out = new JSONObject();
 
         RSend r_Send = (RSend) transaction;
-        Account account = Controller.getInstance().getAccountByAddress(r_Send.getCreator().getAddress());
+        Account account = Controller.getInstance().getWalletAccountByAddress(r_Send.getCreator().getAddress());
         byte[] r_data = r_Send.getData();
         if (r_data == null || r_data.length == 0)
             return null;

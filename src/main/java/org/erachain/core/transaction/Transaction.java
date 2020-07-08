@@ -366,7 +366,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     protected static final int BASE_LENGTH_AS_PACK = BASE_LENGTH_AS_MYPACK + TIMESTAMP_LENGTH
             + CREATOR_LENGTH + SIGNATURE_LENGTH;
     protected static final int BASE_LENGTH = BASE_LENGTH_AS_PACK + FEE_POWER_LENGTH + REFERENCE_LENGTH;
-    protected static final int BASE_LENGTH_AS_DBRECORD = BASE_LENGTH + FEE_LENGTH;
+    protected static final int BASE_LENGTH_AS_DBRECORD = BASE_LENGTH + TIMESTAMP_LENGTH + FEE_LENGTH;
 
     /**
      * Используется для разделения строки поисковых слов для всех трнзакций.<br>
@@ -563,6 +563,12 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     // GETTERS/SETTERS
 
+    public void setHeightSeq(long seqNo) {
+        this.dbRef = seqNo;
+        this.height = parseDBRefHeight(seqNo);
+        this.seqNo = (int) seqNo;
+    }
+
     public void setHeightSeq(int height, int seqNo) {
         this.dbRef = makeDBRef(height, seqNo);
         this.height = height;
@@ -571,7 +577,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     // NEED FOR DB SECONDATY KEYS
     // see org.mapdb.Bind.secondaryKeys
-    public void setDC(DCSet dcSet) {
+    public void setDC(DCSet dcSet, boolean andSetup) {
         this.dcSet = dcSet;
 
         if (BlockChain.TEST_DB == 0 && creator != null) {
@@ -580,32 +586,35 @@ public abstract class Transaction implements ExplorerJsonLine {
                 creatorPerson = (PersonCls) dcSet.getItemPersonMap().get(creatorPersonDuration.a);
             }
         }
+
+        if (andSetup && !isWiped())
+            setupFromStateDB();
     }
 
-    public void setDC_HeightSeq(DCSet dcSet) {
-        setDC(dcSet);
-
-        if (this.typeBytes[0] == Transaction.CALCULATED_TRANSACTION) {
-
-        }
-
-        Long dbRef2 = dcSet.getTransactionFinalMapSigns().get(this.signature);
-        if (dbRef2 == null)
-            return;
-
-        this.dbRef = dbRef2;
-        Tuple2<Integer, Integer> pair = Transaction.parseDBRef(dbRef2);
-        this.height = pair.a;
-        this.seqNo = pair.b;
-    }
-
-    public void setDC(DCSet dcSet, int asDeal, int blockHeight, int seqNo) {
-        setDC(dcSet);
+    /**
+     * @param dcSet
+     * @param forDeal
+     * @param blockHeight
+     * @param seqNo
+     * @param andSetup    - если нужно нарастить мясо на скелет из базв Финал. Не нужно для неподтвержденных и если ее нет в базе еще
+     */
+    public void setDC(DCSet dcSet, int forDeal, int blockHeight, int seqNo, boolean andSetup) {
+        setDC(dcSet, false);
         this.height = blockHeight; //this.getBlockHeightByParentOrLast(dcSet);
         this.seqNo = seqNo;
         this.dbRef = Transaction.makeDBRef(height, seqNo);
-        if (asDeal > Transaction.FOR_PACK && (this.fee == null || this.fee.signum() == 0))
+        if (forDeal > Transaction.FOR_PACK && (this.fee == null || this.fee.signum() == 0))
             this.calcFee();
+
+        if (andSetup && !isWiped())
+            setupFromStateDB();
+    }
+
+    /**
+     * Нарастить мясо на скелет из базы состояния - нужно например для созданим вторичных ключей и Номер Сущности
+     *
+     */
+    public void setupFromStateDB() {
     }
 
     public boolean noDCSet() {
@@ -698,7 +707,10 @@ public abstract class Transaction implements ExplorerJsonLine {
     }
 
     public BigDecimal getFee(Account account) {
-        return this.getFee(account.getAddress());
+        if (this.creator != null)
+            if (this.creator.getAddress().equals(account))
+                return this.fee;
+        return BigDecimal.ZERO;
     }
 
     public BigDecimal getFee() {
@@ -745,7 +757,18 @@ public abstract class Transaction implements ExplorerJsonLine {
         return tagsArray;
     }
 
+    /**
+     * При удалении - транзакция то берется из базы для создания индексов к удалению.
+     * И она скелет - нужно базу данных задать и водтянуть номера сущностей и все заново просчитать чтобы правильно удалить метки.
+     * Для этого проверку делаем в таблтцк при создании индексов
+     *
+     * @return
+     */
     public String[] getTags() {
+
+        if (itemsKeys == null)
+            makeItemsKeys();
+
         try {
             return tags(viewTypeName(), getTitle(), itemsKeys);
         } catch (Exception e) {
@@ -804,9 +827,11 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (Base58.isExtraSymbols(filterStr)) {
                 try {
                     Long dbRef = parseDBRef(filterStr);
-                    Transaction one = map.get(dbRef);
-                    if (one != null) {
-                        transactions.add(one);
+                    if (dbRef != null) {
+                        Transaction one = map.get(dbRef);
+                        if (one != null) {
+                            transactions.add(one);
+                        }
                     }
                 } catch (Exception e1) {
                 }
@@ -1363,6 +1388,11 @@ public abstract class Transaction implements ExplorerJsonLine {
             data = Bytes.concat(data, this.signature);
 
         if (forDeal == FOR_DB_RECORD) {
+            // WRITE DBREF
+            byte[] dbRefBytes = Longs.toByteArray(this.dbRef);
+            dbRefBytes = Bytes.ensureCapacity(dbRefBytes, TIMESTAMP_LENGTH, 0);
+            data = Bytes.concat(data, dbRefBytes);
+
             // WRITE FEE
             byte[] feeBytes = Longs.toByteArray(this.fee.unscaledValue().longValue());
             data = Bytes.concat(data, feeBytes);
@@ -1443,15 +1473,15 @@ public abstract class Transaction implements ExplorerJsonLine {
      *   = 2 - not check person
      *   = 4 - not check PublicText
      */
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         if (height < BlockChain.ALL_VALID_BEFORE) {
             return VALIDATE_OK;
         }
 
         // CHECK IF REFERENCE IS OK
-        //Long reference = asDeal == null ? this.creator.getLastTimestamp(dcSet) : asDeal;
-        if (asDeal > Transaction.FOR_MYPACK && height > BlockChain.ALL_BALANCES_OK_TO) {
+        //Long reference = forDeal == null ? this.creator.getLastTimestamp(dcSet) : forDeal;
+        if (forDeal > Transaction.FOR_MYPACK && height > BlockChain.ALL_BALANCES_OK_TO) {
             if (BlockChain.CHECK_DOUBLE_SPEND_DEEP < 0) {
                 /// вообще не проверяем в тесте
                 if (BlockChain.TEST_DB == 0 && timestamp < Controller.getInstance().getBlockChain().getTimestamp(height - 1)) {
@@ -1643,7 +1673,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     // REST
 
     // public abstract void process(DLSet db);
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         if (false
             //this.signature != null && Base58.encode(this.signature)
@@ -1653,9 +1683,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             error++;
         }
 
-        makeItemsKeys();
-
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             // this.calcFee();
 
             if (this.fee != null && this.fee.compareTo(BigDecimal.ZERO) != 0) {
@@ -1684,7 +1712,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     }
 
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
 
         if (false && BlockChain.CHECK_BUGS > 1
             ///&& viewHeightSeq().equals("628853-1") // is forging 628853-1
@@ -1695,7 +1723,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             error++;
         }
 
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             if (this.fee != null && this.fee.compareTo(BigDecimal.ZERO) != 0) {
                 // NOT update INCOME balance
                 this.creator.changeBalance(this.dcSet, false, false, FEE_KEY, this.fee, true, true);
@@ -1783,6 +1811,12 @@ public abstract class Transaction implements ExplorerJsonLine {
     public void resetDCSet() {
         dcSet = null;
         itemsKeys = null;
+    }
+
+    public void resetSeqNo() {
+        dbRef = 0l;
+        height = 0;
+        seqNo = 0;
     }
 
     // ПРОЫЕРЯЛОСЬ! действует в совокупк с Финализе в Блоке

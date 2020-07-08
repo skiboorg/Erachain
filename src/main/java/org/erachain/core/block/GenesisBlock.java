@@ -558,7 +558,7 @@ public class GenesisBlock extends Block {
                 if (!(BlockChain.TESTS_VERS != 0 && (BlockChain.SIDE_MODE || BlockChain.TEST_MODE))) {
                     try {
                         //File file = new File("License Erachain.txt");
-                        File file = new File("Erachain Licence Agreement (genesis).txt");
+                        File file = new File("Licence Agreement (genesis).txt");
                         //READ SETTINS JSON FILE
                         List<String> lines = Files.readLines(file, Charsets.UTF_8);
 
@@ -810,7 +810,7 @@ public class GenesisBlock extends Block {
         //VALIDATE TRANSACTIONS
         byte[] transactionsSignatures = new byte[0];
         for (Transaction transaction : this.getTransactions()) {
-            transaction.setDC(db);
+            transaction.setDC(db, false);
             if (transaction.isValid(Transaction.FOR_NETWORK, 0l) != Transaction.VALIDATE_OK) {
                 return INVALID_BLOCK_VERSION;
             }

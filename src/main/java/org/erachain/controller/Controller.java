@@ -38,7 +38,6 @@ import org.erachain.core.transaction.TransactionFactory;
 import org.erachain.core.voting.PollOption;
 import org.erachain.core.wallet.Wallet;
 import org.erachain.database.DLSet;
-import org.erachain.database.SortableList;
 import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.AboutFrame;
@@ -91,8 +90,8 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "5.0.01 DEV";
-    public static String buildTime = "2020-05-06 12:00:00 UTC";
+    public static String version = "2.0.01";
+    public static String buildTime = "2020-06-26 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
     public static final char GROUPING_SEPARATOR = '`';
@@ -1787,7 +1786,7 @@ public class Controller extends Observable {
 
     private int skipNotify = 0;
     // https://127.0.0.1/7pay_in/tools/block_proc/ERA
-    public void NotifyIncoming(List<Transaction> transactions) {
+    public void NotifyWalletIncoming(List<Transaction> transactions) {
 
         List<Account> accounts = this.wallet.getAccounts();
         List<Integer> seqs = new ArrayList<Integer>();
@@ -1795,7 +1794,7 @@ public class Controller extends Observable {
         int seq = 0;
         for (Transaction transaction : transactions) {
 
-            transaction.setDC(dcSet);
+            transaction.setDC(dcSet, true);
 
             // FOR ALL ACCOUNTS
             synchronized (accounts) {
@@ -2189,12 +2188,12 @@ public class Controller extends Observable {
         }
     }
 
-    public List<Account> getAccounts() {
+    public List<Account> getWalletAccounts() {
 
         return this.wallet.getAccounts();
     }
 
-    public List<Account> getAccountsAndSetBalancePosition(int position) {
+    public List<Account> getWalletAccountsAndSetBalancePosition(int position) {
 
         return this.wallet.getAccountsAndSetBalancePosition(position);
     }
@@ -2211,25 +2210,19 @@ public class Controller extends Observable {
         return false;
     }
 
-    public List<PublicKeyAccount> getPublicKeyAccounts() {
+    public List<PublicKeyAccount> getWalletPublicKeyAccounts() {
         return this.wallet.getPublicKeyAccounts();
     }
 
-    public List<PrivateKeyAccount> getPrivateKeyAccounts() {
+    public List<PrivateKeyAccount> getWalletPrivateKeyAccounts() {
         return this.wallet.getprivateKeyAccounts();
     }
 
-    public String generateNewAccount() {
+    public String generateNewWalletAccount() {
         return this.wallet.generateNewAccount();
     }
 
-    public String generateNewAccountWithSynch() {
-        String account = this.wallet.generateNewAccount();
-        this.wallet.synchronizeFull();
-        return account;
-    }
-
-    public PrivateKeyAccount getPrivateKeyAccountByAddress(String address) {
+    public PrivateKeyAccount getWalletPrivateKeyAccountByAddress(String address) {
         if (this.doesWalletExists()) {
             return this.wallet.getPrivateKeyAccount(address);
         } else {
@@ -2239,21 +2232,21 @@ public class Controller extends Observable {
 
     public byte[] decrypt(PublicKeyAccount creator, Account recipient, byte[] data) {
 
-        Account account = this.getAccountByAddress(creator.getAddress());
+        Account account = this.getWalletAccountByAddress(creator.getAddress());
 
         byte[] privateKey = null;
         byte[] publicKey = null;
 
         // IF SENDER ANOTHER
         if (account == null) {
-            PrivateKeyAccount accountRecipient = this.getPrivateKeyAccountByAddress(recipient.getAddress());
+            PrivateKeyAccount accountRecipient = this.getWalletPrivateKeyAccountByAddress(recipient.getAddress());
             privateKey = accountRecipient.getPrivateKey();
 
             publicKey = creator.getPublicKey();
         }
         // IF SENDER ME
         else {
-            PrivateKeyAccount accountRecipient = this.getPrivateKeyAccountByAddress(account.getAddress());
+            PrivateKeyAccount accountRecipient = this.getWalletPrivateKeyAccountByAddress(account.getAddress());
             privateKey = accountRecipient.getPrivateKey();
 
             publicKey = this.getPublicKeyByAddress(recipient.getAddress());
@@ -2273,7 +2266,7 @@ public class Controller extends Observable {
      * @param address is a address in wallet
      * @return object Account
      */
-    public Account getAccountByAddress(String address) {
+    public Account getWalletAccountByAddress(String address) {
         if (this.doesWalletExists()) {
             return this.wallet.getAccount(address);
         } else {
@@ -2288,10 +2281,7 @@ public class Controller extends Observable {
         return false;
     }
 
-    // public BigDecimal getUnconfirmedBalance(String address, long key) {
-    // return this.wallet.getUnconfirmedBalance(address, key);
-    // }
-    public Tuple3<BigDecimal, BigDecimal, BigDecimal> getUnconfirmedBalance(Account account, long key) {
+    public Tuple3<BigDecimal, BigDecimal, BigDecimal> getWalletUnconfirmedBalance(Account account, long key) {
         return this.wallet.getUnconfirmedBalance(account, key);
     }
 
@@ -2309,10 +2299,6 @@ public class Controller extends Observable {
 
     public byte[] exportSeed() {
         return this.wallet.exportSeed();
-    }
-
-    public boolean deleteAccount(PrivateKeyAccount account) {
-        return this.wallet.deleteAccount(account);
     }
 
     /**
@@ -2396,7 +2382,7 @@ public class Controller extends Observable {
         this.wallet.setSecondsToUnlock(seconds);
     }
 
-    public List<Pair<Account, Transaction>> getLastTransactions(int limit) {
+    public List<Pair<Account, Transaction>> getLastWalletTransactions(int limit) {
         return this.wallet.getLastTransactions(limit);
     }
 
@@ -2435,15 +2421,15 @@ public class Controller extends Observable {
         return database.getTransactionFinalMap().get(refDB);
     }
 
-    public List<Transaction> getLastTransactions(Account account, int limit) {
+    public List<Transaction> getLastWalletTransactions(Account account, int limit) {
         return this.wallet.getLastTransactions(account, limit);
     }
 
-    public List<Pair<Account, Block.BlockHead>> getLastBlocks(int limit) {
+    public List<Pair<Account, Block.BlockHead>> getLastWalletBlocks(int limit) {
         return this.wallet.getLastBlocks(limit);
     }
 
-    public List<Block.BlockHead> getLastBlocks(Account account, int limit) {
+    public List<Block.BlockHead> getLastWalletBlocks(Account account, int limit) {
         return this.wallet.getLastBlocks(account, limit);
     }
 
@@ -2489,11 +2475,11 @@ public class Controller extends Observable {
     // return this.network.getTelegram(signature);
     // }
 
-    public List<Pair<Account, Name>> getNames() {
+    public List<Pair<Account, Name>> getWalletNames() {
         return this.wallet.getNames();
     }
 
-    public List<Name> getNamesAsList() {
+    public List<Name> getWalletNamesAsList() {
         List<Pair<Account, Name>> names = this.wallet.getNames();
         List<Name> result = new ArrayList<>();
         for (Pair<Account, Name> pair : names) {
@@ -2504,8 +2490,8 @@ public class Controller extends Observable {
 
     }
 
-    public List<String> getNamesAsListAsString() {
-        List<Name> namesAsList = getNamesAsList();
+    public List<String> getWalletNamesAsListAsString() {
+        List<Name> namesAsList = getWalletNamesAsList();
         List<String> results = new ArrayList<String>();
         for (Name name : namesAsList) {
             results.add(name.getName());
@@ -2515,7 +2501,7 @@ public class Controller extends Observable {
     }
 
     @Deprecated
-    public List<Name> getNames(Account account) {
+    public List<Name> getWalletNames(Account account) {
         return this.wallet.getNames(account);
     }
 
@@ -2537,10 +2523,6 @@ public class Controller extends Observable {
     @Deprecated
     public List<Pair<Account, org.erachain.core.voting.Poll>> getPolls() {
         return this.wallet.getPolls();
-    }
-
-    public List<org.erachain.core.voting.Poll> getPolls(Account account) {
-        return this.wallet.getPolls(account);
     }
 
     public ItemMap getItemMap(int type) {
@@ -2639,7 +2621,7 @@ public class Controller extends Observable {
         return signature;
     }
 
-    public byte[] getWalletLastBlockSign() {
+    public byte[] getLastWalletBlockSign() {
         return this.wallet.getLastBlockSignature();
     }
 
@@ -2757,17 +2739,21 @@ public class Controller extends Observable {
 
     // BALANCES
 
-    public SortableList<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
+    public List<Tuple2<byte[], Tuple5<
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>>
     getBalances(
             long key) {
-        return this.dcSet.getAssetBalanceMap().getBalancesSortableList(key);
+        return this.dcSet.getAssetBalanceMap().getBalancesList(key);
     }
 
-    public SortableList<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
+    public List<Tuple2<byte[], Tuple5<
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>>
     getBalances(
             Account account) {
 
-        return this.dcSet.getAssetBalanceMap().getBalancesSortableList(account);
+        return this.dcSet.getAssetBalanceMap().getBalancesList(account);
     }
 
     public List<Transaction> getUnconfirmedTransactionsByAddressFast100(String address) {
@@ -2917,7 +2903,7 @@ public class Controller extends Observable {
 
     // ATs
 
-    public SortableList<String, AT> getAcctATs(String type, boolean initiators) {
+    public List<AT> getAcctATs(String type, boolean initiators) {
         return this.dcSet.getATMap().getAcctATs(type, initiators);
     }
 
@@ -2926,11 +2912,18 @@ public class Controller extends Observable {
     public void onTransactionCreate(Transaction transaction) {
         // ADD TO UNCONFIRMED TRANSACTIONS
         //////this.dcSet.getTransactionTab().add(transaction);
-        /// чтобы не налететь на очситку таблицы - туда передадим
+        /// чтобы не налететь на очистку таблицы - туда передадим
         this.transactionsPool.offerMessage(transaction);
 
         // BROADCAST
         this.broadcastTransaction(transaction);
+
+        if (doesWalletExists() && HARD_WORK < 4) {
+            // для всех счетов - может сам себе послал
+            transaction.resetDCSet(); // сбросим назначения после Форкнутой Базы
+            wallet.processTransaction(transaction);
+        }
+
     }
 
     public Pair<Transaction, Integer> registerName(PrivateKeyAccount registrant, Account owner, String name,
@@ -3273,7 +3266,7 @@ public class Controller extends Observable {
         if (messageBytes != null && messageBytes.length == 0)
             messageBytes = null;
 
-        PrivateKeyAccount privateKeyAccount = cnt.getPrivateKeyAccountByAddress(creator.getAddress());
+        PrivateKeyAccount privateKeyAccount = cnt.getWalletPrivateKeyAccountByAddress(creator.getAddress());
         if (privateKeyAccount == null) {
             return new Pair<Integer, Transaction>(Transaction.INVALID_WALLET_ADDRESS, null);
         }
@@ -3329,26 +3322,26 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction r_SignNote(byte version, byte property1, byte property2, int asDeal,
+    public Transaction r_SignNote(byte version, byte property1, byte property2, int forDeal,
                                   PrivateKeyAccount sender, int feePow, long key, byte[] message, byte[] isText, byte[] encrypted) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_SignNote(version, property1, property2, asDeal, sender, feePow, key,
+            return this.transactionCreator.r_SignNote(version, property1, property2, forDeal, sender, feePow, key,
                     message, isText, encrypted);
         }
     }
 
-    public Transaction r_SertifyPerson(int version, int asDeal, PrivateKeyAccount creator, int feePow, long key,
+    public Transaction r_SertifyPerson(int version, int forDeal, PrivateKeyAccount creator, int feePow, long key,
                                        List<PublicKeyAccount> userAccounts, int add_day) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_SertifyPerson(version, asDeal, creator, feePow, key, userAccounts,
+            return this.transactionCreator.r_SertifyPerson(version, forDeal, creator, feePow, key, userAccounts,
                     add_day);
         }
     }
 
-    public Transaction r_Vouch(int version, int asDeal, PrivateKeyAccount creator, int feePow, int height,
+    public Transaction r_Vouch(int version, int forDeal, PrivateKeyAccount creator, int feePow, int height,
                                int seq) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Vouch(version, asDeal, creator, feePow, height, seq);
+            return this.transactionCreator.r_Vouch(version, forDeal, creator, feePow, height, seq);
         }
     }
 
@@ -3423,7 +3416,7 @@ public class Controller extends Observable {
         // CHECK ACCOUNT IN OWN WALLET
         if (isMyAccountByAddress(account.getAddress())) {
             if (isWalletUnlocked()) {
-                return getPrivateKeyAccountByAddress(account.getAddress()).getPublicKey();
+                return getWalletPrivateKeyAccountByAddress(account.getAddress()).getPublicKey();
             }
         }
 
@@ -3459,10 +3452,10 @@ public class Controller extends Observable {
         }
 
         // CHECK ACCOUNT IN OWN WALLET
-        Account account = getAccountByAddress(address);
+        Account account = getWalletAccountByAddress(address);
         if (account != null) {
             if (isWalletUnlocked()) {
-                return getPrivateKeyAccountByAddress(address).getPublicKey();
+                return getWalletPrivateKeyAccountByAddress(address).getPublicKey();
             }
         }
 
@@ -3790,7 +3783,7 @@ public class Controller extends Observable {
                 this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, info));
 
 
-                String licenseFile = "Erachain Licence Agreement (genesis).txt";
+                String licenseFile = "Licence Agreement (genesis).txt";
                 File f = new File(licenseFile);
                 if (!f.exists()) {
 

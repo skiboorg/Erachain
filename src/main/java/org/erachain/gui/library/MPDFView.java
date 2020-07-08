@@ -265,15 +265,15 @@ public class MPDFView extends javax.swing.JPanel {
 
             File file;
             if (Settings.getInstance().getLang().equals("ru"))
-                file = new File("Erachain Licence Agreement (ru).pdf");
+                file = new File("Licence Agreement (ru).pdf");
             else
-                file = new File("Erachain Licence Agreement.pdf");
+                file = new File("Licence Agreement.pdf");
 
             RandomAccessFile raf = null;
             try {
                 raf = new RandomAccessFile(file, "r");
             } catch (FileNotFoundException e) {
-                file = new File("Erachain Licence Agreement.pdf");
+                file = new File("Licence Agreement.pdf");
                 try {
                     raf = new RandomAccessFile(file, "r");
                 } catch (FileNotFoundException e1) {

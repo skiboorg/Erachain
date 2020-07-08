@@ -135,7 +135,7 @@ public class TradeResource {
         if (wantAsset == null)
             throw ApiErrorFactory.getInstance().createError(Transaction.ITEM_ASSET_NOT_EXIST);
 
-        PrivateKeyAccount privateKeyAccount = cntr.getPrivateKeyAccountByAddress(resultCreator.a.getAddress());
+        PrivateKeyAccount privateKeyAccount = cntr.getWalletPrivateKeyAccountByAddress(resultCreator.a.getAddress());
         if (privateKeyAccount == null) {
             throw ApiErrorFactory.getInstance().createError(Transaction.INVALID_WALLET_ADDRESS);
         }
@@ -263,7 +263,7 @@ public class TradeResource {
         }
 
 
-        PrivateKeyAccount privateKeyAccount = cntr.getPrivateKeyAccountByAddress(resultCreator.a.getAddress());
+        PrivateKeyAccount privateKeyAccount = cntr.getWalletPrivateKeyAccountByAddress(resultCreator.a.getAddress());
         if (privateKeyAccount == null) {
             throw ApiErrorFactory.getInstance().createError(Transaction.INVALID_WALLET_ADDRESS);
         }
@@ -742,7 +742,7 @@ public class TradeResource {
         Controller controller = Controller.getInstance();
 
         // CACHE private keys
-        test1Creators = controller.getPrivateKeyAccounts();
+        test1Creators = controller.getWalletPrivateKeyAccounts();
 
         // запомним счетчики для счетов
         HashMap<String, Long> counters = new HashMap<String, Long>();
@@ -920,7 +920,7 @@ public class TradeResource {
 
                             Integer result = cnt.getTransactionCreator().afterCreate(transaction, Transaction.FOR_NETWORK);
                             // CLEAR for HEAP
-                            transaction.setDC(null);
+                            transaction.setDC(null, false);
 
                             // CHECK VALIDATE MESSAGE
                             if (result == Transaction.VALIDATE_OK) {
