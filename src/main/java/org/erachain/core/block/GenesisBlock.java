@@ -558,7 +558,7 @@ public class GenesisBlock extends Block {
                 if (!(BlockChain.TESTS_VERS != 0 && (BlockChain.SIDE_MODE || BlockChain.TEST_MODE))) {
                     try {
                         //File file = new File("License Erachain.txt");
-                        File file = new File("Erachain Licence Agreement (genesis).txt");
+                        File file = new File("Licence Agreement (genesis).txt");
                         //READ SETTINS JSON FILE
                         List<String> lines = Files.readLines(file, Charsets.UTF_8);
 

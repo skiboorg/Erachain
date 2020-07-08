@@ -90,8 +90,8 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "2.0";
-    public static String buildTime = "2020-06-12 12:00:00 UTC";
+    public static String version = "2.0.01";
+    public static String buildTime = "2020-06-26 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
     public static final char GROUPING_SEPARATOR = '`';
@@ -170,6 +170,7 @@ public class Controller extends Observable {
     public boolean onlyProtocolIndexing;
     public boolean compactDConStart;
     public boolean inMemoryDC;
+
     /**
      * see org.erachain.datachain.DCSet#BLOCKS_MAP
      */
@@ -211,7 +212,6 @@ public class Controller extends Observable {
                 dbs = "M";
 
         }
-
 
         if (withTimestamp)
             return version + (BlockChain.DEMO_MODE ? " DEMO Net"
@@ -1788,6 +1788,9 @@ public class Controller extends Observable {
     // https://127.0.0.1/7pay_in/tools/block_proc/ERA
     public void NotifyWalletIncoming(List<Transaction> transactions) {
 
+        if (!doesWalletExists())
+            return;
+
         List<Account> accounts = this.wallet.getAccounts();
         List<Integer> seqs = new ArrayList<Integer>();
 
@@ -1838,10 +1841,23 @@ public class Controller extends Observable {
         return !Settings.getInstance().updateNameStorage();
     }
 
+    public Account[] getInvolvedAccounts(Transaction transaction) {
+        if (!doesWalletExists())
+            return null;
+
+        return wallet.getInvolvedAccounts(transaction);
+    }
+
+    public Account getInvolvedAccount(Transaction transaction) {
+        if (!doesWalletExists())
+            return null;
+
+        return wallet.getInvolvedAccount(transaction);
+    }
 
     /**
      * вызывается только из синхронизатора в момент синхронизации цепочки.
-     *  Поэтому можно сипользовать внутренню переменную
+     * Поэтому можно сипользовать внутренню переменную
      *
      * @param currentBetterPeer
      * @throws Exception
@@ -3323,10 +3339,10 @@ public class Controller extends Observable {
     }
 
     public Transaction r_SignNote(byte version, byte property1, byte property2, int forDeal,
-                                  PrivateKeyAccount sender, int feePow, long key, byte[] message, byte[] isText, byte[] encrypted) {
+                                  PrivateKeyAccount sender, int feePow, long key, byte[] message) {
         synchronized (this.transactionCreator) {
             return this.transactionCreator.r_SignNote(version, property1, property2, forDeal, sender, feePow, key,
-                    message, isText, encrypted);
+                    message);
         }
     }
 
@@ -3723,6 +3739,7 @@ public class Controller extends Observable {
                 useNet = false;
                 continue;
             }
+
         }
 
         if (Settings.genesisStamp <= 0) {
@@ -3783,7 +3800,7 @@ public class Controller extends Observable {
                 this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, info));
 
 
-                String licenseFile = "Erachain Licence Agreement (genesis).txt";
+                String licenseFile = "Licence Agreement (genesis).txt";
                 File f = new File(licenseFile);
                 if (!f.exists()) {
 
