@@ -1,10 +1,10 @@
 {
   // peers from external source
-  //"peersURL": "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json",
+  //"peersURL": "https://raw.githubusercontent.com/darachain/darachain-public/master/peers.json",
   // Blocks period [sec], minumum: 3, default: 30
   "blockPeriod": 60,
   // external Block Explorer
-  "explorer": "http://my-sidechain.dom:9057",
+  "explorer": "http://explorer.darachain.org:9077",
 
   "sideLicense": "Sidechain Licence Agreement.pdf",
 
