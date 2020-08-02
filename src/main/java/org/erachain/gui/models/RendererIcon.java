@@ -4,7 +4,6 @@ import org.erachain.core.item.ItemCls;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
 
 
 public class RendererIcon extends DefaultTableCellRenderer {
@@ -41,7 +40,7 @@ public class RendererIcon extends DefaultTableCellRenderer {
     protected void setValue(Object value) {
 
         // Get icon to use for the list item value
-        ItemCls item = (ItemCls)value;
+        ItemCls item = (ItemCls) value;
         if (item == null)
             return;
 
