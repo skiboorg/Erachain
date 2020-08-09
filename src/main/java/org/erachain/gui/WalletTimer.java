@@ -1,6 +1,7 @@
 package org.erachain.gui;
 
 import org.erachain.controller.Controller;
+import org.erachain.core.account.Account;
 import org.erachain.core.block.Block;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
@@ -38,8 +39,8 @@ public class WalletTimer<U> implements Observer {
 
         logger = LoggerFactory.getLogger(this.getClass());
         Controller.getInstance().guiTimer.addObserver(this); // обработка repaintGUI
-        muteSound = (Boolean) Settings.getInstance().getJSONObject().getOrDefault("muteSound", false);
-        muteTray = (Boolean) Settings.getInstance().getJSONObject().getOrDefault("muteTray", false);
+        muteSound = (Boolean) Settings.getInstance().getJSONObject().getOrDefault("muteTraySound", false);
+        muteTray = (Boolean) Settings.getInstance().getJSONObject().getOrDefault("muteTrayMessage", false);
 
     }
 
@@ -48,6 +49,9 @@ public class WalletTimer<U> implements Observer {
     }
 
     public void update(Observable o, Object arg) {
+
+        if (!contr.doesWalletExists() || contr.wallet.synchronizeBodyUsed)
+            return;
 
         ObserverMessage messageObs = (ObserverMessage) arg;
 
@@ -71,12 +75,13 @@ public class WalletTimer<U> implements Observer {
             if (event instanceof Transaction) {
 
                 Transaction transaction = (Transaction) event;
+                Account creator = transaction.getCreator();
 
                 if (transaction instanceof RSend) {
                     RSend rSend = (RSend) transaction;
                     if (rSend.hasAmount()) {
                         // TRANSFER
-                        if (contr.wallet.accountExists(rSend.getCreator().getAddress())) {
+                        if (contr.wallet.accountExists(creator)) {
                             sound = "send.wav";
                             head = lang.translate("Payment send");
                             message = rSend.getCreator().getPersonAsString() + " -> \n "
@@ -93,7 +98,7 @@ public class WalletTimer<U> implements Observer {
                         }
                     } else {
                         // MAIL
-                        if (contr.wallet.accountExists(rSend.getCreator().getAddress())) {
+                        if (contr.wallet.accountExists(rSend.getCreator())) {
                             sound = "send.wav";
                             head = lang.translate("Mail send");
                             message = rSend.getCreator().getPersonAsString() + " -> \n "
@@ -112,7 +117,7 @@ public class WalletTimer<U> implements Observer {
                     }
 
                 } else {
-                    if (contr.wallet.accountExists(transaction.getCreator().getAddress())) {
+                    if (contr.wallet.accountExists(transaction.getCreator())) {
                         sound = "outcometransaction.wav";
                         head = lang.translate("Outcome transaction") + ": " + transaction.viewFullTypeName();
                         message = transaction.getTitle();
