@@ -12,16 +12,15 @@ import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.items.accounts.AccountRenderer;
 import org.erachain.gui.items.accounts.AccountsComboBoxModel;
 import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.library.MButton;
-import org.erachain.gui.models.SendTableModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 import org.erachain.utils.Converter;
 import org.erachain.utils.MenuPopupUtil;
 import org.mapdb.Fun.Tuple2;
@@ -43,13 +42,15 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("serial")
 
-public class MailSendPanel extends JPanel {
+public class MailSendPanel extends IconPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons()+ "MailSendPanel.png";
+    public static String NAME = "MailSendPanel";
+    public static String TITLE = "Send Mail";
+
     // TODO - "A" - &
     final static String wrongFirstCharOfAddress = "A";
     // private final MessagesTableModel messagesTableModel;
-    private final JTable table;
+    private final MailsHTMLTableModel messagesHistoryTable;
     public JTextArea txtMessage;
     public JTextField txt_Title;
     int y;
@@ -69,13 +70,11 @@ public class MailSendPanel extends JPanel {
 
     public MailSendPanel(Account accountFrom, Account accountTo, PersonCls person) {
 
+        super(NAME, TITLE);
         th = this;
         this.person = person;
         sendButton = new MButton(Lang.getInstance().translate("Send"), 2);
         y = 0;
-
-        this.setName(Lang.getInstance().translate("Send Mail"));
-        //asset = Controller.getInstance().getAsset(2l);
 
         GridBagLayout gridBagLayout = new GridBagLayout();
         // gridBagLayout.columnWidths = new int[]{0, 112, 140, 0, 0};
@@ -167,46 +166,6 @@ public class MailSendPanel extends JPanel {
                 refreshReceiverDetails();
             }
         });
-
-        // if person show selectbox with all adresses for person
-        if (person != null) {
-
-            AccountsComboBoxModel accounts_To_Model = new AccountsComboBoxModel(person.getKey());
-            this.cbx_To = new JComboBox(accounts_To_Model);
-            if (accounts_To_Model.getSize() != 0) {
-                this.add(this.cbx_To, txtToGBC);
-                txtTo.setText(cbx_To.getSelectedItem().toString());
-                Account account1 = new Account(txtTo.getText());
-                txtRecDetails.setText(account1.toString());
-                toLabel.setText(Lang.getInstance().translate("Select Account To") + ": ");
-                cbx_To.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String str = (String) cbx_To.getSelectedItem();
-                        if (str != null) {
-                            txtTo.setText(cbx_To.getSelectedItem().toString());
-                            refreshReceiverDetails();
-                        }
-
-                    }
-                });
-            } else {
-
-                this.txtTo.setText("has no Accounts");
-                sendButton.setEnabled(false);
-
-            }
-        } else {
-
-            if (accountTo != null) {
-                if (accountTo instanceof PublicKeyAccount) {
-                    txtTo.setText(((PublicKeyAccount)accountTo).getBase58());
-                } else {
-                    txtTo.setText(accountTo.getAddress());
-                }
-            }
-            this.add(txtTo, txtToGBC);
-        }
 
         // LABEL RECEIVER
         GridBagConstraints labelDetailsGBC = new GridBagConstraints();
@@ -396,7 +355,7 @@ public class MailSendPanel extends JPanel {
         feetxtGBC.gridy = y;
 
         txtFeePow = new JComboBox<String>();
-        txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8" }));
+        txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
         txtFeePow.setPreferredSize(new Dimension(130, 22));
         txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
@@ -432,14 +391,21 @@ public class MailSendPanel extends JPanel {
 
         // MESSAGES HISTORY TABLE
 
-        table = new SendTableModel();
+        messagesHistoryTable = new MailsHTMLTableModel(this, (Account) cbxFrom.getSelectedItem());
 
-        table.setTableHeader(null);
-        table.setEditingColumn(0);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(100, 100));
-        scrollPane.setWheelScrollingEnabled(true);
+        cbxFrom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                messagesHistoryTable.setMyAccount((Account) cbxFrom.getSelectedItem());
+            }
+        });
+
+        messagesHistoryTable.setTableHeader(null);
+        messagesHistoryTable.setEditingColumn(0);
+        messagesHistoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane historyScrollPane = new JScrollPane(messagesHistoryTable);
+        historyScrollPane.setPreferredSize(new Dimension(100, 100));
+        historyScrollPane.setWheelScrollingEnabled(true);
 
         // BOTTOM GBC
         GridBagConstraints messagesGBC = new GridBagConstraints();
@@ -454,13 +420,13 @@ public class MailSendPanel extends JPanel {
         messagesGBC.weighty = 4;
         messagesGBC.gridwidth = 5;
 
-        // add(scrollPane, messagesGBC);
+        add(historyScrollPane, messagesGBC);
 
         // BUTTON DECRYPTALL
         decryptButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ((SendTableModel) table).CryptoOpenBoxAll();
+                ((MailsHTMLTableModel) messagesHistoryTable).CryptoOpenBoxAll();
             }
         });
 
@@ -480,6 +446,46 @@ public class MailSendPanel extends JPanel {
 
             }
         }, 0, 500, TimeUnit.MILLISECONDS);
+
+        // if person show selectbox with all adresses for person
+        if (person != null) {
+
+            AccountsComboBoxModel accounts_To_Model = new AccountsComboBoxModel(person.getKey());
+            this.cbx_To = new JComboBox(accounts_To_Model);
+            if (accounts_To_Model.getSize() != 0) {
+                this.add(this.cbx_To, txtToGBC);
+                txtTo.setText(cbx_To.getSelectedItem().toString());
+                Account account1 = new Account(txtTo.getText());
+                txtRecDetails.setText(account1.toString());
+                toLabel.setText(Lang.getInstance().translate("Select Account To") + ": ");
+                cbx_To.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String str = (String) cbx_To.getSelectedItem();
+                        if (str != null) {
+                            txtTo.setText(cbx_To.getSelectedItem().toString());
+                            refreshReceiverDetails();
+                        }
+
+                    }
+                });
+            } else {
+
+                this.txtTo.setText("has no Accounts");
+                sendButton.setEnabled(false);
+
+            }
+        } else {
+
+            if (accountTo != null) {
+                if (accountTo instanceof PublicKeyAccount) {
+                    txtTo.setText(((PublicKeyAccount) accountTo).getBase58());
+                } else {
+                    txtTo.setText(accountTo.getAddress());
+                }
+            }
+            this.add(txtTo, txtToGBC);
+        }
 
         /*
          * this.pack(); this.setLocationRelativeTo(null);
@@ -512,16 +518,24 @@ public class MailSendPanel extends JPanel {
 
         if (recipient.isEmpty()) {
             txtRecDetails.setText("");
+            messagesHistoryTable.setSideAccount(null);
             return;
         }
 
         if (true) {
             this.txtRecDetails.setText(Account.getDetailsForEncrypt(recipient, asset.getKey(),
                     encrypted.isSelected()));
+
+            Tuple2<Account, String> accountRes = Account.tryMakeAccount(recipient);
+            if (accountRes.b == null) {
+                messagesHistoryTable.setSideAccount(accountRes.a);
+            }
+
         } else {
 
             if (txtTo.getText().equals("has no Addresses")) {
                 txtRecDetails.setText(person.viewName() + " " + Lang.getInstance().translate("has no Accounts"));
+                messagesHistoryTable.setSideAccount(null);
                 return;
             }
 
@@ -531,6 +545,8 @@ public class MailSendPanel extends JPanel {
             // CHECK IF RECIPIENT IS VALID ADDRESS
             if (accountRes.a == null) {
                 txtRecDetails.setText(accountRes.b);
+                messagesHistoryTable.setSideAccount(null);
+
                 return;
             } else {
                 account = accountRes.a;
@@ -540,6 +556,7 @@ public class MailSendPanel extends JPanel {
                 if (account.getBalanceUSE(asset.getKey()).compareTo(BigDecimal.ZERO) == 0
                         && account.getBalanceUSE(Transaction.FEE_KEY).compareTo(BigDecimal.ZERO) == 0) {
                     txtRecDetails.setText(Lang.getInstance().translate("Warning!") + " " + txtRecDetails.getText());
+
                 }
             }
         }
@@ -612,7 +629,7 @@ public class MailSendPanel extends JPanel {
 
             // READ FEE
             parsing = 2;
-            feePow = Integer.parseInt((String)this.txtFeePow.getSelectedItem());
+            feePow = Integer.parseInt((String) this.txtFeePow.getSelectedItem());
         } catch (Exception e) {
             // CHECK WHERE PARSING ERROR HAPPENED
             switch (parsing) {
@@ -769,24 +786,6 @@ public class MailSendPanel extends JPanel {
 
             // CHECK VALIDATE MESSAGE
             if (result == transaction.VALIDATE_OK) {
-                // RESET FIELDS
-
-                if (amount != null && amount.compareTo(BigDecimal.ZERO) == 1) // IF
-                // MORE
-                // THAN
-                // ZERO
-                {
-                    this.txtAmount.setText("0");
-                }
-
-                // TODO "A" ??
-                if (false && this.txtTo.getText().startsWith(wrongFirstCharOfAddress)) {
-                    this.txtTo.setText("");
-                }
-
-                this.txtMessage.setText("");
-
-                // TODO "A" ??
                 if (true || this.txtTo.getText().startsWith(wrongFirstCharOfAddress)) {
                     JOptionPane.showMessageDialog(new JFrame(),
                             Lang.getInstance().translate("Message and/or payment has been sent!"),
@@ -802,13 +801,4 @@ public class MailSendPanel extends JPanel {
         this.sendButton.setEnabled(true);
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

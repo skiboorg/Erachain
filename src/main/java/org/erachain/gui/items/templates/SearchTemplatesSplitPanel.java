@@ -19,14 +19,16 @@ import java.net.URL;
 
 @SuppressWarnings("serial")
 public class SearchTemplatesSplitPanel extends SearchItemSplitPanel {
-    private static TemplatesItemsTableModel tableModelTemplates = new TemplatesItemsTableModel();
+
+    public static String NAME = "SearchTemplatesSplitPanel";
+    public static String TITLE = "Search Templates";
+
     private SearchTemplatesSplitPanel th;
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "SearchTemplatesSplitPanel.png";
 
     public SearchTemplatesSplitPanel() {
-        super(tableModelTemplates, "SearchTemplatesSplitPanel", "SearchTemplatesSplitPanel");
+        super(new TemplatesItemsTableModel(), NAME, TITLE);
+
         this.th = this;
-        setName(Lang.getInstance().translate("Search Templates"));
 
         JMenuItem vouch_Item = new JMenuItem(Lang.getInstance().translate("Vouch"));
 
@@ -72,13 +74,4 @@ public class SearchTemplatesSplitPanel extends SearchItemSplitPanel {
 
     }
 
-    public static  Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

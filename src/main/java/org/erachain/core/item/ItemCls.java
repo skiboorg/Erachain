@@ -15,6 +15,7 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
+import org.erachain.gui.Iconable;
 import org.erachain.settings.Settings;
 import org.erachain.utils.Pair;
 import org.json.simple.JSONObject;
@@ -29,7 +30,7 @@ import java.util.HashMap;
 //import java.math.BigDecimal;
 //import com.google.common.primitives.Longs;
 
-public abstract class ItemCls implements ExplorerJsonLine {
+public abstract class ItemCls implements Iconable, ExplorerJsonLine {
 
     protected final static long START_KEY = 1L << 14;
     public static final int ASSET_TYPE = 1;
@@ -378,6 +379,23 @@ public abstract class ItemCls implements ExplorerJsonLine {
         } else {
             return this.getDBIssueMap(db).contains(this.reference);
         }
+    }
+
+    public int getConfirmations(DCSet db) {
+
+        // CHECK IF IN UNCONFIRMED TRANSACTION
+
+        if (!isConfirmed())
+            return 0;
+
+        Long dbRef = db.getTransactionFinalMapSigns().get(this.reference);
+        if (dbRef == null)
+            return 0;
+
+        int height = Transaction.parseDBRefHeight(dbRef);
+
+        return 1 + db.getBlockMap().size() - height;
+
     }
 
     public boolean isFavorite() {

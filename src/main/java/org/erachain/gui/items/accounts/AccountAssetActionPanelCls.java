@@ -14,6 +14,7 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.datachain.DCSet;
 import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.items.assets.AssetInfo;
 import org.erachain.gui.items.assets.ComboBoxAssetsModel;
@@ -23,9 +24,6 @@ import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
 import org.erachain.utils.Converter;
 import org.erachain.utils.MenuPopupUtil;
-import org.erachain.utils.NameUtils;
-import org.erachain.utils.NameUtils.NameResult;
-import org.erachain.utils.Pair;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -37,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 
 //import org.erachain.gui.AccountRenderer;
 
-public class AccountAssetActionPanelCls extends javax.swing.JPanel {
+public class AccountAssetActionPanelCls extends IconPanel {
 
     // TODO - "A" - &
     //static String wrongFirstCharOfAddress = "A";
@@ -77,10 +75,11 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
     private AccountsComboBoxModel accountsModel;
 
-    public AccountAssetActionPanelCls(boolean backward, String panelName, AssetCls assetIn, String titleIn,
+    public AccountAssetActionPanelCls(String panelName, String title, boolean backward, AssetCls assetIn,
                                       int balancePosition,
                                       Account accountFrom, Account accountTo, String message) {
 
+        super(panelName, title);
         if (assetIn == null)
             this.asset = Controller.getInstance().getAsset(2);
         else
@@ -88,16 +87,13 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
         // необходимо входящий параметр отделить так как ниже он по событию изменения актива будет как НУЛь вызваться
         // поэтому тут только приватную переменную юзаем дальше
-        if (titleIn == null) {
+        if (title == null) {
             this.title = asset.viewAssetTypeActionTitle(backward, balancePosition);
-        } else {
-            this.title = titleIn;
         }
 
         if (panelName == null) {
-            setName(Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition)) + " [" + asset.getKey() + " ]");
-        } else {
-            setName(Lang.getInstance().translate(panelName));
+            this.panelName = Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition)) + " [" + asset.getKey() + " ]";
+            setName(this.panelName);
         }
 
         this.account = accountFrom;
@@ -204,8 +200,8 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
                         jComboBox_Account.repaint();
                     }
 
-                    String titleLocal = Lang.getInstance().translate(title);
-                    jLabel_Title.setText((titleLocal == null ? title : titleLocal).replace("%asset%", asset.viewName()));
+                    String titleLocal = Lang.getInstance().translate(AccountAssetActionPanelCls.this.title);
+                    jLabel_Title.setText((titleLocal == null ? AccountAssetActionPanelCls.this.title : titleLocal).replace("%asset%", asset.viewName()));
 
                     if (panelName == null) {
                         setName(Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition)) + " ]" + asset.getKey() + " ]");
@@ -359,18 +355,11 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
             if (PublicKeyAccount.isValidPublicKey(recipientAddress)) {
                 recipient = new PublicKeyAccount(recipientAddress);
             } else {
-                //IS IS NAME of RECIPIENT - resolve ADDRESS
-                Pair<Account, NameResult> result = NameUtils.nameToAdress(recipientAddress);
+                JOptionPane.showMessageDialog(null, "INVALID", Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
 
-                if (result.getB() == NameResult.OK) {
-                    recipient = result.getA();
-                } else {
-                    JOptionPane.showMessageDialog(null, result.getB().getShortStatusMessage(), Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
-
-                    //ENABLE
-                    this.jButton_ok.setEnabled(true);
-                    return false;
-                }
+                //ENABLE
+                this.jButton_ok.setEnabled(true);
+                return false;
             }
         }
 

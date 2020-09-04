@@ -194,6 +194,10 @@ task CopyResourse {
         from 'ERA/z_START_EXAMPLES'
         into 'build/libs/Darachain/z_START_EXAMPLES'
     }
+    copy {
+        from 'ERA/SSL'
+        into 'build/libs/Erachain/SSL'
+    }
 }
 
 task CreateZip(type: Zip) {

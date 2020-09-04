@@ -21,10 +21,7 @@ import org.erachain.datachain.OrderMapImpl;
 import org.erachain.datachain.ReferenceMapImpl;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.lang.Lang;
-import org.erachain.utils.NameUtils;
-import org.erachain.utils.NameUtils.NameResult;
 import org.erachain.utils.NumberAsString;
-import org.erachain.utils.Pair;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 import org.mapdb.Fun.Tuple3;
@@ -102,16 +99,19 @@ public class Account {
 
     public static Tuple2<Account, String> tryMakeAccount(String address) {
 
-        boolean isBase58 = false;
-        try {
-            Base58.decode(address);
-            isBase58 = true;
-        } catch (Exception e) {
+        if (address == null || address.length() < ADDRESS_LENGTH)
+            return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
+
+        if (address.startsWith("+")) {
             if (PublicKeyAccount.isValidPublicKey(address)) {
                 // MAY BE IT BASE.32 +
                 return new Tuple2<Account, String>(new PublicKeyAccount(address), null);
+            } else {
+                return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
             }
         }
+
+        boolean isBase58 = !Base58.isExtraSymbols(address);
 
         if (isBase58) {
             // ORDINARY RECIPIENT
@@ -123,14 +123,7 @@ public class Account {
                 return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
             }
         } else {
-            // IT IS NAME - resolve ADDRESS
-            Pair<Account, NameResult> result = NameUtils.nameToAdress(address);
-
-            if (result.getB() == NameResult.OK) {
-                return new Tuple2<Account, String>(result.getA(), null);
-            } else {
-                return new Tuple2<Account, String>(null, "The name is not registered");
-            }
+            return new Tuple2<Account, String>(null, "The name is not registered");
         }
 
     }
@@ -221,15 +214,7 @@ public class Account {
             if (PublicKeyAccount.isValidPublicKey(address)) {
                 account = new PublicKeyAccount(address);
             } else {
-
-                Pair<Account, NameResult> nameToAdress = NameUtils.nameToAdress(address);
-
-                if (nameToAdress.getB() == NameResult.OK) {
-                    account = nameToAdress.getA();
-                    return (statusBad ? "??? " : "") + account.toString(assetKey);
-                } else {
-                    return (statusBad ? "??? " : "") + nameToAdress.getB().getShortStatusMessage();
-                }
+                return (statusBad ? "??? " : "") + "ERROR";
             }
         }
 
@@ -919,7 +904,7 @@ public class Account {
         for (int i = 1; i < confirmations && block != null && block.getVersion() > 0; i++) {
             for (Transaction transaction : block.getTransactions()) {
 
-                transaction.setDC(db, true); // need for Involved
+                transaction.setDC(db); // need for Involved
 
                 if (transaction.isInvolved(this)) {
                     if (transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
@@ -1391,7 +1376,7 @@ public class Account {
 
     public Tuple2<String, String> getName() {
 
-        return Controller.getInstance().wallet.database.getAccountsPropertisMap().get(getAddress());
+        return Controller.getInstance().wallet.database.getFavoriteAccountsMap().get(getAddress());
 
     }
 

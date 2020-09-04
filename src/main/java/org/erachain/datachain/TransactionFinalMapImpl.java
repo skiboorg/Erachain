@@ -10,6 +10,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.transaction.ArbitraryTransaction;
+import org.erachain.core.transaction.GenesisRecord;
 import org.erachain.core.transaction.RCalculated;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.dbs.*;
@@ -176,7 +177,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             Long key;
             while (iterator.hasNext() && (limit == 0 || counter < limit)) {
 
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 item.setDC((DCSet) databaseSet, true);
 
                 txs.add(item);
@@ -217,7 +218,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 if (limit > 0 && --count < 0)
                     break;
 
-                txs.add(map.get(iterator.next()));
+                txs.add(get(iterator.next()));
             }
             return txs;
         } catch (IOException e) {
@@ -244,7 +245,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                     offset--;
                     continue;
                 }
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 item.setDC((DCSet) databaseSet, true);
 
                 txs.add(item);
@@ -276,7 +277,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                     offset--;
                     continue;
                 }
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 item.setDC((DCSet) databaseSet, true);
 
                 txs.add(item);
@@ -340,7 +341,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                     continue;
                 }
 
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 item.setDC((DCSet) databaseSet, true);
 
                 txs.add(item); // 628853-1
@@ -376,7 +377,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 }
 
                 //Tuple2<Integer, Integer> pair = Transaction.parseDBRef(key);
-                //item = this.map.get(key);
+                //item = get(key);
                 //item.setDC((DCSet) databaseSet, Transaction.FOR_NETWORK, pair.a, pair.b);
 
                 //txs.add(item);
@@ -403,7 +404,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             Long key;
             while (iterator.hasNext() && (limit == 0 || counter < limit)) {
 
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 if (onlyCreator && item.getCreator() != null && !item.getCreator().equals(addressShort)) {
                     // пропустим всех кто не создатель
                     continue;
@@ -425,8 +426,59 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
     }
 
     /**
+     * Поиск сразу по двум счетам - получателя и отправителя
+     *
+     * @param address_A_Short
+     * @param address_B_Short
+     * @param type
+     * @param onlyCreator
+     * @param fromID
+     * @param limit
+     * @param offset
+     * @return
+     */
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<Transaction> getTransactionsByAddressAndType(byte[] address_A_Short, Account address_B, Integer type,
+                                                             boolean onlyCreator, Long fromID, int limit, int offset) {
+
+        if (parent != null || Controller.getInstance().onlyProtocolIndexing) {
+            return null;
+        }
+
+        List<Transaction> transactions = new ArrayList<>();
+        try (IteratorCloseable<Long> iterator = ((TransactionFinalSuit) map).getIteratorByAddressAndType(address_A_Short, type, onlyCreator, fromID, false)) {
+            int counter = 0;
+            Transaction item;
+            Long key;
+            while (iterator.hasNext() && (limit == 0 || counter < limit)) {
+
+                item = get(iterator.next());
+                if (onlyCreator && item.getCreator() != null && !item.getCreator().equals(address_A_Short)) {
+                    // пропустим всех кто не создатель
+                    continue;
+                }
+
+                if (offset > 0) {
+                    offset--;
+                    continue;
+                }
+
+                item.setDC((DCSet) databaseSet, true);
+                if (item.isInvolved(address_B)) {
+                    transactions.add(item);
+                    counter++;
+                }
+            }
+        } catch (IOException e) {
+        }
+        return transactions;
+    }
+
+    /**
      * Если слово заканчивается на "!" - то поиск полностью слова
      * или если оно короче чем MIN_WORLD_INDEX, иначе поиск по началу
+     *
      * @param words
      * @return
      */
@@ -755,7 +807,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 int count = 0;
                 while (iterator.hasNext() && (limit <= 0 || count < limit)) {
                     key = iterator.next();
-                    item = this.map.get(key);
+                    item = get(key);
                     if (noForge && item.getType() == Transaction.CALCULATED_TRANSACTION) {
                         RCalculated tx = (RCalculated) item;
                         String mess = tx.getMessage();
@@ -805,7 +857,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 int count = 0;
                 while (iterator.hasNext() && (limit <= 0 || count < limit)) {
                     key = iterator.next();
-                    item = this.map.get(key);
+                    item = get(key);
                     if (noForge && item.getType() == Transaction.CALCULATED_TRANSACTION) {
                         RCalculated tx = (RCalculated) item;
                         String mess = tx.getMessage();
@@ -875,7 +927,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             Long key;
             while (iterator.hasNext() && (limit == -1 || limit > 0)) {
                 key = (Long) iterator.next();
-                item = this.map.get(key);
+                item = get(key);
                 if (noForge && item.getType() == Transaction.CALCULATED_TRANSACTION) {
                     RCalculated tx = (RCalculated) item;
                     String mess = tx.getMessage();
@@ -960,7 +1012,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             Long key;
 
             while (iterator.hasNext()) {
-                item = this.map.get(iterator.next());
+                item = get(iterator.next());
                 item.setDC((DCSet) databaseSet, true);
                 txs.add(item);
             }
@@ -1112,7 +1164,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             iterator = IteratorCloseableImpl.make(Iterators.filter(iterator, new Predicate<Long>() {
                 @Override
                 public boolean apply(Long key) {
-                    ArbitraryTransaction tx = (ArbitraryTransaction) map.get(key);
+                    ArbitraryTransaction tx = (ArbitraryTransaction) get(key);
                     return tx.getService() == service;
                 }
             }));
@@ -1163,7 +1215,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 int count = 0;
                 while (iterator.hasNext() && (limit <= 0 || count < limit)) {
                     key = iterator.next();
-                    item = this.map.get(key);
+                    item = get(key);
                     if (noForge && item.getType() == Transaction.CALCULATED_TRANSACTION) {
                         RCalculated tx = (RCalculated) item;
                         String mess = tx.getMessage();
@@ -1213,7 +1265,11 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
                 int count = 0;
                 while (iterator.hasNext() && (limit <= 0 || count < limit)) {
                     key = iterator.next();
-                    item = this.map.get(key);
+                    item = get(key);
+                    if (item == null) {
+                        String keyStr = Transaction.viewDBRef(key);
+                        boolean debug = true;
+                    }
                     if (noForge && item.getType() == Transaction.CALCULATED_TRANSACTION) {
                         RCalculated tx = (RCalculated) item;
                         String mess = tx.getMessage();
@@ -1308,11 +1364,16 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
         if (transaction == null)
             return null;
 
-        transaction.setDC((DCSet) databaseSet, true);
-        
+        if (transaction instanceof GenesisRecord) {
+            Tuple2<Integer, Integer> seqNo = Transaction.parseDBRef(key);
+            transaction.setDC((DCSet) databaseSet, Transaction.FOR_PACK, seqNo.a, seqNo.b);
+        } else {
+            transaction.setDC((DCSet) databaseSet);
+        }
+
         // наращивание всех данных для скелета - так же необходимо для создания ключей tags
         if (parent == null && !transaction.isWiped()) {
-            transaction.setupFromStateDB();
+            transaction.updateFromStateDB();
         }
 
         return transaction;
