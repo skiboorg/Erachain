@@ -1,21 +1,30 @@
-package org.erachain.gui.models;
+package org.erachain.gui.items.mails;
 // 30/03
 
 import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.crypto.Base58;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.core.wallet.Wallet;
+import org.erachain.database.wallet.DWSet;
+import org.erachain.database.wallet.WTransactionMap;
 import org.erachain.datachain.DCSet;
+import org.erachain.dbs.IteratorCloseable;
+import org.erachain.gui.MainFrame;
 import org.erachain.gui.PasswordPane;
+import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.library.Library;
 import org.erachain.lang.Lang;
+import org.erachain.settings.Settings;
 import org.erachain.utils.DateTimeFormat;
 import org.erachain.utils.NumberAsString;
 import org.erachain.utils.ObserverMessage;
 import org.erachain.utils.TableMenuPopupUtil;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +41,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
 
 @SuppressWarnings("serial")
-public class SendTableModel extends JTable implements Observer {
+public class MailsHTMLTableModel extends JTable implements Observer {
 
+    public static boolean markIncome = Settings.getInstance().markIncome();
+    public final static Color FORE_COLOR = Settings.getInstance().markColorObj();
+    public final static Color FORE_COLOR_SELECTED = Settings.getInstance().markColorSelectedObj();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SendTableModel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailsHTMLTableModel.class);
+
+    private final DefaultTableCellRenderer adaptee = new DefaultTableCellRenderer();
+
+    private boolean needUpdate;
 
     Comparator<MessageBuf> comparator = new Comparator<MessageBuf>() {
         public int compare(MessageBuf c1, MessageBuf c2) {
@@ -59,13 +76,21 @@ public class SendTableModel extends JTable implements Observer {
     private ArrayList<MessageBuf> messageBufs;
     private DefaultTableModel messagesModel;
 
-    public SendTableModel() {
+    DCSet dcSet = DCSet.getInstance();
+    Wallet wallet = Controller.getInstance().wallet;
+    DWSet dwSet = wallet.database;
+    WTransactionMap tableMap = dwSet.getTransactionMap();
+    private Account myAccountFilter;
+    private Account sideAccountFilter;
+
+    public MailsHTMLTableModel(MailSendPanel parent, Account myAccountFilter) {
         this.setShowGrid(false);
 
         fontHeight = this.getFontMetrics(this.getFont()).getHeight();
 
-        messageBufs = new ArrayList<MessageBuf>();
         messagesModel = new DefaultTableModel();
+        this.myAccountFilter = myAccountFilter;
+
         this.setModel(messagesModel);
         messagesModel.addColumn("");
 
@@ -73,43 +98,28 @@ public class SendTableModel extends JTable implements Observer {
         topRenderer.setVerticalAlignment(DefaultTableCellRenderer.TOP);
         this.getColumn("").setCellRenderer(topRenderer);
 
-        List<Transaction> transactions = new ArrayList<Transaction>();
-
-        for (Transaction transaction : Controller.getInstance().getUnconfirmedTransactions(1000, true)) {
-            if (transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
-                transactions.add(transaction);
-            }
-        }
-
-        for (Account account : Controller.getInstance().getWalletAccounts()) {
-            transactions.addAll(DCSet.getInstance().getTransactionFinalMap().getTransactionsByAddressAndType(account.getShortAddressBytes(), Transaction.SEND_ASSET_TRANSACTION, 0, 0));
-        }
-
-        for (Transaction messagetx : transactions) {
-            messagetx.setDC(DCSet.getInstance(), true);
-
-            boolean is = false;
-            for (MessageBuf message : messageBufs) {
-                if (Arrays.equals(messagetx.getSignature(), message.getSignature())) {
-                    is = true;
-                    break;
-                }
-            }
-            if (!is) {
-                addMessage(messageBufs.size(), (RSend) messagetx);
-            }
-        }
-
-        Collections.sort(messageBufs, comparator);
-
-        messagesModel.setRowCount(messageBufs.size());
-        for (int j = messageBufs.size() - 1; j >= 0; j--) {
-            setHeight(j);
-        }
-
-
         //MENU
         JPopupMenu menu = new JPopupMenu();
+
+        JMenuItem seeDetails = new JMenuItem(Lang.getInstance().translate("See Details"));
+        seeDetails.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JMenuItem menuItem = (JMenuItem) e.getSource();
+                JPopupMenu popupMenu = (JPopupMenu) menuItem.getParent();
+                Component invoker = popupMenu.getInvoker(); //this is the JMenu (in my code)
+                MailsHTMLTableModel invokerAsJComponent = (MailsHTMLTableModel) invoker;
+
+                int row = invokerAsJComponent.getSelectedRow();
+                row = invokerAsJComponent.convertRowIndexToModel(row);
+
+                IssueConfirmDialog dd = new IssueConfirmDialog(MainFrame.getInstance(), true, messageBufs.get(row).tx,
+                        (int) (parent.getWidth() / 1.2), (int) (parent.getHeight() / 1.2), Lang.getInstance().translate("Transaction"));
+                dd.setLocationRelativeTo(parent);
+                dd.setVisible(true);
+
+            }
+        });
+        menu.add(seeDetails);
 
         JMenuItem copyMessage = new JMenuItem(Lang.getInstance().translate("Copy Message"));
         copyMessage.addActionListener(new ActionListener() {
@@ -117,7 +127,7 @@ public class SendTableModel extends JTable implements Observer {
                 JMenuItem menuItem = (JMenuItem) e.getSource();
                 JPopupMenu popupMenu = (JPopupMenu) menuItem.getParent();
                 Component invoker = popupMenu.getInvoker(); //this is the JMenu (in my code)
-                SendTableModel invokerAsJComponent = (SendTableModel) invoker;
+                MailsHTMLTableModel invokerAsJComponent = (MailsHTMLTableModel) invoker;
 
                 int row = invokerAsJComponent.getSelectedRow();
                 row = invokerAsJComponent.convertRowIndexToModel(row);
@@ -152,7 +162,7 @@ public class SendTableModel extends JTable implements Observer {
                 JMenuItem menuItem = (JMenuItem) e.getSource();
                 JPopupMenu popupMenu = (JPopupMenu) menuItem.getParent();
                 Component invoker = popupMenu.getInvoker();
-                SendTableModel invokerAsJComponent = (SendTableModel) invoker;
+                MailsHTMLTableModel invokerAsJComponent = (MailsHTMLTableModel) invoker;
 
                 int row = invokerAsJComponent.getSelectedRow();
                 row = invokerAsJComponent.convertRowIndexToModel(row);
@@ -170,7 +180,7 @@ public class SendTableModel extends JTable implements Observer {
                 JMenuItem menuItem = (JMenuItem) e.getSource();
                 JPopupMenu popupMenu = (JPopupMenu) menuItem.getParent();
                 Component invoker = popupMenu.getInvoker();
-                SendTableModel invokerAsJComponent = (SendTableModel) invoker;
+                MailsHTMLTableModel invokerAsJComponent = (MailsHTMLTableModel) invoker;
 
                 int row = invokerAsJComponent.getSelectedRow();
                 row = invokerAsJComponent.convertRowIndexToModel(row);
@@ -189,7 +199,7 @@ public class SendTableModel extends JTable implements Observer {
                 JMenuItem menuItem = (JMenuItem) e.getSource();
                 JPopupMenu popupMenu = (JPopupMenu) menuItem.getParent();
                 Component invoker = popupMenu.getInvoker();
-                SendTableModel invokerAsJComponent = (SendTableModel) invoker;
+                MailsHTMLTableModel invokerAsJComponent = (MailsHTMLTableModel) invoker;
 
                 int row = invokerAsJComponent.getSelectedRow();
                 row = invokerAsJComponent.convertRowIndexToModel(row);
@@ -208,7 +218,7 @@ public class SendTableModel extends JTable implements Observer {
         this.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    SendTableModel tableModelparent = (SendTableModel) e.getSource();
+                    MailsHTMLTableModel tableModelparent = (MailsHTMLTableModel) e.getSource();
 
                     Point p = e.getPoint();
                     int row = tableModelparent.rowAtPoint(p);
@@ -241,8 +251,15 @@ public class SendTableModel extends JTable implements Observer {
             }
         });
 
-        Controller.getInstance().addWalletObserver(this);
+        resetItems();
+
+        //LISTEN ON STATUS
         Controller.getInstance().addObserver(this);
+        Controller.getInstance().addWalletObserver(this);
+        tableMap.addObserver(this);
+        Controller.getInstance().guiTimer.addObserver(this); // обработка repaintGUI
+        dcSet.getBlockMap().addObserver(this); // for new blocks
+
     }
 
 
@@ -282,7 +299,10 @@ public class SendTableModel extends JTable implements Observer {
 
     @Override
     public Object getValueAt(int row, int column) {
-        return messageBufs.get(row).getDecrMessageHtml(this.getWidth(), (this.getSelectedRow() == row), true);
+        if (row < messageBufs.size()) {
+            return messageBufs.get(row).getDecrMessageHtml(this.getWidth(), (this.getSelectedRow() == row), true);
+        }
+        return null;
     }
 
     @Override
@@ -290,7 +310,7 @@ public class SendTableModel extends JTable implements Observer {
         try {
             this.syncUpdate(o, arg);
         } catch (Exception e) {
-            //GUI ERROR
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -304,20 +324,16 @@ public class SendTableModel extends JTable implements Observer {
             if (status == Wallet.STATUS_LOCKED) {
                 cryptoCloseAll();
             }
-        }
+        } else if (message.getType() == ObserverMessage.WALLET_SYNC_STATUS) {
+            needUpdate = true;
 
-        if (message.getType() == ObserverMessage.NETWORK_STATUS || (int) message.getValue() == Controller.STATUS_OK) {
-            this.repaint();
-        }
+        } else if (message.getType() == ObserverMessage.CHAIN_ADD_BLOCK_TYPE && Controller.getInstance().isStatusOK()) {
+            repaintConfirms();
 
-        if (message.getType() == ObserverMessage.WALLET_LIST_BLOCK_TYPE) {
-            if (Controller.getInstance().getStatus() == Controller.STATUS_OK) {
+        } else if (message.getType() == ObserverMessage.NETWORK_STATUS && (int) message.getValue() == Controller.STATUS_OK) {
+            needUpdate = true;
 
-                this.repaint();
-            }
-        }
-
-        if (message.getType() == ObserverMessage.WALLET_ADD_TRANSACTION_TYPE) {
+        } else if (message.getType() == ObserverMessage.WALLET_ADD_TRANSACTION_TYPE) {
             boolean is;
             if (((Transaction) message.getValue()).getType() == Transaction.SEND_ASSET_TRANSACTION) {
                 is = false;
@@ -329,8 +345,8 @@ public class SendTableModel extends JTable implements Observer {
                         }
                     }
                 if (!is) {
-                    
-                    Transaction messagetx = (Transaction)message.getValue();
+
+                    Transaction messagetx = (Transaction) message.getValue();
                     messagetx.setDC(DCSet.getInstance(), false);
 
                     addMessage(0, (RSend) messagetx);
@@ -348,13 +364,21 @@ public class SendTableModel extends JTable implements Observer {
                     this.repaint();
                 }
             }
+        } else if (message.getType() == ObserverMessage.GUI_REPAINT && needUpdate) {
+            needUpdate = false;
+            resetItems();
         }
     }
 
+    private void repaintConfirms() {
+        repaint();
+    }
+
     private void addMessage(int pos, RSend transaction) {
-        if (!transaction.hasAmount()) {
+        if (true || !transaction.hasAmount()) {
             messageBufs.add(pos, new MessageBuf(
                     // TODO use viewData instead - use transaction instead buffer
+                    transaction.getTitle(),
                     transaction.getData(),
                     transaction.isEncrypted(),
                     transaction.getCreator(), //.asPerson(),
@@ -362,11 +386,12 @@ public class SendTableModel extends JTable implements Observer {
                     transaction.getTimestamp(),
                     transaction.getAmount(),
                     transaction.getKey(),
+                    transaction.isBackward(),
                     transaction.getFee(),
                     transaction.getSignature(),
                     transaction.getCreator().getPublicKey(),
-                    transaction.isText()
-            ));
+                    transaction.isText(),
+                    transaction));
         }
     }
 
@@ -438,9 +463,12 @@ public class SendTableModel extends JTable implements Observer {
     }
 
     private void setHeight(int row) {
-        int textHeight = (3 + lineCount(messageBufs.get(row).getDecrMessage())) * fontHeight;
-        if (textHeight < 24 + 3 * fontHeight) {
-            textHeight = 24 + 3 * fontHeight;
+        int lines = lineCount(messageBufs.get(row).getDecrMessage());
+        if (lines > 5)
+            lines = 5;
+        int textHeight = (4 + lines) * fontHeight;
+        if (textHeight < fontHeight + 4 * fontHeight) {
+            textHeight = 24 + 4 * fontHeight;
         }
         this.setRowHeight(row, textHeight);
     }
@@ -459,6 +487,7 @@ public class SendTableModel extends JTable implements Observer {
     }
 
     public class MessageBuf {
+        private String title;
         private byte[] rawMessage;
         private String decryptedMessage;
         private boolean encrypted;
@@ -471,10 +500,19 @@ public class SendTableModel extends JTable implements Observer {
         private long timestamp;
         private BigDecimal amount;
         private long assetKey;
+        private boolean backward;
         private BigDecimal fee;
         private byte[] signature;
+        public final Transaction tx;
+        private String img_Local_URL;
+        private Image cachedImage;
+        ImageIcon image = null;
+        private int max_Widht;
+        private int max_Height;
 
-        public MessageBuf(byte[] rawMessage, boolean encrypted, PublicKeyAccount sender, Account recipient, long timestamp, BigDecimal amount, long assetKey, BigDecimal fee, byte[] signature, byte[] senderPublicKey, boolean isText) {
+
+        public MessageBuf(String title, byte[] rawMessage, boolean encrypted, PublicKeyAccount sender, Account recipient, long timestamp, BigDecimal amount, long assetKey, boolean backward, BigDecimal fee, byte[] signature, byte[] senderPublicKey, boolean isText, Transaction transaction) {
+            this.title = title;
             this.rawMessage = rawMessage;
             this.encrypted = encrypted;
             this.decryptedMessage = "";
@@ -484,11 +522,13 @@ public class SendTableModel extends JTable implements Observer {
             this.timestamp = timestamp;
             this.amount = amount;
             this.assetKey = assetKey;
+            this.backward = backward;
             this.fee = fee;
             this.senderPublicKey = senderPublicKey;
             this.recipientPublicKey = null;
             this.signature = signature;
             this.isText = isText;
+            tx = transaction;
         }
 
         public byte[] getMessage() {
@@ -593,12 +633,28 @@ public class SendTableModel extends JTable implements Observer {
         }
 
         public String getDecrMessageHtml(int width, boolean selected, boolean images) {
-            Account account = this.sender;
+
+            Account sideAccount;
             String imginout = "";
-            if (account != null) {
-                imginout = "<img src='file:images/messages/receive.png'>";
+            String sidePreff;
+            String colorTextHeader;
+            if (myAccountFilter != null) {
+                if (this.sender != null && this.sender.equals(myAccountFilter)) {
+                    imginout = "<img src='file:images/messages/send.png'>";
+                    sideAccount = recipient;
+                    sidePreff = "To";
+                    colorTextHeader = markIncome ? Settings.colorToHex(Settings.getInstance().markColorObj()) : "";
+                } else {
+                    imginout = "<img src='file:images/messages/receive.png'>";
+                    sideAccount = sender;
+                    sidePreff = "From";
+                    colorTextHeader = !markIncome ? Settings.colorToHex(Settings.getInstance().markColorObj()) : "";
+                }
             } else {
-                imginout = "<img src='file:images/messages/send.png'>";
+                imginout = "";
+                sidePreff = "To";
+                sideAccount = recipient;
+                colorTextHeader = "";
             }
 
             String imgLock = "";
@@ -621,15 +677,17 @@ public class SendTableModel extends JTable implements Observer {
                 strconfirmations = "<font color=red>" + strconfirmations + "</font>";
             }
 
-            String colorHeader = "F0F0F0";
-            String colorTextHeader = "000000";
+            //String colorHeader = "F0F0F0";
+            //String colorTextHeader = "000000";
             String colorTextMessage = "000000";
-            String colorTextBackground = "FFFFFF";
+            //String colorTextBackground = "FFFFFF";
 
 
             if (selected) {
-                colorHeader = "C4DAEF";
-                colorTextBackground = "D1E8FF";
+                //colorHeader = "C4DAEF";
+                //colorHeader = Settings.getInstance().markColorSelectedObj().toString();
+                //colorTextBackground = "D1E8FF";
+                //colorTextBackground = Settings.getInstance().markColorSelectedObj().toString();
             }
 
             if (this.encrypted) {
@@ -661,38 +719,51 @@ public class SendTableModel extends JTable implements Observer {
                 int amo_sign = this.amount.compareTo(BigDecimal.ZERO);
                 long key = this.getAssetKey();
 
-                String send_type;
-                if (key < 0) {
-                    send_type = Lang.getInstance().translate("DEBT");
-                } else {
-                    if (amo_sign < 0) {
-                        send_type = Lang.getInstance().translate("HOLD");
-                    } else {
-                        send_type = Lang.getInstance().translate("PAY");
-                    }
-                }
-                amountStr = "<font" + fontSize + ">" + send_type + " "
-                        //+ Lang.getInstance().translate("Amount") + ": "
-                        + NumberAsString.formatAsString(this.amount) + "</font>"
-                        + " " + Controller.getInstance().getAsset(this.getAbsAssetKey()).getShort(DCSet.getInstance());
-            }
+                AssetCls asset = Controller.getInstance().getAsset(this.getAbsAssetKey());
+                byte[] iconBytes = asset.getIcon();
+                if (false && iconBytes != null && iconBytes.length > 1) {
+                    //if (asset.getKey() == 1l) image = new ImageIcon("images/icons/icon32.png");
+                    image = new ImageIcon(iconBytes);
+                    cachedImage = image.getImage().getScaledInstance(fontHeight, fontHeight, 1);
+                    img_Local_URL = "http:\\img_" + assetKey;
+                    // TODO нужно еще КЭШ картинок сделать как тут org.erachain.gui.items.assets.AssetInfo.HTML_Add_Local_Images
 
+                }
+
+                String actionName = TransactionAmount.viewActionType(assetKey, amount, backward);
+                amountStr = "<b><font size='3'>" + actionName + " "
+                        //+ Lang.getInstance().translate("Amount") + ": "
+                        + NumberAsString.formatAsString(this.amount) + "</font> "
+                        // TODO ошибка открытия
+                        + (cachedImage == null ? "" : "<img src='" + img_Local_URL + "'>")
+                        + " " + asset.toString()
+                        + "</b>";
+            }
 
             return "<html>"
                     + "<body width='" + width + "'>"
-                    + "<table border='0' cellpadding='3' cellspacing='0'><tr><td bgcolor='" + colorHeader + "' width='" + (width / 2 - 1) + "'>"
-                    + "<font size='2' color='" + colorTextHeader + "'>" + Lang.getInstance().translate("From") + ":" + this.sender
-                    + "<br>" + Lang.getInstance().translate("To") + ": "
-                    + this.recipient + "</font></td>"
-                    + "<td bgcolor='" + colorHeader + "' align='right' width='" + (width / 2 - 1) + "'>"
-                    + "<font size='2' color='" + colorTextHeader + "'>" + strconfirmations + " . "
+                    + "<table border='0' cellpadding='3' cellspacing='0'><tr><td" // bgcolor='" + colorHeader
+                    + " width='" + (width / 2 - 1) + "'>"
+                    + "<font size='2.5'" // color='" + colorTextHeader
+                    + ">"
+                    + imginout + " " + Lang.getInstance().translate(sidePreff) + ": " + sideAccount.viewPerson()
+                    //+ imginout + " " + Lang.getInstance().translate("From") + ": " + sender.viewPerson()
+                    //+ "<br>" + Lang.getInstance().translate("To") + ": " + recipient.viewPerson()
+                    + "</font><br>"
+                    + "<font size=1.5em color='" + colorTextHeader + "'><b>" + title
+                    + "</b></font></td>"
+                    + "<td" // bgcolor='" + colorHeader
+                    + " align='right' width='" + (width / 2 - 1) + "'>"
+                    + "<font size='2.5'" // color='" + colorTextHeader
+                    + ">" + strconfirmations + " . "
                     + DateTimeFormat.timestamptoString(this.timestamp)
                     + " " + Lang.getInstance().translate("Fee") + ": "
                     + NumberAsString.formatAsString(fee)
                     + "<br></font>"
                     + amountStr
                     + "</td></tr></table>"
-                    + "<table border='0' cellpadding='3' cellspacing='0'><tr bgcolor='" + colorTextBackground + "'><td width='25'>" + imginout
+                    + "<table border='0' cellpadding='3' cellspacing='0'><tr" // bgcolor='" + colorTextBackground
+                    + "><td width='25'>"
                     + "<td width='" + width + "'>"
                     + "<font size='2.5' color='" + colorTextMessage + "'>"
                     + Library.to_HTML(decrMessage)
@@ -760,5 +831,85 @@ public class SendTableModel extends JTable implements Observer {
         }
     }
 
+    /**
+     * из кошелька только берем - там же и неподтвержденные
+     */
+    private void resetItems() {
+
+        List<Transaction> transactions = new ArrayList<Transaction>();
+
+        if (myAccountFilter == null) {
+            // IN WALLET - UNCONFIRMED TOO HERE - ALL
+            try (IteratorCloseable<Fun.Tuple2<Long, Integer>> iterator =
+                         tableMap.getTypeIterator((byte) Transaction.SEND_ASSET_TRANSACTION, true)) {
+                while (iterator.hasNext()) {
+                    transactions.add(tableMap.get(iterator.next()));
+                }
+            } catch (IOException e) {
+            }
+        } else {
+            if (this.sideAccountFilter == null) {
+                // только на этот счет и любая сторона
+                try (IteratorCloseable<Fun.Tuple2<Long, Integer>> iterator =
+                             tableMap.getAddressTypeIterator(myAccountFilter, Transaction.SEND_ASSET_TRANSACTION, true)) {
+                    while (iterator.hasNext()) {
+                        transactions.add(tableMap.get(iterator.next()));
+                    }
+                } catch (IOException e) {
+                }
+            } else {
+                // BOTH ACCOUNTS
+                try (IteratorCloseable<Fun.Tuple2<Long, Integer>> iterator =
+                             tableMap.getAddressTypeIterator(myAccountFilter, Transaction.SEND_ASSET_TRANSACTION, true)) {
+                    while (iterator.hasNext()) {
+                        Transaction transaction = tableMap.get(iterator.next());
+                        if (transaction.isInvolved(sideAccountFilter))
+                            transactions.add(transaction);
+                    }
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        if (messageBufs == null)
+            messageBufs = new ArrayList<MessageBuf>();
+        else
+            messageBufs.clear();
+
+        for (Transaction messagetx : transactions) {
+            messagetx.setDC(DCSet.getInstance(), true);
+
+            boolean is = false;
+            for (MessageBuf message : messageBufs) {
+                if (Arrays.equals(messagetx.getSignature(), message.getSignature())) {
+                    is = true;
+                    break;
+                }
+            }
+            if (!is) {
+                addMessage(messageBufs.size(), (RSend) messagetx);
+            }
+        }
+
+        Collections.sort(messageBufs, comparator);
+
+        messagesModel.setRowCount(messageBufs.size());
+        for (int j = messageBufs.size() - 1; j >= 0; j--) {
+            setHeight(j);
+        }
+
+        this.repaint();
+
+    }
+
+    public synchronized void setMyAccount(Account accountFilter) {
+        this.myAccountFilter = accountFilter;
+        resetItems();
+    }
+
+    public synchronized void setSideAccount(Account accountFilter) {
+        this.sideAccountFilter = accountFilter;
+        resetItems();
+    }
 }
 

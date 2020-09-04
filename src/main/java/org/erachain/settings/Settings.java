@@ -187,7 +187,7 @@ public class Settings {
     /**
      * Если задан то включает и конечную папку длля файлов
      */
-    private String dataChainPath = "";
+    public static String dataChainPath = "";
     private String walletKeysPath = "";
     public static File SECURE_WALLET_FILE = new File(DEFAULT_WALLET_KEYS_DIR, "wallet.s.dat");
 
@@ -416,8 +416,10 @@ public class Settings {
     /// Так как в папке все может быть удалено - делаем встроенную папку, иначе по несотарожности все может быть удалено ((
     public String getDataChainPath() {
 
-        if (settingsJSON.containsKey("dataChainPath")) {
-            this.dataChainPath = settingsJSON.get("dataChainPath").toString();
+        if (dataChainPath == null || dataChainPath.isEmpty()) {
+            if (settingsJSON.containsKey("dataChainPath")) {
+                this.dataChainPath = settingsJSON.get("dataChainPath").toString();
+            }
         }
 
         if (this.dataChainPath.isEmpty()) return this.userPath + DEFAULT_DATA_CHAIN_DIR;
@@ -1156,6 +1158,10 @@ public class Settings {
             String[] rgb = DEFAULT_FONT_COLOR.split(",");
             return new Color(new Integer(rgb[0].trim()), new Integer(rgb[1].trim()), new Integer(rgb[2].trim()));
         }
+    }
+
+    public static String colorToHex(Color color) {
+        return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
 
     public String markColorSelected() {
