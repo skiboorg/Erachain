@@ -461,9 +461,10 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
-            File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
+            String protocolName = "chainPROTOCOL.json";
+            File file = new File(protocolName);
             if (file.exists()) {
-                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
+                LOGGER.info(protocolName + " USED");
                 // START SIDE CHAIN
                 String jsonString = "";
                 try {
