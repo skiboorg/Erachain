@@ -45,7 +45,7 @@ In Terminal type:
 
 ## Локальная сеть
 Если после включения в настройках поиска узлов в локальной сети и перезапуска ноды локальные узлы не находятся,
- то нужно их прописать явно в файл peers.json (или peer-test.json или peers-demo.json или peers-side.json)
+ то нужно их прописать явно в файл peers.json (или peer-test.json или peers-demo.json или clonePEERS.json)
 
 ## Test Network (TestNet)
 see readme in /z_START_EXAMPLES
@@ -53,7 +53,7 @@ see readme in /z_START_EXAMPLES
 ## Demo Network (DemoNet)
 see readme in /z_START_EXAMPLES
 
-## Sidechains (для тестеров)
+## Clonechains (для тестеров)
 see readme in /z_GENESIS_EXAMPLES
 
 ## Other

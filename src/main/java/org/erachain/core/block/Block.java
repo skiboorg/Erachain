@@ -1736,7 +1736,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     }
 
                     //CHECK TIMESTAMP AND DEADLINE
-                    if ((BlockChain.TEST_MODE || BlockChain.SIDE_MODE || heightBlock > 278989) &&
+                    if ((BlockChain.TEST_MODE || BlockChain.CLONE_MODE || heightBlock > 278989) &&
                             transaction.getTimestamp() > timestampEnd + BlockChain.GENERATING_MIN_BLOCK_TIME_MS(heightBlock)
                     ) {
                         LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
@@ -2054,7 +2054,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
             BigDecimal forgerEarn;
-            if (BlockChain.SIDE_MODE) {
+            if (BlockChain.CLONE_MODE) {
                 long blockFeeRoyaltyLong = this.blockHead.totalFee / 20; // 5%
                 BlockChain.ROYALTY_ACCOUNT.changeBalance(dcSet, asOrphan, false, Transaction.FEE_KEY,
                         new BigDecimal(blockFeeRoyaltyLong).movePointLeft(BlockChain.FEE_SCALE), false, false);
@@ -2077,7 +2077,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     this.txCalculated = new ArrayList<RCalculated>();
 
                 this.txCalculated.add(new RCalculated(this.creator, Transaction.FEE_KEY,
-                        forgerEarn, "forging", Transaction.makeDBRef(this.heightBlock, 0), 0l));
+                        forgerEarn, "forging", Transaction.makeDBRef(this.heightBlock, 0), 0L));
             }
         }
 

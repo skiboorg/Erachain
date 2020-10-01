@@ -63,7 +63,7 @@ public class LicenseDataJFrame extends JDialog {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Dimension screens = kit.getScreenSize();
         initComponents();
-        setTitle(Lang.getInstance().translate("Data License of Sidechain"));
+        setTitle(Lang.getInstance().translate("Data License of Clonechain"));
         List<Image> icons = new ArrayList<Image>();
         icons.add(Toolkit.getDefaultToolkit().getImage("images/icons/icon16.png"));
         icons.add(Toolkit.getDefaultToolkit().getImage("images/icons/icon32.png"));
@@ -149,7 +149,7 @@ public class LicenseDataJFrame extends JDialog {
         gridBagConstraints.insets = new Insets(0, 8, 0, 8);
         //    mainPanel.add(scrollPaneDescription, gridBagConstraints);
 
-        MPDFView pp = new MPDFView(Settings.sideLicense);
+        MPDFView pp = new MPDFView(Settings.cloneLicense);
 
         mainPanel.add(pp, gridBagConstraints);
         pp.show();
