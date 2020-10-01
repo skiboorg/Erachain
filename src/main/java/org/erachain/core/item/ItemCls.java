@@ -15,17 +15,21 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
+import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.Iconable;
 import org.erachain.settings.Settings;
 import org.erachain.utils.Pair;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple6;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 //import java.math.BigDecimal;
 //import com.google.common.primitives.Longs;
@@ -225,7 +229,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
             if (this.getDBIssueMap(db).contains(this.reference)) {
                 this.key = this.getDBIssueMap(db).get(this.reference);
             } else if (BlockChain.CHECK_BUGS > 0
-                    && !BlockChain.SIDE_MODE && !BlockChain.TEST_MODE
+                    && !BlockChain.CLONE_MODE && !BlockChain.TEST_MODE
                     && Base58.encode(this.reference).equals("2Mm3MY2F19CgqebkpZycyT68WtovJbgBb9p5SJDhPDGFpLQq5QjAXsbUZcRFDpr8D4KT65qMV7qpYg4GStmRp4za")
 
             ) {
@@ -574,21 +578,44 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         return getShort(DCSet.getInstance());
     }
 
+    public JSONObject toJsonLite(boolean withIcon, boolean showPerson) {
+
+        JSONObject itemJSON = new JSONObject();
+
+        // ADD DATA
+        itemJSON.put("key", this.getKey());
+        itemJSON.put("name", this.name);
+
+        if (withIcon)
+            itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+
+        itemJSON.put("owner", this.owner.getAddress());
+        if (showPerson) {
+            Fun.Tuple2<Integer, PersonCls> person = this.owner.getPerson();
+            if (person != null) {
+                itemJSON.put("ownerPersonKey", person.b.getKey());
+                itemJSON.put("ownerPersonName", person.b.getName());
+            }
+        }
+
+
+        return itemJSON;
+    }
+
     @SuppressWarnings("unchecked")
     public JSONObject toJson() {
 
-        JSONObject itemJSON = new JSONObject();
+        JSONObject itemJSON = toJsonLite(false, false);
 
         // ADD DATA
         itemJSON.put("item_type", this.getItemTypeName());
         itemJSON.put("item_type_sub", this.getItemSubType());
         itemJSON.put("type0", Byte.toUnsignedInt(this.typeBytes[0]));
         itemJSON.put("type1", Byte.toUnsignedInt(this.typeBytes[1]));
-        itemJSON.put("key", this.getKey());
-        itemJSON.put("name", this.name);
+        //itemJSON.put("key", this.getKey());
+        //itemJSON.put("name", this.name);
         itemJSON.put("description", this.description);
         itemJSON.put("creator", this.owner.getAddress()); // @Deprecated
-        itemJSON.put("owner", this.owner.getAddress());
         itemJSON.put("owner_publick_key", this.owner.getBase58());
         itemJSON.put("owner_publickey", this.owner.getBase58());
         itemJSON.put("isConfirmed", this.isConfirmed());
@@ -608,8 +635,8 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         JSONObject itemJSON = new JSONObject();
 
         // ADD DATA
-        itemJSON.put("icon", Base58.encode(this.getIcon()));
-        itemJSON.put("image", Base58.encode(this.getImage()));
+        itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+        itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
 
         return itemJSON;
     }
@@ -647,6 +674,40 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
             json.put("icon", Base64.encodeBase64String(getIcon()));
 
         return json;
+    }
+
+    public static void makeJsonLitePage(DCSet dcSet, int itemType, long start, int pageSize,
+                                        Map output, boolean showPerson, boolean descending) {
+
+        ItemMap map = dcSet.getItem_Map(itemType);
+        ItemCls element;
+        long size = map.size();
+
+        if (start < 1 || start > size && size > 0) {
+            start = size;
+        }
+        output.put("start", start);
+        output.put("pageSize", pageSize);
+        output.put("listSize", size);
+
+        JSONArray array = new JSONArray();
+
+        long key = 0;
+        try (IteratorCloseable<Long> iterator = map.getIteratorFrom(start, descending)) {
+            while (iterator.hasNext() && pageSize-- > 0) {
+                key = iterator.next();
+                element = map.get(key);
+                if (element != null) {
+                    array.add(element.toJsonLite(true, showPerson));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        output.put("pageItems", array);
+        output.put("lastKey", key);
+
     }
 
     public HashMap getNovaItems() {

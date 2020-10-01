@@ -107,16 +107,14 @@ public class Start {
 
         }
 
-        ///////////////////  SIDECHAINS ///////////
-        file = null; ///new File("sideGENESIS.json");
-        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0
-                /// && file.exists()
-                ) {
+        ///////////////////  CLONECHAINS ///////////
+        file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json");
+        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0 && file.exists()) {
             // START SIDE CHAIN
+            if (false) {
 
-                if (false) {
-
-                    LOGGER.info("sideGENESIS.json USED");
+                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json USED");
+                    List<String> lines = Files.readLines(file, Charsets.UTF_8);
 
                     List<String> lines;
                     String jsonString = "";
@@ -162,7 +160,7 @@ public class Start {
 
                 }
 
-                Settings.NET_MODE = Settings.NET_MODE_SIDE;
+                Settings.NET_MODE = Settings.NET_MODE_CLONE;
 
         }
 
