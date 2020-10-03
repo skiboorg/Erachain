@@ -196,7 +196,7 @@ task CopyResourse {
     }
     copy {
         from 'ERA/SSL'
-        into 'build/libs/Erachain/SSL'
+        into 'build/libs/Darachain/SSL'
     }
 }
 
