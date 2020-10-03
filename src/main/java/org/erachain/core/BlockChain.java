@@ -268,8 +268,6 @@ public class BlockChain {
 
     public HashSet<String> trustedPeers = new HashSet<>();
 
-    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
-
     public static final HashSet<Integer> validBlocks = new HashSet<>();
 
     /**
@@ -376,6 +374,7 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
+    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
     public static final int ACTION_ROYALTY_START = 1;
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
@@ -383,6 +382,16 @@ public class BlockChain {
     public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
     public static final long ACTION_ROYALTY_ASSET = AssetCls.FEE_KEY;
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
+
+    /**
+     * какие проценты при переводе каких активов - Ключ : процент.
+     * Это Доход форжера за минусом Сгорания
+     */
+    public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE = new HashMap<>();
+    /**
+     * какие проценты сжигаем при переводе активов - Ключ : процент
+     */
+    public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем
@@ -593,6 +602,11 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
+
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
