@@ -120,6 +120,16 @@ public class AccountsTransactionsTableModel extends WalletTableModel<AccountsTra
     }
 
     @Override
+    protected void repaintConfirms() {
+        if (list != null) {
+            for (int i = 0; i < list.size(); i++) {
+                setValueAt(i, COLUMN_CONFIRMATIONS, list.get(i).transaction.getConfirmations(dcSet));
+            }
+            fireTableDataChanged();
+        }
+    }
+
+    @Override
     public void getInterval() {
 
         try {

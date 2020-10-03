@@ -128,6 +128,73 @@ public class Account {
 
     }
 
+    public static String balancePositionName(int position) {
+        switch (position) {
+            case TransactionAmount.ACTION_SEND:
+                return "I Own";
+            case TransactionAmount.ACTION_DEBT:
+                return "I Debt";
+            case TransactionAmount.ACTION_HOLD:
+                return "I Hold";
+            case TransactionAmount.ACTION_SPEND:
+                return "I Spend";
+            case TransactionAmount.ACTION_PLEDGE:
+                return "I Pledge";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceCOMPUPositionName(int position) {
+        switch (position) {
+            case TransactionAmount.ACTION_SEND:
+                return "I Own";
+            case TransactionAmount.ACTION_DEBT:
+                return "I Debt";
+            case TransactionAmount.ACTION_HOLD:
+                return "I Hold";
+            case TransactionAmount.ACTION_SPEND:
+            case TransactionAmount.ACTION_PLEDGE:
+                return "Statistics";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceSideName(int side) {
+        switch (side) {
+            case TransactionAmount.BALANCE_SIDE_DEBIT:
+                return "Total Debit";
+            case TransactionAmount.BALANCE_SIDE_LEFT:
+                return "Left # остаток";
+            case TransactionAmount.BALANCE_SIDE_CREDIT:
+                return "Total Credit";
+            case TransactionAmount.BALANCE_SIDE_FORGED:
+                return "Forged";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceCOMPUSideName(int side) {
+        switch (side) {
+            case TransactionAmount.BALANCE_SIDE_DEBIT:
+                return "Bonus";
+            case TransactionAmount.BALANCE_SIDE_LEFT:
+                return "Spend # Потрачено";
+            case TransactionAmount.BALANCE_SIDE_CREDIT:
+                return "Bonus-Spend";
+            case TransactionAmount.BALANCE_SIDE_FORGED:
+                return "Forged";
+        }
+
+        return null;
+
+    }
+
     // make TYPE of transactionAmount by signs of KEY and AMOUNT
     public static int balancePosition(long key, BigDecimal amount, boolean isBackward) {
         if (key == 0l || amount == null || amount.signum() == 0)
@@ -166,7 +233,7 @@ public class Account {
         // CHECK IF RECIPIENT IS VALID ADDRESS
         if (Crypto.getInstance().isValidAddress(address)) {
             if (forEncrypt && null == Controller.getInstance().getPublicKeyByAddress(address)) {
-                return "address is unknown - cant't encrypt for it, please use public key instead";
+                return "address is unknown - can't encrypt for it, please use public key instead";
             }
             if (itemKey > 0) {
                 Account account = new Account(address);
@@ -178,8 +245,7 @@ public class Account {
             return "address is OK";
         } else {
             // Base58 string len = 33-34 for ADDRESS and 40-44 for PubKey
-            if (address.length() > PublicKeyAccount.PUBLIC_KEY_LENGTH + (PublicKeyAccount.PUBLIC_KEY_LENGTH >> 3)
-                    && PublicKeyAccount.isValidPublicKey(address)) {
+            if (PublicKeyAccount.isValidPublicKey(address)) {
                 if (itemKey > 0) {
                     Account account = new PublicKeyAccount(address);
                     if (account.isPerson()) {
@@ -1210,6 +1276,10 @@ public class Account {
         return Ints.fromByteArray(shortBytes);
     }
 
+    public long hashCodeLong() {
+        return Longs.fromByteArray(shortBytes);
+    }
+
     // EQUALS
     @Override
     public boolean equals(Object b) {
@@ -1374,13 +1444,16 @@ public class Account {
         return db.getAddressForging().getLast(getAddress());
     }
 
-    public Tuple2<String, String> getName() {
-
-        return Controller.getInstance().wallet.database.getFavoriteAccountsMap().get(getAddress());
+    public static Tuple3<String, String, String> getFromFavorites(String address) {
+        return Controller.getInstance().wallet.database.getFavoriteAccountsMap().get(address);
 
     }
 
-    public int getAccountNo() {
+    public Tuple3<String, String, String> getFromFavorites() {
+        return getFromFavorites(getAddress());
+    }
+
+    public Integer getAccountNo() {
         return Controller.getInstance().wallet.database.getAccountMap().getAccountNo(getAddress());
     }
 

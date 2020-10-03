@@ -2,12 +2,15 @@ package org.erachain.gui.items.accounts;
 
 import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
+import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.database.wallet.FavoriteAccountsMap;
 import org.erachain.gui.PasswordPane;
 import org.erachain.lang.Lang;
+import org.erachain.utils.MenuPopupUtil;
 import org.erachain.utils.StrJSonFine;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun.Tuple2;
+import org.mapdb.Fun.Tuple3;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +54,7 @@ public class AccountNameAdd extends javax.swing.JDialog {
 
         super();
         th = this;
-        if (!Controller.getInstance().isWalletUnlocked()) {
+        if (false && !Controller.getInstance().isWalletUnlocked()) {
             //ASK FOR PASSWORD
             String password = PasswordPane.showUnlockWalletDialog(this);
             if (password.equals("")) {
@@ -104,7 +107,13 @@ public class AccountNameAdd extends javax.swing.JDialog {
                         JOptionPane.showMessageDialog(null, Lang.getInstance().translate(result.b),
                                 Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
                     } else {
-                        favoriteAccountsMap.put(address, new Tuple2(accountName, StrJSonFine.convert(json)));
+                        Account newAccount = result.a;
+                        if (newAccount instanceof PublicKeyAccount) {
+                            favoriteAccountsMap.put(newAccount.getAddress(), new Tuple3(((PublicKeyAccount) newAccount).getBase58(),
+                                    accountName, StrJSonFine.convert(json)));
+                        } else {
+                            favoriteAccountsMap.put(newAccount.getAddress(), new Tuple3(null, accountName, StrJSonFine.convert(json)));
+                        }
                         setVisible(false);
                     }
                 } catch (Exception e) {
@@ -113,6 +122,11 @@ public class AccountNameAdd extends javax.swing.JDialog {
             }
 
         });
+
+        // popup menu
+        MenuPopupUtil.installContextMenu(jTextFieldAccount);
+        MenuPopupUtil.installContextMenu(jTextFieldName);
+        MenuPopupUtil.installContextMenu(jTextAreaDescription);
 
         this.setLocationRelativeTo(null);
         setModal(true);

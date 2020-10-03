@@ -117,6 +117,8 @@ public class DCSet extends DBASet implements Closeable {
     private BlockChain bchain;
 
     private AddressForging addressForging;
+    private TimeRoyaltyMap timeRoyaltyMap;
+
     private CreditAddressesMap credit_AddressesMap;
     private ItemAssetBalanceMap assetBalanceMap;
     private AddressStatementRefs addressStatement_Refs;
@@ -131,7 +133,9 @@ public class DCSet extends DBASet implements Closeable {
     private AddressPersonMapImpl addressPersonMap;
     private PersonAddressMap personAddressMap;
     private KKKMapPersonStatusUnion kK_KPersonStatusUnionMapPersonStatusUnionTable;
+
     private VouchRecordMap vouchRecordMap;
+    private ExLinksMap exLinksMap;
     private HashesMap hashesMap;
     private HashesSignsMap hashesSignsMap;
 
@@ -242,7 +246,10 @@ public class DCSet extends DBASet implements Closeable {
 
             this.blockSignsMap = new BlockSignsMap(this, database);
             this.blocksHeadsMap = new BlocksHeadsMap(this, database);
+
             this.addressForging = new AddressForging(this, database);
+            this.timeRoyaltyMap = new TimeRoyaltyMap(this, database);
+
             this.credit_AddressesMap = new CreditAddressesMap(this, database);
             this.addressStatement_Refs = new AddressStatementRefs(this, database);
 
@@ -259,6 +266,7 @@ public class DCSet extends DBASet implements Closeable {
             this.transactionFinalCalculatedMap = new TransactionFinalCalculatedMap(this, database);
 
             this.vouchRecordMap = new VouchRecordMap(this, database);
+            this.exLinksMap = new ExLinksMap(this, database);
             this.hashesMap = new HashesMap(this, database);
             this.hashesSignsMap = new HashesSignsMap(this, database);
             this.nameStorageMap = new NameStorageMap(this, database);
@@ -397,6 +405,8 @@ public class DCSet extends DBASet implements Closeable {
 
 
         this.addressForging = new AddressForging(parent.addressForging, this);
+        this.timeRoyaltyMap = new TimeRoyaltyMap(parent.timeRoyaltyMap, this);
+
         this.credit_AddressesMap = new CreditAddressesMap(parent.credit_AddressesMap, this);
         this.addressStatement_Refs = new AddressStatementRefs(parent.addressStatement_Refs, this);
         this.kKAssetStatusMap = new KKAssetStatusMap(parent.kKAssetStatusMap, this);
@@ -411,6 +421,7 @@ public class DCSet extends DBASet implements Closeable {
         this.kK_KPersonStatusUnionMapPersonStatusUnionTable = new KKKMapPersonStatusUnion(parent.kK_KPersonStatusUnionMapPersonStatusUnionTable, this);
         this.transactionFinalCalculatedMap = new TransactionFinalCalculatedMap(parent.transactionFinalCalculatedMap, this);
         this.vouchRecordMap = new VouchRecordMap(parent.vouchRecordMap, this);
+        this.exLinksMap = new ExLinksMap(parent.exLinksMap, this);
         this.hashesMap = new HashesMap(parent.hashesMap, this);
         this.hashesSignsMap = new HashesSignsMap(parent.hashesSignsMap, this);
 
@@ -753,6 +764,8 @@ public class DCSet extends DBASet implements Closeable {
         this.addUses();
 
         this.addressForging.clear();
+        this.timeRoyaltyMap.clear();
+
         this.credit_AddressesMap.clear();
         this.assetBalanceMap.clear();
         this.addressStatement_Refs.clear();
@@ -769,6 +782,7 @@ public class DCSet extends DBASet implements Closeable {
         this.personAddressMap.clear();
         this.kK_KPersonStatusUnionMapPersonStatusUnionTable.clear();
         this.vouchRecordMap.clear();
+        this.exLinksMap.clear();
         this.hashesMap.clear();
         this.hashesSignsMap.clear();
         this.blockMap.clear();
@@ -858,7 +872,6 @@ public class DCSet extends DBASet implements Closeable {
      *     previous making blockHeight + this ForgingH balance
      <hr>
      - not SAME with BLOCK HEADS - use point for not only forged blocks - with incoming ERA Volumes
-
      * @return
      */
     // TODO укротить до 20 байт адрес
@@ -866,13 +879,29 @@ public class DCSet extends DBASet implements Closeable {
         return this.addressForging;
     }
 
-    /** Общая сумма переданных средств в кредит на другой счет
+    /**
+     * Хранит данные о наградах за время
+     * если номер Транзакции не задан - то это последнее значение.
+     * Person.key + seqNo ->
+     * previous making : seqNoPrev + previous Royalty Balance + this Royalty Balance
+     * <hr>
+     * Если точка первая то предыдущее в ней значение Высоты = 0, то есть указывает что ниже нету,
+     * но текущей баланс уже есть для Форжинга
+     *
+     * @return
+     */
+    // TODO укротить до 20 байт адрес
+    public TimeRoyaltyMap getTimeRoyaltyMap() {
+        return this.timeRoyaltyMap;
+    }
+
+    /**
+     * Общая сумма переданных средств в кредит на другой счет
      * Используется для проверки сумм которые отдаются или забираются у заемщика<br><br>
      *
      * <b>Ключ:</b> account.address Creditor + asset key + account.address Debtor<br>
      *
      * <b>Значение:</b> сумма средств
-     *
      */
     public CreditAddressesMap getCredit_AddressesMap() {
         return this.credit_AddressesMap;
@@ -1052,9 +1081,21 @@ public class DCSet extends DBASet implements Closeable {
     }
 
     /**
+     * Ссылка на другую транзакцию<br><br>
+     * Ключ: ссылка на эту транзакцию (с ссылкой).<br>
+     * Значение: ExLink
+     *
+     * @return dcMap
+     */
+    public ExLinksMap getExLinksMap() {
+        return this.exLinksMap;
+    }
+
+
+    /**
      * Для поиска по хешу в транзакции множества хешей - саму запись
      * // found by hash -> record signature
-     *
+     * <p>
      * Ключ: хэш пользователя
      * Значение: ссылка на запись
      *
