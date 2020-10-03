@@ -33,7 +33,7 @@ ext {
 }
 
 //String versionEra = "4.11.08-${git.head().abbreviatedId}"
-String versionEra = "2.0.04 rc"
+String versionEra = "2.0.04"
 archivesBaseName = 'Darachain'
 group 'org.erachain'
 //version versionEra
@@ -187,8 +187,8 @@ task CopyResourse {
         into 'build/libs/Darachain/images'
     }
     copy {
-        from 'ERA/z_GENESIS_EXAMPLES'
-        into 'build/libs/Darachain/z_GENESIS_EXAMPLES'
+        from 'ERA/z_SIDECHAIN_EXAMPLES'
+        into 'build/libs/Erachain/z_SIDECHAIN_EXAMPLES'
     }
     copy {
         from 'ERA/z_START_EXAMPLES'

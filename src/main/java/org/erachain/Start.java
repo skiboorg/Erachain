@@ -107,62 +107,60 @@ public class Start {
 
         }
 
-        ///////////////////  SIDECHAINS ///////////
-        file = null; ///new File("sideGENESIS.json");
-        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0
-                /// && file.exists()
-                ) {
+        ///////////////////  CLONECHAINS ///////////
+        file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json");
+        if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0 && file.exists()) {
             // START SIDE CHAIN
+            if (false) {
 
-                if (false) {
+                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json USED");
 
-                    LOGGER.info("sideGENESIS.json USED");
+                List<String> lines;
+                String jsonString = "";
 
-                    List<String> lines;
-                    String jsonString = "";
-                    try {
-                        lines = Files.readLines(file, Charsets.UTF_8);
-                        for (String line : lines) {
-                            if (line.trim().startsWith("//")) {
-                                // пропускаем //
-                                continue;
-                            }
-                            jsonString += line;
+                try {
+                    lines = Files.readLines(file, Charsets.UTF_8);
+                    for (String line : lines) {
+                        if (line.trim().startsWith("//")) {
+                            // пропускаем //
+                            continue;
                         }
-                    } catch (Exception e) {
-                        LOGGER.info("Error while reading " + file.getAbsolutePath());
-                        LOGGER.error(e.getMessage(), e);
-                        System.exit(3);
+                        jsonString += line;
                     }
-
-                    Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
-                    List appArray = (List) Settings.genesisJSON.get(0);
-                    Settings.APP_NAME = appArray.get(0).toString();
-                    Settings.APP_FULL_NAME = appArray.get(1).toString();
-                    List timeArray = (List) Settings.genesisJSON.get(1);
-                    Settings.genesisStamp = new Long(timeArray.get(0).toString());
-
-                    // если там пустой список то включаем "у всех все есть"
-                    List holders = (List) Settings.genesisJSON.get(2);
-                    if (holders.isEmpty()) {
-                        Settings.ERA_COMPU_ALL_UP = true;
-                    }
-                } else {
-                    // for BRAND
-                    Settings.genesisJSON = new JSONArray();
-                    Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
-                    JSONArray appArray = new JSONArray();
-                    appArray.add(Settings.APP_NAME);
-                    appArray.add(Settings.APP_FULL_NAME);
-                    Settings.genesisJSON.add(appArray);
-
-                    Settings.genesisJSON.add(Settings.genesisStamp);
-
-                    Settings.genesisJSON.add(Settings.HOLDERS);
-
+                } catch (Exception e) {
+                    LOGGER.info("Error while reading " + file.getAbsolutePath());
+                    LOGGER.error(e.getMessage(), e);
+                    System.exit(3);
                 }
 
-                Settings.NET_MODE = Settings.NET_MODE_SIDE;
+                Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
+                List appArray = (List) Settings.genesisJSON.get(0);
+                Settings.APP_NAME = appArray.get(0).toString();
+                Settings.APP_FULL_NAME = appArray.get(1).toString();
+                List timeArray = (List) Settings.genesisJSON.get(1);
+                Settings.genesisStamp = new Long(timeArray.get(0).toString());
+
+                // если там пустой список то включаем "у всех все есть"
+                List holders = (List) Settings.genesisJSON.get(2);
+                if (holders.isEmpty()) {
+                    Settings.ERA_COMPU_ALL_UP = true;
+                }
+            } else {
+                // for BRAND
+                Settings.genesisJSON = new JSONArray();
+                Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
+                JSONArray appArray = new JSONArray();
+                appArray.add(Settings.APP_NAME);
+                appArray.add(Settings.APP_FULL_NAME);
+                Settings.genesisJSON.add(appArray);
+
+                Settings.genesisJSON.add(Settings.genesisStamp);
+
+                Settings.genesisJSON.add(Settings.HOLDERS);
+
+            }
+
+            Settings.NET_MODE = Settings.NET_MODE_CLONE;
 
         }
 
