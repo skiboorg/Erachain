@@ -17,7 +17,6 @@ import org.erachain.core.item.assets.Order;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionFactory;
-import org.erachain.database.SortableList;
 import org.erachain.datachain.*;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.utils.APIUtils;
@@ -67,12 +66,15 @@ public class API {
         Map help = new LinkedHashMap();
 
         help.put("see /apiasset", "Help for assets API");
-        help.put("see /apidocuments", "Help for documents API");
-        help.put("see /apiperson", "Help for person API");
         help.put("see /apipoll", "Help for polls API");
+        help.put("see /apiperson", "Help for persons API");
+        help.put("see /apitemplate", "Help for templates API");
+        help.put("see /apistatus", "Help for statuses API");
+
         help.put("see /apitelegrams", "Help for telegrams API");
         help.put("see /apiexchange", "Help for exchange API");
         help.put("see /apirecords", "Help for transactions API");
+        help.put("see /apidocuments", "Help for documents API");
 
         help.put("*** BALANCE SYSTEM ***", "");
         help.put("bal 1", "Balance Components - {Total_Income, Remaining_Balance]");
@@ -101,7 +103,7 @@ public class API {
         help.put("GET Record by Height and Sequence", "recordbynumber/{height-sequence}");
         help.put("GET Record RAW", "recordraw/{signature}");
         help.put("GET Record RAW by Height and Sequence", "recordrawbynumber/{block-seqNo]");
-        help.put("GET Record RAW by Height and Sequence", "recordrawbynumber/{block]/[seqNo]");
+        help.put("GET Record RAW by Height and Sequence 2", "recordrawbynumber/{block]/[seqNo]");
 
         help.put("*** ADDRESS ***", "");
         help.put("GET Address Validate", "addressvalidate/{address}");
@@ -164,8 +166,12 @@ public class API {
 
     @GET
     @Path("height")
-    public static String getHeight() {
-        return String.valueOf(Controller.getInstance().getMyHeight());
+    public static Response getHeight() {
+        return Response.status(200)
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .entity(String.valueOf(Controller.getInstance().getMyHeight()))
+                .build();
     }
 
     @GET
@@ -1053,25 +1059,29 @@ public class API {
 
         Account account = new Account(address);
         ItemAssetBalanceMap map = DCSet.getInstance().getAssetBalanceMap();
-        SortableList<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>> assetsBalances
-                = map.getBalancesSortableList(account);
+        List<Tuple2<byte[], Tuple5<
+                Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+                Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>> assetsBalances
+                = map.getBalancesList(account);
 
         JSONObject out = new JSONObject();
 
-        for (Pair<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
+        for (Tuple2<byte[], Tuple5<
+                Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+                Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
                 assetsBalance : assetsBalances) {
             JSONArray array = new JSONArray();
-            long assetKey = ItemAssetBalanceMap.getAssetKeyFromKey(assetsBalance.getA());
+            long assetKey = ItemAssetBalanceMap.getAssetKeyFromKey(assetsBalance.a);
 
             if (BlockChain.ERA_COMPU_ALL_UP) {
-                array.add(setJSONArray(account.balAaddDEVAmount(assetKey, assetsBalance.getB().a)));
+                array.add(setJSONArray(account.balAaddDEVAmount(assetKey, assetsBalance.b.a)));
             } else {
-                array.add(setJSONArray(assetsBalance.getB().a));
+                array.add(setJSONArray(assetsBalance.b.a));
             }
-            array.add(setJSONArray(assetsBalance.getB().b));
-            array.add(setJSONArray(assetsBalance.getB().c));
-            array.add(setJSONArray(assetsBalance.getB().d));
-            array.add(setJSONArray(assetsBalance.getB().e));
+            array.add(setJSONArray(assetsBalance.b.b));
+            array.add(setJSONArray(assetsBalance.b.c));
+            array.add(setJSONArray(assetsBalance.b.d));
+            array.add(setJSONArray(assetsBalance.b.e));
             out.put(assetKey, array);
         }
 
@@ -1445,9 +1455,20 @@ public class API {
 
         AssetCls asset = (AssetCls) map.get(key);
 
-        // image to byte[] hot scale (param2 =0)
-        //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-        return Response.ok(new ByteArrayInputStream(asset.getImage())).build();
+        if (asset.getImage() != null) {
+            // image to byte[] hot scale (param2 =0)
+            //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
+            ///return Response.ok(new ByteArrayInputStream(asset.getImage())).build();
+            return Response.status(200)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .entity(new ByteArrayInputStream(asset.getImage()))
+                    .build();
+        }
+        return Response.status(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .entity("")
+                .build();
+
     }
 
     @Path("asseticon/{key}")
@@ -1471,9 +1492,19 @@ public class API {
 
         AssetCls asset = (AssetCls) map.get(key);
 
-        // image to byte[] hot scale (param2 =0)
-        //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-        return Response.ok(new ByteArrayInputStream(asset.getIcon())).build();
+        if (asset.getIcon() != null) {
+            // image to byte[] hot scale (param2 =0)
+            //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
+            //return Response.ok(new ByteArrayInputStream(asset.getIcon())).build();
+            return Response.status(200)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .entity(new ByteArrayInputStream(asset.getIcon()))
+                    .build();
+        }
+        return Response.status(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .entity("")
+                .build();
     }
 
     @Path("personimage/{key}")
@@ -1500,7 +1531,11 @@ public class API {
 
         // image to byte[] hot scale (param2 =0)
         //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-        return Response.ok(new ByteArrayInputStream(person.getImage())).build();
+        //return Response.ok(new ByteArrayInputStream(person.getImage())).build();
+        return Response.status(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .entity(new ByteArrayInputStream(person.getImage()))
+                .build();
     }
 
 

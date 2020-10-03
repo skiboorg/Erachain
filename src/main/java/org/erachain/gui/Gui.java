@@ -1,14 +1,6 @@
 package org.erachain.gui;
 
 
-import java.awt.TrayIcon.MessageType;
-import java.io.File;
-
-import javax.swing.JFrame;
-import javax.swing.RowFilter;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-
 import org.erachain.controller.Controller;
 import org.erachain.gui.create.NoWalletFrame;
 import org.erachain.gui.create.SettingLangFrame;
@@ -16,6 +8,12 @@ import org.erachain.gui.library.MTable;
 import org.erachain.lang.Lang;
 import org.erachain.settings.Settings;
 import org.erachain.utils.SysTray;
+
+import javax.swing.*;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.TrayIcon.MessageType;
+import java.io.File;
 
 import static org.erachain.gui.library.Library.setGuiLookAndFeel;
 
@@ -28,12 +26,13 @@ public class Gui extends JFrame {
 
     private volatile static Gui maingui;
     private MainFrame mainframe;
-    private GuiTimer guiTimer;
+    public final WalletTimer walletTimer;
+
+    public static boolean SHOW_FEE_POWER = false;
 
     private Gui() throws Exception {
 
-
-        setGuiLookAndFeel("");
+        setGuiLookAndFeel();
 
         if (Settings.getInstance().Dump().containsKey("lang")) {
             File langFile = new File(Settings.getInstance().getLangDir(), Settings.getInstance().getLangFileName());
@@ -44,7 +43,7 @@ public class Gui extends JFrame {
             new SettingLangFrame();
         }
 
-        setGuiLookAndFeel("");
+        setGuiLookAndFeel();
 
         //CHECK IF WALLET EXISTS
         if (!Controller.getInstance().noUseWallet && !Controller.getInstance().doesWalletExists()) {
@@ -54,6 +53,8 @@ public class Gui extends JFrame {
             mainframe = MainFrame.getInstance();
             mainframe.setVisible(true);
         }
+
+        walletTimer = new WalletTimer();
 
     }
 

@@ -2,7 +2,6 @@ package org.erachain.database.wallet;
 // 30/03 ++
 
 import org.erachain.controller.Controller;
-import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.imprints.ImprintCls;
@@ -14,9 +13,11 @@ import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.database.DBASet;
 import org.erachain.settings.Settings;
+import org.json.simple.JSONObject;
 import org.mapdb.Atomic.Var;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.Fun;
 
 import java.io.File;
 
@@ -28,12 +29,9 @@ public class DWSet extends DBASet {
     private Long licenseKey;
 
     private AccountMap accountMap;
-    private AccountsPropertisMap accountsPropertisMap;
-    private TransactionMap transactionMap;
+    private FavoriteAccountsMap favoriteAccountsMap;
+    private WTransactionMap transactionMap;
     private BlocksHeadMap blocksHeadMap;
-    private NameMap nameMap;
-    private NameSaleMap nameSaleMap;
-    private PollMap pollMap_old;
     private WItemAssetMap assetMap;
     private WItemImprintMap imprintMap;
     private WItemTemplateMap TemplateMap;
@@ -65,12 +63,9 @@ public class DWSet extends DBASet {
         licenseKey = licenseKeyVar.get();
 
         this.accountMap = new AccountMap(this, this.database);
-        this.accountsPropertisMap = new AccountsPropertisMap(this, this.database);
-        this.transactionMap = new TransactionMap(this, this.database);
+        this.favoriteAccountsMap = new FavoriteAccountsMap(this, this.database);
+        this.transactionMap = new WTransactionMap(this, this.database);
         this.blocksHeadMap = new BlocksHeadMap(this, this.database);
-        this.nameMap = new NameMap(this, this.database);
-        this.nameSaleMap = new NameSaleMap(this, this.database);
-        this.pollMap_old = new PollMap(this, this.database);
         this.assetMap = new WItemAssetMap(this, this.database);
         this.imprintMap = new WItemImprintMap(this, this.database);
         this.TemplateMap = new WItemTemplateMap(this, this.database);
@@ -172,8 +167,8 @@ public class DWSet extends DBASet {
         return this.accountMap;
     }
 
-    public AccountsPropertisMap getAccountsPropertisMap() {
-        return this.accountsPropertisMap;
+    public FavoriteAccountsMap getFavoriteAccountsMap() {
+        return this.favoriteAccountsMap;
     }
 
     /**
@@ -184,27 +179,15 @@ public class DWSet extends DBASet {
      * <hr>
      * Ключ: счет + подпись<br>
      * Значение: транзакция
+     *
      * @return TransactionMap
      */
-    public TransactionMap getTransactionMap() {
+    public WTransactionMap getTransactionMap() {
         return this.transactionMap;
     }
 
     public BlocksHeadMap getBlocksHeadMap() {
         return this.blocksHeadMap;
-    }
-
-    public NameMap getNameMap() {
-        return this.nameMap;
-    }
-
-    public NameSaleMap getNameSaleMap() {
-        return this.nameSaleMap;
-    }
-
-    @Deprecated
-    public PollMap getPollMap_old() {
-        return this.pollMap_old;
     }
 
     public WItemAssetMap getAssetMap() {
@@ -253,6 +236,14 @@ public class DWSet extends DBASet {
         } else {
             return null;
         }
+    }
+
+    public void putItem(ItemCls item) {
+        getItemMap(item).put(item.getKey(), item);
+    }
+
+    public void deleteItem(ItemCls item) {
+        getItemMap(item).delete(item.getKey());
     }
 
     public WItemMap getItemMap(int type) {
@@ -334,22 +325,55 @@ public class DWSet extends DBASet {
         } else {
             return null;
         }
-        
-          
+    }
+
+    public void addItemFavorite(ItemCls item) {
+        getItemFavoritesSet(item).add(item.getKey());
+    }
+
+    public void deleteItemFavorite(ItemCls item) {
+        getItemFavoritesSet(item).delete(item.getKey());
     }
 
     //////////////// FAVORITES ///////////
+    public void addDocumentToFavorite(Transaction transaction) {
+        getDocumentFavoritesSet().add(transaction.getDBRef());
+    }
+
+    public void removeDocumentFromFavorite(Transaction transaction) {
+        getDocumentFavoritesSet().delete(transaction.getDBRef());
+    }
+
+    public boolean isDocumentFavorite(Transaction transaction) {
+        if (transaction.getDBRef() > 0) {
+            return getDocumentFavoritesSet().contains(transaction.getDBRef());
+        }
+        return false;
+    }
+
     public void addTransactionToFavorite(Transaction transaction) {
         getTransactionFavoritesSet().add(transaction.getDBRef());
     }
+
     public void removeTransactionFromFavorite(Transaction transaction) {
         getTransactionFavoritesSet().delete(transaction.getDBRef());
     }
+
     public boolean isTransactionFavorite(Transaction transaction) {
         if (transaction.getDBRef() > 0) {
             return getTransactionFavoritesSet().contains(transaction.getDBRef());
         }
         return false;
+    }
+
+    public void addAddressFavorite(String address, String pubKey, String name, String description) {
+        if (getFavoriteAccountsMap().contains(address))
+            return;
+
+        JSONObject json = new JSONObject();
+        json.put("description", description);
+
+        getFavoriteAccountsMap().put(address, new Fun.Tuple3<>(pubKey, name, json.toJSONString()));
     }
 
     public void addItemToFavorite(ItemCls item) {
@@ -367,32 +391,8 @@ public class DWSet extends DBASet {
     public TelegramsMap getTelegramsMap() {
         return this.telegramsMap;
     }
-    
-    public void delete(PublicKeyAccount account) {
-        this.uses++;
-
-        this.accountMap.delete(account);
-        this.blocksHeadMap.delete(account);
-        this.transactionMap.delete(account);
-        this.nameMap.delete(account);
-        this.nameSaleMap.delete(account);
-        this.pollMap_old.delete(account);
-        this.assetMap.delete(account);
-        this.imprintMap.delete(account);
-        this.TemplateMap.delete(account);
-        this.unionMap.delete(account);
-        this.pollMap.delete(account);
-        this.personMap.delete(account);
-        this.statusMap.delete(account);
-        this.orderMap.delete(account);
-        this.accountsPropertisMap.delete(account.getAddress());
-        this.telegramsMap.deleteFromAccount(account);
-        this.uses--;
-
-    }
 
     long commitPoint;
-
 
     public synchronized void hardFlush() {
         this.uses++;
@@ -433,7 +433,7 @@ public class DWSet extends DBASet {
         }
 
         this.uses++;
-        this.database.rollback();
+        this.database.commit();
         this.database.close();
         this.tables = null;
         this.uses--;

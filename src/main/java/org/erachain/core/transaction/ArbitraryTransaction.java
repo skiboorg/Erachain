@@ -7,7 +7,6 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Base58;
-import org.erachain.core.naming.Name;
 import org.erachain.core.payment.Payment;
 import org.erachain.core.web.blog.BlogEntry;
 import org.erachain.datachain.DCSet;
@@ -130,10 +129,8 @@ public abstract class ArbitraryTransaction extends Transaction {
 
     @Override
     public boolean isInvolved(Account account) {
-        String address = account.getAddress();
-
         for (Account involved : this.getInvolvedAccounts()) {
-            if (address.equals(involved.getAddress())) {
+            if (account.equals(involved)) {
                 return true;
             }
         }
@@ -188,7 +185,7 @@ public abstract class ArbitraryTransaction extends Transaction {
     // PROCESS/ORPHAN
     //@Override
     @Override
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
 
         try {
@@ -205,7 +202,7 @@ public abstract class ArbitraryTransaction extends Transaction {
         }
 
         // UPDATE CREATOR
-        super.process(block, asDeal);
+        super.process(block, forDeal);
 
         // PROCESS PAYMENTS
         for (Payment payment : this.getPayments()) {
@@ -220,7 +217,7 @@ public abstract class ArbitraryTransaction extends Transaction {
 
     //@Override
     @Override
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
 
         // NAME STORAGE UPDATE ORPHAN
         // if (service == 10) {
@@ -231,7 +228,7 @@ public abstract class ArbitraryTransaction extends Transaction {
         // }
 
         // UPDATE CREATOR
-        super.orphan(block, asDeal);
+        super.orphan(block, forDeal);
 
         // ORPHAN PAYMENTS
         for (Payment payment : this.getPayments()) {
@@ -272,10 +269,9 @@ public abstract class ArbitraryTransaction extends Transaction {
                             // BLOGOWNER IS DELETING POST
                         } else if (
                                 commentEntryOpt.getBlognameOpt() != null) {
-                            Name name = this.dcSet.getNameMap().get(
-                                    commentEntryOpt.getBlognameOpt());
+                            Account name = new Account(commentEntryOpt.getBlognameOpt());
                             if (name != null
-                                    && name.getOwner().getAddress()
+                                    && name.getAddress()
                                     .equals(creatorOfDeleteTX)) {
                                 deleteCommentInternal(this.dcSet, commentEntryOpt);
 
@@ -355,10 +351,9 @@ public abstract class ArbitraryTransaction extends Transaction {
                                 // BLOGOWNER IS DELETING POST
                             } else if (author != null
                                     && blogEntryOpt.getBlognameOpt() != null) {
-                                Name name = this.dcSet.getNameMap().get(
-                                        blogEntryOpt.getBlognameOpt());
+                                Account name = new Account(blogEntryOpt.getBlognameOpt());
                                 if (name != null
-                                        && name.getOwner().getAddress()
+                                        && name.getAddress()
                                         .equals(creatorOfDeleteTX)) {
                                     deleteInternal(isShare, blogEntryOpt);
                                 }

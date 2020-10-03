@@ -86,15 +86,18 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         this.signature = signature;
         this.sertifiedSignatures = sertifiedSignatures;
     }
+
     public RSertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key,
                            List<PublicKeyAccount> sertifiedPublicKeys,
                            int add_day, long timestamp, Long reference, byte[] signature, long feeLong,
-                           List<byte[]> sertifiedSignatures) {
+                           long seqNo, List<byte[]> sertifiedSignatures) {
         this(typeBytes, creator, feePow, key,
                 sertifiedPublicKeys,
                 add_day, timestamp, reference);
         this.signature = signature;
         this.sertifiedSignatures = sertifiedSignatures;
+        if (seqNo > 0)
+            this.setHeightSeq(seqNo);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
     }
 
@@ -132,12 +135,16 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     //GETTERS/SETTERS
 
-    public void setDC(DCSet dcSet) {
-        super.setDC(dcSet);
+    public void setDC(DCSet dcSet, boolean andUpdateFromState) {
+        super.setDC(dcSet, false);
 
         if (dcSet != null) {
             this.person = (PersonCls) this.dcSet.getItemPersonMap().get(this.key);
         }
+
+        if (false && andUpdateFromState && !isWiped())
+            updateFromStateDB();
+
     }
 
     @Override
@@ -154,14 +161,14 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     // releaserReference = null - not a pack
     // releaserReference = reference for releaser account - it is as pack
-    public static Transaction Parse(byte[] data, int asDeal) throws Exception {
+    public static Transaction Parse(byte[] data, int forDeal) throws Exception {
 
         int test_len;
-        if (asDeal == Transaction.FOR_MYPACK) {
+        if (forDeal == Transaction.FOR_MYPACK) {
             test_len = BASE_LENGTH_AS_MYPACK;
-        } else if (asDeal == Transaction.FOR_PACK) {
+        } else if (forDeal == Transaction.FOR_PACK) {
             test_len = BASE_LENGTH_AS_PACK;
-        } else if (asDeal == Transaction.FOR_DB_RECORD) {
+        } else if (forDeal == Transaction.FOR_DB_RECORD) {
             test_len = BASE_LENGTH_AS_DBRECORD;
         } else {
             test_len = BASE_LENGTH;
@@ -176,7 +183,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         int position = TYPE_LENGTH;
 
         long timestamp = 0;
-        if (asDeal > Transaction.FOR_MYPACK) {
+        if (forDeal > Transaction.FOR_MYPACK) {
             //READ TIMESTAMP
             byte[] timestampBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
             timestamp = Longs.fromByteArray(timestampBytes);
@@ -194,7 +201,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         position += CREATOR_LENGTH;
 
         byte feePow = 0;
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
             byte[] feePowBytes = Arrays.copyOfRange(data, position, position + 1);
             feePow = feePowBytes[0];
@@ -206,7 +213,13 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         position += SIGNATURE_LENGTH;
 
         long feeLong = 0;
-        if (asDeal == FOR_DB_RECORD) {
+        long seqNo = 0;
+        if (forDeal == FOR_DB_RECORD) {
+            //READ SEQ_NO
+            byte[] seqNoBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
+            seqNo = Longs.fromByteArray(seqNoBytes);
+            position += TIMESTAMP_LENGTH;
+
             // READ FEE
             byte[] feeBytes = Arrays.copyOfRange(data, position, position + FEE_LENGTH);
             feeLong = Longs.fromByteArray(feeBytes);
@@ -237,11 +250,11 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         int add_day = Ints.fromByteArray(Arrays.copyOfRange(data, position, position + DATE_DAY_LENGTH));
         position += DATE_DAY_LENGTH;
 
-        if (asDeal > Transaction.FOR_MYPACK) {
+        if (forDeal > Transaction.FOR_MYPACK) {
             return new RSertifyPubKeys(typeBytes, creator, feePow, key,
                     sertifiedPublicKeys,
                     add_day, timestamp, reference, signature, feeLong,
-                    sertifiedSignatures);
+                    seqNo, sertifiedSignatures);
         } else {
             return new RSertifyPubKeys(typeBytes, creator, key,
                     sertifiedPublicKeys,
@@ -341,7 +354,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         data = this.toBytes(FOR_NETWORK, false);
         if (data == null) return;
 
-        if (BlockChain.SIDE_MODE) {
+        if (BlockChain.CLONE_MODE) {
             // чтобы из других цепочек не срабатывало
             data = Bytes.concat(data, Controller.getInstance().blockChain.getGenesisBlock().getSignature());
         } else {
@@ -447,7 +460,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         byte[] data = this.toBytes(Transaction.FOR_NETWORK, false);
         if (data == null) return false;
 
-        if (BlockChain.SIDE_MODE) {
+        if (BlockChain.CLONE_MODE) {
             // чтобы из других цепочек не срабатывало
             data = Bytes.concat(data, Controller.getInstance().blockChain.getGenesisBlock().getSignature());
         } else {
@@ -473,13 +486,13 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     //
     @Override
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         if (height < BlockChain.ALL_VALID_BEFORE) {
             return VALIDATE_OK;
         }
 
-        int result = super.isValid(asDeal, flags | NOT_VALIDATE_FLAG_PUBLIC_TEXT);
+        int result = super.isValid(forDeal, flags | NOT_VALIDATE_FLAG_PUBLIC_TEXT);
 
         // сюда без проверки Персоны приходит
         if (result != VALIDATE_OK)
@@ -489,17 +502,15 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         if ((flags & NOT_VALIDATE_FLAG_PERSONAL) == 0L && !BlockChain.ANONIM_SERT_USE
                 && !this.creator.isPerson(dcSet, height, creatorPersonDuration)) {
             boolean creator_admin = false;
-            if (height < 20000) {
-                // FIRST Persons only by ADMINS
-                for (String admin : BlockChain.GENESIS_ADMINS) {
-                    if (this.creator.equals(admin)) {
-                        creator_admin = true;
-                        break;
-                    }
+            // ALL Persons by ADMINS
+            for (String admin : BlockChain.GENESIS_ADMINS) {
+                if (this.creator.equals(admin)) {
+                    creator_admin = true;
+                    break;
                 }
             }
             if (!creator_admin
-                    && this.height != 176085) // TODO: wrong transaction
+                    && !BlockChain.MAIN_MODE && this.height != 176085) // TODO: wrong transaction
                 return CREATOR_NOT_PERSONALIZED;
         }
 
@@ -575,10 +586,10 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
     //PROCESS/ORPHAN
 
     @Override
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.process(block, asDeal);
+        super.process(block, forDeal);
 
         int transactionIndex = -1;
         int blockIndex = -1;
@@ -641,7 +652,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
             pkAccount.changeCOMPUBonusBalances(dcSet, false, personBonus, Transaction.BALANCE_SIDE_DEBIT);
             if (makeCalculates) {
                 block.txCalculated.add(new RCalculated(pkAccount, FEE_KEY, personBonus,
-                        "enter bonus", this.dbRef));
+                        "enter bonus", this.dbRef, seqNo));
             }
             BigDecimal issued_FEE_BD_total = personBonus;
 
@@ -651,7 +662,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
             issuer.changeCOMPUBonusBalances(dcSet, false, issued_FEE_BD, Transaction.BALANCE_SIDE_DEBIT);
             if (makeCalculates) {
                 block.txCalculated.add(new RCalculated(issuer, FEE_KEY, issued_FEE_BD, // BONUS_FOR_PERSON_REGISTRAR_4_11,
-                        "register reward @P:" + this.key, this.dbRef));
+                        "register reward @P:" + this.key, this.dbRef, seqNo));
             }
             issued_FEE_BD_total = issued_FEE_BD_total.add(issued_FEE_BD); //BONUS_FOR_PERSON_REGISTRAR_4_11);
 
@@ -703,10 +714,10 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
     }
 
     @Override
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.orphan(block, asDeal);
+        super.orphan(block, forDeal);
 
         //UPDATE RECIPIENT
         String address;
@@ -795,17 +806,11 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     @Override
     public boolean isInvolved(Account account) {
-        if (false) {
-            return getInvolvedAccounts().contains(account);
+        if (account.equals(creator)) return true;
 
-        } else {
-            String address = account.getAddress();
-            if (address.equals(creator.getAddress())) return true;
-
-            for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
-                if (address.equals(publicAccount.getAddress()))
-                    return true;
-            }
+        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+            if (publicAccount.equals(account))
+                return true;
         }
 
         return false;

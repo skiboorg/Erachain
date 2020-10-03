@@ -7,6 +7,7 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
 import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
@@ -128,7 +129,7 @@ public class UnionConfirmDialog extends JDialog {
         }
 
         //Account authenticator =  new Account(address);
-        PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(creatorAccount.getAddress());
+        PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(creatorAccount.getAddress());
         if (creator == null) {
             JOptionPane.showMessageDialog(new JFrame(),
                     Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -394,6 +395,7 @@ public class UnionConfirmDialog extends JDialog {
         getContentPane().add(jFormattedTextField_ToDo, gridBagConstraints);
 
         jLabel_Fee.setText(Lang.getInstance().translate("Fee Power") + ":");
+        jLabel_Fee.setVisible(Gui.SHOW_FEE_POWER);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 16;
@@ -402,6 +404,7 @@ public class UnionConfirmDialog extends JDialog {
         getContentPane().add(jLabel_Fee, gridBagConstraints);
 
         jFormattedTextField_Fee.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("####,###.00"))));
+        jFormattedTextField_Fee.setVisible(Gui.SHOW_FEE_POWER);
         jFormattedTextField_Fee.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         jFormattedTextField_Fee.setMinimumSize(new java.awt.Dimension(100, 20));
         jFormattedTextField_Fee.setPreferredSize(new java.awt.Dimension(100, 20));

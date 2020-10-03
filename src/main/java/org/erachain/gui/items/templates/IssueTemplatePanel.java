@@ -7,6 +7,8 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.IssueTemplateRecord;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.items.TypeOfImage;
 import org.erachain.gui.library.AddImageLabel;
@@ -16,7 +18,6 @@ import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.IssueTemplateDetailsFrame;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,9 +26,11 @@ import static org.erachain.gui.items.utils.GUIConstants.*;
 import static org.erachain.gui.items.utils.GUIUtils.checkWalletUnlock;
 
 @SuppressWarnings("serial")
-public class IssueTemplatePanel extends JPanel {
+public class IssueTemplatePanel extends IconPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "IssueTemplatePanel.png";
+    public static String NAME = "IssueTemplatePanel";
+    public static String TITLE = "Issue Template";
+
     private JComboBox<Account> jComboBoxAccountCreator = new JComboBox<>(new AccountsComboBoxModel());
     private JButton jButtonCreate = new JButton();
     private JLabel jLabelAccountCreator = new JLabel();
@@ -43,6 +46,8 @@ public class IssueTemplatePanel extends JPanel {
     private AddImageLabel addLogoIconPanel;
 
     public IssueTemplatePanel() {
+        super(NAME, TITLE);
+
         initComponents();
         setVisible(true);
     }
@@ -72,7 +77,7 @@ public class IssueTemplatePanel extends JPanel {
         byte[] image = addImageLabel.getImgBytes();
 
         // CREATE PLATE
-        PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+        PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
         if (creator == null) {
             JOptionPane.showMessageDialog(new JFrame(),
                     Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -215,7 +220,8 @@ public class IssueTemplatePanel extends JPanel {
         gridBagConstraints.insets = new Insets(0, 15, 5, 5);
         add(jLabelContent, gridBagConstraints);
 
-        jLabelFee.setText(Lang.getInstance().translate("Fee") + ":");
+        jLabelFee.setText(Lang.getInstance().translate("Fee Power") + ":");
+        jLabelFee.setVisible(Gui.SHOW_FEE_POWER);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
@@ -268,6 +274,7 @@ public class IssueTemplatePanel extends JPanel {
         txtFeePow.setToolTipText("Level of FEE Power");
         txtFeePow.setModel(new DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
         txtFeePow.setPreferredSize(new Dimension(80, 20));
 
         gridBagConstraints = new GridBagConstraints();
@@ -292,13 +299,4 @@ public class IssueTemplatePanel extends JPanel {
         add(jButtonCreate, gridBagConstraints);
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

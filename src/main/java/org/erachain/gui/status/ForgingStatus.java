@@ -56,7 +56,7 @@ public class ForgingStatus extends JLabel implements Observer {
                     target = 1000l;
 
                 DCSet dcSet = DCSet.getInstance();
-                for (Account account : Controller.getInstance().getAccounts()) {
+                for (Account account : Controller.getInstance().getWalletAccounts()) {
                     long win_value = BlockChain.calcWinValue(dcSet, account, newHeight, account.getBalanceUSE(Transaction.RIGHTS_KEY, dcSet).intValue(), null);
                     if (Math.abs(win_value) > winBalance) {
                         winBalance = Math.abs(win_value);
@@ -140,7 +140,7 @@ public class ForgingStatus extends JLabel implements Observer {
     }
 
     private ImageIcon createIcon(Color color) {
-        return GUIUtils.createIcon(color, this.getBackground());
+        return GUIUtils.createIcon(getFont().getSize(), color, this.getBackground());
     }
 
     @Override

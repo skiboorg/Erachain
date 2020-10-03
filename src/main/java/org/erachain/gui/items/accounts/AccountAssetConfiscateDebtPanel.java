@@ -10,34 +10,30 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.transaction.Send_RecordDetailsFrame;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
-
-import java.awt.*;
 
 //import org.erachain.settings.Settings;
 
 @SuppressWarnings("serial")
 
-public class AccountAssetConfiscateDebtPanel extends AccountAssetActionPanelCls  {
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "AccountAssetConfiscateDebtPanel.png";
+public class AccountAssetConfiscateDebtPanel extends AccountAssetActionPanelCls {
 
     public AccountAssetConfiscateDebtPanel(AssetCls assetIn, Account accountFrom, Account accountTo, PersonCls person) {
-        super(true, null, assetIn, null,
+        super(null, null, true, assetIn,
                 TransactionAmount.ACTION_DEBT, accountFrom, accountTo, null);
 
-        // icon.setIcon(null);
+        iconName = "AccountAssetConfiscateDebtPanel";
 
     }
 
     @Override
     public void onSendClick() {
-  
+
         // confirm params
         if (!cheskError()) return;
 
         // CREATE TX MESSAGE
         Transaction transaction = Controller.getInstance().r_Send((byte) 2, TransactionAmount.BACKWARD_MASK,
-                (byte) 0, Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress()), feePow,
+                (byte) 0, Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress()), feePow,
                 recipient, -key, amount, head, messageBytes, isTextByte, encrypted);
 
         String Status_text = "";
@@ -62,13 +58,4 @@ public class AccountAssetConfiscateDebtPanel extends AccountAssetActionPanelCls 
         this.jButton_ok.setEnabled(true);
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

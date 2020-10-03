@@ -207,6 +207,13 @@ public class ObserverMessage {
     public static final int LIST_POLL_UNION_TYPE = 1254;
     public static final int LIST_POLL_UNION_FAVORITES_TYPE = 1256;
 
+    public static final int RESET_EXLINK_TYPE = 1261;
+    public static final int ADD_EXLINK_TYPE = 1262;
+    public static final int REMOVE_EXLINK_TYPE = 1263;
+    public static final int LIST_EXLINK_TYPE = 1264;
+    public static final int LIST_EXLINK_FAVORITES_TYPE = 1266;
+
+
     ///////////////////////// CHAIN //////////////////////
     public static final int CHAIN_RESET_BLOCK_TYPE = 5501;
     public static final int CHAIN_ADD_BLOCK_TYPE = 5502;
@@ -301,19 +308,28 @@ public class ObserverMessage {
     public static final int WALLET_ADD_UNION_TYPE = 12012;
     public static final int WALLET_REMOVE_UNION_TYPE = 12013;
     public static final int WALLET_LIST_UNION_TYPE = 12014;
-    public static final int LIST_UNION_FAVORITES_TYPE = 12016;
+    public static final int RESET_UNION_FAVORITES_TYPE = 12016;
+    public static final int ADD_UNION_FAVORITES_TYPE = 12017;
+    public static final int DELETE_UNION_FAVORITES_TYPE = 12018;
+    public static final int LIST_UNION_FAVORITES_TYPE = 12019;
 
-    public static final int WALLET_ACCOUNT_PROPERTIES_ADD = 12017;
-    public static final int WALLET_ACCOUNT_PROPERTIES_DELETE = 12018;
-    public static final int WALLET_ACCOUNT_PROPERTIES_LIST = 12019;
-   
+    public static final int WALLET_ACCOUNT_PROPERTIES_ADD = 12117;
+    public static final int WALLET_ACCOUNT_PROPERTIES_DELETE = 12118;
+    public static final int WALLET_ACCOUNT_PROPERTIES_LIST = 12119;
+    public static final int WALLET_ACCOUNT_PROPERTIES_RESET = 12120;
+
+    public static final int WALLET_ACCOUNT_FAVORITE_ADD = 12121;
+    public static final int WALLET_ACCOUNT_FAVORITE_DELETE = 12122;
+    public static final int WALLET_ACCOUNT_FAVORITE_LIST = 12123;
+    public static final int WALLET_ACCOUNT_FAVORITE_RESET = 12124;
+
     public static final int WALLET_ADD_TELEGRAM_TYPE = 1000003;
     public static final int WALLET_REMOVE_TELEGRAM_TYPE = 1000001;
     public static final int WALLET_LIST_TELEGRAM_TYPE = 1000002;
     public static final int WALLET_RESET_TELEGRAM_TYPE = 1000004;
-    
+
     // all telegramm observer meggase
-    public static final int ALL_TELEGRAM_RESET_TYPE =-1003;
+    public static final int ALL_TELEGRAM_RESET_TYPE = -1003;
     public static final int ALL_TELEGRAMT_ADD_TYPE = -1001;
     public static final int ALL_TELEGRAMT_REMOVE_TYPE = -1002;
     public static final int ALL_TELEGRAMT_LIST_TYPE = -1000;

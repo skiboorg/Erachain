@@ -8,6 +8,8 @@ import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.transaction.IssueUnionRecord;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
+import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.items.TypeOfImage;
 import org.erachain.gui.library.AddImageLabel;
@@ -16,7 +18,6 @@ import org.erachain.gui.library.Library;
 import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,11 @@ import static org.erachain.gui.items.utils.GUIUtils.checkWalletUnlock;
 //import org.erachain.settings.Settings;
 
 @SuppressWarnings("serial")
-public class IssueUnionPanel extends JPanel {
+public class IssueUnionPanel extends IconPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "IssueUnionPanel.png";
+    public static String NAME = "IssueUnionPanel";
+    public static String TITLE = "Issue Union";
+
     private static Logger logger = LoggerFactory.getLogger(IssueUnionPanel.class);
 
     private JComboBox<Account> cbxFrom;
@@ -62,11 +65,11 @@ public class IssueUnionPanel extends JPanel {
     private JLabel parentJLabel = new JLabel();
 
     public IssueUnionPanel() {
+        super(NAME, TITLE);
+
         initComponents();
 
-
         //BUTTON Register
-
 
         this.issueButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -143,7 +146,7 @@ public class IssueUnionPanel extends JPanel {
         }
 
         byte[] image = null;
-        PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+        PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
         if (creator == null) {
             JOptionPane.showMessageDialog(new JFrame(),
                     Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -266,6 +269,7 @@ public class IssueUnionPanel extends JPanel {
         add(birthdayJLabel, gridBagConstraints);
 
         feeJLabel.setText(Lang.getInstance().translate("Fee Power") + ":");
+        feeJLabel.setVisible(Gui.SHOW_FEE_POWER);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
@@ -323,6 +327,7 @@ public class IssueUnionPanel extends JPanel {
 
         txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 7;
@@ -347,15 +352,5 @@ public class IssueUnionPanel extends JPanel {
         add(txtParent, gridBagConstraints);
 
 
-    }
-
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
     }
 }

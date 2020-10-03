@@ -24,7 +24,7 @@ public class PersonListAddPopupMenuItem {
 
                 //new AccountSendDialog(null, null, null, person);
                 MainPanel.getInstance().insertNewTab(Lang.getInstance().translate("Send asset"), new AccountAssetSendPanel(null,
-                        null, null, person, null), AccountAssetSendPanel.getIcon());
+                        null, null, person, null));
 
             }
         });
@@ -34,7 +34,7 @@ public class PersonListAddPopupMenuItem {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                MainPanel.getInstance().insertNewTab(Lang.getInstance().translate("Send Mail"), new MailSendPanel(null, null, (PersonCls) person), MailSendPanel.getIcon());
+                MainPanel.getInstance().insertNewTab(Lang.getInstance().translate("Send Mail"), new MailSendPanel(null, null, (PersonCls) person));
             }
         });
 
@@ -52,7 +52,7 @@ public class PersonListAddPopupMenuItem {
         });
         menu.add(set_Status_Item);
 
-        JMenuItem attestPubKey_Item = new JMenuItem(Lang.getInstance().translate("Attest Public Key for Person"));
+        JMenuItem attestPubKey_Item = new JMenuItem(Lang.getInstance().translate("Certify Public Key for Person"));
 
         attestPubKey_Item.addActionListener(new ActionListener() {
             @Override

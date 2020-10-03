@@ -105,6 +105,10 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
         return TransactionAmount.viewActionType(this.key, this.amount, false);
     }
 
+    public String viewActionTypeWas() {
+        return TransactionAmount.viewActionTypeWas(this.key, this.amount, false);
+    }
+
     @Override
     public String viewSubTypeName() {
         return viewActionType();
@@ -125,8 +129,8 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
         return this.key;
     }
 
-    public void setDC(DCSet dcSet, int asDeal, int blockHeight, int seqNo) {
-        super.setDC(dcSet, asDeal, blockHeight, seqNo);
+    public void setDC(DCSet dcSet, int forDeal, int blockHeight, int seqNo, boolean andUpdateFromState) {
+        super.setDC(dcSet, forDeal, blockHeight, seqNo, false);
 
         if (this.amount != null) {
             long assetKey = this.getAbsKey();
@@ -139,6 +143,9 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
                 }
             }
         }
+
+        if (false && andUpdateFromState && !isWiped())
+            updateFromStateDB();
     }
 
     @Override
@@ -238,7 +245,7 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
     //VALIDATE
 
     @Override
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         //CHECK IF RECIPIENT IS VALID ADDRESS
         if (!"1A3P7u56G4NgYfsWMms1BuctZfnCeqrYk3".equals(this.recipient.getAddress())) {
@@ -264,7 +271,7 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
     //PROCESS/ORPHAN
 
     @Override
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         long key = this.key;
 
@@ -300,11 +307,20 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
         } else {
             // CREATOR update
             GenesisBlock.CREATOR.changeBalance(this.dcSet, true, false, key, this.amount, false, false);
+
+            if (BlockChain.CLONE_MODE && key == FEE_KEY) {
+                BigDecimal sideRoyalty = amount.multiply(new BigDecimal("0.05")); // 5%
+                BlockChain.ROYALTY_ACCOUNT.changeBalance(dcSet, false, false, Transaction.FEE_KEY,
+                        sideRoyalty, false, false);
+                GenesisBlock.CREATOR.changeBalance(this.dcSet, true, false, Transaction.FEE_KEY,
+                        sideRoyalty, false, false);
+            }
+
         }
     }
 
     @Override
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
         // RISE ERROR
         DCSet err = null;
         err.hashCode();
@@ -360,10 +376,9 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
 
     @Override
     public boolean isInvolved(Account account) {
-        String address = account.getAddress();
 
-        if (this.creator != null && address.equals(creator.getAddress())
-                || address.equals(recipient.getAddress())) {
+        if (account.equals(creator)
+                || account.equals(recipient)) {
             return true;
         }
 

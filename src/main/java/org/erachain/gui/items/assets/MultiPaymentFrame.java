@@ -118,6 +118,7 @@ public class MultiPaymentFrame extends JFrame {
         //LABEL FEE
         labelGBC.gridy = 2;
         JLabel feeLabel = new JLabel(Lang.getInstance().translate("Fee Power") + ":");
+        feeLabel.setVisible(Gui.SHOW_FEE_POWER);
         this.add(feeLabel, labelGBC);
 
         //TXT AMOUNT
@@ -127,6 +128,7 @@ public class MultiPaymentFrame extends JFrame {
         //BigDecimal fee = BigDecimal.ONE;
         //fee = fee.add(BigDecimal.valueOf(this.payments.size()).divide(BigDecimal.valueOf(5)));
         txtFeePow.setText("0");
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
 
         this.add(txtFeePow, txtGBC);
 
@@ -186,7 +188,7 @@ public class MultiPaymentFrame extends JFrame {
             int feePow = Integer.parseInt(txtFeePow.getText());
 
             //CREATE MULTI PAYMENT
-            PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(this.asset.getOwner().getAddress());
+            PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(this.asset.getOwner().getAddress());
             if (creator == null) {
                 JOptionPane.showMessageDialog(new JFrame(),
                         Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),

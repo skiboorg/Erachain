@@ -1,8 +1,14 @@
 package org.erachain.gui.items.statement;
 
+import org.erachain.controller.Controller;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.core.wallet.Wallet;
+import org.erachain.database.wallet.WTransactionMap;
+import org.erachain.gui.MainFrame;
 import org.erachain.gui.SplitPanel;
+import org.erachain.gui.WalletTableRenderer;
 import org.erachain.gui.library.MTable;
+import org.erachain.gui.models.TimerTableModelCls;
 import org.erachain.gui.transaction.TransactionDetailsFactory;
 import org.erachain.lang.Lang;
 import org.erachain.settings.Settings;
@@ -13,33 +19,37 @@ import javax.swing.*;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class StatementsMySplitPanel extends SplitPanel {
+
+    public static String NAME = "StatementsMySplitPanel";
+    public static String TITLE = "My Documents";
+
     private static final long serialVersionUID = 2717571093561259483L;
 
-
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "StatementsMySplitPanel.png";
     // для прозрачности
     int alpha = 255;
     int alpha_int;
-    StatementsTableModelMy my_Statements_Model;
+    MyStatementsTableModel my_Statements_Model;
+    Wallet wallet = Controller.getInstance().wallet;
 
 
     private TableRowSorter search_Sorter;
 
 
     public StatementsMySplitPanel() {
-        super("StatementsMySplitPanel");
+        super(NAME, TITLE);
 
-        this.setName(Lang.getInstance().translate("My Statements"));
         this.searthLabelSearchToolBarLeftPanel.setText(Lang.getInstance().translate("Search") + ":  ");
         // not show buttons
         this.button1ToolBarLeftPanel.setVisible(false);
@@ -54,7 +64,7 @@ public class StatementsMySplitPanel extends SplitPanel {
         //TABLE
 
 
-        my_Statements_Model = new StatementsTableModelMy();
+        my_Statements_Model = new MyStatementsTableModel();
         //	my_Statements_table = new JTable(my_Statements_Model);// new Statements_Table_Model();
 
         //	my_Statements_table.setTableHeader(null);
@@ -98,9 +108,62 @@ public class StatementsMySplitPanel extends SplitPanel {
 			*/        // SET VIDEO
         //this.jTableJScrollPanelLeftPanel.setModel(my_PersonsModel);
         this.jTableJScrollPanelLeftPanel = new MTable(my_Statements_Model); //my_Statements_table;
+        jTableJScrollPanelLeftPanel.setDefaultRenderer(Object.class, new WalletTableRenderer());
+        jTableJScrollPanelLeftPanel.setDefaultRenderer(Boolean.class, new WalletTableRenderer());
+
+
+        TableColumnModel columnModel = jTableJScrollPanelLeftPanel.getColumnModel();
+        columnModel.getColumn(my_Statements_Model.COLUMN_SEQNO).setPreferredWidth(150);
+        columnModel.getColumn(my_Statements_Model.COLUMN_SEQNO).setMaxWidth(150);
+        columnModel.getColumn(my_Statements_Model.COLUMN_FAVORITE).setPreferredWidth(70);
+        columnModel.getColumn(my_Statements_Model.COLUMN_FAVORITE).setMaxWidth(100);
+
         //this.jTableJScrollPanelLeftPanel.setTableHeader(null);
         // sorter
         search_Sorter = new TableRowSorter(my_Statements_Model);
+
+
+        // hand cursor for Favorite column
+        jTableJScrollPanelLeftPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseMoved(MouseEvent e) {
+                if (jTableJScrollPanelLeftPanel.columnAtPoint(e.getPoint()) == StatementsMySplitPanel.this.my_Statements_Model.COLUMN_FAVORITE) {
+                    jTableJScrollPanelLeftPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                } else {
+                    jTableJScrollPanelLeftPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            }
+        });
+
+        // mouse from favorine column
+        jTableJScrollPanelLeftPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+                Point point = e.getPoint();
+                java.util.Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+
+                        int row = jTableJScrollPanelLeftPanel.rowAtPoint(point);
+                        jTableJScrollPanelLeftPanel.setRowSelectionInterval(row, row);
+
+                        Transaction itemTableSelected = getItem(row);
+
+                        if (e.getClickCount() == 2) {
+                            //tableMouse2Click(itemTableSelected);
+                        }
+
+                        if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON1) {
+                            if (jTableJScrollPanelLeftPanel.getSelectedColumn() == StatementsMySplitPanel.this.my_Statements_Model.COLUMN_FAVORITE) {
+                                favoriteSet(itemTableSelected);
+                            }
+                        }
+                    }
+                }, 10);
+            }
+        });
+
         ArrayList<SortKey> keys = new ArrayList<RowSorter.SortKey>();
         keys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
         keys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
@@ -128,8 +191,8 @@ public class StatementsMySplitPanel extends SplitPanel {
                     return;
                 }
 
-                Transaction transaction = my_Statements_Model.get_Statement(jTableJScrollPanelLeftPanel
-                        .convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
+                Transaction transaction = my_Statements_Model.getItem(jTableJScrollPanelLeftPanel
+                        .convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow())).b;
                 if (transaction == null) {
                     return;
                 }
@@ -150,20 +213,14 @@ public class StatementsMySplitPanel extends SplitPanel {
 
     }
 
-    // set favorine My
-    void favorite_my(JTable table) {
-        int row = table.getSelectedRow();
-        row = table.convertRowIndexToModel(row);
-    }
-
     @Override
     public void onClose() {
         // delete observer left panel
-        my_Statements_Model.removeObservers();
+        my_Statements_Model.deleteObservers();
         // get component from right panel
         Component c1 = jScrollPaneJPanelRightPanel.getViewport().getView();
         // if PersonInfo 002 delay on close
-        if (c1 instanceof StatementInfo) ((StatementInfo) c1).delay_on_Close();
+        if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
 
     }
 
@@ -176,9 +233,11 @@ public class StatementsMySplitPanel extends SplitPanel {
 
             Transaction transaction = null;
             if (jTableJScrollPanelLeftPanel.getSelectedRow() >= 0)
-                transaction = my_Statements_Model.get_Statement(jTableJScrollPanelLeftPanel.convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
+                transaction = my_Statements_Model.getItem(jTableJScrollPanelLeftPanel.convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow())).b;
 
             if (transaction == null) return;
+
+            ((WTransactionMap) my_Statements_Model.getMap()).clearUnViewed(transaction);
 
             JPanel info_panel = TransactionDetailsFactory.getInstance().createTransactionDetail(transaction);
 
@@ -189,18 +248,22 @@ public class StatementsMySplitPanel extends SplitPanel {
 
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
+    private Transaction getItem(int row) {
+        int crow = jTableJScrollPanelLeftPanel.convertRowIndexToModel(row);
+        return my_Statements_Model.getItem(crow).b;
     }
 
+    private void favoriteSet(Transaction transaction) {
+        // CHECK IF FAVORITES
+        if (wallet.isDocumentFavorite(transaction)) {
+            int showConfirmDialog = JOptionPane.showConfirmDialog(MainFrame.getInstance(), Lang.getInstance().translate("Delete from favorite") + "?", Lang.getInstance().translate("Delete from favorite"), JOptionPane.OK_CANCEL_OPTION);
+            if (showConfirmDialog == 0) {
+                wallet.removeDocumentFavorite(transaction);
+            }
+        } else {
+            wallet.addDocumentFavorite(transaction);
+        }
+        ((TimerTableModelCls) jTableJScrollPanelLeftPanel.getModel()).fireTableDataChanged();
+
+    }
 }
-
-
-
-

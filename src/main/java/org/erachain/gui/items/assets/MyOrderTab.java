@@ -15,9 +15,7 @@ import org.erachain.gui.models.WalletOrdersTableModel;
 import org.erachain.gui.transaction.CreateOrderDetailsFrame;
 import org.erachain.gui2.MainPanel;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 import org.erachain.utils.TableMenuPopupUtil;
-import org.mapdb.Fun;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -29,7 +27,9 @@ import java.awt.event.MouseEvent;
 
 public class MyOrderTab extends SplitPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "MyOrderTab.png";
+    public static String NAME = "MyOrderTab";
+    public static String TITLE = "My Orders";
+
     private static final long serialVersionUID = 1L;
     protected int row;
     /**
@@ -40,8 +40,7 @@ public class MyOrderTab extends SplitPanel {
 
     @SuppressWarnings("rawtypes")
     public MyOrderTab() {
-        super("MyOrderTab");
-        this.setName(Lang.getInstance().translate("My Orders"));
+        super(NAME, TITLE);
         searthLabelSearchToolBarLeftPanel.setText(Lang.getInstance().translate("Search") + ":  ");
         // not show buttons
         button1ToolBarLeftPanel.setVisible(false);
@@ -88,10 +87,10 @@ public class MyOrderTab extends SplitPanel {
                 int row = jTableJScrollPanelLeftPanel.rowAtPoint(point);
                 jTableJScrollPanelLeftPanel.setRowSelectionInterval(row, row);
 
-                Fun.Tuple2<Long, Order> itemTableSelected = ordersModel.getItem(row);
+                Order itemTableSelected = ordersModel.getItem(row);
 
                 if (e.getClickCount() == 2) {
-                    tableMouse2Click(itemTableSelected.b);
+                    tableMouse2Click(itemTableSelected);
                 }
 
             }
@@ -158,10 +157,10 @@ public class MyOrderTab extends SplitPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (ordersModel.getSortableList().isEmpty())
+                if (ordersModel.isEmpty())
                     return;
 
-                Order order = ordersModel.getItem(row).b;
+                Order order = ordersModel.getItem(row);
                 Transaction createOrder = DCSet.getInstance().getTransactionFinalMap().get(order.getId());
 
                 IssueConfirmDialog dd = new IssueConfirmDialog(MainFrame.getInstance(), true, createOrder,
@@ -185,7 +184,7 @@ public class MyOrderTab extends SplitPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                Order order = ordersModel.getItem(row).b;
+                Order order = ordersModel.getItem(row);
                 if (order != null)
                     new TradesFrame(order, false);
             }
@@ -197,7 +196,7 @@ public class MyOrderTab extends SplitPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                Order order = ordersModel.getItem(row).b;
+                Order order = ordersModel.getItem(row);
                 new CancelOrderFrame(order);
             }
         });
@@ -208,7 +207,7 @@ public class MyOrderTab extends SplitPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                tableMouse2Click(ordersModel.getItem(row).b);
+                tableMouse2Click(ordersModel.getItem(row));
 
             }
         });
@@ -241,7 +240,7 @@ public class MyOrderTab extends SplitPanel {
                 int row = jTableJScrollPanelLeftPanel.rowAtPoint(p);
                 jTableJScrollPanelLeftPanel.setRowSelectionInterval(row, row);
 
-                Order order = ordersModel.getItem(row).b;
+                Order order = ordersModel.getItem(row);
                 if (order.isActive(DCSet.getInstance()))
                     orderMenu.getComponent(2).setEnabled(true);
                 else
@@ -281,7 +280,7 @@ public class MyOrderTab extends SplitPanel {
                 if (jTableJScrollPanelLeftPanel.getSelectedRow() >= 0)
                     i = jTableJScrollPanelLeftPanel
                             .convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow());
-                order = ordersModel.getItem(i).b;
+                order = ordersModel.getItem(i);
                 if (order == null)
                     return;
                 jScrollPaneJPanelRightPanel.setViewportView(new OrderInfoPanel(order));
@@ -309,7 +308,7 @@ public class MyOrderTab extends SplitPanel {
         }
         if (end > start) {
             int step = end - start;
-            ordersModel.setInterval(start, step);
+            ordersModel.setInterval(start);
             ordersModel.fireTableDataChanged();
         }
     }
@@ -328,17 +327,8 @@ public class MyOrderTab extends SplitPanel {
         AssetCls wantAsset = Controller.getInstance().getAsset(order.getWantAssetKey());
         ExchangePanel panel = new ExchangePanel(haveAsset, wantAsset, action, "");
         panel.setName(haveAsset.getTickerName() + "/" + wantAsset.getTickerName());
-        MainPanel.getInstance().insertTab(Lang.getInstance().translate("Exchange"),
-                panel, ExchangePanel.getIcon());
+        MainPanel.getInstance().insertTab(
+                panel);
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

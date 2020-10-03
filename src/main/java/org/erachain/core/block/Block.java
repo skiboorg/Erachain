@@ -16,14 +16,15 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.blockexplorer.ExplorerJsonLine;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.RCalculated;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.core.transaction.TransactionFactory;
 import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.ntp.NTP;
-import org.erachain.utils.Converter;
 import org.erachain.utils.NumberAsString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -34,8 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -1193,7 +1196,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
         //ADD AT BYTES
         if (atBytes != null) {
-            block.put("blockATs", Converter.toHex(atBytes));
+            block.put("blockATs", Base58.encode(atBytes)); //Converter.toHex(atBytes));
             //block.put("atFees", this.atFees);
         }
 
@@ -1528,16 +1531,16 @@ public class Block implements Closeable, ExplorerJsonLine {
         this.forgingValue = creator.getBalanceUSE(Transaction.RIGHTS_KEY, dcSet).intValue();
 
         this.winValue = BlockChain.calcWinValue(dcSet, this.creator, this.heightBlock, this.forgingValue, null);
-        if (this.winValue < 1) {
+        if (this.winValue < 1 && this.heightBlock > BlockChain.ALL_VALID_BEFORE) {
             this.forgingValue = creator.getBalanceUSE(Transaction.RIGHTS_KEY, dcSet).intValue();
             this.winValue = BlockChain.calcWinValue(dcSet, this.creator, this.heightBlock, this.forgingValue, null);
 
             Tuple3<Integer, Integer, Integer> forgingPoint = creator.getLastForgingData(dcSet);
             LOGGER.debug("*** Block[" + this.heightBlock + "] WIN_VALUE not in BASE RULES " + this.winValue
-                + " Creator: " + this.creator.getAddress());
+                    + " Creator: " + this.creator.getAddress());
             LOGGER.debug("*** forging Value: " + this.forgingValue
                     + " creator DataPoint: " + creator.getForgingData(dcSet, forgingPoint == null ? heightBlock : forgingPoint.a)
-                + " creator LAST Data: " + creator.getLastForgingData(dcSet));
+                    + " creator LAST Data: " + creator.getLastForgingData(dcSet));
             return INVALID_BLOCK_WIN;
         }
 
@@ -1642,8 +1645,6 @@ public class Block implements Closeable, ExplorerJsonLine {
             transactionsSignatures = new byte[SIGNATURE_LENGTH * transactionCount + atBytesLength];
             byte[] transactionSignature;
 
-            this.getTransactions();
-
             boolean isPrimarySet = !dcSetPlace.isFork();
 
             long timerProcess = 0;
@@ -1666,15 +1667,14 @@ public class Block implements Closeable, ExplorerJsonLine {
                     // make pool for calculated
                     this.txCalculated = new ArrayList<RCalculated>();
                 }
+
             } else {
-                long processTiming = System.nanoTime();
-                processTiming = (System.nanoTime() - processTiming) / 1000;
-                if (processTiming < 999999999999l) {
-                    LOGGER.debug("VALIDATING[" + this.heightBlock + "]="
-                            + this.transactionCount + " db.FORK: " + processTiming + "[us]");
-                }
                 this.txCalculated = null;
             }
+
+            makeHoldRoyalty(dcSetPlace, false);
+
+            this.getTransactions();
 
             long processTiming = System.nanoTime();
             long processTimingLocal;
@@ -1726,7 +1726,8 @@ public class Block implements Closeable, ExplorerJsonLine {
                     }
 
                     if (!isSignatureValid) {
-                        if (!transaction.isSignatureValid(dcSetPlace)) {
+                        if (!transaction.isSignatureValid(dcSetPlace)
+                                && BlockChain.ALL_VALID_BEFORE < heightBlock) {
                             //
                             LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
                                     + ":" + transaction.viewFullTypeName()
@@ -1742,7 +1743,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     }
 
                     //CHECK TIMESTAMP AND DEADLINE
-                    if ((BlockChain.TEST_MODE || BlockChain.SIDE_MODE || heightBlock > 278989) &&
+                    if ((BlockChain.TEST_MODE || BlockChain.CLONE_MODE || heightBlock > 278989) &&
                             transaction.getTimestamp() > timestampEnd + BlockChain.GENERATING_MIN_BLOCK_TIME_MS(heightBlock)
                     ) {
                         LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
@@ -1760,7 +1761,8 @@ public class Block implements Closeable, ExplorerJsonLine {
                     // так как мы в блоке такие транзакции уже проверяем то коллизию с неподтвержденными не проверяем
                     // все равно их потом удалим - иначе при откатах может случиться оказия - что и в блоке она есть и в неподтвержденных
                     if (transaction.isValid(Transaction.FOR_NETWORK, Transaction.NOT_VALIDATE_KEY_COLLISION)
-                            != Transaction.VALIDATE_OK) {
+                            != Transaction.VALIDATE_OK
+                            && BlockChain.ALL_VALID_BEFORE < heightBlock) {
                         int error = transaction.isValid(Transaction.FOR_NETWORK, Transaction.NOT_VALIDATE_KEY_COLLISION);
                         LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
                                 + ":" + transaction.viewFullTypeName()
@@ -1853,7 +1855,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
                 } else {
 
-                    // for some TRANSACTIONs need add to FINAM MAP etc.
+                    // for some TRANSACTIONS need add to FINAL MAP etc.
                     // RSertifyPubKeys - in same BLOCK with IssuePersonRecord
 
                     processTimingLocal = System.nanoTime();
@@ -1975,6 +1977,9 @@ public class Block implements Closeable, ExplorerJsonLine {
      */
 
     public synchronized void close() {
+
+        txCalculated = null;
+
         if (validatedForkDB != null) {
             try {
                 validatedForkDB.close();
@@ -1992,7 +1997,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         if (transactions != null) {
             try {
                 // ОЧЕНЬ ВАЖНО чтобы Finalizer мог спокойно удалять их и DCSet.fork
-                // иначе Финализер не можеи зацикленные сслки порвать и не очищает HEAP
+                // иначе Финализер не может зацикленные ссылки порвать и не очищает HEAP
                 for (Transaction transaction : transactions) {
                     transaction.resetDCSet();
                 }
@@ -2028,8 +2033,6 @@ public class Block implements Closeable, ExplorerJsonLine {
         validatedForkDB.writeToParent();
     }
 
-    private Account accountFeeFFF = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
-
     //PROCESS/ORPHAN
     public void feeProcess(DCSet dcSet, boolean asOrphan) {
         //REMOVE FEE
@@ -2061,9 +2064,9 @@ public class Block implements Closeable, ExplorerJsonLine {
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
             BigDecimal forgerEarn;
-            if (BlockChain.SIDE_MODE) {
+            if (BlockChain.CLONE_MODE) {
                 long blockFeeRoyaltyLong = this.blockHead.totalFee / 20; // 5%
-                accountFeeFFF.changeBalance(dcSet, asOrphan, false, Transaction.FEE_KEY,
+                BlockChain.ROYALTY_ACCOUNT.changeBalance(dcSet, asOrphan, false, Transaction.FEE_KEY,
                         new BigDecimal(blockFeeRoyaltyLong).movePointLeft(BlockChain.FEE_SCALE), false, false);
 
                 forgerEarn = new BigDecimal(this.blockHead.totalFee - blockFeeRoyaltyLong).movePointLeft(BlockChain.FEE_SCALE)
@@ -2079,12 +2082,9 @@ public class Block implements Closeable, ExplorerJsonLine {
             this.creator.changeCOMPUBonusBalances(dcSet, asOrphan, forgerEarn, Transaction.BALANCE_SIDE_FORGED);
 
             // MAKE CALCULATED TRANSACTIONS
-            if (!asOrphan && !Controller.getInstance().noCalculated) {
-                if (this.txCalculated == null)
-                    this.txCalculated = new ArrayList<RCalculated>();
-
+            if (this.txCalculated != null) {
                 this.txCalculated.add(new RCalculated(this.creator, Transaction.FEE_KEY,
-                        forgerEarn, "forging", Transaction.makeDBRef(this.heightBlock, 0)));
+                        forgerEarn, "forging", Transaction.makeDBRef(this.heightBlock, 0), 0L));
             }
         }
 
@@ -2240,6 +2240,75 @@ public class Block implements Closeable, ExplorerJsonLine {
 
     }
 
+    /**
+     * Начисление всем за участие в проекте
+     */
+    private void makeHoldRoyalty(DCSet dcSet, boolean asOrphan) {
+
+        if (dcSet.isFork())
+            // в форке нет Индекса!
+            return;
+
+        // ловим блок когда можно начислять
+        if (heightBlock % (BlockChain.BLOCKS_PER_DAY(heightBlock) * BlockChain.HOLD_ROYALTY_PERIOD_DAYS) != 0)
+            return;
+
+        // если сумма малая - не начисляем
+        BigDecimal readyToRoyalty = GenesisBlock.CREATOR.getBalance(dcSet, Transaction.FEE_KEY, TransactionAmount.ACTION_DEBT).b.negate();
+        if (readyToRoyalty.compareTo(BlockChain.HOLD_ROYALTY_MIN) < 0)
+            return;
+
+        ItemAssetBalanceMap map = dcSet.getAssetBalanceMap();
+        AssetCls asset = dcSet.getItemAssetMap().get(BlockChain.HOLD_ROYALTY_ASSET);
+        BigDecimal totalHold = asset.getReleased(dcSet);
+        BigDecimal koeff = readyToRoyalty.divide(totalHold, BlockChain.FEE_SCALE + 5, RoundingMode.DOWN);
+        BigDecimal totalPayedRoyalty = BigDecimal.ZERO;
+
+        try (IteratorCloseable<byte[]> iterator = map.getIteratorByAsset(BlockChain.HOLD_ROYALTY_ASSET)) {
+            BigDecimal balanceHold;
+            Account holder;
+            long txReference = Transaction.makeDBRef(heightBlock, 0);
+            while (iterator.hasNext()) {
+                byte[] key = iterator.next();
+                holder = new Account(ItemAssetBalanceMap.getShortAccountFromKey(key));
+                balanceHold = map.get(key).a.b;
+                balanceHold = balanceHold.multiply(koeff).setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
+
+                if (balanceHold.signum() <= 0)
+                    continue;
+
+                holder.changeBalance(dcSet, asOrphan, false, Transaction.FEE_KEY, balanceHold, false, true);
+                // учтем что получили бонусы
+                holder.changeCOMPUBonusBalances(dcSet, asOrphan, balanceHold, Transaction.BALANCE_SIDE_DEBIT);
+
+                // у эмитента снимем
+                BlockChain.HOLD_ROYALTY_EMITTER.changeBalance(dcSet, !asOrphan, false, Transaction.FEE_KEY, balanceHold, false, true);
+                BlockChain.HOLD_ROYALTY_EMITTER.changeCOMPUBonusBalances(dcSet, !asOrphan, balanceHold, Transaction.BALANCE_SIDE_DEBIT);
+
+                if (this.txCalculated != null) {
+                    txCalculated.add(new RCalculated(holder, Transaction.FEE_KEY, balanceHold,
+                            "AS-staking", txReference, 0L));
+                }
+
+                totalPayedRoyalty = totalPayedRoyalty.add(balanceHold);
+            }
+
+            // учтем снятие с начисления для держателей долей
+            GenesisBlock.CREATOR.changeBalance(dcSet, !asOrphan, false, -Transaction.FEE_KEY,
+                    totalPayedRoyalty,
+                    true, false);
+
+            if (this.txCalculated != null) {
+                txCalculated.add(new RCalculated(GenesisBlock.CREATOR, Transaction.FEE_KEY, totalPayedRoyalty.negate(),
+                        "AS-staking OUT", txReference, 0L));
+            }
+
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+
+    }
+
     // TODO - make it trownable
     public void process(DCSet dcSet) throws Exception {
 
@@ -2258,9 +2327,8 @@ public class Block implements Closeable, ExplorerJsonLine {
         }
 
         // for DEBUG
-        if (this.heightBlock == 65431
-                || this.heightBlock == 86549) {
-            int rrrr = 0;
+        if (this.heightBlock == 97815) {
+            boolean debug = true;
         }
 
         //PROCESS TRANSACTIONS
@@ -2270,16 +2338,19 @@ public class Block implements Closeable, ExplorerJsonLine {
         // RESET forginf Info Updates
         this.forgingInfoUpdate = null;
 
+        if (/// теперь нужно считать так как у нас из Форка слив напрямую идет dcSet.isFork() ||
+                cnt.noCalculated) {
+            this.txCalculated = null;
+        } else {
+            // make pool for calculated
+            this.txCalculated = new ArrayList<RCalculated>();
+        }
+
+        makeHoldRoyalty(dcSet, false);
+
         this.getTransactions();
 
         if (this.transactionCount > 0) {
-            if (/// теперь нужно счтитать так как у нас из Форка слив напрямую идет dcSet.isFork() ||
-                    cnt.noCalculated) {
-                this.txCalculated = null;
-            } else {
-                // make pool for calculated
-                this.txCalculated = new ArrayList<RCalculated>();
-            }
 
             //DLSet dbSet = Controller.getInstance().getDBSet();
             TransactionMap unconfirmedMap = dcSet.getTransactionTab();
@@ -2303,6 +2374,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                 //logger.debug("[" + seqNo + "] record is process" );
 
                 // NEED set DC for WIPED too
+                // здесь ще нет ничего в базе данных - нечего наращивать
                 transaction.setDC(dcSet, Transaction.FOR_NETWORK, this.heightBlock, seqNo);
 
                 //PROCESS
@@ -2414,6 +2486,8 @@ public class Block implements Closeable, ExplorerJsonLine {
         //REMOVE FEE
         feeProcess(dcSet, true);
 
+        makeHoldRoyalty(dcSet, true);
+
         if (this.forgingInfoUpdate != null) {
             // обновить форжинговые данные - один раз для всех трнзакций в блоке
             // Обрабатывает данные об измененных форжинговых балансах
@@ -2480,6 +2554,9 @@ public class Block implements Closeable, ExplorerJsonLine {
         this.getTransactions();
         //ORPHAN ALL TRANSACTIONS IN DB BACK TO FRONT
         int seqNo;
+        if (heightBlock == 97856) {
+            boolean debug = true;
+        }
         for (int i = this.transactionCount - 1; i >= 0; i--) {
             seqNo = i + 1;
             if (cnt.isOnStopping()) {
@@ -2490,7 +2567,8 @@ public class Block implements Closeable, ExplorerJsonLine {
             //logger.debug("<<< core.block.Block.orphanTransactions\n" + transaction.toJson());
 
             // (!) seqNo = i + 1
-            transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, seqNo);
+            transaction.setDC(dcSet, Transaction.FOR_NETWORK, height, seqNo,
+                    true); // тут наращиваем мясо - чтобы ключи удалялись правильно
 
             if (!transaction.isWiped()) {
                 transaction.orphan(this, Transaction.FOR_NETWORK);
@@ -2515,6 +2593,9 @@ public class Block implements Closeable, ExplorerJsonLine {
                     transFinalMapSinds.delete(itemSignature);
                 }
             }
+
+            // сбросим данные блока - для правильного отображения неподтвержденных
+            transaction.resetSeqNo();
         }
 
         // DELETE ALL CALCULATED

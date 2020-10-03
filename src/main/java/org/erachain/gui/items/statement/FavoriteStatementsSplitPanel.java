@@ -1,12 +1,11 @@
 package org.erachain.gui.items.statement;
 
-import org.erachain.controller.Controller;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.SplitPanel;
-import org.erachain.gui.items.persons.ItemsPersonsTableModel;
-import org.erachain.gui.items.records.FavoriteTransactionTableModel;
+import org.erachain.gui.WalletTableRenderer;
 import org.erachain.gui.library.MTable;
+import org.erachain.gui.models.TimerTableModelCls;
 import org.erachain.gui.records.VouchRecordDialog;
 import org.erachain.gui.transaction.TransactionDetailsFactory;
 import org.erachain.lang.Lang;
@@ -20,6 +19,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
@@ -30,20 +30,20 @@ import java.util.ArrayList;
 
 public class FavoriteStatementsSplitPanel extends SplitPanel {
 
+    public static String NAME = "FavoriteStatementsSplitPanel";
+    public static String TITLE = "Favorite Documents";
+
     private static final long serialVersionUID = 2717571093561259483L;
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "FavoriteStatementsSplitPanel.png";
 
     // для прозрачности
     int alpha = 255;
     int alpha_int;
-    // private StatementsTableModelFavorite search_Table_Model;
-    private FavoriteTransactionTableModel favotitesTable;
-    //	private MTable search_Table;
-    private RowSorter<ItemsPersonsTableModel> search_Sorter;
+
+    private FavoriteStatementsTableModel favotitesTable;
+    private RowSorter<FavoriteStatementsTableModel> search_Sorter;
 
     public FavoriteStatementsSplitPanel() {
-        super("FavoriteStatementsSplitPanel");
-        setName(Lang.getInstance().translate("Favorite Documents"));
+        super(NAME, TITLE);
         searthLabelSearchToolBarLeftPanel.setText(Lang.getInstance().translate("Search") + ":  ");
 
         // not show buttons
@@ -55,12 +55,21 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
 
         //CREATE TABLE
         //search_Table_Model = new StatementsTableModelFavorite();
-        favotitesTable = new FavoriteTransactionTableModel();
+        favotitesTable = new FavoriteStatementsTableModel();
 
         // UPDATE FILTER ON TEXT CHANGE
         searchTextFieldSearchToolBarLeftPanelDocument.getDocument().addDocumentListener(new search_tab_filter());
         // SET VIDEO
         jTableJScrollPanelLeftPanel = new MTable(this.favotitesTable);
+        jTableJScrollPanelLeftPanel.setDefaultRenderer(Object.class, new WalletTableRenderer());
+        jTableJScrollPanelLeftPanel.setDefaultRenderer(Boolean.class, new WalletTableRenderer());
+
+        TableColumnModel columnModel = jTableJScrollPanelLeftPanel.getColumnModel();
+        columnModel.getColumn(favotitesTable.COLUMN_SEQNO).setPreferredWidth(150);
+        columnModel.getColumn(favotitesTable.COLUMN_SEQNO).setMaxWidth(150);
+        columnModel.getColumn(favotitesTable.COLUMN_FAVORITE).setPreferredWidth(70);
+        columnModel.getColumn(favotitesTable.COLUMN_FAVORITE).setMaxWidth(100);
+
         //	jTableJScrollPanelLeftPanel = search_Table;
         //sorter from 0 column
         search_Sorter = new TableRowSorter(favotitesTable);
@@ -75,6 +84,21 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
         jTableJScrollPanelLeftPanel.getSelectionModel().addListSelectionListener(new search_listener());
 
         JPopupMenu menu = new JPopupMenu();
+
+        // favorite menu
+        JMenuItem favoriteMenuItems = new JMenuItem(Lang.getInstance().translate("Remove Favorite"));
+        favoriteMenuItems.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Transaction statement = (Transaction) favotitesTable.getItem(jTableJScrollPanelLeftPanel
+                        .convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
+                if (statement == null) return;
+                favotitesTable.wallet.removeDocumentFavorite(statement);
+            }
+        });
+
+        menu.add(favoriteMenuItems);
+
+        menu.addSeparator();
 
         JMenuItem vouch_Item = new JMenuItem(Lang.getInstance().translate("Vouch"));
 
@@ -133,11 +157,7 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
                 if (e.getClickCount() == 1 & e.getButton() == e.BUTTON1) {
 
                     if (jTableJScrollPanelLeftPanel.getSelectedColumn() == favotitesTable.COLUMN_FAVORITE) {
-
-                        row = jTableJScrollPanelLeftPanel.convertRowIndexToModel(row);
-                        Transaction transaction = (Transaction) favotitesTable.getItem(row);
-                        favorite_set(transaction);
-
+                        favoriteSet((Transaction) favotitesTable.getItem(jTableJScrollPanelLeftPanel.convertRowIndexToModel(row)));
                     }
                 }
             }
@@ -167,22 +187,7 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
         // get component from right panel
         Component c1 = jScrollPaneJPanelRightPanel.getViewport().getView();
         // if PersonInfo 002 delay on close
-        if (c1 instanceof StatementInfo) ((StatementInfo) c1).delay_on_Close();
-
-    }
-
-    public void favorite_set(Transaction transaction) {
-
-        // CHECK IF FAVORITES
-        if (Controller.getInstance().isTransactionFavorite(transaction)) {
-            int dd = JOptionPane.showConfirmDialog(MainFrame.getInstance(), Lang.getInstance().translate("Delete from favorite") + "?", Lang.getInstance().translate("Delete from favorite"), JOptionPane.OK_CANCEL_OPTION);
-
-            if (dd == 0) Controller.getInstance().removeTransactionFavorite(transaction);
-        } else {
-
-            Controller.getInstance().addTransactionFavorite(transaction);
-        }
-        jTableJScrollPanelLeftPanel.repaint();
+        if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
 
     }
 
@@ -226,7 +231,8 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
             if (jTableJScrollPanelLeftPanel.getSelectedRow() < 0)
                 return;
 
-            Transaction transaction = (Transaction)favotitesTable.getItem(jTableJScrollPanelLeftPanel.convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
+            Transaction transaction = (Transaction) favotitesTable.getItem(jTableJScrollPanelLeftPanel.
+                    convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
 
             JPanel info_panel = TransactionDetailsFactory.getInstance().createTransactionDetail(transaction);
             info_panel.setPreferredSize(new Dimension(jScrollPaneJPanelRightPanel.getSize().width - 50, jScrollPaneJPanelRightPanel.getSize().height - 50));
@@ -235,14 +241,18 @@ public class FavoriteStatementsSplitPanel extends SplitPanel {
         }
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
+    private void favoriteSet(Transaction transaction) {
+        // CHECK IF FAVORITES
+        if (favotitesTable.wallet.isDocumentFavorite(transaction)) {
+            int showConfirmDialog = JOptionPane.showConfirmDialog(MainFrame.getInstance(), Lang.getInstance().translate("Delete from favorite") + "?", Lang.getInstance().translate("Delete from favorite"), JOptionPane.OK_CANCEL_OPTION);
+            if (showConfirmDialog == 0) {
+                favotitesTable.wallet.removeDocumentFavorite(transaction);
             }
+        } else {
+            favotitesTable.wallet.addDocumentFavorite(transaction);
         }
+        ((TimerTableModelCls) jTableJScrollPanelLeftPanel.getModel()).fireTableDataChanged();
+
     }
 
 }

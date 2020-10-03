@@ -12,6 +12,7 @@ import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.ItemCls;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.ArbitraryTransaction;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.BlocksHeadsMap;
@@ -80,9 +81,9 @@ public class BlockChain {
     public static PrivateKeyAccount[] TEST_DB_ACCOUNTS = TEST_DB == 0 ? null : new PrivateKeyAccount[1000];
     public static final boolean NOT_CHECK_SIGNS = TEST_DB > 0 && false;
 
-    static public int CHECK_BUGS = TEST_DB > 0 ? 0 : 5;
+    static public int CHECK_BUGS = TEST_DB > 0 ? 0 : Settings.CHECK_BUGS;
 
-    static public int SKIP_BASE_ASSETS_AFTER = 3;
+    static public int SKIP_BASE_ASSETS_AFTER = 2;
 
     /**
      * если задан - первое подключение к нему
@@ -90,14 +91,24 @@ public class BlockChain {
     public static final byte[] START_PEER = null; //new byte[]{(byte)138, (byte)197, (byte)135, (byte)122};
 
     /**
-     * Защита от платажей с удостоверенного на анонима
+     * Защита от платежей с удостоверенного на анонима
      */
     public static boolean PERSON_SEND_PROTECT = true;
 
-    public static final boolean SIDE_MODE = Settings.getInstance().isSideNet();
+    /**
+     * Подмена реального на чужой - для синхронизации из старой ветки
+     */
+    public static byte[] GENESIS_SIGNATURE;
+    /**
+     * Мой реальный блок - что защиты от подмены
+     */
+    public static byte[] GENESIS_SIGNATURE_TRUE;
+
+
+    public static final boolean CLONE_MODE = Settings.getInstance().isCloneNet();
     public static final boolean DEMO_MODE = Settings.getInstance().isDemoNet();
     public static final boolean TEST_MODE = Settings.getInstance().isTestNet();
-    public static final boolean MAIN_MODE = !TEST_MODE && !SIDE_MODE;
+    public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
 
     /**
      * default = 30 sec
@@ -109,12 +120,12 @@ public class BlockChain {
      */
     public static final boolean ERA_COMPU_ALL_UP = TEST_MODE || TEST_DB > 0 || Settings.ERA_COMPU_ALL_UP;
 
-    public static int NETWORK_PORT = TEST_DB > 0 ? 9006 : TEST_MODE ? 9066 : SIDE_MODE ? 9076 : 0;
+    public static int NETWORK_PORT = TEST_DB > 0 ? 9006 : TEST_MODE ? 9066 : CLONE_MODE ? 9076 : 0;
 
     public static final int DEFAULT_WEB_PORT = NETWORK_PORT + 1;
     public static final int DEFAULT_RPC_PORT = NETWORK_PORT + 2;
 
-    public static final String DEFAULT_EXPLORER = "http://explorer.erachain.org:" + DEFAULT_WEB_PORT;
+    public static final String DEFAULT_EXPLORER = "http://explorer.darachain.org:" + DEFAULT_WEB_PORT;
 
     //public static final String TIME_ZONE = "GMT+3";
     //
@@ -125,7 +136,7 @@ public class BlockChain {
      */
     public static final boolean ANONIM_SERT_USE = TEST_MODE || BlockChain.ERA_COMPU_ALL_UP;
 
-    public static final int MAX_ORPHAN = 10000; // max orphan blocks in chain for 30 sec
+    public static final int MAX_ORPHAN = 1000; // max orphan blocks in chain for 30 sec
     public static final int SYNCHRONIZE_PACKET = 300; // when synchronize - get blocks packet by transactions
 
     /**
@@ -137,10 +148,10 @@ public class BlockChain {
     /**
      * минимальное расстояние для сборк блоков
      */
-    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 15 : SIDE_MODE ? 15 : 40; // GENESIS START TOP ACCOUNTS
+    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 15 : CLONE_MODE ? 15 : 40; // GENESIS START TOP ACCOUNTS
 
     // RIGHTs
-    public static final int GENESIS_ERA_TOTAL = 10000000;
+    public static final int GENESIS_ERA_TOTAL = 100000000;
     public static final int GENERAL_ERA_BALANCE = GENESIS_ERA_TOTAL / 100;
     public static final int MAJOR_ERA_BALANCE = 33000;
     public static final int MINOR_ERA_BALANCE = 1000;
@@ -193,7 +204,7 @@ public class BlockChain {
 
     public static final int GENESIS_WIN_VALUE = TEST_MODE ? 3000 : ERA_COMPU_ALL_UP ? 10000 : 22000;
 
-    public static final String[] GENESIS_ADMINS = !ERA_COMPU_ALL_UP && SIDE_MODE ? new String[]{
+    public static final String[] GENESIS_ADMINS = !ERA_COMPU_ALL_UP && CLONE_MODE ? new String[]{
             (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()}
             : new String[]{"78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5",
             "7B3gTXXKB226bxTxEHi8cJNfnjSbuuDoMC"};
@@ -203,6 +214,10 @@ public class BlockChain {
     //public static final int ORDER_FEE_DOWN = VERS_4_11;
     public static final int HOLD_VALID_START = VERS_4_11;
 
+    /**
+     * Если задан то это режим синхронизации со стрым протоколом - значит нам нельза генерить блоки и трнзакции
+     * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
+     */
     public static int ALL_VALID_BEFORE = DEMO_MODE ? 0 : 0;
     public static final int CANCEL_ORDERS_ALL_VALID = TEST_DB > 0 ? 0 : 623904; //260120;
     /**
@@ -226,23 +241,23 @@ public class BlockChain {
 
     // TODO поидее отрицательное тоже работать будет как надо
     public static final long VERS_30SEC_TIME =
-            SIDE_MODE || TEST_MODE ? 0 : Settings.DEFAULT_MAINNET_STAMP + (long) VERS_30SEC * 288L;
+            CLONE_MODE || TEST_MODE ? 0 : Settings.DEFAULT_MAINNET_STAMP + (long) VERS_30SEC * 288L;
 
     public static final int VERS_4_21_02 = 684000;
 
-    public static final int VERS_4_23_01 = TEST_DB > 0 || SIDE_MODE || TEST_MODE ? 0 : 800000;
+    public static final int VERS_4_23_01 = TEST_DB > 0 || CLONE_MODE || TEST_MODE ? 0 : 800000;
 
-    public static final int VERS_5_01_01 = TEST_DB > 0 || SIDE_MODE || TEST_MODE ? 0 : 990000;
+    public static final int VERS_5_01_01 = TEST_DB > 0 || CLONE_MODE ? 0 : DEMO_MODE ? 426167 : TEST_MODE ? 0 : 990000;
 
     /**
      * Включает реферальную систему
      */
-    public static int REFERAL_BONUS_FOR_PERSON = SIDE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
+    public static int REFERAL_BONUS_FOR_PERSON = CLONE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
 
     /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне
      */
-    public static final int START_ISSUE_RIGHTS = TEST_DB > 0 || SIDE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
+    public static final int START_ISSUE_RIGHTS = TEST_DB > 0 || CLONE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
 
     public static final int START_ITEM_DUPLICATE = TEST_DB > 0 || !MAIN_MODE ? 0 : 800000;
 
@@ -253,12 +268,14 @@ public class BlockChain {
 
     public HashSet<String> trustedPeers = new HashSet<>();
 
+    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+
     public static final HashSet<Integer> validBlocks = new HashSet<>();
 
     /**
      * Записи которые удалены
      */
-    public static final HashSet<Long> WIPED_RECORDS =  new HashSet<>();
+    public static final HashSet<Long> WIPED_RECORDS = new HashSet<>();
 
     /*
      *  SEE in concrete TRANSACTIONS
@@ -295,7 +312,7 @@ public class BlockChain {
             Base58.decode("4Vo6hmojFGgAJhfjyiN8PNYktpgrdHGF8Bqe12Pk3PvcvcH8tuJTcTnnCqyGChriHTuZX1u5Qwho8BuBPT4FJ53W")
     };
 
-    public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : SIDE_MODE || TEST_MODE ? new byte[][]{} :
+    public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : CLONE_MODE || TEST_MODE ? new byte[][]{} :
             new byte[][]{
                     //Base58.decode("61Fzu3PhsQ74EoMKrwwxKHMQi3z9fYAU5UeUfxtGdXPRfKbWdgpBQWgAojEnmDHK2LWUKtsmyqWb4WpCEatthdgK"),
             };
@@ -325,11 +342,11 @@ public class BlockChain {
     ///final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("2.0").scaleByPowerOfTen(-(BlockChain.TRADE_PRECISION - 1));
     final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("0.001");
 
-    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : SIDE_MODE || TEST_MODE ? 0 : VERS_4_11;
+    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : VERS_4_11;
 
     public static final int AMOUNT_SCALE_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 1033;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
-    public static final int FREEZE_FROM = TEST_DB > 0 ? 0 : SIDE_MODE || TEST_MODE ? 0 : 249222;
+    public static final int FREEZE_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : 249222;
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
     public static final String[] TRUE_ADDRESSES = TEST_DB > 0 ? new String[]{} : new String[]{
             "7R2WUFaS7DF2As6NKz13Pgn9ij4sFw6ymZ"
@@ -359,16 +376,29 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
+    public static final int ACTION_ROYALTY_START = 1;
+    public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
+    public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
+    public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
+    public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
+    public static final long ACTION_ROYALTY_ASSET = AssetCls.FEE_KEY;
+    public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
+
+    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
+    public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем
+    public static Account HOLD_ROYALTY_EMITTER = new Account("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"); // если меньше то распределение не делаем
+    public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
+
 
     /**
-     * Multi-level Referal Sysytem. Levels for deep
+     * Multi-level Referal System. Levels for deep
      */
     public static final int FEE_INVITED_DEEP = TEST_DB > 0 || MAIN_MODE ? 0 : 3;
     /**
      * Stop referals system on this person Number. Причем рефералка которая должна упать этим персонам
      * (с номером ниже заданного) по сути просто сжигается - то есть идет дефляция.
      */
-    public static final long BONUS_STOP_PERSON_KEY = SIDE_MODE || TEST_MODE ? 0 : 13L;
+    public static final long BONUS_STOP_PERSON_KEY = CLONE_MODE || TEST_MODE ? 0 : 13L;
 
     public static final int FEE_INVITED_SHIFT = 1;
     /**
@@ -392,9 +422,9 @@ public class BlockChain {
     public static final BigDecimal GIFTED_COMPU_AMOUNT_FOR_PERSON_BD = BigDecimal.valueOf(GIFTED_COMPU_AMOUNT_FOR_PERSON, FEE_SCALE);
 
     public static final Tuple2<Integer, byte[]> CHECKPOINT = new Tuple2<Integer, byte[]>(
-            SIDE_MODE || TEST_MODE ? 0 : 235267,
+            CLONE_MODE || TEST_MODE ? 0 : 235267,
             Base58.decode(
-                    SIDE_MODE || TEST_MODE ? ""
+                    CLONE_MODE || TEST_MODE ? ""
                             : "2VTp79BBpK5E4aZYV5Tk3dYRS887W1devsrnyJeN6WTBQYQzoe2cTg819DdRs5o9Wh6tsGLsetYTbDu9okgriJce"));
 
     // issue PERSON
@@ -439,19 +469,15 @@ public class BlockChain {
     // dcSet_in = db() - for test
     public BlockChain(DCSet dcSet_in) throws Exception {
 
-        //CREATE GENESIS BLOCK
-        genesisBlock = new GenesisBlock();
-        genesisTimestamp = genesisBlock.getTimestamp();
-
         trustedPeers.addAll(Settings.getInstance().getTrustedPeers());
-
+        //HOLD_ROYALTY_EMITTER = new Account("q");
 
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
-        } else if (SIDE_MODE) {
-            File file = new File("chainPROTOCOL.json");
+        } else if (CLONE_MODE) {
+            File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
-                LOGGER.info("chainPROTOCOL.json USED");
+                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
                 // START SIDE CHAIN
                 String jsonString = "";
                 try {
@@ -505,8 +531,8 @@ public class BlockChain {
                     Settings.peersURL = chainParams.get("peersURL").toString();
                 }
 
-                if (chainParams.containsKey("sideLicense")) {
-                    Settings.sideLicense = chainParams.get("sideLicense").toString();
+                if (chainParams.containsKey(Settings.CLONE_OR_SIDE.toLowerCase() + "License")) {
+                    Settings.cloneLicense = chainParams.get(Settings.CLONE_OR_SIDE.toLowerCase() + "License").toString();
                 }
 
                 if (chainParams.containsKey("startKey")) {
@@ -530,6 +556,14 @@ public class BlockChain {
 
                 if (chainParams.containsKey("protectSendToAnonymous")) {
                     PERSON_SEND_PROTECT = (Boolean) chainParams.get("protectSendToAnonymous");
+                }
+
+                if (chainParams.containsKey("genesisSignature")) {
+                    // нужно для синхронизации из другой ветки например если потокол сильно поменялся
+                    // используется совместно с ключем - ALL_VALID_BEFORE
+                    JSONArray array = (JSONArray) chainParams.get("genesisSignature");
+                    GENESIS_SIGNATURE = Base58.decode(array.get(0).toString());
+                    GENESIS_SIGNATURE_TRUE = Base58.decode(array.get(1).toString());
                 }
 
 
@@ -736,12 +770,16 @@ public class BlockChain {
 
         }
 
+        //CREATE GENESIS BLOCK
+        genesisBlock = new GenesisBlock();
+        genesisTimestamp = genesisBlock.getTimestamp();
+
         DCSet dcSet = dcSet_in;
         if (dcSet == null) {
             dcSet = DCSet.getInstance();
         }
 
-        if (TEST_MODE || SIDE_MODE) {
+        if (TEST_MODE || CLONE_MODE) {
             LOGGER.info(genesisBlock.getTestNetInfo());
         }
 
@@ -791,7 +829,7 @@ public class BlockChain {
 
     public static int GENERATING_MIN_BLOCK_TIME(int height) {
 
-        if (SIDE_MODE)
+        if (CLONE_MODE)
             return BLOCKS_PERIOD;
 
         if (VERS_30SEC > 0 && height <= VERS_30SEC) {
@@ -894,7 +932,7 @@ public class BlockChain {
 
     public static BigDecimal BONUS_FOR_PERSON(int height) {
 
-        if (SIDE_MODE || TEST_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
+        if (CLONE_MODE || TEST_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
             return BigDecimal.valueOf(5000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
         } else {
             return BigDecimal.valueOf(2000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
@@ -927,7 +965,6 @@ public class BlockChain {
     }
 
     public byte[] getMyHardCheckPointSign() {
-        byte[] mySign;
         if (CHECKPOINT.a > 1) {
             return CHECKPOINT.b;
         } else {
@@ -1061,7 +1098,7 @@ public class BlockChain {
             }
         } else {
             if (previousForgingPoint == null)
-                return 0l;
+                return 0L;
         }
 
         int previousForgingHeight = previousForgingPoint.a;
@@ -1217,7 +1254,7 @@ public class BlockChain {
             return this.genesisTimestamp + (long) height * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
         }
 
-        return this.genesisTimestamp + (SIDE_MODE || TEST_MODE ? 0L : 16667L)
+        return this.genesisTimestamp + (CLONE_MODE || TEST_MODE ? 0L : 16667L)
                 + (long) VERS_30SEC * (long) GENERATING_MIN_BLOCK_TIME_MS(VERS_30SEC)
                 + (long) (height - VERS_30SEC) * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
 
@@ -1307,7 +1344,13 @@ public class BlockChain {
             );
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            Controller.getInstance().stopAll(1104);
+            if (BlockChain.CHECK_BUGS > 9) {
+                // тут нельзя выходить так как просто битым блоком смогут все ноды убить при атаке
+                Controller.getInstance().stopAll(1104);
+            } else {
+                noValid = 999;
+                peer.ban(30, "Block ERROR: " + e.getMessage());
+            }
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
             Controller.getInstance().stopAll(1105);
@@ -1329,9 +1372,9 @@ public class BlockChain {
                 LOGGER.error("MY WinBlock is INVALID! ignore...");
             }
 
-            // сперва в блоке трнзакции освобождаем и ссылку базу
+            // сперва в блоке транзакции освобождаем и ссылку базу
             block.close();
-            // тепеь сам фор базы закрываем - освободим память и чистильщиков кеша внутренние у MapDB
+            // теперь сам фор базы закрываем - освободим память и чистильщиков кеша внутренние у MapDB
             fork.close();
             return false;
         }

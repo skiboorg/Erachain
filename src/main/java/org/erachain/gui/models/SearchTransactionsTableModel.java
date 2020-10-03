@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class SearchTransactionsTableModel extends SearchTableModelCls<Transaction> {
 
-    public static final int COLUMN_TIMESTAMP = 0;
-    public static final int COLUMN_BLOCK = 1;
-    public static final int COLUMN_SEQ_NO = 2;
-    public static final int COLUMN_TYPE = 3;
+    public static final int COLUMN_SEQNO = 0;
+    public static final int COLUMN_TIMESTAMP = 1;
+    public static final int COLUMN_TYPE = 2;
+    public static final int COLUMN_CREATOR = 3;
     public static final int COLUMN_TITLE = 4;
     public static final int COLUMN_KEY = 5;
     public static final int COLUMN_AMOUNT = 6;
@@ -34,8 +34,8 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
     public SearchTransactionsTableModel() {
         super(DCSet.getInstance().getTransactionFinalMap(),
-                new String[]{"Timestamp", "Block", "SeqNo", "Type", "Title", "Key", "Amount", "Favorite"},
-                new Boolean[]{true, true, true, true, true, true, true, true},
+                new String[]{"№", "Timestamp", "Type", "Creator", "Title", "Key", "Amount", "Favorite"},
+                new Boolean[]{false, true, true, true, true, true, true, true},
                 false);
 
     }
@@ -49,7 +49,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
         } catch (NumberFormatException e) {
             Transaction transaction = ((TransactionFinalMap)map).getRecord(string);
             if (transaction != null) {
-                transaction.setDC(DCSet.getInstance());
+                transaction.setDC(DCSet.getInstance(), true);
                 list.add(transaction);
             }
             this.fireTableDataChanged();
@@ -63,7 +63,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
                 list.remove(item);
                 continue;
             }
-            item.setDC_HeightSeq(dcSet);
+            item.setDC(dcSet, false);
         }
 
         this.fireTableDataChanged();
@@ -81,7 +81,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
         if (account != null) {
             // ИЩЕМ по СЧЕТУ
-            list.addAll(((TransactionFinalMap) map).getTransactionsByAddressLimit(account.getShortAddressBytes(), 1000, true));
+            list.addAll(((TransactionFinalMap) map).getTransactionsByAddressLimit(account.getShortAddressBytes(), 1000, true, descending));
 
         }
 
@@ -100,7 +100,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
         String fromWord = null;
         if (false) {
             // TODO сделать поиск по Transaction.searchTransactions
-            Fun.Tuple3<Long, Long, List<Transaction>> result = Transaction.searchTransactions(dcSet, filter, false, 10000, fromID, start);
+            Fun.Tuple3<Long, Long, List<Transaction>> result = Transaction.searchTransactions(dcSet, filter, false, 10000, fromID, start, true);
         } else {
             list.addAll(((FilteredByStringArray) dcSet.getTransactionFinalMap())
                     .getKeysByFilterAsArray(filter, fromWord, fromID, start, step, false));
@@ -112,7 +112,7 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
                 list.remove(item);
                 continue;
             }
-            item.setDC_HeightSeq(dcSet);
+            item.setDC(dcSet, false);
         }
 
         this.fireTableDataChanged();
@@ -133,6 +133,10 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
 
             switch (column) {
+
+                case COLUMN_SEQNO:
+                    return transaction.viewHeightSeq();
+
                 case COLUMN_TIMESTAMP:
 
                     return DateTimeFormat.timestamptoString(transaction.getTimestamp());
@@ -147,9 +151,9 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
                     return transaction.getAmount();//.getAmount(transaction.getCreator()));
 
-                case COLUMN_BLOCK:
+                case COLUMN_CREATOR:
 
-                    return transaction.getBlockHeight();
+                    return transaction.getCreator().getPersonAsString();
 
                 case COLUMN_KEY:
 
@@ -163,8 +167,6 @@ public class SearchTransactionsTableModel extends SearchTableModelCls<Transactio
 
                     return cnt.isTransactionFavorite(transaction);
 
-                case COLUMN_SEQ_NO:
-                    return transaction.getSeqNo();
 
             }
 

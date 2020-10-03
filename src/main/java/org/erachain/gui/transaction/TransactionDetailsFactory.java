@@ -1,7 +1,7 @@
 package org.erachain.gui.transaction;
 
 import org.erachain.core.transaction.*;
-import org.erachain.gui.items.statement.StatementInfo;
+import org.erachain.gui.items.statement.RNoteInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,58 +56,7 @@ public class TransactionDetailsFactory {
             case Transaction.SIGN_NOTE_TRANSACTION:
 
                 RSignNote statement = (RSignNote) transaction;
-                return new StatementInfo(statement);
-
-            case Transaction.REGISTER_NAME_TRANSACTION:
-
-                RegisterNameTransaction nameRegistration = (RegisterNameTransaction) transaction;
-                RegisterNameDetailsFrame registerNameDetailsFrame = new RegisterNameDetailsFrame(nameRegistration);
-                gridBagConstraints.gridy = registerNameDetailsFrame.labelGBC.gridy + 1;
-                registerNameDetailsFrame.add(jLabel9, gridBagConstraints);
-                return registerNameDetailsFrame;
-
-            case Transaction.UPDATE_NAME_TRANSACTION:
-
-                UpdateNameTransaction nameUpdate = (UpdateNameTransaction) transaction;
-
-                UpdateNameDetailsFrame updateNameDetailsFrame = new UpdateNameDetailsFrame(nameUpdate);
-
-                gridBagConstraints.gridy = updateNameDetailsFrame.labelGBC.gridy + 1;
-                updateNameDetailsFrame.add(jLabel9, gridBagConstraints);
-
-                return updateNameDetailsFrame;
-
-            case Transaction.SELL_NAME_TRANSACTION:
-
-                SellNameTransaction nameSale = (SellNameTransaction) transaction;
-
-                SellNameDetailsFrame sellNameDetailsFrame = new SellNameDetailsFrame(nameSale);
-
-                gridBagConstraints.gridy = sellNameDetailsFrame.labelGBC.gridy + 1;
-                sellNameDetailsFrame.add(jLabel9, gridBagConstraints);
-
-                return sellNameDetailsFrame;
-
-            case Transaction.CANCEL_SELL_NAME_TRANSACTION:
-
-                CancelSellNameTransaction cancelNameSale = (CancelSellNameTransaction) transaction;
-                CancelSellNameDetailsFrame cancelSellNameDetailsFrame = new CancelSellNameDetailsFrame(cancelNameSale);
-
-                gridBagConstraints.gridy = cancelSellNameDetailsFrame.labelGBC.gridy + 1;
-                cancelSellNameDetailsFrame.add(jLabel9, gridBagConstraints);
-
-                return cancelSellNameDetailsFrame;
-
-            case Transaction.BUY_NAME_TRANSACTION:
-
-                BuyNameTransaction namePurchase = (BuyNameTransaction) transaction;
-
-                BuyNameDetailsFrame buyNameDetailsFrame = new BuyNameDetailsFrame(namePurchase);
-
-                gridBagConstraints.gridy = buyNameDetailsFrame.labelGBC.gridy + 1;
-                buyNameDetailsFrame.add(jLabel9, gridBagConstraints);
-
-                return buyNameDetailsFrame;
+                return new RNoteInfo(statement);
 
             case Transaction.CREATE_POLL_TRANSACTION:
 

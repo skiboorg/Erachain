@@ -1,20 +1,19 @@
 package org.erachain.gui.items;
 
 import org.erachain.controller.Controller;
-import org.erachain.database.SortableList;
 import org.erachain.database.wallet.FavoriteItemMap;
 import org.erachain.dbs.DBTabImpl;
+import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.ObserverWaiter;
-import org.erachain.gui.models.SortedListTableModelCls;
 import org.erachain.utils.ObserverMessage;
-import org.erachain.utils.Pair;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 @SuppressWarnings("serial")
-public abstract class FavoriteItemModelTable extends SortedListTableModelCls<Long, Object> implements Observer, ObserverWaiter {
+public abstract class FavoriteItemModelTable extends WalletItemTableModel implements Observer, ObserverWaiter {
 
     private final int RESET_EVENT;
     private final int ADD_EVENT;
@@ -27,7 +26,7 @@ public abstract class FavoriteItemModelTable extends SortedListTableModelCls<Lon
                                   int resetObserver, int addObserver, int deleteObserver, int listObserver, int favorite) {
         super(columnNames, columnAutoHeight, false);
 
-        // в головной гласс нельзя таблицу передавать - чтобы там лишний раз не запускалась иницализация наблюдения
+        // в головной класс нельзя таблицу передавать - чтобы там лишний раз не запускалась иницализация наблюдения
         // оно еще ен готово так как таблица вторая не присвоена - ниже привяжемся к наблюдениям
         this.map = map;
         this.favoriteMap = favoriteMap;
@@ -60,11 +59,12 @@ public abstract class FavoriteItemModelTable extends SortedListTableModelCls<Lon
             needUpdate = false;
 
         } else if (type == ADD_EVENT) {
-            list.add(Controller.getInstance().getAsset((long) message.getValue()));
+            list.add(map.get(message.getValue()));
             needUpdate = true;
 
         } else if (type == DELETE_EVENT) {
-            list.remove(Controller.getInstance().getAsset((long) message.getValue()));
+            //list.remove(Controller.getInstance().getAsset((long) message.getValue()));
+            list.remove(map.get(message.getValue()));
             needUpdate = true;
 
         } else if (type == RESET_EVENT) {
@@ -74,48 +74,37 @@ public abstract class FavoriteItemModelTable extends SortedListTableModelCls<Lon
         }
     }
 
-    // необходимо переопределить так у супер класса по размеру SortedList
-    // а нам надо по Лист
-    @Override
-    public int getRowCount() {
-        if (list == null) {
-            return 0;
-        }
-
-        return list.size();
-    }
-
-    @Override
-    public Object getItem(int k) {
-        return list.get(k);
-    }
-
-    //public abstract int getMapSize();
-    @Override
-    public long getMapSize() {
-        return favoriteMap.size();
-    }
-
     @Override
     public void getInterval() {
-
-        getIntervalThis(start, step);
-
-    }
-
-    @Override
-    public void getIntervalThis(long startBack, int limit) {
-        listSorted = new SortableList<Long, Object>(map, favoriteMap.getFromToKeys(0, Long.MAX_VALUE));
-        listSorted.sort();
-
+        Object key;
+        int count = 0;
         list = new ArrayList<>();
-        for (Pair<Long, Object> key: listSorted) {
-            if (key.getB() == null) {
-                continue;
+        if (startKey == null) {
+            try (IteratorCloseable iterator = favoriteMap.getIterator()) {
+                while (iterator.hasNext() && count < step) {
+                    key = iterator.next();
+                    Object item = map.get(key);
+                    if (item == null)
+                        // это может бюыть так как пока еще не вся цепочка засосалась но Избранные уже заданы
+                        continue;
+                    list.add(item);
+                    count++; // только теперь счетчик увеличим - иначе пустые сбивают счет
+                }
+            } catch (IOException e) {
             }
-            list.add(map.get(key.getA()));
+        } else {
+            try (IteratorCloseable iterator = favoriteMap.getIterator()) {
+                while (iterator.hasNext() && count++ < step) {
+                    key = iterator.next();
+                    Object item = map.get(key);
+                    if (item == null)
+                        // это может бюыть так как пока еще не вся цепочка засосалась но Избранные уже заданы
+                        continue;
+                    list.add(item);
+                }
+            } catch (IOException e) {
+            }
         }
-
     }
 
     public void addObservers() {

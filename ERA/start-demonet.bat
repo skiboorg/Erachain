@@ -1,9 +1,9 @@
 @ECHO OFF
 
-set app=exochain
-set task=exochain-demo
+set app=darachain
+set task=darachain-demo
 
-set pars=-testnet=demo
+set pars=-pass=1 -dbschain=mapdb -bugs=7 -datachainpath=dataDEMO -testnet=demo
 
 set jpars=
 

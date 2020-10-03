@@ -180,6 +180,9 @@ public class OnDealClick {
             case Transaction.HASH_ALREDY_EXIST:
                 mess = "Hash already exist";
                 break;
+            case Transaction.WRONG_SIGNER:
+                mess = "Wrong Signer";
+                break;
 
             case Transaction.NAME_NOT_LOWER_CASE:
                 mess = "Name not lower case";
@@ -418,6 +421,9 @@ public class OnDealClick {
             case Transaction.ITEM_PERSON_NOT_EXIST:
                 mess = "Item person does not exist";
                 break;
+            case Transaction.ITEM_POLL_NOT_EXIST:
+                mess = "Item poll does not exist";
+                break;
             case Transaction.ITEM_UNION_NOT_EXIST:
                 mess = "Item union does not exist";
                 break;
@@ -465,6 +471,9 @@ public class OnDealClick {
                 break;
             case Transaction.INVALID_BLOCK_TRANS_SEQ_ERROR:
                 mess = "Invalid block record sequence";
+                break;
+            case Transaction.ACCOUNT_ACCSES_DENIED:
+                mess = "Access denied for account";
                 break;
             case Transaction.KEY_COLLISION:
                 mess = "Key collision, try again";

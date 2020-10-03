@@ -13,22 +13,20 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.datachain.DCSet;
+import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.items.assets.AssetInfo;
 import org.erachain.gui.items.assets.ComboBoxAssetsModel;
 import org.erachain.gui.library.MDecimalFormatedTextField;
+import org.erachain.gui.library.RecipientAddress;
 import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
 import org.erachain.utils.Converter;
 import org.erachain.utils.MenuPopupUtil;
-import org.erachain.utils.NameUtils;
-import org.erachain.utils.NameUtils.NameResult;
-import org.erachain.utils.Pair;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
@@ -36,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 
 //import org.erachain.gui.AccountRenderer;
 
-public class AccountAssetActionPanelCls extends javax.swing.JPanel {
+public class AccountAssetActionPanelCls extends IconPanel implements RecipientAddress.RecipientAddressInterface {
 
     // TODO - "A" - &
     //static String wrongFirstCharOfAddress = "A";
@@ -76,10 +74,11 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
     private AccountsComboBoxModel accountsModel;
 
-    public AccountAssetActionPanelCls(boolean backward, String panelName, AssetCls assetIn, String titleIn,
+    public AccountAssetActionPanelCls(String panelName, String title, boolean backward, AssetCls assetIn,
                                       int balancePosition,
                                       Account accountFrom, Account accountTo, String message) {
 
+        super(panelName, title);
         if (assetIn == null)
             this.asset = Controller.getInstance().getAsset(2);
         else
@@ -87,16 +86,13 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
         // необходимо входящий параметр отделить так как ниже он по событию изменения актива будет как НУЛь вызваться
         // поэтому тут только приватную переменную юзаем дальше
-        if (titleIn == null) {
+        if (title == null) {
             this.title = asset.viewAssetTypeActionTitle(backward, balancePosition);
-        } else {
-            this.title = titleIn;
         }
 
         if (panelName == null) {
-            setName(Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition) + " [" + asset.getKey() + " ]"));
-        } else {
-            setName(Lang.getInstance().translate(panelName));
+            this.panelName = Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition)) + " [" + asset.getKey() + " ]";
+            setName(this.panelName);
         }
 
         this.account = accountFrom;
@@ -160,6 +156,7 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
         }
 
         this.jComboBox_Fee.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
+        jComboBox_Fee.setVisible(Gui.SHOW_FEE_POWER);
 
         //ON FAVORITES CHANGE
 
@@ -202,8 +199,8 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
                         jComboBox_Account.repaint();
                     }
 
-                    String titleLocal = Lang.getInstance().translate(title);
-                    jLabel_Title.setText((titleLocal == null ? title : titleLocal).replace("%asset%", asset.viewName()));
+                    String titleLocal = Lang.getInstance().translate(AccountAssetActionPanelCls.this.title);
+                    jLabel_Title.setText((titleLocal == null ? AccountAssetActionPanelCls.this.title : titleLocal).replace("%asset%", asset.viewName()));
 
                     if (panelName == null) {
                         setName(Lang.getInstance().translate(asset.viewAssetTypeAction(backward, balancePosition)) + " ]" + asset.getKey() + " ]");
@@ -234,24 +231,6 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
             }
         });
 
-        // set acoount TO
-        this.jTextField_To.getDocument().addDocumentListener(new DocumentListener() {
-
-            @Override
-            public void changedUpdate(DocumentEvent arg0) {
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent arg0) {
-                refreshReceiverDetails();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent arg0) {
-                refreshReceiverDetails();
-            }
-        });
-
         this.jLabel_Mess_Title.setText(Lang.getInstance().translate("Title") + ":");
         this.jLabel_Mess.setText(Lang.getInstance().translate("Message") + ":");
         this.jCheckBox_Enscript.setText(Lang.getInstance().translate("Encrypt message") + ":");
@@ -264,10 +243,10 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
                     + account.getBalanceInPosition(asset.getKey(), balancePosition).b.toPlainString());
         }
 
-        this.jLabel_Fee.setText(Lang.getInstance().translate("Fee level") + ":");
+        this.jLabel_Fee.setText(Lang.getInstance().translate("Fee Power") + ":");
+        jLabel_Fee.setVisible(Gui.SHOW_FEE_POWER);
 
         // CONTEXT MENU
-        MenuPopupUtil.installContextMenu(this.jTextField_To);
         MenuPopupUtil.installContextMenu(this.jTextField_Amount);
         MenuPopupUtil.installContextMenu(this.jTextArea_Description);
         MenuPopupUtil.installContextMenu(this.jTextField_Recive_Detail);
@@ -284,9 +263,9 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
             jButton_ok.setEnabled(false);
         } else {
             if (recipient instanceof PublicKeyAccount) {
-                jTextField_To.setText(((PublicKeyAccount) recipient).getBase58());
+                recipientAddress.setSelectedAddress(((PublicKeyAccount) recipient).getBase58());
             } else {
-                jTextField_To.setText(recipient.getAddress());
+                recipientAddress.setSelectedAddress(recipient.getAddress());
             }
             jButton_ok.setEnabled(true);
         }
@@ -296,9 +275,9 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
     protected void checkReadyToOK() {
 
         try {
-            String recipientAddress = jTextField_To.getText().trim();
-            if (recipientAddress.isEmpty() ||
-                    !Crypto.getInstance().isValidAddress(recipientAddress) && !PublicKeyAccount.isValidPublicKey(recipientAddress)) {
+            String recipientAddressStr = recipientAddress.getSelectedAddress().trim();
+            if (recipientAddressStr.isEmpty() ||
+                    !Crypto.getInstance().isValidAddress(recipientAddressStr) && !PublicKeyAccount.isValidPublicKey(recipientAddressStr)) {
                 jButton_ok.setEnabled(false);
                 return;
             }
@@ -315,12 +294,13 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
         checkReadyToOK();
 
-        String toValue = jTextField_To.getText();
+        String recipient = recipientAddress.getSelectedAddress();
         AssetCls asset = ((AssetCls) jComboBox_Asset.getSelectedItem());
 
-        this.jTextField_Recive_Detail.setText(Account.getDetails(toValue, asset));
+        this.jTextField_Recive_Detail.setText(Lang.getInstance().translate(
+                Account.getDetailsForEncrypt(recipient, asset.getKey(),
+                        this.jCheckBox_Enscript.isSelected())));
 
-        //this.jCheckBox_Enscript.setEnabled(true);
     }
 
     public boolean cheskError() {
@@ -347,27 +327,20 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
         }
 
         //READ RECIPIENT
-        String recipientAddress = jTextField_To.getText().trim();
+        String recipientAddressStr = recipientAddress.getSelectedAddress().trim();
 
         //ORDINARY RECIPIENT
-        if (Crypto.getInstance().isValidAddress(recipientAddress)) {
-            this.recipient = new Account(recipientAddress);
+        if (Crypto.getInstance().isValidAddress(recipientAddressStr)) {
+            this.recipient = new Account(recipientAddressStr);
         } else {
-            if (PublicKeyAccount.isValidPublicKey(recipientAddress)) {
-                recipient = new PublicKeyAccount(recipientAddress);
+            if (PublicKeyAccount.isValidPublicKey(recipientAddressStr)) {
+                recipient = new PublicKeyAccount(recipientAddressStr);
             } else {
-                //IS IS NAME of RECIPIENT - resolve ADDRESS
-                Pair<Account, NameResult> result = NameUtils.nameToAdress(recipientAddress);
+                JOptionPane.showMessageDialog(null, "INVALID", Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
 
-                if (result.getB() == NameResult.OK) {
-                    recipient = result.getA();
-                } else {
-                    JOptionPane.showMessageDialog(null, result.getB().getShortStatusMessage(), Lang.getInstance().translate("Error"), JOptionPane.ERROR_MESSAGE);
-
-                    //ENABLE
-                    this.jButton_ok.setEnabled(true);
-                    return false;
-                }
+                //ENABLE
+                this.jButton_ok.setEnabled(true);
+                return false;
             }
         }
 
@@ -459,7 +432,7 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
             if (encryptMessage) {
                 //sender
-                PrivateKeyAccount account = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress().toString());
+                PrivateKeyAccount account = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
                 byte[] privateKey = account.getPrivateKey();
 
                 //recipient
@@ -511,6 +484,12 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
 
     }
 
+    // выполняемая процедура при изменении адреса получателя
+    @Override
+    public void recipientAddressWorker(String e) {
+        refreshReceiverDetails();
+    }
+
     public void onSendClick() {
 
     }
@@ -526,7 +505,6 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jLabel_Recive_Detail = new javax.swing.JLabel();
-        jTextField_To = new javax.swing.JTextField();
         jLabel_Account = new javax.swing.JLabel();
         jLabel_To = new javax.swing.JLabel();
         jComboBox_Account = new javax.swing.JComboBox<>();
@@ -563,7 +541,7 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 0);
         add(jLabel_Recive_Detail, gridBagConstraints);
 
-        jTextField_To.setText("");
+        recipientAddress = new RecipientAddress(this);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
@@ -571,7 +549,7 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.3;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 15);
-        add(jTextField_To, gridBagConstraints);
+        add(recipientAddress, gridBagConstraints);
 
         jLabel_Account.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel_Account.setText("jLabel2");
@@ -768,6 +746,7 @@ public class AccountAssetActionPanelCls extends javax.swing.JPanel {
     public MDecimalFormatedTextField jTextField_Amount;
     public javax.swing.JTextField jTextField_Mess_Title;
     private javax.swing.JTextField jTextField_Recive_Detail;
-    public javax.swing.JTextField jTextField_To;
+    public RecipientAddress recipientAddress;
     // End of variables declaration
+
 }

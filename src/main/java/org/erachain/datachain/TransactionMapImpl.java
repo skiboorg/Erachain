@@ -358,7 +358,7 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
         try {
             Transaction transaction = super.get(key);
             if (transaction != null) {
-                transaction.setHeightSeq(0, 0);
+                transaction.resetSeqNo();
             }
             return transaction;
         } catch (Exception e) {
@@ -367,14 +367,14 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
         return null;
     }
 
-    public Collection<Long> getFromToKeys(long fromKey, int limit) {
+    public Collection<Long> getFromToKeys(Long fromKey, int limit) {
 
         List<Long> treeKeys = new ArrayList<Long>();
 
         // DESCENDING + 1000
         try (IteratorCloseable<Long> iterator = ((TransactionSuit) map).getTimestampIterator(true)) {
 
-            Iterators.advance(iterator, (int) fromKey);
+            //Iterators.advance(iterator, (int) fromKey);
 
             // тут не нужно уже делать Закрываемый Итератор - так достаточно того что внутренний Итератор закроется
             Iterator<Long> iteratorLimited = Iterators.limit(iterator, limit);
@@ -536,7 +536,7 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
                     ok = false;
 
                 if (!ok) {
-                    transaction.setDC((DCSet) databaseSet);
+                    transaction.setDC((DCSet) databaseSet, true);
                     HashSet<Account> recipients = transaction.getRecipientAccounts();
 
                     if (recipients == null || recipients.isEmpty() || !recipients.contains(account)) {
@@ -572,7 +572,7 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
                     break;
 
                 transaction = this.get(iterator.next());
-                transaction.setDC((DCSet) databaseSet);
+                transaction.setDC((DCSet) databaseSet, true);
                 values.add(transaction);
             }
         } catch (IOException e) {
@@ -582,18 +582,17 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
     }
 
     /**
-     * @param address    may be Null for ALL
+     * @param account    may be Null for ALL
      * @param type
      * @param timestamp
      * @param count
      * @param descending
      * @return
      */
-    public List<Transaction> getTransactions(String address, int type, long timestamp, int count, boolean descending) {
+    public List<Transaction> getTransactions(Account account, int type, long timestamp, int count, boolean descending) {
 
         ArrayList<Transaction> values = new ArrayList<>();
         try (IteratorCloseable<Long> iterator = this.getIterator(TransactionSuit.TIMESTAMP_INDEX, descending)) {
-            Account account = address == null ? null : new Account(address);
 
             int i = 0;
             Transaction transaction;
@@ -603,7 +602,7 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
                         || transaction.getTimestamp() < timestamp)
                     continue;
 
-                transaction.setDC((DCSet) databaseSet);
+                transaction.setDC((DCSet) databaseSet, true);
 
                 if ((account == null || transaction.isInvolved(account))) {
                     values.add(transaction);
@@ -631,7 +630,7 @@ public class TransactionMapImpl extends DBTabImpl<Long, Transaction>
                 if (type != 0 && type != transaction.getType())
                     continue;
 
-                transaction.setDC((DCSet) databaseSet);
+                transaction.setDC((DCSet) databaseSet, true);
                 HashSet<Account> recipients = transaction.getRecipientAccounts();
                 if (recipients == null || recipients.isEmpty())
                     continue;

@@ -21,6 +21,7 @@ public class ApiService extends Observable {
     public ApiService() {
         //CREATE CONFIG
         Set<Class<?>> s = new HashSet<Class<?>>();
+        s.add(RPCResource.class);
         s.add(CoreResource.class);
         s.add(SeedResource.class);
         s.add(PeersResource.class);
@@ -31,20 +32,22 @@ public class ApiService extends Observable {
         s.add(WalletResource.class);
         s.add(RSendResource.class);
         s.add(RecPaymentResource.class);
-        s.add(NamesResource.class);
-        s.add(NameSalesResource.class);
-        s.add(PollsResource.class);
         s.add(ArbitraryTransactionsResource.class);
-        s.add(NamePaymentResource.class);
         s.add(ATResource.class);
         s.add(BlogPostResource.class);
         s.add(BlogResource.class);
         //s.add(CalcFeeResource.class);
-        s.add(NameStorageResource.class);
+
         //	s.add(Rec_MessageResource.class);
         s.add(RecResource.class);
         s.add(RecHashesResource.class);
-        s.add(AssetsResource.class);
+
+        s.add(ItemAssetsResource.class);
+        s.add(ItemPersonsResource.class);
+        s.add(ItemPollsResource.class);
+        s.add(ItemStatusesResource.class);
+        s.add(ItemTemplatesResource.class);
+
         s.add(RecStatementResource.class);
         s.add(MultiPaymentResource.class);
         s.add(TradeResource.class);

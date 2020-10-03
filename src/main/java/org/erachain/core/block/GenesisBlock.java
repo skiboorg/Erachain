@@ -21,6 +21,7 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
+import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class GenesisBlock extends Block {
             this.testnetInfo += "\nStart the other nodes with command" + ":";
             this.testnetInfo += "\njava -Xms512m -Xmx1024m -jar erachain.jar -testnet=" + genesisTimestamp;
 
-        } else if (BlockChain.SIDE_MODE) {
+        } else if (BlockChain.CLONE_MODE) {
 
             sideSettingString = "";
             sideSettingString += Settings.genesisJSON.get(0).toString();
@@ -506,7 +507,12 @@ public class GenesisBlock extends Block {
         makeTransactionsRAWandHASH();
 
         // SIGN simple as HASH
-        this.signature = generateHeadHash();
+        if (BlockChain.GENESIS_SIGNATURE == null) {
+            this.signature = generateHeadHash();
+        } else {
+            this.signature = BlockChain.GENESIS_SIGNATURE;
+        }
+
     }
 
     // make assets
@@ -554,10 +560,10 @@ public class GenesisBlock extends Block {
         switch (key) {
             case (int) TemplateCls.LICENSE_KEY:
                 String license = "";
-                if (!(BlockChain.TESTS_VERS != 0 && (BlockChain.SIDE_MODE || BlockChain.TEST_MODE))) {
+                if (!(BlockChain.TESTS_VERS != 0 && (BlockChain.CLONE_MODE || BlockChain.TEST_MODE))) {
                     try {
                         //File file = new File("License Erachain.txt");
-                        File file = new File("Erachain Licence Agreement (genesis).txt");
+                        File file = new File("Licence Agreement (genesis).txt");
                         //READ SETTINS JSON FILE
                         List<String> lines = Files.readLines(file, Charsets.UTF_8);
 
@@ -634,6 +640,49 @@ public class GenesisBlock extends Block {
         ///// STATUSES
         for (int i = 1; i < StatusCls.RIGHTS_KEY; i++)
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
+
+        PublicKeyAccount coinsOwner = new PublicKeyAccount("AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6");
+        AssetVenture asset = new AssetVenture((byte) 0, coinsOwner, "AS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "BTC",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "GOLD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "UAH",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "KZT",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "KGS",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "BYN",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+        asset = new AssetVenture((byte) 0, coinsOwner, "CNY",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "RUB",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "EUR",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, coinsOwner, "USD",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+
     }
 
     //GETTERS
@@ -699,6 +748,7 @@ public class GenesisBlock extends Block {
     //VALIDATE
 
     public byte[] generateHeadHash() {
+
         byte[] data = new byte[0];
 
         //WRITE VERSION
@@ -715,10 +765,10 @@ public class GenesisBlock extends Block {
         genesisTimestampBytes = Bytes.ensureCapacity(genesisTimestampBytes, 8, 0);
         data = Bytes.concat(data, genesisTimestampBytes);
 
-        if (BlockChain.SIDE_MODE) {
+        if (BlockChain.CLONE_MODE) {
             //WRITE SIDE SETTINGS
-            byte[] genesisSideBytes = this.sideSettingString.getBytes(StandardCharsets.UTF_8);
-            data = Bytes.concat(data, genesisSideBytes);
+            byte[] genesisjsonCloneBytes = this.sideSettingString.getBytes(StandardCharsets.UTF_8);
+            data = Bytes.concat(data, genesisjsonCloneBytes);
         }
 
 		/*
@@ -749,7 +799,10 @@ public class GenesisBlock extends Block {
 
         //VALIDATE BLOCK SIGNATURE
         byte[] digest = generateHeadHash();
-        if (!Arrays.equals(digest, this.signature)) {
+        if (!Arrays.equals(digest,
+                // TODO - как защитить свой оригинальныЙ? Если задан наш оригинальный - то его и берем
+                BlockChain.GENESIS_SIGNATURE_TRUE == null ?
+                        this.signature : BlockChain.GENESIS_SIGNATURE_TRUE)) {
             return false;
         }
 

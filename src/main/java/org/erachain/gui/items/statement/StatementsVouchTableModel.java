@@ -16,9 +16,9 @@ import java.util.List;
 
 public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
 
-    public static final int COLUMN_TIMESTAMP = 0;
-    public static final int COLUMN_CREATOR = 1;
-    public static final int COLUMN_HEIGHT = 2;
+    public static final int COLUMN_SEQNO = 0;
+    public static final int COLUMN_TIMESTAMP = 1;
+    public static final int COLUMN_CREATOR = 2;
     public static final int COLUMN_CREATOR_NAME = 30;
     private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,7 @@ public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
     public StatementsVouchTableModel(Transaction transaction) {
 
         super(DCSet.getInstance().getVouchRecordMap(),
-                new String[]{"Timestamp", "Voucher / Signatory", "Height"}, null, false);
+                new String[]{"№", "Timestamp", "Voucher / Signatory"}, null, false);
 
         if (transaction != null) {
             blockNo = transaction.getBlockHeight();
@@ -78,6 +78,10 @@ public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
             return null;
 
         switch (column) {
+
+            case COLUMN_SEQNO:
+                return transaction.viewHeightSeq();
+
             case COLUMN_TIMESTAMP:
 
                 return DateTimeFormat.timestamptoString(transaction.getTimestamp());
@@ -85,10 +89,6 @@ public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
             case COLUMN_CREATOR:
 
                 return transaction.getCreator().getPersonAsString();
-
-            case COLUMN_HEIGHT:
-
-                return transaction.getBlockHeight();
 
             case COLUMN_CREATOR_NAME:
                 return transaction.getCreator().getPerson().b.getName();
@@ -99,7 +99,7 @@ public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
     }
 
     @Override
-    public void getIntervalThis(long start, int limit) {
+    public void getInterval() {
 
         if (list == null) {
             list = new ArrayList<>();
@@ -108,7 +108,7 @@ public class StatementsVouchTableModel extends TimerTableModelCls<RVouch> {
         }
 
         // read indexes to DB
-        Tuple2<BigDecimal, List<Long>> vouches = ((VouchRecordMap)map).get(Transaction.makeDBRef(this.blockNo, this.recNo));
+        Tuple2<BigDecimal, List<Long>> vouches = ((VouchRecordMap) map).get(Transaction.makeDBRef(this.blockNo, this.recNo));
         if (vouches == null) {
             fireTableDataChanged();
             return;

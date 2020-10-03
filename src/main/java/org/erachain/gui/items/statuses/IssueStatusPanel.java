@@ -7,6 +7,8 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.transaction.IssueStatusRecord;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.items.TypeOfImage;
 import org.erachain.gui.library.AddImageLabel;
@@ -15,7 +17,6 @@ import org.erachain.gui.library.Library;
 import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,9 +24,11 @@ import java.awt.*;
 import static org.erachain.gui.items.utils.GUIConstants.*;
 import static org.erachain.gui.items.utils.GUIUtils.checkWalletUnlock;
 
-public class IssueStatusPanel extends JPanel  {
+public class IssueStatusPanel extends IconPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "IssueStatusPanel.png";
+    public static String NAME = "IssueStatusPanel";
+    public static String TITLE = "Issue Status";
+
     private JComboBox<Account> cbxFrom;
     private JComboBox<String> txtFeePow = new JComboBox<String>();
     private JTextField txtName = new JTextField();
@@ -37,6 +40,8 @@ public class IssueStatusPanel extends JPanel  {
 
 
     public IssueStatusPanel() {
+        super(NAME, TITLE);
+
         setLayout(new GridBagLayout());
         String colorText = "FF0000";
 
@@ -105,7 +110,8 @@ public class IssueStatusPanel extends JPanel  {
         gbcDescriptionLabel.anchor = GridBagConstraints.NORTHEAST;
         add(descriptionLabel, gbcDescriptionLabel);
 
-        JLabel feeLabel = new JLabel(Lang.getInstance().translate("Fee Power") + " (0..6)" + ":");
+        JLabel feeLabel = new JLabel(Lang.getInstance().translate("Fee Power") + ":");
+        feeLabel.setVisible(Gui.SHOW_FEE_POWER);
         GridBagConstraints gbcFeeLabel = new GridBagConstraints();
         gbcFeeLabel.gridx = 1;
         gbcFeeLabel.gridy = 6;
@@ -154,6 +160,7 @@ public class IssueStatusPanel extends JPanel  {
 
         txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
         GridBagConstraints gbcTxtFeePow = new GridBagConstraints();
         gbcTxtFeePow.gridx = 2;
         gbcTxtFeePow.gridy = 6;
@@ -195,7 +202,7 @@ public class IssueStatusPanel extends JPanel  {
         byte[] icon = addLogoIconPanel.getImgBytes();
         byte[] image = addImageLabel.getImgBytes();
         boolean unique = jcheckUnique.isSelected();
-        PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+        PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
         if (creator == null) {
             JOptionPane.showMessageDialog(new JFrame(),
                     Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -246,13 +253,4 @@ public class IssueStatusPanel extends JPanel  {
         txtFeePow.setSelectedItem("0");
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

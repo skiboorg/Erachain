@@ -1,7 +1,6 @@
 package org.erachain.gui.library;
 
 import com.github.rjeschke.txtmark.Processor;
-//import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.Theme;
 import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
@@ -24,6 +23,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+//import net.sf.tinylaf.Theme;
+
 // почемуто иногда она не может найти эту библиотеку при запуске JAR - надо закоментить ее и опять вставить здесь
 // по Alt-Enter на Класса с вызовом Theme. ниже в коде
 
@@ -44,18 +45,18 @@ public class Library {
             return;
 
         if (transaction.noDCSet())
-            transaction.setDC_HeightSeq(DCSet.getInstance());
+            transaction.setDC(DCSet.getInstance(), false);
 
         switch ( transaction.getType()) {
             case Transaction.SEND_ASSET_TRANSACTION:
                 RSend r_Send = (RSend) transaction;
 
                 // AS RECIPIENT
-                Account account = Controller.getInstance().getAccountByAddress(r_Send.getRecipient().getAddress());
+                Account account = Controller.getInstance().getWalletAccountByAddress(r_Send.getRecipient().getAddress());
                 if (account != null) {
                     if (r_Send.hasAmount()) {
                         if (Settings.getInstance().isSoundReceivePaymentEnabled())
-                            PlaySound.getInstance().playSound("receivepayment.wav", transaction.getSignature());
+                            PlaySound.getInstance().playSound("receivepayment.wav");
 
                         SysTray.getInstance().sendMessage("Payment received",
                                 "From: " + r_Send.getCreator().getPersonAsString() + "\nTo: " + r_Send.getRecipient().getPersonAsString() + "\n"
@@ -67,7 +68,7 @@ public class Library {
 
                     } else {
                         if (Settings.getInstance().isSoundReceiveMessageEnabled())
-                            PlaySound.getInstance().playSound("receivemessage.wav", transaction.getSignature());
+                            PlaySound.getInstance().playSound("receivemessage.wav");
 
                         SysTray.getInstance().sendMessage("Message received",
                                 "From: " + r_Send.getCreator().getPersonAsString() + "\nTo: " + r_Send.getRecipient().getPersonAsString() + "\n"
@@ -80,12 +81,12 @@ public class Library {
                     return;
                 }
 
-                account = Controller.getInstance().getAccountByAddress(r_Send.getCreator().getAddress());
+                account = Controller.getInstance().getWalletAccountByAddress(r_Send.getCreator().getAddress());
                 if (account != null) {
                     if (r_Send.hasAmount()) {
 
                         if (Settings.getInstance().isSoundNewTransactionEnabled())
-                            PlaySound.getInstance().playSound("newtransaction.wav", transaction.getSignature());
+                            PlaySound.getInstance().playSound("newtransaction.wav");
 
                         SysTray.getInstance().sendMessage("Payment send",
                                 "From: " + transaction.getCreator().getPersonAsString() + "\nTo: " + r_Send.getRecipient().getPersonAsString() + "\n"
@@ -98,7 +99,7 @@ public class Library {
                     } else {
 
                         if (Settings.getInstance().isSoundNewTransactionEnabled())
-                            PlaySound.getInstance().playSound("newtransaction.wav", transaction.getSignature());
+                            PlaySound.getInstance().playSound("newtransaction.wav");
 
                         SysTray.getInstance().sendMessage("Message send",
                                 "From: " + transaction.getCreator().getPersonAsString() + "\nTo: " + r_Send.getRecipient().getPersonAsString() + "\n"
@@ -111,10 +112,10 @@ public class Library {
                 }
 
             default:
-                account = Controller.getInstance().getAccountByAddress(transaction.getCreator().getAddress());
+                account = Controller.getInstance().getWalletAccountByAddress(transaction.getCreator().getAddress());
                 if (account != null) {
                     if (Settings.getInstance().isSoundNewTransactionEnabled()) {
-                        PlaySound.getInstance().playSound("newtransaction.wav", transaction.getSignature());
+                        PlaySound.getInstance().playSound("newtransaction.wav");
                     }
 
                     SysTray.getInstance().sendMessage("Transaction send",
@@ -126,9 +127,7 @@ public class Library {
         }
     }
 
-    public static void setGuiLookAndFeel(String text) {
-        String name_font = "Courier";
-        int size_font;
+    public static void setGuiLookAndFeel() {
 
         // theme
         String name_Theme = Settings.getInstance().get_LookAndFell();
@@ -151,13 +150,13 @@ public class Library {
                     | UnsupportedLookAndFeelException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+                //UIManager.getLookAndFeel();
             }
         }
 
         if (name_Theme.equals("Other")) {
 
             try {
-
                 //UIManager.setLookAndFeel("de.muntjak.tinylookandfeel.TinyLookAndFeel");
                 UIManager.setLookAndFeel("net.sf.tinylaf.TinyLookAndFeel");
             } catch (Exception ex) {
@@ -197,13 +196,8 @@ public class Library {
         JFrame.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
 
-        if (text == "") {
-            size_font = new Integer(Settings.getInstance().get_Font());
-            name_font = Settings.getInstance().get_Font_Name();
-
-        } else {
-            size_font = new Integer(text);
-        }
+        int size_font = new Integer(Settings.getInstance().get_Font());
+        String name_font = Settings.getInstance().get_Font_Name();
 
         Font font = new Font(name_font, Font.TRUETYPE_FONT, size_font);
         UIManager.put("Button.font", font);
@@ -415,7 +409,10 @@ public class Library {
             return descr;
 
         // PLAIN TEXT
-        return descr.replaceAll(" ", "&ensp;").replaceAll("\t", "&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;")
+        return descr.replaceAll(" ", "&ensp;")
+                .replaceAll("\t", "&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
                 .replaceAll("\n", "<br>");
 
     }
@@ -477,42 +474,6 @@ public class Library {
         case Transaction.SIGN_NOTE_TRANSACTION:
 
             jsonString = ((RSignNote) trans).toJson().toJSONString();
-            break;
-            
-        case Transaction.REGISTER_NAME_TRANSACTION:
-
-            jsonString = ((RegisterNameTransaction) trans).toJson().toJSONString();
-            break;
-
-        case Transaction.UPDATE_NAME_TRANSACTION:
-
-            jsonString = ((UpdateNameTransaction) trans).toJson().toJSONString();
-            break;
-
-        case Transaction.SELL_NAME_TRANSACTION:
-
-            jsonString = ((SellNameTransaction) trans).toJson().toJSONString();
-            break;
-
-        case Transaction.CANCEL_SELL_NAME_TRANSACTION:
-
-            jsonString = ((CancelSellNameTransaction) trans).toJson().toJSONString();
-            break;
-
-        case Transaction.BUY_NAME_TRANSACTION:
-
-            jsonString = ((BuyNameTransaction) trans).toJson().toJSONString();
-            break;
-
-        case Transaction.CREATE_POLL_TRANSACTION:
-
-            jsonString = ((CreatePollTransaction) trans).toJson().toJSONString();
-
-            break;
-
-        case Transaction.VOTE_ON_POLL_TRANSACTION:
-
-            jsonString = ((VoteOnPollTransaction) trans).toJson().toJSONString();
             break;
 
         case Transaction.VOTE_ON_ITEM_POLL_TRANSACTION:

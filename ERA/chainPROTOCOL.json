@@ -1,10 +1,10 @@
 {
   // peers from external source
-  "peersURL": "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json",
+  //"peersURL": "https://raw.githubusercontent.com/darachain/darachain-public/master/peers.json",
   // Blocks period [sec], minumum: 3, default: 30
   "blockPeriod": 60,
   // external Block Explorer
-  "explorer": "http://my-sidechain.dom:9057",
+  "explorer": "http://explorer.darachain.org:9077",
 
   "sideLicense": "Sidechain Licence Agreement.pdf",
 
@@ -32,103 +32,121 @@
       12,
       "BTC",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     /////// COMMODITY
     [
       21,
       "GOLD",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       22,
       "OIL",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       23,
       "GAS",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       24,
       "BREND",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     /////// FIATCURRENCY
+    [
+      82,
+      "UAH",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      83,
+      "KZT",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      84,
+      "KGS",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
+    [
+      85,
+      "BYN",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
     [
       86,
       "TRY",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       87,
       "SGD",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       88,
       "AUD",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       89,
       "CHF",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       90,
       "GBP",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       91,
       "JPY",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       92,
       "RUB",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       93,
       "CNY",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       94,
       "EUR",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ],
     [
       95,
       "USD",
       0,
-      "7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
     ]
   ],
 
   "persons": [
     // PERSON KEY, NAME, BIRTH TIMESTAMP, CREATOR
-    [
-      1001,
-      "DMITRII ERMOLAEV",
-      148293470000,
-      "7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh"
-    ]
   ]
 }

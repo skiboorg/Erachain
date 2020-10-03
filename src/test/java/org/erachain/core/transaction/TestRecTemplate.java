@@ -89,7 +89,7 @@ public class TestRecTemplate {
 
         //CREATE ISSUE PLATE TRANSACTION
         issueTemplateRecord = new IssueTemplateRecord(maker, template, FEE_POWER, timestamp, maker.getLastTimestamp(db)[0]);
-        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1);
+        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueTemplateRecord.sign(maker, Transaction.FOR_NETWORK);
         if (process) {
             issueTemplateRecord.process(gb, Transaction.FOR_NETWORK);
@@ -136,7 +136,7 @@ public class TestRecTemplate {
         //CREATE ISSUE PLATE TRANSACTION
         IssueTemplateRecord issueTemplateRecord = new IssueTemplateRecord(maker, template, FEE_POWER, timestamp, maker.getLastTimestamp(db)[0]);
         issueTemplateRecord.sign(maker, Transaction.FOR_NETWORK);
-        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1);
+        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueTemplateRecord.process(gb, Transaction.FOR_NETWORK);
 
         //CONVERT TO BYTES
@@ -193,7 +193,7 @@ public class TestRecTemplate {
 
         //CREATE ISSUE PLATE TRANSACTION
         IssueTemplateRecord issueTemplateRecord = new IssueTemplateRecord(maker, template, FEE_POWER, timestamp, maker.getLastTimestamp(db)[0]);
-        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1);
+        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         assertEquals(Transaction.VALIDATE_OK, issueTemplateRecord.isValid(Transaction.FOR_NETWORK, flags));
 
         issueTemplateRecord.sign(maker, Transaction.FOR_NETWORK);
@@ -234,7 +234,7 @@ public class TestRecTemplate {
 
         //CREATE ISSUE PLATE TRANSACTION
         IssueTemplateRecord issueTemplateRecord = new IssueTemplateRecord(maker, template, FEE_POWER, timestamp, maker.getLastTimestamp(db)[0]);
-        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1);
+        issueTemplateRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueTemplateRecord.sign(maker, Transaction.FOR_NETWORK);
         issueTemplateRecord.process(gb, Transaction.FOR_NETWORK);
         long key = db.getIssueTemplateMap().get(issueTemplateRecord);
@@ -256,14 +256,14 @@ public class TestRecTemplate {
 
         initTemplate(true);
 
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 10, maker.getLastTimestamp(db)[0]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 10, maker.getLastTimestamp(db)[0]);
         signNoteRecord.sign(maker, asPack);
 
         //CHECK IF ISSUE PLATE TRANSACTION IS VALID
         assertEquals(true, signNoteRecord.isSignatureValid(db));
 
         //INVALID SIGNATURE
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 10, maker.getLastTimestamp(db)[0], new byte[64]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 10, maker.getLastTimestamp(db)[0], new byte[64]);
 
         //CHECK IF ISSUE PLATE IS INVALID
         assertEquals(false, signNoteRecord.isSignatureValid(db));
@@ -276,7 +276,7 @@ public class TestRecTemplate {
 
         initTemplate(true);
 
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 10, maker.getLastTimestamp(db)[0]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 10, maker.getLastTimestamp(db)[0]);
         signNoteRecord.sign(maker, asPack);
 
         //CONVERT TO BYTES
@@ -323,7 +323,7 @@ public class TestRecTemplate {
 
         // NOT DATA
         data = null;
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 20, maker.getLastTimestamp(db)[0]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 20, maker.getLastTimestamp(db)[0]);
         signNoteRecord.sign(maker, Transaction.FOR_NETWORK);
 
         //CONVERT TO BYTES
@@ -370,7 +370,7 @@ public class TestRecTemplate {
         // NOT KEY
         //data = null;
         templateKey = 0;
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 20, maker.getLastTimestamp(db)[0]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 20, maker.getLastTimestamp(db)[0]);
         signNoteRecord.sign(maker, Transaction.FOR_NETWORK);
 
         //CONVERT TO BYTES
@@ -417,7 +417,7 @@ public class TestRecTemplate {
         // NOT KEY
         data = null;
         templateKey = 0;
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 20, maker.getLastTimestamp(db)[0]);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 20, maker.getLastTimestamp(db)[0]);
         signNoteRecord.sign(maker, Transaction.FOR_NETWORK);
 
         //CONVERT TO BYTES
@@ -471,8 +471,8 @@ public class TestRecTemplate {
 
         initTemplate(true);
 
-        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, isText, encrypted, timestamp + 10, maker.getLastTimestamp(db)[0]);
-        signNoteRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1);
+        signNoteRecord = new RSignNote(maker, FEE_POWER, templateKey, data, timestamp + 10, maker.getLastTimestamp(db)[0]);
+        signNoteRecord.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         assertEquals(Transaction.VALIDATE_OK, signNoteRecord.isValid(Transaction.FOR_NETWORK, flags));
 
         signNoteRecord.sign(maker, Transaction.FOR_NETWORK);

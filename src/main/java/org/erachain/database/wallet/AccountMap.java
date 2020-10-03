@@ -25,6 +25,9 @@ public class AccountMap extends DCUMapImpl<String, Integer> {
     private static final String ADDRESSES = "addresses";
     private static final String ADDRESSES_NO = "addresses_nomer";
 
+    /**
+     * address + itemKey -> balance
+     */
     private Map<Tuple2<String, Long>, Tuple3<BigDecimal, BigDecimal, BigDecimal>> assetsBalanceMap;
     private Set<byte[]> publickKeys;
     List<Account> accounts;
@@ -119,6 +122,19 @@ public class AccountMap extends DCUMapImpl<String, Integer> {
     }
 
     public boolean exists(String address) {
+        if (address == null)
+            return false;
+
+        for (Account account : this.accounts) {
+            if (account.equals(address)) return true;
+        }
+        return false;
+    }
+
+    public boolean exists(Account address) {
+        if (address == null)
+            return false;
+
         for (Account account : this.accounts) {
             if (account.equals(address)) return true;
         }
@@ -234,7 +250,6 @@ public class AccountMap extends DCUMapImpl<String, Integer> {
     }
 
     public Integer getAccountNo(String account) {
-
         return map.get(account);
     }
 

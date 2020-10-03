@@ -296,7 +296,7 @@ public class Synchronizer extends Thread {
                 LOGGER.debug("*** VALIDATE in FORK [" + height + "]");
 
                 // CHECK IF VALID
-                if (!block.isSignatureValid()) {
+                if (block.heightBlock > BlockChain.ALL_VALID_BEFORE && !block.isSignatureValid()) {
                     // INVALID BLOCK THROW EXCEPTION
                     String mess = "Dishonest peer by not is Valid block, height: " + height;
                     peer.ban(BAN_BLOCK_TIMES << 1, mess);
@@ -312,7 +312,7 @@ public class Synchronizer extends Thread {
                     throw new Exception(mess);
                 }
 
-                if (block.isValid(fork,
+                if (block.heightBlock > BlockChain.ALL_VALID_BEFORE && block.isValid(fork,
                         true /// это же проверка в ФОРКЕ - тут нужно! Тем более что там внутри процессинг уже идет
                 ) > 0) {
                     // INVALID BLOCK THROW EXCEPTION
@@ -662,13 +662,16 @@ public class Synchronizer extends Thread {
                                     throw new Exception("on stopping");
                                 }
 
-                                LOGGER.debug(e.getMessage(), e);
                                 errorMess = "invalid PARSE! " + e.getMessage();
+                                LOGGER.debug(errorMess, e);
                                 banTime = BAN_BLOCK_TIMES << 1;
+                                if (BlockChain.CHECK_BUGS > 9) {
+                                    ctrl.stopAll(339);
+                                }
                                 break;
                             } catch (Throwable e) {
-                                LOGGER.debug(e.getMessage(), e);
                                 errorMess = "invalid PARSE! " + e.getMessage();
+                                LOGGER.debug(errorMess, e);
                                 banTime = BAN_BLOCK_TIMES << 1;
                                 ctrl.stopAll(339);
                                 break;
@@ -681,20 +684,26 @@ public class Synchronizer extends Thread {
                                     banTime = BAN_BLOCK_TIMES;
                                     break;
                                 }
+                            } catch (java.lang.OutOfMemoryError e) {
+                                errorMess = "error io isValid! [" + blockFromPeer.heightBlock + "] " + e.getMessage();
+                                LOGGER.debug(errorMess, e);
+                                banTime = BAN_BLOCK_TIMES;
+                                ctrl.stopAll(340);
+                                break;
                             } catch (Exception e) {
 
                                 if (ctrl.isOnStopping()) {
                                     throw new Exception("on stopping");
                                 }
 
-                                LOGGER.debug(e.getMessage(), e);
-                                errorMess = "error io isValid! " + e.getMessage();
+                                errorMess = "error io isValid! [" + blockFromPeer.heightBlock + "] " + e.getMessage();
+                                LOGGER.debug(errorMess, e);
                                 banTime = BAN_BLOCK_TIMES;
                                 ctrl.stopAll(340);
                                 break;
                             } catch (Throwable e) {
-                                LOGGER.debug(e.getMessage(), e);
-                                errorMess = "error io isValid! " + e.getMessage();
+                                errorMess = "error io isValid! [" + blockFromPeer.heightBlock + "] " + e.getMessage();
+                                LOGGER.debug(errorMess, e);
                                 banTime = BAN_BLOCK_TIMES;
                                 ctrl.stopAll(341);
                                 break;
@@ -1146,7 +1155,7 @@ public class Synchronizer extends Thread {
                         return;
 
                     if (Settings.getInstance().getNotifyIncomingConfirmations() > 0) {
-                        ctrl.NotifyIncoming(block.getTransactions());
+                        ctrl.NotifyWalletIncoming(block.getTransactions());
                     }
 
                     if (ctrl.isOnStopping())

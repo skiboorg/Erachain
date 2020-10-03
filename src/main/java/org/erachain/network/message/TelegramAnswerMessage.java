@@ -70,8 +70,8 @@ public class TelegramAnswerMessage extends Message {
             HashSet<Account> recipients = tran.getRecipientAccounts();
             for(Account recipient:recipients){
             
-              if( Controller.getInstance().wallet.accountExists(recipient.getAddress()) &&  !telegransList.contains(tran))
-                              telegransList.add(tran);
+              if (Controller.getInstance().wallet.accountExists(recipient) && !telegransList.contains(tran))
+                  telegransList.add(tran);
             }
       }
         // add JSON
@@ -131,10 +131,10 @@ public class TelegramAnswerMessage extends Message {
     public ArrayList<Transaction> getTelegransList() {
         return telegransList;
     }
-    public void saveToWallet(){
-        for (Transaction trans:telegransList){
-            Controller.getInstance().wallet.database.getTelegramsMap().add(trans.viewSignature(), trans);
-            
+
+    public void saveToWallet() {
+        for (Transaction transaction : telegransList) {
+            Controller.getInstance().addTelegramToWallet(transaction, transaction.viewSignature());
         }
     }
 

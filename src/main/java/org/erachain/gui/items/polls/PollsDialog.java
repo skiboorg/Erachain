@@ -9,6 +9,7 @@ import org.erachain.core.item.polls.PollCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.VoteOnItemPollTransaction;
 import org.erachain.datachain.DCSet;
+import org.erachain.gui.Gui;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.items.ComboBoxModelItemsAll;
 import org.erachain.gui.items.accounts.AccountRenderer;
@@ -193,17 +194,19 @@ public class PollsDialog extends JDialog {
         // LABEL FEE
         labelGBC.gridy = 6;
         JLabel feeLabel = new JLabel(Lang.getInstance().translate("Fee Power") + ":");
+        feeLabel.setVisible(Gui.SHOW_FEE_POWER);
         this.add(feeLabel, labelGBC);
 
         // TXT FEE
         detailGBC.gridy = 6;
         this.txtFeePow = new JTextField();
         this.txtFeePow.setText("0");
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
         this.add(this.txtFeePow, detailGBC);
 
         // ADD EXCHANGE BUTTON
         detailGBC.gridy = 7;
-        voteButton = new JButton(Lang.getInstance().translate("Vote"));
+        voteButton = new JButton(Lang.getInstance().translate("To Vote"));
         voteButton.setPreferredSize(new Dimension(100, 25));
         voteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -262,7 +265,7 @@ public class PollsDialog extends JDialog {
         }
 
         // CREATE POLL
-        PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+        PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
         if (creator == null) {
             JOptionPane.showMessageDialog(new JFrame(),
                     Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),

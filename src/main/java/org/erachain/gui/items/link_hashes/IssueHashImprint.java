@@ -9,6 +9,7 @@ import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.library.AuxiliaryToolTip;
 import org.erachain.gui.models.AccountsComboBoxModel;
@@ -32,7 +33,7 @@ import java.util.List;
  */
 public class IssueHashImprint extends javax.swing.JPanel {
 
-    private AuxiliaryToolTip auxiliaryToolTip;
+    private AuxiliaryToolTip auxiliaryToolTip = new AuxiliaryToolTip();
     private boolean wasChanged = false;
 
     /**
@@ -60,6 +61,8 @@ public class IssueHashImprint extends javax.swing.JPanel {
      */
     public IssueHashImprint() {
 
+        auxiliaryToolTip.setKey("AUX KEY");
+
         initComponents();
         this.jLabel_Title.setFont(new java.awt.Font("Tahoma", 0, 18));
         ;
@@ -68,11 +71,13 @@ public class IssueHashImprint extends javax.swing.JPanel {
         this.jTable_Hash.setModel(table_Model);
         this.jLabel_Account.setText(Lang.getInstance().translate("Account") + ":");
         this.jComboBox_Account.setModel(new AccountsComboBoxModel());
-        String tipURL = Lang.getInstance().translate("Задайте внешнюю ссылку ввиде URL. \n Причем если ссвлка будет закачиваться на:\n / или = или № - то значение хеша будет добавлено к ссылке");
+        String tipURL = Lang.getInstance().translate("Задайте внешнюю ссылку в виде URL. \n Причем если ссылка будет закачиваться на:\n / или = или № - то значение хеша будет добавлено к ссылке");
         this.jLabel_URL.setText(Lang.getInstance().translate("URL") + ":");
         this.jLabel_URL.setToolTipText(tipURL);
         this.jTextField_URL.setText("");
         this.jTextField_URL.setToolTipText(tipURL);
+        JToolTip tip = createToolTip();
+        tip.setTipText("TIP PROBE");
 
 
         this.jLabel_Description.setText(Lang.getInstance().translate("Description") + ":");
@@ -137,7 +142,7 @@ public class IssueHashImprint extends javax.swing.JPanel {
             List<String> hashes = this.table_Model.getValues(0);
 
             //CREATE IMPRINT
-            PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+            PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
             if (creator == null) {
                 JOptionPane.showMessageDialog(new JFrame(),
                         Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -313,8 +318,9 @@ public class IssueHashImprint extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.insets = new java.awt.Insets(0, 13, 0, 0);
-        this.add(new JLabel(Lang.getInstance().translate("Fee Power") + ":"), gridBagConstraints);
-
+        JLabel feeLabel = new JLabel(Lang.getInstance().translate("Fee Power") + ":");
+        feeLabel.setVisible(Gui.SHOW_FEE_POWER);
+        this.add(feeLabel, gridBagConstraints);
 
         //TXT FEE
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -328,7 +334,7 @@ public class IssueHashImprint extends javax.swing.JPanel {
         txtFeePow = new JComboBox<String>();
         txtFeePow.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8"}));
         txtFeePow.setSelectedIndex(0);
-
+        txtFeePow.setVisible(Gui.SHOW_FEE_POWER);
 
         this.add(this.txtFeePow, gridBagConstraints);
 

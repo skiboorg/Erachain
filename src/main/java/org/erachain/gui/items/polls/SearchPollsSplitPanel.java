@@ -17,40 +17,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class SearchPollsSplitPanel extends SearchItemSplitPanel {
-    /**
-     *
-     */
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "SearchPollsSplitPanel.png";
+
+    public static String NAME = "SearchPollsSplitPanel";
+    public static String TITLE = "Search Polls";
+
     private static final long serialVersionUID = 1L;
-    private static PollsItemsTableModel tableModelPolls = new PollsItemsTableModel();
 
     public SearchPollsSplitPanel() {
-        super(tableModelPolls, "Search_Poll_Tab", "Search_Poll_Tab");
+        super(new PollsItemsTableModel(), NAME, TITLE);
 
         jTableJScrollPanelLeftPanel.getColumnModel().getColumn(3).setMaxWidth(200);
         jTableJScrollPanelLeftPanel.getColumnModel().getColumn(3).setPreferredWidth(100);
         jTableJScrollPanelLeftPanel.getColumnModel().getColumn(4).setMaxWidth(200);
         jTableJScrollPanelLeftPanel.getColumnModel().getColumn(4).setPreferredWidth(100);
 
-        // ADD MENU ITEMS
-        JMenuItem confirm_Menu = new JMenuItem(Lang.getInstance().translate("Confirm"));
-        confirm_Menu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                //			new UnionConfirmDialog(th, (UnionCls) itemMenu);
-            }
-        });
-        this.menuTable.add(confirm_Menu);
-
-        JMenuItem setStatus_Menu = new JMenuItem(Lang.getInstance().translate("Set status"));
-        setStatus_Menu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                //			new UnionSetStatusDialog(th, (UnionCls) itemMenu);
-            }
-        });
-        this.menuTable.add(setStatus_Menu);
-
-
-        JMenuItem setVote_Menu = new JMenuItem(Lang.getInstance().translate("Voting"));
+        JMenuItem setVote_Menu = new JMenuItem(Lang.getInstance().translate("To Vote"));
         setVote_Menu.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 //			new UnionSetStatusDialog(th, (UnionCls) itemMenu);
@@ -63,6 +44,14 @@ public class SearchPollsSplitPanel extends SearchItemSplitPanel {
         this.menuTable.add(setVote_Menu);
 
         menuTable.addSeparator();
+
+        JMenuItem setStatus_Menu = new JMenuItem(Lang.getInstance().translate("Set status"));
+        setStatus_Menu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //			new UnionSetStatusDialog(th, (UnionCls) itemMenu);
+            }
+        });
+        this.menuTable.add(setStatus_Menu);
 
         JMenuItem setSeeInBlockexplorer = new JMenuItem(Lang.getInstance().translate("Check in Blockexplorer"));
 
@@ -80,6 +69,15 @@ public class SearchPollsSplitPanel extends SearchItemSplitPanel {
             }
         });
         menuTable.add(setSeeInBlockexplorer);
+
+        // ADD MENU ITEMS
+        JMenuItem confirm_Menu = new JMenuItem(Lang.getInstance().translate("Vouch"));
+        confirm_Menu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //			new UnionConfirmDialog(th, (UnionCls) itemMenu);
+            }
+        });
+        this.menuTable.add(confirm_Menu);
 
     }
 	
@@ -113,16 +111,5 @@ public class SearchPollsSplitPanel extends SearchItemSplitPanel {
 
         return pollInfo;
 
-    }
-
-
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
     }
 }

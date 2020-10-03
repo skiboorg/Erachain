@@ -1,13 +1,13 @@
 package org.erachain.dbs.nativeMemMap;
 
 import com.google.common.collect.ImmutableList;
+import lombok.extern.slf4j.Slf4j;
 import org.erachain.controller.Controller;
 import org.erachain.database.DBASet;
 import org.erachain.datachain.DCSet;
 import org.erachain.dbs.*;
 import org.erachain.dbs.mapDB.DBMapSuit;
 import org.mapdb.Fun;
-import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -21,6 +21,8 @@ import java.util.*;
 Поэтому нужно добавлять униальность
 
  */
+
+@Slf4j
 public abstract class DBMapSuitFork<T, U> extends DBMapSuit<T, U> implements ForkedMap {
 
     protected DBTab<T, U> parent;
@@ -37,18 +39,18 @@ public abstract class DBMapSuitFork<T, U> extends DBMapSuit<T, U> implements For
     Boolean EXIST = true;
     int shiftSize;
 
-    public DBMapSuitFork(DBTab parent, DBASet dcSet, Comparator comparator, Logger logger, DBTab cover) {
-        this.logger = logger;
+    public DBMapSuitFork(DBTab parent, DBASet dcSet, Comparator comparator, DBTab cover) {
+        //this.logger = logger;
         this.databaseSet = dcSet;
         this.database = dcSet.database;
         this.cover = cover;
 
         if (Runtime.getRuntime().maxMemory() == Runtime.getRuntime().totalMemory()) {
-            // System.out.println("########################### Free Memory:"
-            // + Runtime.getRuntime().freeMemory());
+            logger.debug("########################### Free Memory:" + Runtime.getRuntime().freeMemory());
             if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() >> 10)
                     + (Controller.MIN_MEMORY_TAIL)) {
-                databaseSet.clearCache();
+                // у родителя чистим - у себя нет, так как только создали
+                ((DBASet) parent.getDBSet()).clearCache();
                 System.gc();
                 if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() >> 10)
                         + (Controller.MIN_MEMORY_TAIL << 1))
@@ -69,8 +71,8 @@ public abstract class DBMapSuitFork<T, U> extends DBMapSuit<T, U> implements For
 
     }
 
-    public DBMapSuitFork(DBTab parent, DBASet dcSet, Logger logger) {
-        this(parent, dcSet, null, logger, null);
+    public DBMapSuitFork(DBTab parent, DBASet dcSet) {
+        this(parent, dcSet, null, null);
     }
 
     public Map getMap() {

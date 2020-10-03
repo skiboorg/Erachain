@@ -3,6 +3,7 @@ package org.erachain.core.transaction;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import org.erachain.api.ApiErrorFactory;
 import org.erachain.controller.Controller;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
@@ -18,9 +19,11 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.TransactionFinalMapImpl;
+import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.settings.Settings;
 import org.erachain.utils.DateTimeFormat;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 import org.mapdb.Fun.Tuple3;
@@ -29,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -129,6 +133,8 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     public static final int HASH_ALREDY_EXIST = 51;
 
+    public static final int WRONG_SIGNER = 55;
+
     public static final int INVALID_CLAIM_DEBT_CREATOR = 61;
 
     public static final int NOT_ENOUGH_ERA_OWN_10 = 101;
@@ -179,14 +185,15 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int ITEM_IMPRINT_DOES_NOT_EXIST = 205;
     public static final int ITEM_TEMPLATE_NOT_EXIST = 206;
     public static final int ITEM_PERSON_NOT_EXIST = 207;
-    public static final int ITEM_STATUS_NOT_EXIST = 208;
-    public static final int ITEM_UNION_NOT_EXIST = 209;
-    public static final int ITEM_DOES_NOT_STATUSED = 210;
-    public static final int ITEM_DOES_NOT_UNITED = 211;
-    public static final int ITEM_DUPLICATE_KEY = 212;
-    public static final int ITEM_DUPLICATE = 213;
-    public static final int INVALID_TIMESTAMP_START = 214;
-    public static final int INVALID_TIMESTAMP_END = 215;
+    public static final int ITEM_POLL_NOT_EXIST = 208;
+    public static final int ITEM_STATUS_NOT_EXIST = 209;
+    public static final int ITEM_UNION_NOT_EXIST = 210;
+    public static final int ITEM_DOES_NOT_STATUSED = 211;
+    public static final int ITEM_DOES_NOT_UNITED = 212;
+    public static final int ITEM_DUPLICATE_KEY = 213;
+    public static final int ITEM_DUPLICATE = 214;
+    public static final int INVALID_TIMESTAMP_START = 215;
+    public static final int INVALID_TIMESTAMP_END = 216;
 
     public static final int ITEM_PERSON_IS_DEAD = 235;
     public static final int AMOUNT_LENGHT_SO_LONG = 236;
@@ -233,11 +240,13 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int INVALID_HEAD_LENGTH = 392;
     public static final int INVALID_DATA_FORMAT = 393;
 
+    public static final int INVALID_BLOCK_TRANS_SEQ_ERROR = 501;
+    public static final int ACCOUNT_ACCSES_DENIED = 520;
+
     public static final int PRIVATE_KEY_NOT_FOUND = 530;
     public static final int INVALID_UPDATE_VALUE = 540;
     public static final int INVALID_TRANSACTION_TYPE = 550;
     public static final int INVALID_BLOCK_HEIGHT = 599;
-    public static final int INVALID_BLOCK_TRANS_SEQ_ERROR = 501;
     public static final int TELEGRAM_DOES_NOT_EXIST = 541;
     public static final int NOT_YET_RELEASED = 599;
     public static final int AT_ERROR = 600; // END error for org.erachain.api.ApiErrorFactory.ERROR
@@ -290,11 +299,6 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int CALCULATED_TRANSACTION = 100;
 
     // old
-    public static final int REGISTER_NAME_TRANSACTION = 6 + 130;
-    public static final int UPDATE_NAME_TRANSACTION = 7 + 130;
-    public static final int SELL_NAME_TRANSACTION = 8 + 130;
-    public static final int CANCEL_SELL_NAME_TRANSACTION = 9 + 130;
-    public static final int BUY_NAME_TRANSACTION = 10 + 130;
     public static final int ARBITRARY_TRANSACTION = 12 + 130;
     public static final int MULTI_PAYMENT_TRANSACTION = 13 + 130;
     public static final int DEPLOY_AT_TRANSACTION = 14 + 130;
@@ -366,7 +370,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     protected static final int BASE_LENGTH_AS_PACK = BASE_LENGTH_AS_MYPACK + TIMESTAMP_LENGTH
             + CREATOR_LENGTH + SIGNATURE_LENGTH;
     protected static final int BASE_LENGTH = BASE_LENGTH_AS_PACK + FEE_POWER_LENGTH + REFERENCE_LENGTH;
-    protected static final int BASE_LENGTH_AS_DBRECORD = BASE_LENGTH + FEE_LENGTH;
+    protected static final int BASE_LENGTH_AS_DBRECORD = BASE_LENGTH + TIMESTAMP_LENGTH + FEE_LENGTH;
 
     /**
      * Используется для разделения строки поисковых слов для всех трнзакций.<br>
@@ -563,15 +567,26 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     // GETTERS/SETTERS
 
+    public void setHeightSeq(long seqNo) {
+        this.dbRef = seqNo;
+        this.height = parseDBRefHeight(seqNo);
+        this.seqNo = (int) seqNo;
+    }
+
     public void setHeightSeq(int height, int seqNo) {
         this.dbRef = makeDBRef(height, seqNo);
         this.height = height;
         this.seqNo = seqNo;
     }
 
-    // NEED FOR DB SECONDATY KEYS
-    // see org.mapdb.Bind.secondaryKeys
-    public void setDC(DCSet dcSet) {
+    /**
+     * NEED FOR DB SECONDATY KEYS see org.mapdb.Bind.secondaryKeys
+     *
+     * @param dcSet
+     * @param andUpdateFromState если нужно нарастить мясо на скелет из базв Финал. Не нужно для неподтвержденных
+     *                           и если ее нет в базе еще. Используется только для вычисления номера Сущности для отображения Выпускающих трнзакций - после их обработки, например в Блокэксплоере чтобы посмотреть какой актив был этой трнзакцией выпущен.
+     */
+    public void setDC(DCSet dcSet, boolean andUpdateFromState) {
         this.dcSet = dcSet;
 
         if (BlockChain.TEST_DB == 0 && creator != null) {
@@ -580,36 +595,52 @@ public abstract class Transaction implements ExplorerJsonLine {
                 creatorPerson = (PersonCls) dcSet.getItemPersonMap().get(creatorPersonDuration.a);
             }
         }
+
+        if (andUpdateFromState && !isWiped())
+            updateFromStateDB();
     }
 
-    public void setDC_HeightSeq(DCSet dcSet) {
-        setDC(dcSet);
-
-        if (this.typeBytes[0] == Transaction.CALCULATED_TRANSACTION) {
-
-        }
-
-        Long dbRef2 = dcSet.getTransactionFinalMapSigns().get(this.signature);
-        if (dbRef2 == null)
-            return;
-
-        this.dbRef = dbRef2;
-        Tuple2<Integer, Integer> pair = Transaction.parseDBRef(dbRef2);
-        this.height = pair.a;
-        this.seqNo = pair.b;
+    public void setDC(DCSet dcSet) {
+        setDC(dcSet, false);
     }
 
-    public void setDC(DCSet dcSet, int asDeal, int blockHeight, int seqNo) {
-        setDC(dcSet);
+    /**
+     * @param dcSet
+     * @param forDeal
+     * @param blockHeight
+     * @param seqNo
+     * @param andUpdateFromState если нужно нарастить мясо на скелет из базв Финал. Не нужно для неподтвержденных
+     *                           и если ее нет в базе еще. Используется только для вычисления номера Сущности для отображения Выпускающих трнзакций - после их обработки, например в Блокэксплоере чтобы посмотреть какой актив был этой трнзакцией выпущен.
+     */
+    public void setDC(DCSet dcSet, int forDeal, int blockHeight, int seqNo, boolean andUpdateFromState) {
+        setDC(dcSet, false);
         this.height = blockHeight; //this.getBlockHeightByParentOrLast(dcSet);
         this.seqNo = seqNo;
         this.dbRef = Transaction.makeDBRef(height, seqNo);
-        if (asDeal > Transaction.FOR_PACK && (this.fee == null || this.fee.signum() == 0))
+        if (forDeal > Transaction.FOR_PACK && (this.fee == null || this.fee.signum() == 0))
             this.calcFee();
+
+        if (andUpdateFromState && !isWiped())
+            updateFromStateDB();
+    }
+
+    public void setDC(DCSet dcSet, int forDeal, int blockHeight, int seqNo) {
+        setDC(dcSet, forDeal, blockHeight, seqNo, false);
+    }
+
+    /**
+     * Нарастить мясо на скелет из базы состояния - нужно например для созданим вторичных ключей и Номер Сущности
+     *
+     */
+    public void updateFromStateDB() {
     }
 
     public boolean noDCSet() {
         return this.dcSet == null;
+    }
+
+    public DCSet getDCSet() {
+        return this.dcSet;
     }
 
     public int getType() {
@@ -698,7 +729,10 @@ public abstract class Transaction implements ExplorerJsonLine {
     }
 
     public BigDecimal getFee(Account account) {
-        return this.getFee(account.getAddress());
+        if (this.creator != null)
+            if (this.creator.getAddress().equals(account))
+                return this.fee;
+        return BigDecimal.ZERO;
     }
 
     public BigDecimal getFee() {
@@ -734,14 +768,35 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         System.arraycopy(tagsWords, 0, tagsArray, 0, tagsWords.length);
         for (int i = tagsWords.length; i < tagsArray.length; i++) {
-            Object[] itemKey = itemsKeys[i - tagsWords.length];
-            tagsArray[i] = ItemCls.getItemTypeChar((int) itemKey[0], (Long) itemKey[1]).toLowerCase();
+            try {
+                Object[] itemKey = itemsKeys[i - tagsWords.length];
+                tagsArray[i] = ItemCls.getItemTypeChar((int) itemKey[0], (Long) itemKey[1]).toLowerCase();
+            } catch (Exception e) {
+                LOGGER.error("itemsKeys[" + i + "] = " + itemsKeys[i - tagsWords.length].toString());
+                throw (e);
+            }
         }
         return tagsArray;
     }
 
+    /**
+     * При удалении - транзакция то берется из базы для создания индексов к удалению.
+     * И она скелет - нужно базу данных задать и водтянуть номера сущностей и все заново просчитать чтобы правильно удалить метки.
+     * Для этого проверку делаем в таблтцк при создании индексов
+     *
+     * @return
+     */
     public String[] getTags() {
-        return tags(viewTypeName(), getTitle(), itemsKeys);
+
+        if (itemsKeys == null)
+            makeItemsKeys();
+
+        try {
+            return tags(viewTypeName(), getTitle(), itemsKeys);
+        } catch (Exception e) {
+            LOGGER.error(toString() + " - itemsKeys.len: " + itemsKeys.length);
+            throw e;
+        }
     }
 
     /*
@@ -775,15 +830,16 @@ public abstract class Transaction implements ExplorerJsonLine {
     /**
      * Постраничный поиск по строке поиска
      *
+     * @param offest
      * @param filterStr
      * @param useForge
      * @param pageSize
      * @param fromID
-     * @param offest
+     * @param fillFullPage
      * @return
      */
     public static Tuple3<Long, Long, List<Transaction>> searchTransactions(
-            DCSet dcSet, String filterStr, boolean useForge, int pageSize, Long fromID, int offset) {
+            DCSet dcSet, String filterStr, boolean useForge, int pageSize, Long fromID, int offset, boolean fillFullPage) {
 
         List<Transaction> transactions = new ArrayList<>();
 
@@ -793,9 +849,11 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (Base58.isExtraSymbols(filterStr)) {
                 try {
                     Long dbRef = parseDBRef(filterStr);
-                    Transaction one = map.get(dbRef);
-                    if (one != null) {
-                        transactions.add(one);
+                    if (dbRef != null) {
+                        Transaction one = map.get(dbRef);
+                        if (one != null) {
+                            transactions.add(one);
+                        }
                     }
                 } catch (Exception e1) {
                 }
@@ -813,10 +871,10 @@ public abstract class Transaction implements ExplorerJsonLine {
         }
 
         if (filterStr == null) {
-            transactions = map.getTransactionsFromID(fromID, offset, pageSize, !useForge, true);
+            transactions = map.getTransactionsFromID(fromID, offset, pageSize, !useForge, fillFullPage);
         } else {
-            transactions = map.getTransactionsByTitleFromID(filterStr, fromID,
-                    offset, pageSize, true);
+            transactions.addAll(map.getTransactionsByTitleFromID(filterStr, fromID,
+                    offset, pageSize, fillFullPage));
         }
 
         if (transactions.isEmpty()) {
@@ -1079,7 +1137,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         if (block != null && block.txCalculated != null) {
             block.txCalculated.add(new RCalculated(creator, assetKey, amount,
-                    message, this.dbRef));
+                    message, this.dbRef, seqNo));
             return true;
         }
         return false;
@@ -1237,6 +1295,7 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (this.height > 0) {
             transaction.put("height", this.height);
             transaction.put("sequence", this.seqNo);
+            transaction.put("seqNo", viewHeightSeq());
             if (isWiped()) {
                 transaction.put("wiped", true);
             }
@@ -1281,6 +1340,55 @@ public abstract class Transaction implements ExplorerJsonLine {
         return transaction;
     }
 
+    /**
+     * for RPC
+     *
+     * @param jsonObject
+     * @return
+     */
+    static public Object decodeJson(String x) {
+
+        JSONObject out = new JSONObject();
+        JSONObject jsonObject;
+        int error;
+        try {
+            //READ JSON
+            jsonObject = (JSONObject) JSONValue.parse(x);
+        } catch (NullPointerException | ClassCastException e) {
+            error = ApiErrorFactory.ERROR_JSON;
+            out.put("error", error);
+            out.put("error_message", OnDealClick.resultMess(error));
+            return out;
+        }
+
+        if (jsonObject == null) {
+            error = ApiErrorFactory.ERROR_JSON;
+            out.put("error", error);
+            out.put("error_message", OnDealClick.resultMess(error));
+            return out;
+        }
+
+        String creatorStr = (String) jsonObject.getOrDefault("creator", null);
+
+        Account creator = null;
+        if (creatorStr == null) {
+            error = Transaction.INVALID_CREATOR;
+            return new Fun.Tuple2<>(error, OnDealClick.resultMess(error));
+        } else {
+            Fun.Tuple2<Account, String> resultCreator = Account.tryMakeAccount(creatorStr);
+            if (resultCreator.a == null) {
+                return new Fun.Tuple2<>(Transaction.INVALID_CREATOR, resultCreator.b);
+            }
+            creator = resultCreator.a;
+        }
+
+        int feePow = Integer.valueOf(jsonObject.getOrDefault("feePow", 0).toString());
+        String password = (String) jsonObject.getOrDefault("password", null);
+
+        return new Fun.Tuple4(jsonObject, creator, feePow, password);
+
+    }
+
     public void sign(PrivateKeyAccount creator, int forDeal) {
 
         // use this.reference in any case and for Pack too
@@ -1290,7 +1398,7 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (data == null)
             return;
 
-        if (BlockChain.SIDE_MODE) {
+        if (BlockChain.CLONE_MODE) {
             // чтобы из других цепочек не срабатывало
             data = Bytes.concat(data, Controller.getInstance().blockChain.getGenesisBlock().getSignature());
         } else {
@@ -1324,7 +1432,6 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (forDeal > FOR_MYPACK) {
             // WRITE TIMESTAMP
             byte[] timestampBytes = Longs.toByteArray(this.timestamp);
-            timestampBytes = Bytes.ensureCapacity(timestampBytes, TIMESTAMP_LENGTH, 0);
             data = Bytes.concat(data, timestampBytes);
         }
 
@@ -1332,7 +1439,6 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (this.reference != null) {
             // NULL in imprints
             byte[] referenceBytes = Longs.toByteArray(this.reference);
-            referenceBytes = Bytes.ensureCapacity(referenceBytes, REFERENCE_LENGTH, 0);
             data = Bytes.concat(data, referenceBytes);
         }
 
@@ -1351,6 +1457,10 @@ public abstract class Transaction implements ExplorerJsonLine {
             data = Bytes.concat(data, this.signature);
 
         if (forDeal == FOR_DB_RECORD) {
+            // WRITE DBREF
+            byte[] dbRefBytes = Longs.toByteArray(this.dbRef);
+            data = Bytes.concat(data, dbRefBytes);
+
             // WRITE FEE
             byte[] feeBytes = Longs.toByteArray(this.fee.unscaledValue().longValue());
             data = Bytes.concat(data, feeBytes);
@@ -1394,7 +1504,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             }
         }
 
-        if (BlockChain.SIDE_MODE) {
+        if (BlockChain.CLONE_MODE) {
             // чтобы из других цепочек не срабатывало
             data = Bytes.concat(data, Controller.getInstance().blockChain.getGenesisBlock().getSignature());
         } else {
@@ -1431,15 +1541,15 @@ public abstract class Transaction implements ExplorerJsonLine {
      *   = 2 - not check person
      *   = 4 - not check PublicText
      */
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         if (height < BlockChain.ALL_VALID_BEFORE) {
             return VALIDATE_OK;
         }
 
         // CHECK IF REFERENCE IS OK
-        //Long reference = asDeal == null ? this.creator.getLastTimestamp(dcSet) : asDeal;
-        if (asDeal > Transaction.FOR_MYPACK && height > BlockChain.ALL_BALANCES_OK_TO) {
+        //Long reference = forDeal == null ? this.creator.getLastTimestamp(dcSet) : forDeal;
+        if (forDeal > Transaction.FOR_MYPACK && height > BlockChain.ALL_BALANCES_OK_TO) {
             if (BlockChain.CHECK_DOUBLE_SPEND_DEEP < 0) {
                 /// вообще не проверяем в тесте
                 if (BlockChain.TEST_DB == 0 && timestamp < Controller.getInstance().getBlockChain().getTimestamp(height - 1)) {
@@ -1553,7 +1663,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " top level";
                 txCalculated.add(new RCalculated(invitedAccount, FEE_KEY, giftBG,
-                        messageLevel, this.dbRef));
+                        messageLevel, this.dbRef, seqNo));
 
             }
             return;
@@ -1581,7 +1691,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " @P:" + invitedPersonKey + " level." + (1 + BlockChain.FEE_INVITED_DEEP - level);
                 txCalculated.add(new RCalculated(issuerAccount, FEE_KEY, giftBG,
-                        messageLevel, this.dbRef));
+                        messageLevel, this.dbRef, seqNo));
             }
 
             if (fee_gift_next > 0) {
@@ -1601,7 +1711,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " @P:" + invitedPersonKey + " level." + (1 + BlockChain.FEE_INVITED_DEEP - level);
                 txCalculated.add(new RCalculated(issuerAccount, FEE_KEY, giftBG,
-                        messageLevel, this.dbRef));
+                        messageLevel, this.dbRef, seqNo));
             }
         }
     }
@@ -1628,10 +1738,165 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     }
 
+    // previous forging block or changed ERA volume
+    public Tuple3<Long, Long, Long> peekRoyaltyData(Long personKey) {
+        return dcSet.getTimeRoyaltyMap().peek(personKey);
+    }
+
+    public void pushRoyaltyData(Long personKey, Long royaltyBalance, Long royaltyValue) {
+        dcSet.getTimeRoyaltyMap().push(personKey, dbRef, royaltyBalance, royaltyValue);
+    }
+
+    public Tuple3<Long, Long, Long> popRoyaltyData(Long personKey) {
+        return dcSet.getTimeRoyaltyMap().pop(personKey);
+    }
+
+    private void calcRoyalty(Block block, Account account, long koeff, boolean asOrphan) {
+
+        Tuple4<Long, Integer, Integer, Integer> personDuration;
+        Long royaltyID;
+        if (BlockChain.ACTION_ROYALTY_PERSONS_ONLY) {
+            personDuration = creator.getPersonDuration(dcSet);
+            if (personDuration == null || personDuration.a == null) {
+                return;
+            }
+            royaltyID = personDuration.a;
+        } else {
+            royaltyID = account.hashCodeLong();
+        }
+
+        BigDecimal royaltyBG;
+        if (asOrphan) {
+            // это откат - списываем
+            Tuple3<Long, Long, Long> lastValue = peekRoyaltyData(royaltyID);
+            if (lastValue.c == 0) {
+                return;
+            }
+
+            royaltyBG = BigDecimal.valueOf(lastValue.c, BlockChain.FEE_SCALE);
+
+        } else {
+            // это прямое начисление
+            BigDecimal balance;
+            if (BlockChain.ACTION_ROYALTY_PERSONS_ONLY) {
+                // по всем счетам персоны
+                balance = PersonCls.getTotalBalance(dcSet, royaltyID, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND);
+            } else {
+                balance = account.getBalance(dcSet, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND).b;
+            }
+
+            if (balance == null || balance.signum() <= 0)
+                return;
+
+            Long royaltyBalance = balance.setScale(BlockChain.FEE_SCALE).unscaledValue().longValue();
+            Tuple3<Long, Long, Long> lastRoyaltyPoint = peekRoyaltyData(royaltyID);
+            if (lastRoyaltyPoint == null) {
+                // уще ничего не было - считать нечего
+                pushRoyaltyData(royaltyID, royaltyBalance, 0L);
+                return;
+            }
+
+            if (royaltyBalance == 0) {
+                return;
+            }
+
+            Long previousForgingSeqNo = lastRoyaltyPoint.a;
+            int diff = height - (int) (previousForgingSeqNo >> 32);
+            if (diff < 1) {
+                pushRoyaltyData(royaltyID, royaltyBalance, 0L);
+                return;
+            }
+
+            int dayBlocks = BlockChain.BLOCKS_PER_DAY(height);
+            int diffDays = diff / dayBlocks;
+            if (diffDays > BlockChain.ACTION_ROYALTY_MAX_DAYS) {
+                diff = BlockChain.ACTION_ROYALTY_MAX_DAYS * dayBlocks;
+            }
+
+            long percent = diff * koeff;
+
+            royaltyBG = BigDecimal.valueOf(percent, BlockChain.FEE_SCALE)
+                    .movePointLeft(3)
+                    .multiply(balance)
+                    .setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
+
+            if (royaltyBG.compareTo(BlockChain.ACTION_ROYALTY_MIN) < 0) {
+                pushRoyaltyData(royaltyID, royaltyBalance, 0L);
+                return;
+
+            }
+
+            Long royaltyValue = royaltyBG.unscaledValue().longValue();
+
+            pushRoyaltyData(royaltyID, royaltyBalance, royaltyValue);
+
+        }
+
+        account.changeBalance(this.dcSet, asOrphan, false, BlockChain.ACTION_ROYALTY_ASSET, royaltyBG, false, true);
+        // учтем что получили бонусы
+        account.changeCOMPUBonusBalances(dcSet, asOrphan, royaltyBG, Transaction.BALANCE_SIDE_DEBIT);
+
+        if (block != null && block.txCalculated != null && !asOrphan) {
+            block.txCalculated.add(new RCalculated(account, FEE_KEY, royaltyBG,
+                    "EXO-maining", this.dbRef, 0L));
+
+        }
+
+        // учтем эмиссию
+        GenesisBlock.CREATOR.changeBalance(this.dcSet, !asOrphan, false, BlockChain.ACTION_ROYALTY_ASSET,
+                royaltyBG, true, false);
+
+        // учтем начисления для держателей долей
+        GenesisBlock.CREATOR.changeBalance(this.dcSet, !asOrphan, false, -BlockChain.ACTION_ROYALTY_ASSET,
+                royaltyBG.multiply(BlockChain.ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT).setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN),
+                true, false);
+
+
+    }
+
+    /**
+     * Time Royalty for Person
+     *
+     * @param asOrphan
+     */
+    public void processRoyalty(Block block, boolean asOrphan) {
+        if (BlockChain.ACTION_ROYALTY_START <= 0)
+            return;
+
+        long koeff = 1000000L * (long) BlockChain.ACTION_ROYALTY_PERCENT / (30L * (long) BlockChain.BLOCKS_PER_DAY(height));
+        Tuple4<Long, Integer, Integer, Integer> personDuration;
+
+        if (asOrphan) {
+            if (creator != null) {
+                calcRoyalty(block, creator, koeff, asOrphan);
+            }
+
+            HashSet<Account> recipients = getRecipientAccounts();
+            if (recipients != null && !recipients.isEmpty()) {
+                for (Account recipient : recipients) {
+                    calcRoyalty(block, recipient, koeff, asOrphan);
+                }
+            }
+        } else {
+
+            if (creator != null) {
+                calcRoyalty(block, creator, koeff, asOrphan);
+            }
+
+            HashSet<Account> recipients = getRecipientAccounts();
+            if (recipients != null && !recipients.isEmpty()) {
+                for (Account recipient : recipients) {
+                    calcRoyalty(block, recipient, koeff, asOrphan);
+                }
+            }
+        }
+
+    }
+
     // REST
 
     // public abstract void process(DLSet db);
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         if (false
             //this.signature != null && Base58.encode(this.signature)
@@ -1641,10 +1906,11 @@ public abstract class Transaction implements ExplorerJsonLine {
             error++;
         }
 
-        makeItemsKeys();
-
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             // this.calcFee();
+
+            // CALC ROYALTY
+            processRoyalty(block, false);
 
             if (this.fee != null && this.fee.compareTo(BigDecimal.ZERO) != 0) {
                 // NOT update INCOME balance
@@ -1672,7 +1938,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     }
 
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
 
         if (false && BlockChain.CHECK_BUGS > 1
             ///&& viewHeightSeq().equals("628853-1") // is forging 628853-1
@@ -1683,7 +1949,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             error++;
         }
 
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             if (this.fee != null && this.fee.compareTo(BigDecimal.ZERO) != 0) {
                 // NOT update INCOME balance
                 this.creator.changeBalance(this.dcSet, false, false, FEE_KEY, this.fee, true, true);
@@ -1773,6 +2039,12 @@ public abstract class Transaction implements ExplorerJsonLine {
         itemsKeys = null;
     }
 
+    public void resetSeqNo() {
+        dbRef = 0l;
+        height = 0;
+        seqNo = 0;
+    }
+
     // ПРОЫЕРЯЛОСЬ! действует в совокупк с Финализе в Блоке
     @Override
     protected void finalize() throws Throwable {
@@ -1785,7 +2057,7 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (signature == null) {
             return getClass().getName() + ":" + viewFullTypeName();
         }
-        return getClass().getName() + ":" + viewFullTypeName() + Base58.encode(signature);
+        return getClass().getName() + ":" + viewFullTypeName() + ":" + Base58.encode(signature);
     }
 
 }

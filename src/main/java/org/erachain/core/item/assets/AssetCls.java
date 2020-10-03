@@ -250,7 +250,7 @@ public abstract class AssetCls extends ItemCls {
     @Override
     public long getStartKey() {
 
-        if (!BlockChain.SIDE_MODE)
+        if (!BlockChain.CLONE_MODE)
             return MIN_START_KEY;
 
         long startKey = BlockChain.startKeys[ItemCls.ASSET_TYPE];
@@ -436,9 +436,51 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
+            case 12:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/BTC.gif"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 82:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/UAH.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 83:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/KZT.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 84:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/KGS.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 85:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/BYN.png"));
+                } catch (Exception e) {
+                }
+                return icon;
             case 92:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/RUB.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 93:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/CNY.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 94:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/EUR.png"));
                 } catch (Exception e) {
                 }
                 return icon;
@@ -1134,7 +1176,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_ACCOUNTING:
         }
 
-        return viewAssetTypeAction(backward, actionType);
+        return viewAssetTypeAction(backward, actionType) + " # to";
 
     }
 

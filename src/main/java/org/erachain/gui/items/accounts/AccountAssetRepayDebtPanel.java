@@ -10,32 +10,26 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.transaction.Send_RecordDetailsFrame;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
-
-import java.awt.*;
 
 @SuppressWarnings("serial")
 
-public class AccountAssetRepayDebtPanel extends AccountAssetActionPanelCls  {
+public class AccountAssetRepayDebtPanel extends AccountAssetActionPanelCls {
 
-    // private final MessagesTableModel messagesTableModel;
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "AccountAssetRepayDebtPanel.png";
     public AccountAssetRepayDebtPanel(AssetCls assetIn, Account accountFrom, Account accountTo, PersonCls person) {
-        super(false, null, assetIn, null,
+        super(null, null, false, assetIn,
                 TransactionAmount.ACTION_REPAY_DEBT, accountFrom, accountTo, null);
 
-        // icon.setIcon(null);
-
+        iconName = "AccountAssetRepayDebtPanel";
     }
 
     @Override
     public void onSendClick() {
         // confirm params
-     
+
         if (!cheskError()) return;
         // CREATE TX MESSAGE
         Transaction transaction = Controller.getInstance().r_Send(
-                Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress()), feePow, recipient, -key,
+                Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress()), feePow, recipient, -key,
                 amount, head, messageBytes, isTextByte, encrypted, 0);
 
         String Status_text = "";
@@ -61,13 +55,4 @@ public class AccountAssetRepayDebtPanel extends AccountAssetActionPanelCls  {
         this.jButton_ok.setEnabled(true);
     }
 
-    public static  Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

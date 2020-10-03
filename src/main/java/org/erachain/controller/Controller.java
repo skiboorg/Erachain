@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.erachain.api.ApiClient;
+import org.erachain.api.ApiErrorFactory;
 import org.erachain.api.ApiService;
 import org.erachain.at.AT;
 import org.erachain.core.*;
@@ -29,22 +30,21 @@ import org.erachain.core.item.polls.PollCls;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.item.templates.TemplateCls;
 import org.erachain.core.item.unions.UnionCls;
-import org.erachain.core.naming.Name;
-import org.erachain.core.naming.NameSale;
 import org.erachain.core.payment.Payment;
 import org.erachain.core.telegram.TelegramStore;
+import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionFactory;
 import org.erachain.core.voting.PollOption;
 import org.erachain.core.wallet.Wallet;
 import org.erachain.database.DLSet;
-import org.erachain.database.SortableList;
 import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.AboutFrame;
 import org.erachain.gui.Gui;
 import org.erachain.gui.GuiTimer;
 import org.erachain.gui.library.IssueConfirmDialog;
+import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
 import org.erachain.network.Network;
 import org.erachain.network.Peer;
@@ -56,6 +56,7 @@ import org.erachain.webserver.Status;
 import org.erachain.webserver.WebService;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 import org.mapdb.Fun.Tuple3;
 import org.mapdb.Fun.Tuple5;
@@ -69,6 +70,7 @@ import java.awt.TrayIcon.MessageType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -91,8 +93,8 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "5.0.01 DEV";
-    public static String buildTime = "2020-05-06 12:00:00 UTC";
+    public static String version = "2.0.04";
+    public static String buildTime = "2020-09-02 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
     public static final char GROUPING_SEPARATOR = '`';
@@ -171,6 +173,7 @@ public class Controller extends Observable {
     public boolean onlyProtocolIndexing;
     public boolean compactDConStart;
     public boolean inMemoryDC;
+
     /**
      * see org.erachain.datachain.DCSet#BLOCKS_MAP
      */
@@ -212,7 +215,6 @@ public class Controller extends Observable {
                 dbs = "M";
 
         }
-
 
         if (withTimestamp)
             return version + (BlockChain.DEMO_MODE ? " DEMO Net"
@@ -315,10 +317,10 @@ public class Controller extends Observable {
     public byte[] getMessageMagic() {
         if (this.messageMagic == null) {
             long longTestNetStamp = Settings.getInstance().getGenesisStamp();
-            if (!BlockChain.DEMO_MODE && BlockChain.TEST_MODE || BlockChain.SIDE_MODE) {
+            if (!BlockChain.DEMO_MODE && BlockChain.TEST_MODE || BlockChain.CLONE_MODE) {
                 byte[] seedTestNetStamp = Crypto.getInstance().digest(Longs.toByteArray(longTestNetStamp));
                 this.messageMagic = Arrays.copyOfRange(seedTestNetStamp, 0, Message.MAGIC_LENGTH);
-            } else if (BlockChain.SIDE_MODE) {
+            } else if (BlockChain.CLONE_MODE) {
                 byte[] seedTestNetStamp = blockChain.getGenesisBlock().getSignature();
                 this.messageMagic = Arrays.copyOfRange(seedTestNetStamp, 0, Message.MAGIC_LENGTH);
             } else {
@@ -749,7 +751,7 @@ public class Controller extends Observable {
             this.setChanged();
             this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.getInstance().translate("Start WEB Service")));
             LOGGER.info(Lang.getInstance().translate("Start WEB Service"));
-            this.webService = new WebService();
+            this.webService = WebService.getInstance();
             this.webService.start();
         }
 
@@ -1007,10 +1009,13 @@ public class Controller extends Observable {
 
         if (this.webService != null)
             this.webService.stop();
+        while( !this.webService.isStoped()){}
+        this.webService = null;
 
         // START API SERVICE
+        WebService.getInstance().clearInstance();
         if (Settings.getInstance().isWebEnabled()) {
-            this.webService = new WebService();
+            this.webService = WebService.getInstance();
             this.webService.start();
         }
     }
@@ -1179,6 +1184,12 @@ public class Controller extends Observable {
     public void blockchainSyncStatusUpdate(int height) {
         this.setChanged();
         this.notifyObservers(new ObserverMessage(ObserverMessage.BLOCKCHAIN_SYNC_STATUS, height));
+    }
+
+    public void playWalletEvent(Object object) {
+        if (gui == null || gui.walletTimer == null)
+            return;
+        gui.walletTimer.playEvent(object);
     }
 
     /**
@@ -1787,7 +1798,10 @@ public class Controller extends Observable {
 
     private int skipNotify = 0;
     // https://127.0.0.1/7pay_in/tools/block_proc/ERA
-    public void NotifyIncoming(List<Transaction> transactions) {
+    public void NotifyWalletIncoming(List<Transaction> transactions) {
+
+        if (!doesWalletExists())
+            return;
 
         List<Account> accounts = this.wallet.getAccounts();
         List<Integer> seqs = new ArrayList<Integer>();
@@ -1839,10 +1853,23 @@ public class Controller extends Observable {
         return !Settings.getInstance().updateNameStorage();
     }
 
+    public Account[] getInvolvedAccounts(Transaction transaction) {
+        if (!doesWalletExists())
+            return null;
+
+        return wallet.getInvolvedAccounts(transaction);
+    }
+
+    public Account getInvolvedAccount(Transaction transaction) {
+        if (!doesWalletExists())
+            return null;
+
+        return wallet.getInvolvedAccount(transaction);
+    }
 
     /**
      * вызывается только из синхронизатора в момент синхронизации цепочки.
-     *  Поэтому можно сипользовать внутренню переменную
+     * Поэтому можно сипользовать внутренню переменную
      *
      * @param currentBetterPeer
      * @throws Exception
@@ -2189,12 +2216,12 @@ public class Controller extends Observable {
         }
     }
 
-    public List<Account> getAccounts() {
+    public List<Account> getWalletAccounts() {
 
         return this.wallet.getAccounts();
     }
 
-    public List<Account> getAccountsAndSetBalancePosition(int position) {
+    public List<Account> getWalletAccountsAndSetBalancePosition(int position) {
 
         return this.wallet.getAccountsAndSetBalancePosition(position);
     }
@@ -2211,25 +2238,19 @@ public class Controller extends Observable {
         return false;
     }
 
-    public List<PublicKeyAccount> getPublicKeyAccounts() {
+    public List<PublicKeyAccount> getWalletPublicKeyAccounts() {
         return this.wallet.getPublicKeyAccounts();
     }
 
-    public List<PrivateKeyAccount> getPrivateKeyAccounts() {
+    public List<PrivateKeyAccount> getWalletPrivateKeyAccounts() {
         return this.wallet.getprivateKeyAccounts();
     }
 
-    public String generateNewAccount() {
+    public String generateNewWalletAccount() {
         return this.wallet.generateNewAccount();
     }
 
-    public String generateNewAccountWithSynch() {
-        String account = this.wallet.generateNewAccount();
-        this.wallet.synchronizeFull();
-        return account;
-    }
-
-    public PrivateKeyAccount getPrivateKeyAccountByAddress(String address) {
+    public PrivateKeyAccount getWalletPrivateKeyAccountByAddress(String address) {
         if (this.doesWalletExists()) {
             return this.wallet.getPrivateKeyAccount(address);
         } else {
@@ -2237,23 +2258,31 @@ public class Controller extends Observable {
         }
     }
 
+    public PrivateKeyAccount getWalletPrivateKeyAccountByAddress(Account account) {
+        if (this.doesWalletExists()) {
+            return this.wallet.getPrivateKeyAccount(account);
+        } else {
+            return null;
+        }
+    }
+
     public byte[] decrypt(PublicKeyAccount creator, Account recipient, byte[] data) {
 
-        Account account = this.getAccountByAddress(creator.getAddress());
+        Account account = this.getWalletAccountByAddress(creator.getAddress());
 
         byte[] privateKey = null;
         byte[] publicKey = null;
 
         // IF SENDER ANOTHER
         if (account == null) {
-            PrivateKeyAccount accountRecipient = this.getPrivateKeyAccountByAddress(recipient.getAddress());
+            PrivateKeyAccount accountRecipient = this.getWalletPrivateKeyAccountByAddress(recipient.getAddress());
             privateKey = accountRecipient.getPrivateKey();
 
             publicKey = creator.getPublicKey();
         }
         // IF SENDER ME
         else {
-            PrivateKeyAccount accountRecipient = this.getPrivateKeyAccountByAddress(account.getAddress());
+            PrivateKeyAccount accountRecipient = this.getWalletPrivateKeyAccountByAddress(account.getAddress());
             privateKey = accountRecipient.getPrivateKey();
 
             publicKey = this.getPublicKeyByAddress(recipient.getAddress());
@@ -2273,7 +2302,7 @@ public class Controller extends Observable {
      * @param address is a address in wallet
      * @return object Account
      */
-    public Account getAccountByAddress(String address) {
+    public Account getWalletAccountByAddress(String address) {
         if (this.doesWalletExists()) {
             return this.wallet.getAccount(address);
         } else {
@@ -2288,10 +2317,14 @@ public class Controller extends Observable {
         return false;
     }
 
-    // public BigDecimal getUnconfirmedBalance(String address, long key) {
-    // return this.wallet.getUnconfirmedBalance(address, key);
-    // }
-    public Tuple3<BigDecimal, BigDecimal, BigDecimal> getUnconfirmedBalance(Account account, long key) {
+    public boolean isMyAccountByAddress(Account address) {
+        if (this.doesWalletExists()) {
+            return this.wallet.accountExists(address);
+        }
+        return false;
+    }
+
+    public Tuple3<BigDecimal, BigDecimal, BigDecimal> getWalletUnconfirmedBalance(Account account, long key) {
         return this.wallet.getUnconfirmedBalance(account, key);
     }
 
@@ -2309,10 +2342,6 @@ public class Controller extends Observable {
 
     public byte[] exportSeed() {
         return this.wallet.exportSeed();
-    }
-
-    public boolean deleteAccount(PrivateKeyAccount account) {
-        return this.wallet.deleteAccount(account);
     }
 
     /**
@@ -2396,7 +2425,7 @@ public class Controller extends Observable {
         this.wallet.setSecondsToUnlock(seconds);
     }
 
-    public List<Pair<Account, Transaction>> getLastTransactions(int limit) {
+    public List<Pair<Account, Transaction>> getLastWalletTransactions(int limit) {
         return this.wallet.getLastTransactions(limit);
     }
 
@@ -2435,15 +2464,15 @@ public class Controller extends Observable {
         return database.getTransactionFinalMap().get(refDB);
     }
 
-    public List<Transaction> getLastTransactions(Account account, int limit) {
+    public List<Transaction> getLastWalletTransactions(Account account, int limit) {
         return this.wallet.getLastTransactions(account, limit);
     }
 
-    public List<Pair<Account, Block.BlockHead>> getLastBlocks(int limit) {
+    public List<Pair<Account, Block.BlockHead>> getLastWalletBlocks(int limit) {
         return this.wallet.getLastBlocks(limit);
     }
 
-    public List<Block.BlockHead> getLastBlocks(Account account, int limit) {
+    public List<Block.BlockHead> getLastWalletBlocks(Account account, int limit) {
         return this.wallet.getLastBlocks(account, limit);
     }
 
@@ -2485,63 +2514,6 @@ public class Controller extends Observable {
     public TelegramMessage getTelegram(String signature) {
         return this.network.getTelegram(signature);
     }
-    // public TelegramMessage getTelegram(String signature) {
-    // return this.network.getTelegram(signature);
-    // }
-
-    public List<Pair<Account, Name>> getNames() {
-        return this.wallet.getNames();
-    }
-
-    public List<Name> getNamesAsList() {
-        List<Pair<Account, Name>> names = this.wallet.getNames();
-        List<Name> result = new ArrayList<>();
-        for (Pair<Account, Name> pair : names) {
-            result.add(pair.getB());
-        }
-
-        return result;
-
-    }
-
-    public List<String> getNamesAsListAsString() {
-        List<Name> namesAsList = getNamesAsList();
-        List<String> results = new ArrayList<String>();
-        for (Name name : namesAsList) {
-            results.add(name.getName());
-        }
-        return results;
-
-    }
-
-    @Deprecated
-    public List<Name> getNames(Account account) {
-        return this.wallet.getNames(account);
-    }
-
-    @Deprecated
-    public List<Pair<Account, NameSale>> getNameSales() {
-        return this.wallet.getNameSales();
-    }
-
-    @Deprecated
-    public List<NameSale> getNameSales(Account account) {
-        return this.wallet.getNameSales(account);
-    }
-
-    @Deprecated
-    public List<NameSale> getAllNameSales() {
-        return this.dcSet.getNameExchangeMap().getNameSales();
-    }
-
-    @Deprecated
-    public List<Pair<Account, org.erachain.core.voting.Poll>> getPolls() {
-        return this.wallet.getPolls();
-    }
-
-    public List<org.erachain.core.voting.Poll> getPolls(Account account) {
-        return this.wallet.getPolls(account);
-    }
 
     public ItemMap getItemMap(int type) {
         switch (type) {
@@ -2559,6 +2531,46 @@ public class Controller extends Observable {
         return null;
     }
 
+    public void addAddressFavorite(String address, String pubKey, String name, String description) {
+        this.wallet.addAddressFavorite(address, pubKey, name, description);
+    }
+
+    public void addTelegramToWallet(Transaction transaction, String signatureKey) {
+        HashSet<Account> recipients = transaction.getRecipientAccounts();
+        PublicKeyAccount creator = transaction.getCreator();
+        String creator58 = creator.getAddress();
+        String creatorPubKey58 = creator.getBase58();
+        for (Account recipient : recipients) {
+            if (wallet.accountExists(recipient)) {
+                wallet.database.getTelegramsMap().add(signatureKey, transaction);
+                if (!wallet.database.getFavoriteAccountsMap().contains(creator58)) {
+                    String title = transaction.getTitle();
+                    String description = "";
+                    if (transaction instanceof RSend) {
+                        RSend rsend = ((RSend) transaction);
+                        if (rsend.isText()) {
+                            byte[] data = rsend.getData();
+                            if (data != null && data.length > 0) {
+                                if (rsend.isEncrypted()) {
+                                    data = decrypt(creator, rsend.getRecipient(), data);
+                                }
+                                if (data != null && data.length > 0) {
+                                    try {
+                                        description = new String(data, "UTF-8");
+                                    } catch (UnsupportedEncodingException e) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    addAddressFavorite(creator58, creatorPubKey58,
+                            title == null || title.isEmpty() ? "telegram" : title, description);
+                    break;
+                }
+            }
+        }
+    }
+
     public void addItemFavorite(ItemCls item) {
         this.wallet.addItemFavorite(item);
     }
@@ -2567,7 +2579,9 @@ public class Controller extends Observable {
         this.wallet.removeItemFavorite(item);
     }
 
-    public boolean isItemFavorite(ItemCls item) { return this.wallet.isItemFavorite(item); }
+    public boolean isItemFavorite(ItemCls item) {
+        return this.wallet.isItemFavorite(item);
+    }
 
     public void addTransactionFavorite(Transaction transaction) {
         this.wallet.addTransactionFavorite(transaction);
@@ -2579,11 +2593,6 @@ public class Controller extends Observable {
 
     public boolean isTransactionFavorite(Transaction transaction) {
         return this.wallet.isTransactionFavorite(transaction);
-    }
-
-
-    public Collection<org.erachain.core.voting.Poll> getAllPolls() {
-        return this.dcSet.getPollMap().values();
     }
 
     public Collection<ItemCls> getAllItems(int type) {
@@ -2639,7 +2648,7 @@ public class Controller extends Observable {
         return signature;
     }
 
-    public byte[] getWalletLastBlockSign() {
+    public byte[] getLastWalletBlockSign() {
         return this.wallet.getLastBlockSignature();
     }
 
@@ -2757,37 +2766,25 @@ public class Controller extends Observable {
 
     // BALANCES
 
-    public SortableList<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
+    public List<Tuple2<byte[], Tuple5<
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>>
     getBalances(
             long key) {
-        return this.dcSet.getAssetBalanceMap().getBalancesSortableList(key);
+        return this.dcSet.getAssetBalanceMap().getBalancesList(key);
     }
 
-    public SortableList<byte[], Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>
+    public List<Tuple2<byte[], Tuple5<
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>,
+            Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>>>
     getBalances(
             Account account) {
 
-        return this.dcSet.getAssetBalanceMap().getBalancesSortableList(account);
+        return this.dcSet.getAssetBalanceMap().getBalancesList(account);
     }
 
     public List<Transaction> getUnconfirmedTransactionsByAddressFast100(String address) {
         return this.dcSet.getTransactionTab().getTransactionsByAddressFast100(address);
-    }
-
-    // NAMES
-
-    public Name getName(String nameName) {
-        return this.dcSet.getNameMap().get(nameName);
-    }
-
-    public NameSale getNameSale(String nameName) {
-        return this.dcSet.getNameExchangeMap().getNameSale(nameName);
-    }
-
-    // POLLS
-
-    public org.erachain.core.voting.Poll getPoll(String name) {
-        return this.dcSet.getPollMap().get(name);
     }
 
     // ASSETS
@@ -2917,7 +2914,7 @@ public class Controller extends Observable {
 
     // ATs
 
-    public SortableList<String, AT> getAcctATs(String type, boolean initiators) {
+    public List<AT> getAcctATs(String type, boolean initiators) {
         return this.dcSet.getATMap().getAcctATs(type, initiators);
     }
 
@@ -2926,67 +2923,18 @@ public class Controller extends Observable {
     public void onTransactionCreate(Transaction transaction) {
         // ADD TO UNCONFIRMED TRANSACTIONS
         //////this.dcSet.getTransactionTab().add(transaction);
-        /// чтобы не налететь на очситку таблицы - туда передадим
+        /// чтобы не налететь на очистку таблицы - туда передадим
         this.transactionsPool.offerMessage(transaction);
 
         // BROADCAST
         this.broadcastTransaction(transaction);
-    }
 
-    public Pair<Transaction, Integer> registerName(PrivateKeyAccount registrant, Account owner, String name,
-                                                   String value, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createNameRegistration(registrant, new Name(owner, name, value), feePow);
+        if (doesWalletExists() && HARD_WORK < 4) {
+            // для всех счетов - может сам себе послал
+            transaction.resetDCSet(); // сбросим назначения после Форкнутой Базы
+            wallet.processTransaction(transaction);
         }
-    }
 
-    public Pair<Transaction, Integer> updateName(PrivateKeyAccount owner, Account newOwner, String name, String value,
-                                                 int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createNameUpdate(owner, new Name(newOwner, name, value), feePow);
-        }
-    }
-
-    public Pair<Transaction, Integer> sellName(PrivateKeyAccount owner, String name, BigDecimal amount, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createNameSale(owner, new NameSale(name, amount), feePow);
-        }
-    }
-
-    public Pair<Transaction, Integer> cancelSellName(PrivateKeyAccount owner, NameSale nameSale, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createCancelNameSale(owner, nameSale, feePow);
-        }
-    }
-
-    public Pair<Transaction, Integer> BuyName(PrivateKeyAccount buyer, NameSale nameSale, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createNamePurchase(buyer, nameSale, feePow);
-        }
-    }
-
-    public Transaction createPoll_old(PrivateKeyAccount creator, String name, String description, List<String> options,
-                                      int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            // CREATE POLL OPTIONS
-            List<PollOption> pollOptions = new ArrayList<PollOption>();
-            for (String option : options) {
-                pollOptions.add(new PollOption(option));
-            }
-
-            // CREATE POLL
-            org.erachain.core.voting.Poll poll = new org.erachain.core.voting.Poll(creator, name, description, pollOptions);
-
-            return this.transactionCreator.createPollCreation(creator, poll, feePow);
-
-
-        }
     }
 
     public Transaction createItemPollVote(PrivateKeyAccount creator, long pollKey, int optionIndex, int feePow) {
@@ -3054,8 +3002,66 @@ public class Controller extends Observable {
 
     }
 
+    public Object issueAsset(HttpServletRequest request, String x) {
+
+        Object result = Transaction.decodeJson(x);
+        if (result instanceof JSONObject) {
+            return result;
+        }
+
+        Fun.Tuple4<Account, Integer, String, JSONObject> transactionResult = (Fun.Tuple4<Account, Integer, String, JSONObject>) result;
+        Account creator = transactionResult.a;
+        int feePow = transactionResult.b;
+        String password = transactionResult.c;
+        JSONObject jsonObject = transactionResult.d;
+
+        if (jsonObject == null) {
+            int error = ApiErrorFactory.ERROR_JSON;
+            return new Fun.Tuple2<>(error, OnDealClick.resultMess(error));
+        }
+
+        String name = (String) jsonObject.getOrDefault("name", null);
+        String description = (String) jsonObject.getOrDefault("description", null);
+
+        byte[] icon;
+        String icon64 = (String) jsonObject.getOrDefault("icon64", null);
+        if (icon64 == null) {
+            String icon58 = (String) jsonObject.getOrDefault("icon", null);
+            if (icon58 == null)
+                icon = null;
+            else
+                icon = Base58.decode(icon58);
+        } else {
+            icon = java.util.Base64.getDecoder().decode(icon64);
+        }
+
+        byte[] image;
+        String image64 = (String) jsonObject.getOrDefault("image64", null);
+        if (image64 == null) {
+            String image58 = (String) jsonObject.getOrDefault("image", null);
+            if (image58 == null)
+                image = null;
+            else
+                image = Base58.decode(image58);
+        } else {
+            image = java.util.Base64.getDecoder().decode(image64);
+        }
+
+        Integer scale = (Integer) jsonObject.getOrDefault("scale", 0);
+        Integer assetType = (Integer) jsonObject.getOrDefault("assetType", 0);
+        Long quantity = (Long) jsonObject.getOrDefault("quantity", 0L);
+
+        APIUtils.askAPICallAllowed(password, "POST issue Asset " + name, request, true);
+        PrivateKeyAccount creatorPrivate = getWalletPrivateKeyAccountByAddress(creator);
+
+        return issueAsset(creatorPrivate,
+                name, description, icon, image, scale,
+                assetType, quantity, feePow);
+
+    }
+
     public Transaction issueAsset(PrivateKeyAccount creator, String name, String description, byte[] icon, byte[] image,
-                                  boolean movable, int scale, int assetType, long quantity, int feePow) {
+                                  int scale, int assetType, long quantity, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
             return this.transactionCreator.createIssueAssetTransaction(creator, name, description, icon, image, scale,
@@ -3100,6 +3106,80 @@ public class Controller extends Observable {
                     deathday, gender, race, birthLatitude, birthLongitude, skinColor, eyeColor, hairСolor, height, icon,
                     image, description, owner, ownerSignature);
         }
+    }
+
+    public Object issuePerson(HttpServletRequest request, String x) {
+
+        Object result = Transaction.decodeJson(x);
+        if (result instanceof JSONObject) {
+            return result;
+        }
+
+        Fun.Tuple4<Account, Integer, String, JSONObject> transactionResult = (Fun.Tuple4<Account, Integer, String, JSONObject>) result;
+        Account creator = transactionResult.a;
+        int feePow = transactionResult.b;
+        String password = transactionResult.c;
+        JSONObject jsonObject = transactionResult.d;
+
+        if (jsonObject == null) {
+            int error = ApiErrorFactory.ERROR_JSON;
+            return new Fun.Tuple2<>(error, OnDealClick.resultMess(error));
+        }
+
+        String name = (String) jsonObject.getOrDefault("name", null);
+        String description = (String) jsonObject.getOrDefault("description", null);
+
+        byte[] icon;
+        String icon64 = (String) jsonObject.getOrDefault("icon64", null);
+        if (icon64 == null) {
+            String icon58 = (String) jsonObject.getOrDefault("icon", null);
+            if (icon58 == null)
+                icon = null;
+            else
+                icon = Base58.decode(icon58);
+        } else {
+            icon = java.util.Base64.getDecoder().decode(icon64);
+        }
+
+        byte[] image;
+        String image64 = (String) jsonObject.getOrDefault("image64", null);
+        if (image64 == null) {
+            String image58 = (String) jsonObject.getOrDefault("image", null);
+            if (image58 == null)
+                image = null;
+            else
+                image = Base58.decode(image58);
+        } else {
+            image = java.util.Base64.getDecoder().decode(image64);
+        }
+
+        Integer scale = (Integer) jsonObject.getOrDefault("scale", 0);
+        Integer assetType = (Integer) jsonObject.getOrDefault("assetType", 0);
+        Long birthday = (Long) jsonObject.getOrDefault("birthday", 0L);
+        Long deathday = (Long) jsonObject.getOrDefault("deathday", null);
+        Integer gender = (Integer) jsonObject.getOrDefault("gender", 0);
+        String race = jsonObject.getOrDefault("race", null).toString();
+        Float birthLatitude = (Float) jsonObject.getOrDefault("birthLatitude", 0.0f);
+        Float birthLongitude = (Float) jsonObject.getOrDefault("birthLongitude", 0.0f);
+        String skinColor = jsonObject.getOrDefault("skinColor", null).toString();
+        String eyeColor = jsonObject.getOrDefault("eyeColor", null).toString();
+        String hairСolor = jsonObject.getOrDefault("hairСolor", null).toString();
+        Integer height = (Integer) jsonObject.getOrDefault("height", 0);
+        String owner58 = jsonObject.getOrDefault("owner", null).toString();
+        PublicKeyAccount owner = new PublicKeyAccount(owner58);
+        String ownerSignature58 = jsonObject.getOrDefault("ownerSignature", null).toString();
+        byte[] ownerSignature = Base58.decode(ownerSignature58);
+
+        APIUtils.askAPICallAllowed(password, "POST issue Person " + name, request, true);
+        PrivateKeyAccount creatorPrivate = getWalletPrivateKeyAccountByAddress(creator);
+
+        PersonHuman person = new PersonHuman(owner, name, birthday, deathday, (byte) (int) gender,
+                race, birthLatitude, birthLongitude,
+                skinColor, eyeColor, hairСolor, height, icon, image, description,
+                ownerSignature);
+
+        return issuePersonHuman(creatorPrivate, feePow, person);
+
     }
 
     public Pair<Transaction, Integer> issuePersonHuman(PrivateKeyAccount creator, int feePow, PersonHuman human) {
@@ -3273,7 +3353,7 @@ public class Controller extends Observable {
         if (messageBytes != null && messageBytes.length == 0)
             messageBytes = null;
 
-        PrivateKeyAccount privateKeyAccount = cnt.getPrivateKeyAccountByAddress(creator.getAddress());
+        PrivateKeyAccount privateKeyAccount = cnt.getWalletPrivateKeyAccountByAddress(creator.getAddress());
         if (privateKeyAccount == null) {
             return new Pair<Integer, Transaction>(Transaction.INVALID_WALLET_ADDRESS, null);
         }
@@ -3329,26 +3409,26 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction r_SignNote(byte version, byte property1, byte property2, int asDeal,
-                                  PrivateKeyAccount sender, int feePow, long key, byte[] message, byte[] isText, byte[] encrypted) {
+    public Transaction r_SignNote(byte version, byte property1, byte property2, int forDeal,
+                                  PrivateKeyAccount sender, int feePow, long key, byte[] message) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_SignNote(version, property1, property2, asDeal, sender, feePow, key,
-                    message, isText, encrypted);
+            return this.transactionCreator.r_SignNote(version, property1, property2, forDeal, sender, feePow, key,
+                    message);
         }
     }
 
-    public Transaction r_SertifyPerson(int version, int asDeal, PrivateKeyAccount creator, int feePow, long key,
+    public Transaction r_SertifyPerson(int version, int forDeal, PrivateKeyAccount creator, int feePow, long key,
                                        List<PublicKeyAccount> userAccounts, int add_day) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_SertifyPerson(version, asDeal, creator, feePow, key, userAccounts,
+            return this.transactionCreator.r_SertifyPerson(version, forDeal, creator, feePow, key, userAccounts,
                     add_day);
         }
     }
 
-    public Transaction r_Vouch(int version, int asDeal, PrivateKeyAccount creator, int feePow, int height,
+    public Transaction r_Vouch(int version, int forDeal, PrivateKeyAccount creator, int feePow, int height,
                                int seq) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Vouch(version, asDeal, creator, feePow, height, seq);
+            return this.transactionCreator.r_Vouch(version, forDeal, creator, feePow, height, seq);
         }
     }
 
@@ -3421,9 +3501,9 @@ public class Controller extends Observable {
     public byte[] getPublicKey(Account account) {
 
         // CHECK ACCOUNT IN OWN WALLET
-        if (isMyAccountByAddress(account.getAddress())) {
+        if (isMyAccountByAddress(account)) {
             if (isWalletUnlocked()) {
-                return getPrivateKeyAccountByAddress(account.getAddress()).getPublicKey();
+                return getWalletPrivateKeyAccountByAddress(account.getAddress()).getPublicKey();
             }
         }
 
@@ -3458,11 +3538,18 @@ public class Controller extends Observable {
             return null;
         }
 
-        // CHECK ACCOUNT IN OWN WALLET
-        Account account = getAccountByAddress(address);
-        if (account != null) {
-            if (isWalletUnlocked()) {
-                return getPrivateKeyAccountByAddress(address).getPublicKey();
+        if (wallet != null) {
+            Tuple3<String, String, String> favorite = wallet.database.getFavoriteAccountsMap().get(address);
+            if (favorite != null && favorite.a != null) {
+                return Base58.decode(favorite.a);
+            }
+
+            // CHECK ACCOUNT IN OWN WALLET
+            Account account = getWalletAccountByAddress(address);
+            if (account != null) {
+                if (isWalletUnlocked()) {
+                    return getWalletPrivateKeyAccountByAddress(address).getPublicKey();
+                }
             }
         }
 
@@ -3504,12 +3591,6 @@ public class Controller extends Observable {
 
             // ADD OBSERVER TO BLOCKGENERATOR
             // this.blockGenerator.addObserver(o);
-
-            // ADD OBSERVER TO NAMESALES
-            this.dcSet.getNameExchangeMap().addObserver(o);
-
-            // ADD OBSERVER TO POLLS
-            //this.dcSet.getPollMap().addObserver(o);
 
             // ADD OBSERVER TO ASSETS
             this.dcSet.getItemAssetMap().addObserver(o);
@@ -3730,6 +3811,7 @@ public class Controller extends Observable {
                 useNet = false;
                 continue;
             }
+
         }
 
         if (Settings.genesisStamp <= 0) {
@@ -3790,7 +3872,7 @@ public class Controller extends Observable {
                 this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, info));
 
 
-                String licenseFile = "Erachain Licence Agreement (genesis).txt";
+                String licenseFile = "Licence Agreement (genesis).txt";
                 File f = new File(licenseFile);
                 if (!f.exists()) {
 

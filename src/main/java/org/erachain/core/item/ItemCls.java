@@ -15,20 +15,26 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
+import org.erachain.dbs.IteratorCloseable;
+import org.erachain.gui.Iconable;
+import org.erachain.settings.Settings;
 import org.erachain.utils.Pair;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple6;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 //import java.math.BigDecimal;
 //import com.google.common.primitives.Longs;
 
-public abstract class ItemCls implements ExplorerJsonLine {
+public abstract class ItemCls implements Iconable, ExplorerJsonLine {
 
     protected final static long START_KEY = 1L << 14;
     public static final int ASSET_TYPE = 1;
@@ -199,17 +205,42 @@ public abstract class ItemCls implements ExplorerJsonLine {
         return this.image;
     }
 
-    public long getKey() {
-        return getKey(DCSet.getInstance());
-    }
-
     public void setKey(long key) {
         this.key = key;
     }
 
+    public long getKey() {
+        return this.key; //getKey(DCSet.getInstance());
+    }
+
     public long getKey(DCSet db) {
         // resolve key in that DB
-        resolveKey(db);
+        ////resolveKey(db);
+        return this.key;
+    }
+
+    public long resolveKey(DCSet db) {
+
+        if (this.reference == null || BlockChain.isWiped(this.reference))
+            return 0L;
+
+        if (false && this.key == 0 // & this.reference != null
+        ) {
+            if (this.getDBIssueMap(db).contains(this.reference)) {
+                this.key = this.getDBIssueMap(db).get(this.reference);
+            } else if (BlockChain.CHECK_BUGS > 0
+                    && !BlockChain.CLONE_MODE && !BlockChain.TEST_MODE
+                    && Base58.encode(this.reference).equals("2Mm3MY2F19CgqebkpZycyT68WtovJbgBb9p5SJDhPDGFpLQq5QjAXsbUZcRFDpr8D4KT65qMV7qpYg4GStmRp4za")
+
+            ) {
+                LOGGER.error("Item [" + this.name + "] not found for REFERENCE: " + Base58.encode(this.reference));
+                if (BlockChain.CHECK_BUGS > 3) {
+                    Long error = null;
+                    error++;
+                }
+            }
+        }
+
         return this.key;
     }
 
@@ -308,31 +339,6 @@ public abstract class ItemCls implements ExplorerJsonLine {
 
     }
 
-    public long resolveKey(DCSet db) {
-
-        if (this.reference == null || BlockChain.isWiped(this.reference))
-            return 0L;
-
-        if (this.key == 0 // & this.reference != null
-                ) {
-            if (this.getDBIssueMap(db).contains(this.reference)) {
-                this.key = this.getDBIssueMap(db).get(this.reference);
-            } else if (BlockChain.CHECK_BUGS > 0
-                    && !BlockChain.SIDE_MODE && !BlockChain.TEST_MODE
-                    && Base58.encode(this.reference).equals("2Mm3MY2F19CgqebkpZycyT68WtovJbgBb9p5SJDhPDGFpLQq5QjAXsbUZcRFDpr8D4KT65qMV7qpYg4GStmRp4za")
-
-            ) {
-                LOGGER.error("Item [" + this.name + "] not found for REFERENCE: " + Base58.encode(this.reference));
-                if (BlockChain.CHECK_BUGS > 3) {
-                    Long error = null;
-                    error++;
-                }
-            }
-        }
-
-        return this.key;
-    }
-
     public void resetKey() {
         this.key = 0;
     }
@@ -372,7 +378,28 @@ public abstract class ItemCls implements ExplorerJsonLine {
     }
 
     public boolean isConfirmed(DCSet db) {
-        return this.getDBIssueMap(db).contains(this.reference);
+        if (true) {
+            return key != 0;
+        } else {
+            return this.getDBIssueMap(db).contains(this.reference);
+        }
+    }
+
+    public int getConfirmations(DCSet db) {
+
+        // CHECK IF IN UNCONFIRMED TRANSACTION
+
+        if (!isConfirmed())
+            return 0;
+
+        Long dbRef = db.getTransactionFinalMapSigns().get(this.reference);
+        if (dbRef == null)
+            return 0;
+
+        int height = Transaction.parseDBRefHeight(dbRef);
+
+        return 1 + db.getBlockMap().size() - height;
+
     }
 
     public boolean isFavorite() {
@@ -551,21 +578,44 @@ public abstract class ItemCls implements ExplorerJsonLine {
         return getShort(DCSet.getInstance());
     }
 
+    public JSONObject toJsonLite(boolean withIcon, boolean showPerson) {
+
+        JSONObject itemJSON = new JSONObject();
+
+        // ADD DATA
+        itemJSON.put("key", this.getKey());
+        itemJSON.put("name", this.name);
+
+        if (withIcon)
+            itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+
+        itemJSON.put("owner", this.owner.getAddress());
+        if (showPerson) {
+            Fun.Tuple2<Integer, PersonCls> person = this.owner.getPerson();
+            if (person != null) {
+                itemJSON.put("ownerPersonKey", person.b.getKey());
+                itemJSON.put("ownerPersonName", person.b.getName());
+            }
+        }
+
+
+        return itemJSON;
+    }
+
     @SuppressWarnings("unchecked")
     public JSONObject toJson() {
 
-        JSONObject itemJSON = new JSONObject();
+        JSONObject itemJSON = toJsonLite(false, false);
 
         // ADD DATA
         itemJSON.put("item_type", this.getItemTypeName());
         itemJSON.put("item_type_sub", this.getItemSubType());
         itemJSON.put("type0", Byte.toUnsignedInt(this.typeBytes[0]));
         itemJSON.put("type1", Byte.toUnsignedInt(this.typeBytes[1]));
-        itemJSON.put("key", this.getKey());
-        itemJSON.put("name", this.name);
+        //itemJSON.put("key", this.getKey());
+        //itemJSON.put("name", this.name);
         itemJSON.put("description", this.description);
         itemJSON.put("creator", this.owner.getAddress()); // @Deprecated
-        itemJSON.put("owner", this.owner.getAddress());
         itemJSON.put("owner_publick_key", this.owner.getBase58());
         itemJSON.put("owner_publickey", this.owner.getBase58());
         itemJSON.put("isConfirmed", this.isConfirmed());
@@ -585,8 +635,8 @@ public abstract class ItemCls implements ExplorerJsonLine {
         JSONObject itemJSON = new JSONObject();
 
         // ADD DATA
-        itemJSON.put("icon", Base58.encode(this.getIcon()));
-        itemJSON.put("image", Base58.encode(this.getImage()));
+        itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+        itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
 
         return itemJSON;
     }
@@ -626,6 +676,40 @@ public abstract class ItemCls implements ExplorerJsonLine {
         return json;
     }
 
+    public static void makeJsonLitePage(DCSet dcSet, int itemType, long start, int pageSize,
+                                        Map output, boolean showPerson, boolean descending) {
+
+        ItemMap map = dcSet.getItem_Map(itemType);
+        ItemCls element;
+        long size = map.size();
+
+        if (start < 1 || start > size && size > 0) {
+            start = size;
+        }
+        output.put("start", start);
+        output.put("pageSize", pageSize);
+        output.put("listSize", size);
+
+        JSONArray array = new JSONArray();
+
+        long key = 0;
+        try (IteratorCloseable<Long> iterator = map.getIteratorFrom(start, descending)) {
+            while (iterator.hasNext() && pageSize-- > 0) {
+                key = iterator.next();
+                element = map.get(key);
+                if (element != null) {
+                    array.add(element.toJsonLite(true, showPerson));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        output.put("pageItems", array);
+        output.put("lastKey", key);
+
+    }
+
     public HashMap getNovaItems() {
         return new HashMap<String, Fun.Tuple3<Long, Long, byte[]>>();
     }
@@ -645,7 +729,10 @@ public abstract class ItemCls implements ExplorerJsonLine {
      */
     public long isNovaAsset(Account creator, DCSet dcSet) {
         Object item = getNovaItems().get(this.name);
-        if (item != null && creator.equals(getNovaItemCreator(item))) {
+        if (item != null &&
+                (creator.equals(getNovaItemCreator(item))
+                    || true || creator.equals(Settings.HOLDERS.get(0).get(0)))
+                ) {
             ItemMap dbMap = this.getDBMap(dcSet);
             Long key = (Long) getNovaItemKey(item);
             if (dbMap.contains(key)) {
@@ -671,6 +758,11 @@ public abstract class ItemCls implements ExplorerJsonLine {
             newKey = novaKey;
             dbMap.put(newKey, this);
 
+            // если в Генесиз вносим NOVA ASSET - пересчитаем и Размер
+            if (dbMap.getLastKey() < newKey) {
+                dbMap.setLastKey(newKey);
+            }
+
         } else {
 
             // INSERT WITH NEW KEY
@@ -684,8 +776,12 @@ public abstract class ItemCls implements ExplorerJsonLine {
         }
 
         this.key = newKey;
-        //SET ORPHAN DATA
-        this.getDBIssueMap(db).put(this.reference, newKey);
+
+        if (false) {
+            // теперь ключ прямо в записи храним и не нужно его отдельно хранить
+            //SET ORPHAN DATA
+            this.getDBIssueMap(db).put(this.reference, newKey);
+        }
 
         return key;
     }
@@ -713,8 +809,11 @@ public abstract class ItemCls implements ExplorerJsonLine {
             map.delete(thisKey);
         }
 
-        //DELETE ORPHAN DATA
-        this.getDBIssueMap(db).delete(this.reference);
+        if (false) {
+            // теперь ключ прямо в записи храним и не нужно его отдельно хранить
+            //DELETE ORPHAN DATA
+            this.getDBIssueMap(db).delete(this.reference);
+        }
 
         return thisKey;
 

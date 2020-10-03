@@ -4,6 +4,7 @@ import org.erachain.controller.Controller;
 import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.SplitPanel;
 import org.erachain.gui.library.Library;
 import org.erachain.gui.library.MTable;
@@ -32,15 +33,19 @@ import java.text.SimpleDateFormat;
 
 
 @SuppressWarnings("serial")
-public class UnconfirmedTransactionsPanel extends JPanel {
+public class UnconfirmedTransactionsPanel extends IconPanel {
+
+    public static String NAME = "UnconfirmedTransactionsPanel";
+    public static String TITLE = "Unconfirmed Transactions";
+
     protected Logger logger;
-    private static String iconFile = Settings.getInstance().getPatnIcons() + "UnconfirmedTransactionsPanel.png";
     private static UnconfirmedTransactionsPanel instance;
     private UnconfirmedTransactionsTableModel transactionsModel;
     private MTable transactionsTable;
 
     public UnconfirmedTransactionsPanel() {
-        setName(Lang.getInstance().translate("Unconfirmed Records"));
+        super(NAME, TITLE);
+
         // this.parent = parent;
         this.setLayout(new GridBagLayout());
         // this.setLayout(new ScrollPaneLayout());
@@ -89,7 +94,7 @@ public class UnconfirmedTransactionsPanel extends JPanel {
             }
         });
 
-        SplitPanel record_stpit = new SplitPanel("");
+        SplitPanel record_stpit = new SplitPanel("", title);
         record_stpit.toolBarLeftPanel.setVisible(false);
         record_stpit.jToolBarRightPanel.setVisible(false);
         record_stpit.searchToolBar_LeftPanel.setVisible(false);
@@ -182,10 +187,7 @@ public class UnconfirmedTransactionsPanel extends JPanel {
                 int row = record_stpit.jTableJScrollPanelLeftPanel.getSelectedRow();
                 row = record_stpit.jTableJScrollPanelLeftPanel.convertRowIndexToModel(row);
                 Transaction trans = transactionsModel.getItem(row);
-                DCSet dcSet = DCSet.getInstance();
-                trans.setDC(dcSet, Transaction.FOR_NETWORK, DCSet.getInstance().getBlockMap().size() + 1, 1);
-                if (trans.isValid(Transaction.FOR_NETWORK, 0) == Transaction.VALIDATE_OK)
-                    Controller.getInstance().broadcastTransaction(trans);
+                Controller.getInstance().broadcastTransaction(trans);
 
             }
         });
@@ -277,13 +279,4 @@ public class UnconfirmedTransactionsPanel extends JPanel {
 
     }
 
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

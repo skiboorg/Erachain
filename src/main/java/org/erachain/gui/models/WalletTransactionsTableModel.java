@@ -2,19 +2,22 @@ package org.erachain.gui.models;
 
 import org.erachain.controller.Controller;
 import org.erachain.core.item.ItemCls;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.*;
-import org.erachain.datachain.DCSet;
+import org.erachain.database.wallet.WTransactionMap;
+import org.erachain.dbs.IteratorCloseable;
+import org.erachain.dbs.IteratorCloseableImpl;
 import org.erachain.lang.Lang;
-import org.erachain.utils.DateTimeFormat;
-import org.erachain.utils.Pair;
 import org.mapdb.Fun.Tuple2;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
-public class WalletTransactionsTableModel extends WalletAutoKeyTableModel<Tuple2<Long, Long>, Tuple2<Long, Transaction>>{
+public class WalletTransactionsTableModel extends WalletTableModel<Tuple2<Tuple2<Long, Integer>, Transaction>> {
 
-    public static final int COLUMN_CONFIRMATIONS = 0;
+    public static final int COLUMN_NUMBER = 0;
     public static final int COLUMN_TIMESTAMP = 1;
     public static final int COLUMN_TYPE = 2;
     public static final int COLUMN_CREATOR = 3;
@@ -23,7 +26,9 @@ public class WalletTransactionsTableModel extends WalletAutoKeyTableModel<Tuple2
     public static final int COLUMN_RECIPIENT = 6;
     public static final int COLUMN_FEE = 7;
     public static final int COLUMN_SIZE = 8;
-    public static final int COLUMN_NUMBER = 9;
+    public static final int COLUMN_FAVORITE = 9;
+
+    private boolean onlyUnread = false;
 
     /**
      * В динамическом режиме перерисовывается автоматически по событию GUI_REPAINT
@@ -33,121 +38,75 @@ public class WalletTransactionsTableModel extends WalletAutoKeyTableModel<Tuple2
      */
     public WalletTransactionsTableModel() {
         super(Controller.getInstance().getWallet().database.getTransactionMap(),
-                new String[]{"Confirmations", "Timestamp", "Type", "Creator", "Item", "Amount", "Recipient", "Fee", "Size"},
-                new Boolean[]{true, true, true, true, true, true, true, false, false}, true);
+                new String[]{"№", "Timestamp", "Type", "Creator", "Item", "Amount", "Recipient", "Fee", "Size", "Favorite"},
+                new Boolean[]{true, true, true, true, true, true, true, false, false, true, true},
+                true, COLUMN_FAVORITE);
 
     }
 
     @Override
     public Object getValueAt(int row, int column) {
 
-        if (this.listSorted == null || this.listSorted.size() - 1 < row) {
+        if (this.list == null || row > this.list.size() - 1) {
             return null;
         }
 
-        Pair<Tuple2<Long, Long>, Tuple2<Long, Transaction>> data = this.listSorted.get(row);
+        Tuple2<Tuple2<Long, Integer>, Transaction> rowItem = this.list.get(row);
+        Transaction transaction = rowItem.b;
 
-        if (data == null) {
-            return null;
-        }
-
-        if (data.getB() == null)
-            return null;
-
-        Transaction transaction = data.getB().b;
-        if (transaction == null)
-            return null;
-
-        Tuple2<Long, Long> address = data.getA();
-        if (address == null)
-            return null;
-
-        //String creator_address = data.getA().a;
-        //Account creator = new Account(data.getA().a);
-        //Account recipient = null; // = new Account(data.getA().b);
-
-        //creator = transaction.getCreator();
-        String itemName = "";
+        ItemCls item = null;
         if (transaction instanceof TransactionAmount && transaction.getAbsKey() > 0) {
             TransactionAmount transAmo = (TransactionAmount) transaction;
-            //recipient = transAmo.getRecipient();
-            ItemCls item = DCSet.getInstance().getItemAssetMap().get(transAmo.getAbsKey());
-            if (item == null)
-                return null;
-
-            itemName = item.toString();
+            item = dcSet.getItemAssetMap().get(transAmo.getAbsKey());
         } else if (transaction instanceof GenesisTransferAssetTransaction) {
             GenesisTransferAssetTransaction transGen = (GenesisTransferAssetTransaction) transaction;
-            //recipient = transGen.getRecipient();
-            ItemCls item = DCSet.getInstance().getItemAssetMap().get(transGen.getAbsKey());
-            if (item == null)
-                return null;
-
-            itemName = item.toString();
-            //creator_address = transGen.getRecipient().getAddress();
+            item = dcSet.getItemAssetMap().get(transGen.getAbsKey());
         } else if (transaction instanceof IssueItemRecord) {
             IssueItemRecord transIssue = (IssueItemRecord) transaction;
-            ItemCls item = transIssue.getItem();
-            if (item == null)
-                return null;
-
-            itemName = item.getShort();
+            item = transIssue.getItem();
         } else if (transaction instanceof GenesisIssueItemRecord) {
             GenesisIssueItemRecord transIssue = (GenesisIssueItemRecord) transaction;
-            ItemCls item = transIssue.getItem();
-            if (item == null)
-                return null;
-
-            itemName = item.getShort();
+            item = transIssue.getItem();
         } else if (transaction instanceof RSertifyPubKeys) {
             RSertifyPubKeys sertifyPK = (RSertifyPubKeys) transaction;
-            //recipient = transAmo.getRecipient();
-            ItemCls item = DCSet.getInstance().getItemPersonMap().get(sertifyPK.getAbsKey());
-            if (item == null)
-                return null;
-
-            itemName = item.toString();
+            item = dcSet.getItemPersonMap().get(sertifyPK.getAbsKey());
         } else {
-
-            try {
-                if (transaction.viewItemName() != null) {
-                    itemName = transaction.viewItemName();
-                }
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                //e.printStackTrace();
-                itemName = "";
-            }
-
 
         }
         switch (column) {
-            case COLUMN_CONFIRMATIONS:
+            case COLUMN_IS_OUTCOME:
+                if (transaction.getCreator() != null)
+                    return transaction.getCreator().hashCode() == rowItem.a.b;
+                return false;
 
-                return transaction.getConfirmations(DCSet.getInstance());
+            case COLUMN_UN_VIEWED:
+                return ((WTransactionMap) map).isUnViewed(transaction);
+
+            case COLUMN_CONFIRMATIONS:
+                return transaction.getConfirmations(dcSet);
+
+            case COLUMN_NUMBER:
+                return transaction.viewHeightSeq();
 
             case COLUMN_TIMESTAMP:
-
-
-                return DateTimeFormat.timestamptoString(transaction.getTimestamp());//.viewTimestamp(); // + " " + transaction.getTimestamp() / 1000;
+                return transaction.viewTimestamp();//.viewTimestamp(); // + " " + transaction.getTimestamp() / 1000;
 
             case COLUMN_TYPE:
-
                 return Lang.getInstance().translate(transaction.viewFullTypeName());
 
             case COLUMN_CREATOR:
-
                 return transaction.viewCreator();
 
             case COLUMN_ITEM:
-                return itemName;
+                return item;
 
             case COLUMN_AMOUNT:
+                BigDecimal amount = transaction.getAmount();
+                if (amount != null && item != null && item instanceof AssetCls) {
+                    amount = amount.setScale(((AssetCls) item).getScale());
+                }
 
-                BigDecimal amo = transaction.getAmount();
-                if (amo == null)
-                    return BigDecimal.ZERO;
-                return amo;
+                return amount;
 
             case COLUMN_RECIPIENT:
 
@@ -160,32 +119,86 @@ public class WalletTransactionsTableModel extends WalletAutoKeyTableModel<Tuple2
                 }
 
             case COLUMN_FEE:
-
                 return transaction.getFee();
 
             case COLUMN_SIZE:
                 return transaction.viewSize(Transaction.FOR_NETWORK);
 
-            case COLUMN_NUMBER:
-                return data.getB();
+            case COLUMN_FAVORITE:
+                return Controller.getInstance().isTransactionFavorite(transaction);
         }
 
         return null;
 
     }
 
-    public void getIntervalThis(long startBack, int limit) {
+    @Override
+    protected void repaintConfirms() {
+        for (int i = 0; i < list.size(); i++) {
+            setValueAt(i, COLUMN_CONFIRMATIONS, list.get(i).b.getConfirmations(dcSet));
+        }
+        fireTableDataChanged();
+    }
 
-        super.getIntervalThis(startBack, limit);
+    public void setOnlyUndead() {
+        onlyUnread = !onlyUnread;
+        getInterval();
+        fireTableDataChanged();
+    }
 
-        DCSet dcSet = DCSet.getInstance();
-        for (Pair<Tuple2<Long, Long>, Tuple2<Long, Transaction>> item: listSorted) {
-            if (item.getB() == null) {
-                continue;
+    public void clearAllOnlyUndead() {
+        ((WTransactionMap) map).clearUnViewed();
+        fireTableDataChanged();
+    }
+
+    @Override
+    public void getInterval() {
+
+        Object key;
+        int count = 0;
+        list = new ArrayList<>();
+        if (onlyUnread) {
+            try (IteratorCloseable iterator = IteratorCloseableImpl.make(((WTransactionMap) map).getUndeadIterator(false))) {
+                while (iterator.hasNext() && count++ < step) {
+                    key = iterator.next();
+                    Transaction item = (Transaction) map.get(key);
+                    if (item == null)
+                        continue;
+                    list.add(new Tuple2<>((Tuple2<Long, Integer>) key, item));
+                }
+            } catch (IOException e) {
             }
 
-            item.getB().b.setDC_HeightSeq(dcSet);
-            item.getB().b.calcFee();
+        } else {
+            if (startKey == null) {
+                try (IteratorCloseable iterator = map.getDescendingIterator()) {
+                    while (iterator.hasNext() && count++ < step) {
+                        key = iterator.next();
+                        Transaction item = (Transaction) map.get(key);
+                        if (item == null)
+                            continue;
+                        list.add(new Tuple2<>((Tuple2<Long, Integer>) key, item));
+                    }
+                } catch (IOException e) {
+                }
+            } else {
+                try (IteratorCloseable iterator = map.getDescendingIterator()) {
+                    while (iterator.hasNext() && count++ < step) {
+                        key = iterator.next();
+                        Transaction item = (Transaction) map.get(key);
+                        if (item == null)
+                            continue;
+                        list.add(new Tuple2<>((Tuple2<Long, Integer>) key, item));
+                    }
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        for (Tuple2<Tuple2<Long, Integer>, Transaction> item : list) {
+
+            item.b.setDC(dcSet, false);
+            item.b.calcFee();
         }
 
     }

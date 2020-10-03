@@ -21,10 +21,7 @@ import org.erachain.datachain.OrderMapImpl;
 import org.erachain.datachain.ReferenceMapImpl;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.lang.Lang;
-import org.erachain.utils.NameUtils;
-import org.erachain.utils.NameUtils.NameResult;
 import org.erachain.utils.NumberAsString;
-import org.erachain.utils.Pair;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 import org.mapdb.Fun.Tuple3;
@@ -102,16 +99,19 @@ public class Account {
 
     public static Tuple2<Account, String> tryMakeAccount(String address) {
 
-        boolean isBase58 = false;
-        try {
-            Base58.decode(address);
-            isBase58 = true;
-        } catch (Exception e) {
+        if (address == null || address.length() < ADDRESS_LENGTH)
+            return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
+
+        if (address.startsWith("+")) {
             if (PublicKeyAccount.isValidPublicKey(address)) {
                 // MAY BE IT BASE.32 +
                 return new Tuple2<Account, String>(new PublicKeyAccount(address), null);
+            } else {
+                return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
             }
         }
+
+        boolean isBase58 = !Base58.isExtraSymbols(address);
 
         if (isBase58) {
             // ORDINARY RECIPIENT
@@ -120,18 +120,78 @@ public class Account {
             } else if (PublicKeyAccount.isValidPublicKey(address)) {
                 return new Tuple2<Account, String>(new PublicKeyAccount(address), null);
             } else {
-                return new Tuple2<Account, String>(null, "Wrong Address or PublickKey");
+                return new Tuple2<Account, String>(null, "Wrong Address or PublicKey");
             }
         } else {
-            // IT IS NAME - resolve ADDRESS
-            Pair<Account, NameResult> result = NameUtils.nameToAdress(address);
-
-            if (result.getB() == NameResult.OK) {
-                return new Tuple2<Account, String>(result.getA(), null);
-            } else {
-                return new Tuple2<Account, String>(null, "The name is not registered");
-            }
+            return new Tuple2<Account, String>(null, "The name is not registered");
         }
+
+    }
+
+    public static String balancePositionName(int position) {
+        switch (position) {
+            case TransactionAmount.ACTION_SEND:
+                return "I Own";
+            case TransactionAmount.ACTION_DEBT:
+                return "I Debt";
+            case TransactionAmount.ACTION_HOLD:
+                return "I Hold";
+            case TransactionAmount.ACTION_SPEND:
+                return "I Spend";
+            case TransactionAmount.ACTION_PLEDGE:
+                return "I Pledge";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceCOMPUPositionName(int position) {
+        switch (position) {
+            case TransactionAmount.ACTION_SEND:
+                return "I Own";
+            case TransactionAmount.ACTION_DEBT:
+                return "I Debt";
+            case TransactionAmount.ACTION_HOLD:
+                return "I Hold";
+            case TransactionAmount.ACTION_SPEND:
+            case TransactionAmount.ACTION_PLEDGE:
+                return "Statistics";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceSideName(int side) {
+        switch (side) {
+            case TransactionAmount.BALANCE_SIDE_DEBIT:
+                return "Total Debit";
+            case TransactionAmount.BALANCE_SIDE_LEFT:
+                return "Left # остаток";
+            case TransactionAmount.BALANCE_SIDE_CREDIT:
+                return "Total Credit";
+            case TransactionAmount.BALANCE_SIDE_FORGED:
+                return "Forged";
+        }
+
+        return null;
+
+    }
+
+    public static String balanceCOMPUSideName(int side) {
+        switch (side) {
+            case TransactionAmount.BALANCE_SIDE_DEBIT:
+                return "Bonus";
+            case TransactionAmount.BALANCE_SIDE_LEFT:
+                return "Spend # Потрачено";
+            case TransactionAmount.BALANCE_SIDE_CREDIT:
+                return "Bonus-Spend";
+            case TransactionAmount.BALANCE_SIDE_FORGED:
+                return "Forged";
+        }
+
+        return null;
 
     }
 
@@ -148,7 +208,7 @@ public class Account {
                 type = isBackward ? TransactionAmount.ACTION_PLEDGE : TransactionAmount.ACTION_SEND;
             } else {
                 // HOLD in STOCK or PLEDGE
-                type = isBackward ? TransactionAmount.ACTION_HOLD : TransactionAmount.ACTION_PLEDGE;
+                type = isBackward ? TransactionAmount.ACTION_HOLD : TransactionAmount.ACTION_RESERCED_6;
             }
         } else {
             if (amount_sign > 0) {
@@ -164,11 +224,48 @@ public class Account {
 
     }
 
-    public static String getDetails(String toValue, AssetCls asset) {
+    public static String getDetailsForEncrypt(String address, long itemKey, boolean forEncrypt) {
+
+        if (address.isEmpty()) {
+            return "";
+        }
+
+        // CHECK IF RECIPIENT IS VALID ADDRESS
+        if (Crypto.getInstance().isValidAddress(address)) {
+            if (forEncrypt && null == Controller.getInstance().getPublicKeyByAddress(address)) {
+                return "address is unknown - can't encrypt for it, please use public key instead";
+            }
+            if (itemKey > 0) {
+                Account account = new Account(address);
+                if (account.isPerson()) {
+                    return account.getPerson().b.toString() + " " + account.getBalance(itemKey).a.b.toPlainString();
+                }
+                return " + " + account.getBalance(itemKey).a.b.toPlainString();
+            }
+            return "address is OK";
+        } else {
+            // Base58 string len = 33-34 for ADDRESS and 40-44 for PubKey
+            if (PublicKeyAccount.isValidPublicKey(address)) {
+                if (itemKey > 0) {
+                    Account account = new PublicKeyAccount(address);
+                    if (account.isPerson()) {
+                        return account.getPerson().b.toString() + " " + account.getBalance(itemKey).a.b.toPlainString();
+                    }
+                    return " + " + account.getBalance(itemKey).a.b.toPlainString();
+                }
+                return "public key is OK";
+            } else {
+                return "address or public key is invalid";
+            }
+        }
+
+    }
+
+    public static String getDetails(String address, long assetKey) {
 
         String out = "";
 
-        if (toValue.isEmpty()) {
+        if (address.isEmpty()) {
             return out;
         }
 
@@ -177,33 +274,30 @@ public class Account {
         Account account = null;
 
         // CHECK IF RECIPIENT IS VALID ADDRESS
-        if (Crypto.getInstance().isValidAddress(toValue)) {
-            account = new Account(toValue);
+        if (Crypto.getInstance().isValidAddress(address)) {
+            account = new Account(address);
         } else {
-            if (PublicKeyAccount.isValidPublicKey(toValue)) {
-                account = new PublicKeyAccount(toValue);
+            if (PublicKeyAccount.isValidPublicKey(address)) {
+                account = new PublicKeyAccount(address);
             } else {
-
-                Pair<Account, NameResult> nameToAdress = NameUtils.nameToAdress(toValue);
-
-                if (nameToAdress.getB() == NameResult.OK) {
-                    account = nameToAdress.getA();
-                    return (statusBad ? "??? " : "") + account.toString(asset.getKey());
-                } else {
-                    return (statusBad ? "??? " : "") + nameToAdress.getB().getShortStatusMessage();
-                }
+                return (statusBad ? "??? " : "") + "ERROR";
             }
         }
 
-        if (account.getBalanceUSE(asset.getKey()).compareTo(BigDecimal.ZERO) == 0
+        if (account.getBalanceUSE(assetKey).compareTo(BigDecimal.ZERO) == 0
                 && account.getBalanceUSE(Transaction.FEE_KEY).compareTo(BigDecimal.ZERO) == 0) {
             return Lang.getInstance().translate("Warning!") + " " + (statusBad ? "???" : "")
-                    + account.toString(asset.getKey());
+                    + account.toString(assetKey);
         } else {
-            return (statusBad ? "???" : "") + account.toString(asset.getKey());
+            return (statusBad ? "???" : "") + account.toString(assetKey);
         }
 
     }
+
+    public static String getDetails(String address, AssetCls asset) {
+        return getDetails(address, asset.getKey());
+    }
+
 
     public static Map<byte[], BigDecimal> getKeyBalancesWithForks(DCSet dcSet, long key,
                                                                   Map<byte[], BigDecimal> values) {
@@ -213,7 +307,7 @@ public class Account {
 
         if (true) {
             // здесь нужен протокольный итератор! Берем TIMESTAMP_INDEX
-            for (byte[] mapKey: map.keySet()) {
+            for (byte[] mapKey : map.keySet()) {
                 if (ItemAssetBalanceMap.getAssetKeyFromKey(mapKey) == key) {
                     ballance = map.get(mapKey);
                     values.put(ItemAssetBalanceMap.getShortAccountFromKey(mapKey), ballance.a.b);
@@ -356,7 +450,7 @@ public class Account {
 
     // BALANCE
     public Tuple3<BigDecimal, BigDecimal, BigDecimal> getUnconfirmedBalance(long key) {
-        return Controller.getInstance().getUnconfirmedBalance(this, key);
+        return Controller.getInstance().getWalletUnconfirmedBalance(this, key);
     }
 
     /*
@@ -442,6 +536,8 @@ public class Account {
                 return this.getBalance(dcSet, key).d;
             case TransactionAmount.ACTION_PLEDGE:
                 return this.getBalance(dcSet, key).e;
+            case TransactionAmount.ACTION_RESERCED_6:
+                return new Tuple2<>(BigDecimal.ZERO, BigDecimal.ZERO);
         }
 
         return null;
@@ -1180,6 +1276,10 @@ public class Account {
         return Ints.fromByteArray(shortBytes);
     }
 
+    public long hashCodeLong() {
+        return Longs.fromByteArray(shortBytes);
+    }
+
     // EQUALS
     @Override
     public boolean equals(Object b) {
@@ -1344,13 +1444,16 @@ public class Account {
         return db.getAddressForging().getLast(getAddress());
     }
 
-    public Tuple2<String, String> getName() {
-
-        return Controller.getInstance().wallet.database.getAccountsPropertisMap().get(getAddress());
+    public static Tuple3<String, String, String> getFromFavorites(String address) {
+        return Controller.getInstance().wallet.database.getFavoriteAccountsMap().get(address);
 
     }
 
-    public int getAccountNo() {
+    public Tuple3<String, String, String> getFromFavorites() {
+        return getFromFavorites(getAddress());
+    }
+
+    public Integer getAccountNo() {
         return Controller.getInstance().wallet.database.getAccountMap().getAccountNo(getAddress());
     }
 

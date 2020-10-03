@@ -8,6 +8,8 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.AssetType;
 import org.erachain.core.transaction.IssueAssetTransaction;
 import org.erachain.core.transaction.Transaction;
+import org.erachain.gui.Gui;
+import org.erachain.gui.IconPanel;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.items.TypeOfImage;
 import org.erachain.gui.library.AddImageLabel;
@@ -17,7 +19,6 @@ import org.erachain.gui.library.MDecimalFormatedTextField;
 import org.erachain.gui.models.AccountsComboBoxModel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
-import org.erachain.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,9 +29,11 @@ import static org.erachain.gui.items.utils.GUIUtils.checkWalletUnlock;
 /**
  * @author Саша
  */
-public class IssueAssetPanel extends JPanel  {
+public class IssueAssetPanel extends IconPanel {
 
-    private static String iconFile = Settings.getInstance().getPatnIcons()+ "IssueAssetPanel.png";
+    public static String NAME = "IssueAssetPanel";
+    public static String TITLE = "Issue Asset";
+
     private JLabel titleJLabel = new JLabel();
     private JLabel accountJLabel = new JLabel(Lang.getInstance().translate("Account") + ":");
     private JLabel descriptionJLabel = new JLabel(Lang.getInstance().translate("Description") + ":");
@@ -57,15 +60,20 @@ public class IssueAssetPanel extends JPanel  {
     private AssetTypesComboBoxModel assetTypesComboBoxModel;
 
     public IssueAssetPanel() {
+        super(NAME, TITLE);
         initComponents();
         titleJLabel.setFont(FONT_TITLE);
         titleJLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleJLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-        titleJLabel.setText(Lang.getInstance().translate("Issue Asset"));
+        titleJLabel.setText(Lang.getInstance().translate(TITLE));
         textAreaDescription.setLineWrap(true);
         textQuantity.setMaskType(textQuantity.maskLong);
         textQuantity.setText("0");
         textFeePow.setSelectedItem("0");
+
+        feeJLabel.setVisible(Gui.SHOW_FEE_POWER);
+        textFeePow.setVisible(Gui.SHOW_FEE_POWER);
+
         issueJButton.addActionListener(arg0 -> onIssueClick());
         // select combobox Asset type
         assetTypeJComboBox.addActionListener(e -> {
@@ -291,12 +299,12 @@ public class IssueAssetPanel extends JPanel  {
             // READ QUANTITY
             parsestep++;
             long quantity = Long.parseLong(textQuantity.getText());
-            int asDeal = Transaction.FOR_NETWORK;
+            int forDeal = Transaction.FOR_NETWORK;
 
             // CREATE ASSET
             parsestep++;
             // SCALE, ASSET_TYPE, QUANTITY
-            PrivateKeyAccount creator = Controller.getInstance().getPrivateKeyAccountByAddress(sender.getAddress());
+            PrivateKeyAccount creator = Controller.getInstance().getWalletPrivateKeyAccountByAddress(sender.getAddress());
             if (creator == null) {
                 JOptionPane.showMessageDialog(new JFrame(),
                         Lang.getInstance().translate(OnDealClick.resultMess(Transaction.PRIVATE_KEY_NOT_FOUND)),
@@ -312,7 +320,7 @@ public class IssueAssetPanel extends JPanel  {
 
             IssueAssetTransaction issueAssetTransaction = (IssueAssetTransaction) Controller.getInstance().issueAsset(
                     creator, textName.getText(), textAreaDescription.getText(), addLogoIconLabel.getImgBytes(),
-                    addImageLabel.getImgBytes(), false, scale, assetType, quantity, feePow);
+                    addImageLabel.getImgBytes(), scale, assetType, quantity, feePow);
 
             AssetCls asset = (AssetCls) issueAssetTransaction.getItem();
 
@@ -347,7 +355,7 @@ public class IssueAssetPanel extends JPanel  {
             }
 
             // VALIDATE AND PROCESS
-            int result = Controller.getInstance().getTransactionCreator().afterCreate(issueAssetTransaction, asDeal);
+            int result = Controller.getInstance().getTransactionCreator().afterCreate(issueAssetTransaction, forDeal);
 
             // CHECK VALIDATE MESSAGE
             switch (result) {
@@ -432,16 +440,6 @@ public class IssueAssetPanel extends JPanel  {
 
         // ENABLE
         issueJButton.setEnabled(true);
-    }
-
-    public static Image getIcon() {
-        {
-            try {
-                return Toolkit.getDefaultToolkit().getImage(iconFile);
-            } catch (Exception e) {
-                return null;
-            }
-        }
     }
 
 }

@@ -1,8 +1,10 @@
 package org.erachain.gui.models;
 
 import org.erachain.controller.Controller;
+import org.erachain.datachain.DCSet;
 import org.erachain.dbs.DBTab;
 import org.erachain.dbs.DBTabImpl;
+import org.erachain.dbs.IteratorCloseable;
 import org.erachain.lang.Lang;
 import org.erachain.utils.ObserverMessage;
 import org.slf4j.Logger;
@@ -10,12 +12,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.table.AbstractTableModel;
 import javax.validation.constraints.Null;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 @SuppressWarnings("serial")
 public abstract class TimerTableModelCls<U> extends AbstractTableModel implements Observer {
+
+    public static final int COLUMN_IS_OUTCOME = -3;
+    public static final int COLUMN_UN_VIEWED = -2;
+    public static final int COLUMN_CONFIRMATIONS = -1;
+    public int COLUMN_FAVORITE = 1000;
 
     private String name;
     protected String[] columnNames;
@@ -28,17 +37,15 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
     private int DELETE_EVENT;
     private int LIST_EVENT;
 
-    public int COLUMN_FOR_ICON = 1;
-    public int COLUMN_FAVORITE = 1000;
-    public static final int COLUMN_ITEM_VALUE = 200;
-
     protected List<U> list;
 
     private Boolean[] columnAutoHeight; // = new Boolean[]{true, true, true, true, true, true, true, false, false};
 
-    protected long start = 0;
+    protected Object startKey;
     protected int step = 50;
-    protected long size = 0;
+    protected Object lastPageKey;
+
+    protected DCSet dcSet = DCSet.getInstance();
 
     protected DBTabImpl map;
     protected Logger logger;
@@ -104,6 +111,10 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
         return columnNames[index];
     }
 
+    public DBTabImpl getMap() {
+        return map;
+    }
+
     public U getItem(int row) {
         if (list == null)
             return null;
@@ -122,8 +133,13 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
     public abstract Object getValueAt(int row, int column);
 
     public Class<? extends Object> getColumnClass(int c) {
-        Object o = getValueAt(0, c);
-        return o == null ? Null.class : o.getClass();
+        try {
+            Object o = getValueAt(0, c);
+            return o == null ? Null.class : o.getClass();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Null.class;
+        }
     }
 
     public void update(Observable o, Object arg) {
@@ -140,7 +156,7 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
      * убираем synchronized - так как теперь все размеренно по таймеру вызывается. Иначе блокировка при нажатии
      * на Синхронизировать кошелек очень часто бывает
      */
-    public /*synchronized*/ void syncUpdate(Observable o, Object arg) {
+    public void syncUpdate(Observable o, Object arg) {
         ObserverMessage message = (ObserverMessage) arg;
 
         if (message.getType() == ADD_EVENT
@@ -149,6 +165,8 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
         } else if (message.getType() == LIST_EVENT
                 || message.getType() == RESET_EVENT) {
             needUpdate = true;
+        } else if (message.getType() == ObserverMessage.CHAIN_ADD_BLOCK_TYPE && Controller.getInstance().isStatusOK()) {
+            repaintConfirms();
         } else if (message.getType() == ObserverMessage.GUI_REPAINT && needUpdate) {
             needUpdate = false;
             getInterval();
@@ -156,8 +174,33 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
         }
     }
 
-    //public abstract void getIntervalThis(int startBack, int endBack);
-    public void getIntervalThis(long start, int limit) {
+    /**
+     * перерисовка Подтверждений на новый блок
+     */
+    protected void repaintConfirms() {
+    }
+
+    public void getInterval() {
+        Object key;
+        int count = 0;
+        list = new ArrayList<>();
+        if (startKey == null) {
+            try (IteratorCloseable iterator = map.getIterator(0, descending)) {
+                while (iterator.hasNext() && count++ < step) {
+                    key = iterator.next();
+                    list.add((U) map.get(key));
+                }
+            } catch (IOException e) {
+            }
+        } else {
+            try (IteratorCloseable iterator = map.getIterator(0, descending)) {
+                while (iterator.hasNext() && count++ < step) {
+                    key = iterator.next();
+                    list.add((U) map.get(key));
+                }
+            } catch (IOException e) {
+            }
+        }
     }
 
     public int getMapDefaultIndex() {
@@ -167,32 +210,8 @@ public abstract class TimerTableModelCls<U> extends AbstractTableModel implement
         return map.getDefaultIndex();
     }
 
-    public long getMapSize() {
-        if (map == null)
-            return 0;
-
-        return map.size();
-    }
-
-    /**
-     * если descending установлен, то ключ отрицательный значит и его вычисляем обратно.
-     * То есть 10-я запись имеет ключ -9 (отричательный). Тогда отсчет start=0 будет идти от последней записи
-     * с отступом step
-     */
-    public void getInterval() {
-
-        if (descending) {
-            long startBack = -getMapSize() + start;
-            getIntervalThis(startBack, step);
-        } else {
-             getIntervalThis(start, step);
-        }
-
-    }
-
-    public void setInterval(int start, int step) {
-        this.start = start;
-        this.step = step;
+    public void setInterval(Object startKey) {
+        this.startKey = startKey;
 
         getInterval();
     }

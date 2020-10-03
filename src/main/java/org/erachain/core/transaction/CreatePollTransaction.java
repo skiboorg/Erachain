@@ -6,15 +6,15 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
-import org.erachain.core.crypto.Crypto;
 import org.erachain.core.voting.Poll;
 import org.erachain.core.voting.PollOption;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * old create poll from QORA
@@ -40,12 +40,15 @@ public class CreatePollTransaction extends Transaction {
         this.signature = signature;
         //this.calcFee();
     }
+
     public CreatePollTransaction(byte[] typeBytes, PublicKeyAccount creator, Poll poll, byte feePow, long timestamp,
-                                 Long reference, byte[] signature, long feeLong) {
+                                 Long reference, byte[] signature, long seqNo, long feeLong) {
         this(typeBytes, creator, poll, feePow, timestamp, reference);
 
         this.signature = signature;
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
+        if (seqNo > 0)
+            this.setHeightSeq(seqNo);
     }
 
     public CreatePollTransaction(PublicKeyAccount creator, Poll poll, byte feePow, long timestamp, Long reference, byte[] signature) {
@@ -64,14 +67,14 @@ public class CreatePollTransaction extends Transaction {
         return true;
     }
 
-    public static Transaction Parse(byte[] data, int asDeal) throws Exception {
+    public static Transaction Parse(byte[] data, int forDeal) throws Exception {
 
         int test_len;
-        if (asDeal == Transaction.FOR_MYPACK) {
+        if (forDeal == Transaction.FOR_MYPACK) {
             test_len = BASE_LENGTH_AS_MYPACK;
-        } else if (asDeal == Transaction.FOR_PACK) {
+        } else if (forDeal == Transaction.FOR_PACK) {
             test_len = BASE_LENGTH_AS_PACK;
-        } else if (asDeal == Transaction.FOR_DB_RECORD) {
+        } else if (forDeal == Transaction.FOR_DB_RECORD) {
             test_len = BASE_LENGTH_AS_DBRECORD;
         } else {
             test_len = BASE_LENGTH;
@@ -86,7 +89,7 @@ public class CreatePollTransaction extends Transaction {
         int position = TYPE_LENGTH;
 
         long timestamp = 0;
-        if (asDeal > Transaction.FOR_MYPACK) {
+        if (forDeal > Transaction.FOR_MYPACK) {
             //READ TIMESTAMP
             byte[] timestampBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
             timestamp = Longs.fromByteArray(timestampBytes);
@@ -108,7 +111,7 @@ public class CreatePollTransaction extends Transaction {
         position += poll.getDataLength();
 
         byte feePow = 0;
-        if (asDeal > Transaction.FOR_PACK) {
+        if (forDeal > Transaction.FOR_PACK) {
             // READ FEE POWER
             byte[] feePowBytes = Arrays.copyOfRange(data, position, position + 1);
             feePow = feePowBytes[0];
@@ -119,14 +122,23 @@ public class CreatePollTransaction extends Transaction {
         byte[] signatureBytes = Arrays.copyOfRange(data, position, position + SIGNATURE_LENGTH);
 
         long feeLong = 0;
-        if (asDeal == FOR_DB_RECORD) {
+        long seqNo = 0;
+        if (forDeal == FOR_DB_RECORD) {
+            position += SIGNATURE_LENGTH;
+
+            //READ SEQ_NO
+            byte[] seqNoBytes = Arrays.copyOfRange(data, position, position + TIMESTAMP_LENGTH);
+            seqNo = Longs.fromByteArray(seqNoBytes);
+            position += TIMESTAMP_LENGTH;
+
             // READ FEE
             byte[] feeBytes = Arrays.copyOfRange(data, position, position + FEE_LENGTH);
             feeLong = Longs.fromByteArray(feeBytes);
             position += FEE_LENGTH;
         }
 
-        return new CreatePollTransaction(typeBytes, creator, poll, feePow, timestamp, reference, signatureBytes, feeLong);
+        return new CreatePollTransaction(typeBytes, creator, poll, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+
     }
 
     public Poll getPoll() {
@@ -198,6 +210,10 @@ public class CreatePollTransaction extends Transaction {
             data = Bytes.concat(data, this.signature);
 
         if (forDeal == FOR_DB_RECORD) {
+            // WRITE DBREF
+            byte[] dbRefBytes = Longs.toByteArray(this.dbRef);
+            data = Bytes.concat(data, dbRefBytes);
+
             // WRITE FEE
             byte[] feeBytes = Longs.toByteArray(this.fee.unscaledValue().longValue());
             data = Bytes.concat(data, feeBytes);
@@ -238,92 +254,33 @@ public class CreatePollTransaction extends Transaction {
 	 */
 
     @Override
-    public int isValid(int asDeal, long flags) {
+    public int isValid(int forDeal, long flags) {
 
         if (this.height > BlockChain.ITEM_POLL_FROM)
             return INVALID_TRANSACTION_TYPE;
 
-        //CHECK POLL NAME LENGTH
-        int nameLength = this.poll.getName().getBytes(StandardCharsets.UTF_8).length;
-        if (nameLength > 400 || nameLength < 1) {
-            return INVALID_NAME_LENGTH_MAX;
-        }
-
-        //CHECK POLL NAME LOWERCASE
-        if (!this.poll.getName().equals(this.poll.getName().toLowerCase())) {
-            return NAME_NOT_LOWER_CASE;
-        }
-
-        //CHECK POLL DESCRIPTION LENGTH
-        int descriptionLength = this.poll.getDescription().getBytes(StandardCharsets.UTF_8).length;
-        if (descriptionLength > BlockChain.MAX_REC_DATA_BYTES || descriptionLength < 1) {
-            return INVALID_DESCRIPTION_LENGTH_MAX;
-        }
-
-        //CHECK POLL DOES NOT EXIST ALREADY
-        if (this.dcSet.getPollMap().contains(this.poll)) {
-            return POLL_ALREADY_CREATED;
-        }
-
-        //CHECK IF POLL DOES NOT CONTAIN ANY VOTERS
-        if (this.poll.hasVotes()) {
-            return POLL_ALREADY_HAS_VOTES;
-        }
-
-        //CHECK POLL CREATOR VALID ADDRESS
-        if (!Crypto.getInstance().isValidAddress(this.poll.getCreator().getAddressBytes())) {
-            return INVALID_ADDRESS;
-        }
-
-        //CHECK OPTIONS LENGTH
-        int optionsLength = poll.getOptions().size();
-        if (optionsLength > 100 || optionsLength < 1) {
-            return INVALID_OPTIONS_LENGTH;
-        }
-
-        //CHECK OPTIONS
-        List<String> options = new ArrayList<String>();
-        for (PollOption option : this.poll.getOptions()) {
-            //CHECK OPTION LENGTH
-            int optionLength = option.getName().getBytes(StandardCharsets.UTF_8).length;
-            if (optionLength > 400 || optionLength < 1) {
-                return INVALID_OPTION_LENGTH;
-            }
-
-            //CHECK OPTION UNIQUE
-            if (options.contains(option.getName())) {
-                return DUPLICATE_OPTION;
-            }
-
-            options.add(option.getName());
-        }
-
-        return super.isValid(asDeal, flags);
+        return super.isValid(forDeal, flags);
     }
 
     //PROCESS/ORPHAN
 
     //@Override
     @Override
-    public void process(Block block, int asDeal) {
+    public void process(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.process(block, asDeal);
+        super.process(block, forDeal);
 
-        //INSERT INTO DATABASE
-        this.dcSet.getPollMap().add(this.poll);
     }
 
 
     //@Override
     @Override
-    public void orphan(Block block, int asDeal) {
+    public void orphan(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.orphan(block, asDeal);
+        super.orphan(block, forDeal);
 
-        //DELETE FROM DATABASE
-        this.dcSet.getPollMap().delete(this.poll);
     }
 
 
@@ -342,9 +299,8 @@ public class CreatePollTransaction extends Transaction {
 
     @Override
     public boolean isInvolved(Account account) {
-        String address = account.getAddress();
 
-        if (address.equals(this.creator.getAddress()) || address.equals(this.poll.getCreator().getAddress())) {
+        if (account.equals(this.creator) || account.equals(this.poll.getCreator())) {
             return true;
         }
 
