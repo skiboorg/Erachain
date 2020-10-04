@@ -111,6 +111,11 @@ public class BlockChain {
     public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
 
     /**
+     * Счет на который начисляются %% для Эрачейн с сайдченов
+     */
+    public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+
+    /**
      * default = 30 sec
      */
     private static int BLOCKS_PERIOD = 30; // [sec]
@@ -374,7 +379,6 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
-    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
     public static final int ACTION_ROYALTY_START = 1;
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
