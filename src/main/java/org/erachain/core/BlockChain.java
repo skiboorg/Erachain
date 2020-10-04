@@ -111,6 +111,11 @@ public class BlockChain {
     public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
 
     /**
+     * Счет на который начисляются %% для Эрачейн с сайдченов
+     */
+    public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+
+    /**
      * default = 30 sec
      */
     private static int BLOCKS_PERIOD = 30; // [sec]
@@ -374,7 +379,6 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
-    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
     public static final int ACTION_ROYALTY_START = 1;
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
@@ -384,10 +388,10 @@ public class BlockChain {
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
 
     /**
-     * какие проценты при переводе каких активов - Ключ : процент.
+     * какие проценты при переводе каких активов - Ключ : процент + минималка.
      * Это Доход форжера за минусом Сгорания
      */
-    public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE = new HashMap<>();
+    public static final HashMap<Long, Tuple2<BigDecimal, BigDecimal>> ASSET_TRANSFER_PERCENTAGE = new HashMap<>();
     /**
      * какие проценты сжигаем при переводе активов - Ключ : процент
      */
@@ -602,8 +606,8 @@ public class BlockChain {
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
 
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
             ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
