@@ -111,6 +111,11 @@ public class BlockChain {
     public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
 
     /**
+     * Счет на который начисляются %% для Эрачейн с сайдченов
+     */
+    public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+
+    /**
      * default = 30 sec
      */
     private static int BLOCKS_PERIOD = 30; // [sec]
@@ -357,7 +362,7 @@ public class BlockChain {
     public static final int CONFIRMS_TRUE = MAX_ORPHAN; // for reference by ITEM_KEY
     //public static final int FEE_MIN_BYTES = 200;
     public static final int FEE_PER_BYTE_4_10 = 64;
-    public static final int FEE_PER_BYTE = 100;
+    public static final int FEE_PER_BYTE = 10000;
     public static final int FEE_SCALE = 8;
     public static final BigDecimal FEE_RATE = BigDecimal.valueOf(1, FEE_SCALE);
     //public static final BigDecimal MIN_FEE_IN_BLOCK_4_10 = BigDecimal.valueOf(FEE_PER_BYTE_4_10 * 8 * 128, FEE_SCALE);
@@ -374,7 +379,6 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
-    public static Account ROYALTY_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
     public static final int ACTION_ROYALTY_START = 1;
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
@@ -484,16 +488,9 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
-
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
-
-            String protocolName = "chainPROTOCOL.json";
-            File file = new File(protocolName);
+            File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
-                LOGGER.info(protocolName + " USED");
+                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
                 // START SIDE CHAIN
                 String jsonString = "";
                 try {
@@ -608,6 +605,11 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
+
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
@@ -1144,36 +1146,12 @@ public class BlockChain {
             repeatsMin = BlockChain.GENESIS_ERA_TOTAL / forgingBalance;
             repeatsMin = (repeatsMin >> 2);
 
-            if (ERA_COMPU_ALL_UP) {
-                if (DEMO_MODE && height < 2100) {
-                    repeatsMin = 1;
-                } else {
-                    repeatsMin = REPEAT_WIN;
-                }
-            } else if (MAIN_MODE) {
-                if (height < 40000) {
-                    if (repeatsMin > 4)
-                        repeatsMin = 4;
-                } else if (height < 100000) {
-                    if (repeatsMin > 6)
-                        repeatsMin = 6;
-                } else if (height < 110000) {
-                    if (repeatsMin > 10) {
-                        repeatsMin = 10;
-                    }
-                } else if (height < 120000) {
-                    if (repeatsMin > 40)
-                        repeatsMin = 40;
-                } else if (height < VERS_4_21_02) {
-                    if (repeatsMin > 200)
-                        repeatsMin = 200;
-                } else if (repeatsMin < 10) {
-                    repeatsMin = 10;
-                }
+            if (repeatsMin < REPEAT_WIN) {
+                repeatsMin = REPEAT_WIN;
             }
         }
 
-        if (difference < repeatsMin && (!DEMO_MODE || height > 31515)) {
+        if (difference < repeatsMin) {
             return difference - repeatsMin;
         }
 
