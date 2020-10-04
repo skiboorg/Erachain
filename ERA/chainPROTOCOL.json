@@ -27,6 +27,13 @@
   //
   "assets": [
     // **** ASSET KEY, NAME, QUALITY, CREATOR ****
+    /////// SPECIAL
+    [
+      7,
+      "BAL",
+      0,
+      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+    ],
     /////// CRYPTOCURRENCY
     [
       12,
