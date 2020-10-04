@@ -840,9 +840,6 @@ public class Account {
     public Tuple3<BigDecimal, BigDecimal, BigDecimal> changeBalance(DCSet db, boolean substract, boolean isBackward, long key,
                                                                     BigDecimal amount_in, boolean notUpdateIncomed, boolean spendUpdate) {
 
-        if (this.equals("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5")) {
-            boolean debug = true;
-        }
         int actionType = balancePosition(key, amount_in, isBackward);
 
         ItemAssetBalanceMap map = db.getAssetBalanceMap();
