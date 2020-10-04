@@ -484,16 +484,9 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
-
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
-
-            String protocolName = "chainPROTOCOL.json";
-            File file = new File(protocolName);
+            File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
-                LOGGER.info(protocolName + " USED");
+                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
                 // START SIDE CHAIN
                 String jsonString = "";
                 try {
@@ -608,6 +601,11 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
+
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
@@ -1144,9 +1142,7 @@ public class BlockChain {
             repeatsMin = BlockChain.GENESIS_ERA_TOTAL / forgingBalance;
             repeatsMin = (repeatsMin >> 2);
 
-            if (ERA_COMPU_ALL_UP) {
-                repeatsMin = 1;
-            } else if (repeatsMin < REPEAT_WIN) {
+            if (repeatsMin < REPEAT_WIN) {
                     repeatsMin = REPEAT_WIN;
             }
         }
