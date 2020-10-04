@@ -484,6 +484,12 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
+
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
+
             String protocolName = "chainPROTOCOL.json";
             File file = new File(protocolName);
             if (file.exists()) {
@@ -602,11 +608,6 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
-
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new BigDecimal("0.01"));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new BigDecimal("0.01"));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
