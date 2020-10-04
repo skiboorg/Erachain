@@ -2035,6 +2035,10 @@ public class Block implements Closeable, ExplorerJsonLine {
 
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
+            if (this.creator.equals("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5")) {
+                boolean debug = true;
+            }
+
             BigDecimal forgerEarn;
             if (BlockChain.CLONE_MODE) {
                 // Авторские начисления на счет Эрачейн от всех комиссий в блоке
