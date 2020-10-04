@@ -1145,35 +1145,13 @@ public class BlockChain {
             repeatsMin = (repeatsMin >> 2);
 
             if (ERA_COMPU_ALL_UP) {
-                if (DEMO_MODE && height < 2100) {
-                    repeatsMin = 1;
-                } else {
+                repeatsMin = 1;
+            } else if (repeatsMin < REPEAT_WIN) {
                     repeatsMin = REPEAT_WIN;
-                }
-            } else if (MAIN_MODE) {
-                if (height < 40000) {
-                    if (repeatsMin > 4)
-                        repeatsMin = 4;
-                } else if (height < 100000) {
-                    if (repeatsMin > 6)
-                        repeatsMin = 6;
-                } else if (height < 110000) {
-                    if (repeatsMin > 10) {
-                        repeatsMin = 10;
-                    }
-                } else if (height < 120000) {
-                    if (repeatsMin > 40)
-                        repeatsMin = 40;
-                } else if (height < VERS_4_21_02) {
-                    if (repeatsMin > 200)
-                        repeatsMin = 200;
-                } else if (repeatsMin < 10) {
-                    repeatsMin = 10;
-                }
             }
         }
 
-        if (difference < repeatsMin && (!DEMO_MODE || height > 31515)) {
+        if (difference < repeatsMin) {
             return difference - repeatsMin;
         }
 
