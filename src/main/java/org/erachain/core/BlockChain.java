@@ -1143,7 +1143,11 @@ public class BlockChain {
             repeatsMin = (repeatsMin >> 2);
 
             if (repeatsMin < REPEAT_WIN) {
+                if (height < ALL_VALID_BEFORE) {
+                    repeatsMin = 1;
+                } else {
                     repeatsMin = REPEAT_WIN;
+                }
             }
         }
 
