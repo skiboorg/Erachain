@@ -1,5 +1,6 @@
 package org.erachain.gui.exdata;
 
+import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.exdata.ExData;
@@ -9,6 +10,7 @@ import org.erachain.core.exdata.exLink.ExLinkReply;
 import org.erachain.core.item.templates.TemplateCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
+import org.erachain.gui.exdata.authors.AuthorsPanel;
 import org.erachain.gui.items.link_hashes.TableModelIssueHashes;
 import org.erachain.gui.items.statement.IssueDocumentPanel;
 import org.erachain.gui.library.*;
@@ -63,6 +65,7 @@ public class ExDataPanel extends JPanel {
     private MButton jButton_Input_Hashes_From_File_Other_Hashes;
     private JLabel jLabel_Title_Message;
     private JPanel jPanel_Attached_Files;
+    private AuthorsPanel authorsPanel;
     private JPanel jPanel_Message;
     private JPanel jPanel_Message_Public;
     private JPanel jPanel_Other_Attached_Files_Work;
@@ -83,6 +86,8 @@ public class ExDataPanel extends JPanel {
     public JCheckBox checkBoxMakeHashAndCheckUniqueHashes;
     public JCheckBox checkBoxMakeHashAndCheckUniqueAttachedFiles;
     public DocTypeAppendixPanel docTypeAppendixPanel;
+    public MultiPayOutsPanel multiPayOutsPanel;
+
 
 
     /**
@@ -314,13 +319,15 @@ public class ExDataPanel extends JPanel {
         jButton_Remove_Other_Hashes = new MButton();
         jPanel_Title = new JPanel();
 
+        authorsPanel = new AuthorsPanel();
         jLabel_Title_Message = new JLabel();
         jTextField_Title_Message = new JTextField();
         jButton_Input_Hashes_From_File_Other_Hashes = new MButton();
-
         params_Template_Model = new ParamsTemplateModel();
         jTable_Params_Message_Public = new MTable(params_Template_Model);
         docTypeAppendixPanel = new DocTypeAppendixPanel(this);
+        multiPayOutsPanel = new MultiPayOutsPanel();
+
         params_Template_Model.addTableModelListener(new TableModelListener() {
 
             @Override
@@ -369,7 +376,15 @@ public class ExDataPanel extends JPanel {
         gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
 
         jTabbedPane_Type.addTab(Lang.getInstance().translate("Type"), docTypeAppendixPanel);
+
+        if (BlockChain.TEST_MODE) {
+            JScrollPane multiPayScrollBar = new JScrollPane();
+            multiPayScrollBar.setViewportView(multiPayOutsPanel);
+            jTabbedPane_Type.addTab(Lang.getInstance().translate("Payouts"), multiPayScrollBar);
+        }
+
         jTabbedPane_Type.addTab(Lang.getInstance().translate("Recipients"), multipleRecipientsPanel);
+        jTabbedPane_Type.addTab(Lang.getInstance().translate(authorsPanel.getName()),authorsPanel);
 
         fill_Template_Panel = new MFillTemplatePanel();
         jTabbedPane_Type.addTab(Lang.getInstance().translate("Template"), fill_Template_Panel);
