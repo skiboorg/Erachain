@@ -488,6 +488,12 @@ public class BlockChain {
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
+
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
+
             File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
                 LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
@@ -605,11 +611,6 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
-
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
