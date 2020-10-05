@@ -646,12 +646,9 @@ public class GenesisBlock extends Block {
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        if (false && BlockChain.CLONE_MODE) {
-            // TODO если с нуля начинать то открыть этот токен
-            asset = new AssetVenture((byte) 0, coinsOwner, "BAL",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 2, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-        }
+        asset = new AssetVenture((byte) 0, coinsOwner, "BAL",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 2, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
 
         asset = new AssetVenture((byte) 0, coinsOwner, "BTC",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
