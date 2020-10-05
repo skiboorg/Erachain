@@ -379,7 +379,7 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
-    public static final int ACTION_ROYALTY_START = 1;
+    public static final int ACTION_ROYALTY_START = 0; // if - 0 - OFF
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.000001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
@@ -397,8 +397,8 @@ public class BlockChain {
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
+    public static final int HOLD_ROYALTY_PERIOD_DAYS = 0; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
-    public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем
     public static Account HOLD_ROYALTY_EMITTER = new Account("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt"); // если меньше то распределение не делаем
     public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
 
@@ -583,6 +583,14 @@ public class BlockChain {
             }
         } else if (DEMO_MODE) {
 
+            if (false) {
+                // это как пример для отладки
+                ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+                ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+                ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+                ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
+            }
+
             // GENERAL TRUST
             TRUSTED_ANONYMOUS.add("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt");
             TRUSTED_ANONYMOUS.add("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh");
@@ -605,11 +613,6 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
-
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             ////////// WIPED
             // WRONG Issue Person #125
