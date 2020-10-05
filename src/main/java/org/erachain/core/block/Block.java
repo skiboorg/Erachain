@@ -2068,7 +2068,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     new BigDecimal(emittedFee).movePointLeft(BlockChain.FEE_SCALE), true, false);
         }
 
-        if (transactionCount > 0) {
+        if (transactionCount > 0 && !BlockChain.ASSET_TRANSFER_PERCENTAGE.isEmpty()) {
             // подсчет наград с ПЕРЕВОДОВ
             HashMap<AssetCls, Tuple2<BigDecimal, BigDecimal>> earnedAllAssets = new HashMap<>();
             Tuple2<BigDecimal, BigDecimal> earnedPair;
@@ -2268,12 +2268,8 @@ public class Block implements Closeable, ExplorerJsonLine {
      */
     private void makeHoldRoyalty(DCSet dcSet, boolean asOrphan) {
 
-        if (dcSet.isFork())
-            // в форке нет Индекса!
-            return;
-
         // ловим блок когда можно начислять
-        if (heightBlock % (BlockChain.BLOCKS_PER_DAY(heightBlock) * BlockChain.HOLD_ROYALTY_PERIOD_DAYS) != 0)
+        if (BlockChain.HOLD_ROYALTY_PERIOD_DAYS <= 0 || heightBlock % (BlockChain.BLOCKS_PER_DAY(heightBlock) * BlockChain.HOLD_ROYALTY_PERIOD_DAYS) != 0)
             return;
 
         // если сумма малая - не начисляем

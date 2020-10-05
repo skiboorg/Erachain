@@ -32,7 +32,7 @@ public class Settings {
     public static final long DEFAULT_MAINNET_STAMP = 1591963920000L; // MAIN Net
     public static final long DEFAULT_DEMO_NET_STAMP = 1591963920000L; // DEMO Net
 
-    public static String FORK_APP_Name = "Darachain";
+    public static String FORK_APP_Name = "Darachain1";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
     public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
 
@@ -46,6 +46,8 @@ public class Settings {
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
+            Arrays.asList("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5", "4500000", 1)
+
             Arrays.asList("744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW", "10000000", 1),
             Arrays.asList("78bLvKGdbhUsQREw4SdMbKYCb1vetxQBkt", "4500000", 1),
             Arrays.asList("79e27XPZf1ZhQJbB3nNV9gAnJZCBP9TSUY", "4500000", 1),
