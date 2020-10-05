@@ -24,47 +24,20 @@ public abstract class AssetCls extends ItemCls {
     public static final long MIN_START_KEY = 1000L;
 
     // CORE KEY
-    public static final long ERA_KEY = 1l;
+    public static final long ERA_KEY = 1L;
     public static final String ERA_ABBREV = "DAR"; // ERA (main rights units)
     public static final String ERA_NAME = "DAR";
-    public static final String ERA_DESCR = "Основная учётная единица, мера собственности и управления данной средой - \"правовая\", \"управляющая\"" + ": "
-            + ERA_NAME + "(" + ERA_ABBREV + "). "
-            + "Именно единицы Эра позволяют собирать блоки и получать комиссию с упакованных в них транзакций"
-            + ". "
-            + ("Более чем %MIN% ЭРА, находящихся в пользовании на счету позволяет собирать блоки (форжить) с этого счёта, а более чем %MINOR% позволяет удостоверять других участников среды"
-            .replace("%MIN%", "" + BlockChain.MIN_GENERATING_BALANCE)
-            .replace("%MINOR%", "" + BlockChain.MINOR_ERA_BALANCE))
-            + ". "
-            + "Число единиц %GENERAL% ЭРА дает права создавать новые статусы и другие сущности в среде"
-            .replace("%GENERAL%", "" + BlockChain.GENERAL_ERA_BALANCE)
-            + ".";
+    public static final String ERA_DESCR = "";
 
-    // FEE KEY
-    public static final long FEE_KEY = 2l;
-    public static final String FEE_ABBREV = "EXO"; // COMPU (compute units)
+    public static final long FEE_KEY = 2L;
+    public static final String FEE_ABBREV = "EXO"; // COMP (main rights units)
     public static final String FEE_NAME = "EXO";
-    public static final String FEE_DESCR = "Основная учётная единица среды, используемая для оплаты комиссий за внесение записей в среду - \"рабочая\", \"оплатная\"" + ": "
-            + FEE_NAME + "(" + FEE_ABBREV + "). ";
+    public static final String FEE_DESCR = "";
 
-    // TRUST KEY
-    public static final long TRUST_KEY = 3l;
-    public static final String TRUST_ABBREV = "AS"; // COMPU (compute units)
-    public static final String TRUST_NAME = "AS";
-    public static final String TRUST_DESCR = "?" + ": "
-            + TRUST_NAME + "(" + TRUST_ABBREV + "). ";
-
-    // REAL KEY
-    public static final long REAL_KEY = 4l;
-    public static final String REAL_ABBREV = "ВЕД"; // COMPU (compute units)
-    public static final String REAL_NAME = "ВЕДЫ";
-    public static final String REAL_DESCR = "Труд, знания, заслуги и польза" + ": "
-            + REAL_NAME + "(" + REAL_ABBREV + "). ";
-
-    // DEaL KEY
-    public static final long LIA_KEY = 5l;
-    public static final String LIA_ABBREV = "LIA"; //
+    public static final long LIA_KEY = 5L;
+    public static final String LIA_ABBREV = "LIA"; // COMP (main rights units)
     public static final String LIA_NAME = "LIA";
-    public static final String LIA_DESCR = "Life ID Asset (" + LIA_NAME + ")";
+    public static final String LIA_DESCR = "";
 
     public static final int UNIQUE = 1;
     public static final int VENTURE = 2;
@@ -408,8 +381,6 @@ public abstract class AssetCls extends ItemCls {
         switch ((int) this.key) {
             case 1:
                 return "" + AssetCls.ERA_NAME + " ++";
-            case 2:
-                return "" + AssetCls.FEE_NAME + " ++";
         }
 
         return this.description;

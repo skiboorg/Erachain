@@ -151,15 +151,15 @@ public class BlockChain {
     public static final int TARGET_COUNT = 1 << TARGET_COUNT_SHIFT;
     public static final int BASE_TARGET = 10000;///1 << 15;
     /**
-     * минимальное расстояние для сборк блоков
+     * минимальное расстояние для сборки блоков
      */
-    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 10 : CLONE_MODE ? 15 : 40; // GENESIS START TOP ACCOUNTS
+    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 10 : CLONE_MODE ? 15 : 40;
 
     // RIGHTs
     public static final int GENESIS_ERA_TOTAL = 100000000;
     public static final int GENERAL_ERA_BALANCE = GENESIS_ERA_TOTAL / 100;
-    public static final int MAJOR_ERA_BALANCE = 33000;
-    public static final int MINOR_ERA_BALANCE = 1000;
+    public static final int MAJOR_ERA_BALANCE = 50000;
+    public static final int MINOR_ERA_BALANCE = 10000;
     // SERTIFY
     // need RIGHTS for non PERSON account
     public static final BigDecimal MAJOR_ERA_BALANCE_BD = BigDecimal.valueOf(MAJOR_ERA_BALANCE);
@@ -286,21 +286,13 @@ public class BlockChain {
      * };
      */
 
-    public static final byte[][] VALID_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{
-            //Base58.decode("1A3P7u56G4NgYfsWMms1BuctZfnCeqrYk3")
-    };
+    public static final byte[][] VALID_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{};
 
-    public static final byte[][] DISCREDIR_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{
-            //Base58.decode("AoPMZ3Q8u5q2g9aK8JZSQRnb6iS53FjUjrtT8hCfHg9F") // 7DedW8f87pSDiRnDArq381DNn1FsTBa68Y")
-    };
-    public static final byte[][] VALID_SIGN = TEST_DB > 0? new byte[][]{} : new byte[][]{
-            //Base58.decode("4Vo6hmojFGgAJhfjyiN8PNYktpgrdHGF8Bqe12Pk3PvcvcH8tuJTcTnnCqyGChriHTuZX1u5Qwho8BuBPT4FJ53W")
-    };
+    public static final byte[][] DISCREDIR_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{};
+    public static final byte[][] VALID_SIGN = TEST_DB > 0? new byte[][]{} : new byte[][]{};
 
     public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : CLONE_MODE || TEST_MODE ? new byte[][]{} :
-            new byte[][]{
-                    //Base58.decode("61Fzu3PhsQ74EoMKrwwxKHMQi3z9fYAU5UeUfxtGdXPRfKbWdgpBQWgAojEnmDHK2LWUKtsmyqWb4WpCEatthdgK"),
-            };
+            new byte[][]{};
 
     // DEX precision
     ///public static final int TRADE_PRECISION = 4;
@@ -379,7 +371,7 @@ public class BlockChain {
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
-    public static final int HOLD_ROYALTY_PERIOD_DAYS = 30; // как часто начисляем? Если = 0 - на начислять
+    public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
     public static Account HOLD_ROYALTY_EMITTER = new Account(
             (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()
