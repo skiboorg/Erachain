@@ -83,7 +83,7 @@ public class BlockChain {
 
     static public int CHECK_BUGS = TEST_DB > 0 ? 0 : Settings.CHECK_BUGS;
 
-    static public int SKIP_BASE_ASSETS_AFTER = 2;
+    static public int SKIP_BASE_ASSETS_AFTER = 1;
 
     /**
      * если задан - первое подключение к нему

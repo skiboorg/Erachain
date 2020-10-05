@@ -29,10 +29,10 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1591963920000L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1591963920000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1601916619000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1601916619000L; // DEMO Net
 
-    public static String FORK_APP_Name = "Darachain1";
+    public static String FORK_APP_Name = "Darachain";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
     public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
 
@@ -46,8 +46,6 @@ public class Settings {
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
-            Arrays.asList("7BNhaZBVCvUmdZtbQBNxoHGTnLP3w9aQH5", "4500000", 1)
-
             Arrays.asList("744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW", "10000000", 1),
             Arrays.asList("78bLvKGdbhUsQREw4SdMbKYCb1vetxQBkt", "4500000", 1),
             Arrays.asList("79e27XPZf1ZhQJbB3nNV9gAnJZCBP9TSUY", "4500000", 1),
@@ -90,8 +88,8 @@ public class Settings {
     private static final String DEFAULT_TELEGRAM_DIR = "datatele";
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     //NETWORK
-    private static final int DEFAULT_MIN_CONNECTIONS = 10; // for OWN connections
-    private static final int DEFAULT_MAX_CONNECTIONS = 100;
+    private static final int DEFAULT_MIN_CONNECTIONS = 3; // for OWN connections
+    private static final int DEFAULT_MAX_CONNECTIONS = 20;
     private static final boolean DEFAULT_LOCAL_PEER_SCANNER = false;
     // EACH known PEER may send that whit peers to me - not white peer may be white peer for me
     private static final int DEFAULT_MAX_RECEIVE_PEERS = 100;
