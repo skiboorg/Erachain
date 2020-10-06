@@ -255,11 +255,6 @@ public class BlockChain {
     public static final int VERS_5_01_01 = TEST_DB > 0 || CLONE_MODE ? 0 : DEMO_MODE ? 0 : TEST_MODE ? 0 : 0;
 
     /**
-     * Включает реферальную систему
-     */
-    public static int REFERAL_BONUS_FOR_PERSON = CLONE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
-
-    /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне
      */
     public static final int START_ISSUE_RIGHTS = TEST_DB > 0 || CLONE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
@@ -334,7 +329,7 @@ public class BlockChain {
     public static final int FREEZE_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : 0;
 
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
-    public static final String[] TRUE_ADDRESSES = TEST_DB > 0 ? new String[]{} :
+    public static final String[] TRUE_ADDRESSES = TEST_DB > 0 || TEST_MODE? new String[]{} :
             new String[]{
                     (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()}; // GET from chainPROTOCOL.json
 
@@ -382,20 +377,26 @@ public class BlockChain {
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 30; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
     public static Account HOLD_ROYALTY_EMITTER = new Account(
-            (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()
+            TEST_MODE? "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
+                (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()
         );
     public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
 
 
     /**
-     * Multi-level Referal System. Levels for deep
+     * Включает реферальную систему
      */
-    public static final int FEE_INVITED_DEEP = TEST_DB > 0 || MAIN_MODE ? 3 : 3;
+    public static int REFERRAL_BONUS_FOR_PERSON = TEST_DB > 0 || !MAIN_MODE ? 0 : VERS_5_01_01;
+
     /**
-     * Stop referals system on this person Number. Причем рефералка которая должна упать этим персонам
+     * Multi-level Referral System. Levels for deep
+     */
+    public static final int FEE_INVITED_DEEP = TEST_DB > 0 ? 0 : 3;
+    /**
+     * Stop referals system on this person Number. Причем рефералка которая должна упасть этим персонам
      * (с номером ниже заданного) по сути просто сжигается - то есть идет дефляция.
      */
-    public static final long BONUS_STOP_PERSON_KEY = CLONE_MODE || TEST_MODE ? 0 : 13L;
+    public static final long BONUS_STOP_PERSON_KEY = TEST_DB > 0 || !MAIN_MODE ? 0 : 13L;
 
     /**
      * Постаянная награда за байт транзакции
@@ -407,10 +408,10 @@ public class BlockChain {
     public static final int FEE_INVITED_SHIFT_IN_LEVEL = 1;
 
     public static final Tuple2<Integer, byte[]> CHECKPOINT = new Tuple2<Integer, byte[]>(
-            CLONE_MODE || TEST_MODE ? 0 : 235267,
+            CLONE_MODE || TEST_MODE ? 0 : 0,
             Base58.decode(
-                    CLONE_MODE || TEST_MODE ? ""
-                            : "2VTp79BBpK5E4aZYV5Tk3dYRS887W1devsrnyJeN6WTBQYQzoe2cTg819DdRs5o9Wh6tsGLsetYTbDu9okgriJce"));
+                    CLONE_MODE || TEST_MODE ? "" // sign
+                            : ""));
 
     // issue PERSON
     //public static final BigDecimal PERSON_MIN_ERA_BALANCE = BigDecimal.valueOf(10000000);
@@ -538,7 +539,7 @@ public class BlockChain {
                 }
 
                 if (chainParams.containsKey("referalsOn")) {
-                    REFERAL_BONUS_FOR_PERSON = (Boolean) chainParams.get("referalsOn") ? 0 : Integer.MAX_VALUE;
+                    REFERRAL_BONUS_FOR_PERSON = (Boolean) chainParams.get("referalsOn") ? 0 : Integer.MAX_VALUE;
                 }
 
                 if (chainParams.containsKey("allValidBefore")) {
@@ -561,13 +562,11 @@ public class BlockChain {
             }
         } else if (DEMO_MODE) {
 
-            if (false) {
-                // это как пример для отладки
-                ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-                ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-                ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-                ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
-            }
+            // это как пример для отладки
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
 
             // GENERAL TRUST
             TRUSTED_ANONYMOUS.add("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt");
@@ -591,70 +590,6 @@ public class BlockChain {
 
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
-
-            ////////// WIPED
-            ///WIPED_RECORDS.add(Longs.fromByteArray(Base58.decode("zDLLXWRmL8qhrU9DaxTTG4xrLHgb7xLx5fVrC2NXjRaw2vhzB1PArtgqNe2kxp655saohUcWcsSZ8Bo218ByUzH")));
-
-            // GENERAL TRUST
-            //TRUSTED_ANONYMOUS.add("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt");
-            //TRUSTED_ANONYMOUS.add("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh");
-
-            // ANOMIMASER for incomes from PERSONALIZED
-            // ANONYMASERS.add("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt");
-
-            // TICKER = KEY + CREATOR
-            NOVA_ASSETS.put("BTC",
-                    new Tuple3<Long, Long, byte[]>(12L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("ETH",
-                    new Tuple3<Long, Long, byte[]>(14L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-
-            NOVA_ASSETS.put("USD",
-                    new Tuple3<Long, Long, byte[]>(95L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("EUR",
-                    new Tuple3<Long, Long, byte[]>(94L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("CNY",
-                    new Tuple3<Long, Long, byte[]>(93L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("RUB",
-                    new Tuple3<Long, Long, byte[]>(92L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("JPY",
-                    new Tuple3<Long, Long, byte[]>(91L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("GBP",
-                    new Tuple3<Long, Long, byte[]>(90L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("CHF",
-                    new Tuple3<Long, Long, byte[]>(89L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("AUD",
-                    new Tuple3<Long, Long, byte[]>(88L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("SGD",
-                    new Tuple3<Long, Long, byte[]>(87L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("TRY",
-                    new Tuple3<Long, Long, byte[]>(86L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-
-
-            // COMMODITY
-            NOVA_ASSETS.put("GOLD",
-                    new Tuple3<Long, Long, byte[]>(21L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("OIL",
-                    new Tuple3<Long, Long, byte[]>(22L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("GAS",
-                    new Tuple3<Long, Long, byte[]>(23L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-            NOVA_ASSETS.put("BREND",
-                    new Tuple3<Long, Long, byte[]>(24L, 0L, new Account("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh").getShortAddressBytes()));
-
-
-            /// Права для Кибальникова в Боевой Версии
-            NOVA_ASSETS.put("ERG",
-                    new Tuple3<Long, Long, byte[]>(20L, 0L, new Account("7GiE2pKyrULF2iQhAXvdUusXYqiKRQx68m").getShortAddressBytes()));
-
-            // LOCKED -> to TRUSTED for it address
-
-            // TEAM 0 LOCKS
-
-            // TEST
-
-            // ERACHAIN FUNDATION
-
-
-            //validBlocks.add(214085);
 
         }
 
@@ -828,7 +763,7 @@ public class BlockChain {
     }
 
     public static boolean REFERAL_BONUS_FOR_PERSON(int height) {
-        return TEST_DB == 0 && height > REFERAL_BONUS_FOR_PERSON;
+        return height > REFERRAL_BONUS_FOR_PERSON;
     }
 
     public static int getCheckPoint(DCSet dcSet, boolean useDynamic) {
