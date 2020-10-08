@@ -925,7 +925,7 @@ public class BlockChain {
 
         if (forgingBalance < BlockChain.MIN_GENERATING_BALANCE) {
             if (height > ALL_BALANCES_OK_TO)
-                return 0l;
+                return 0L;
             forgingBalance = BlockChain.MIN_GENERATING_BALANCE;
         }
 
@@ -937,7 +937,7 @@ public class BlockChain {
 
         int repeatsMin;
 
-        if (height < BlockChain.REPEAT_WIN) {
+        if (height <= BlockChain.REPEAT_WIN) {
             repeatsMin = height - 2;
         } else {
             repeatsMin = BlockChain.GENESIS_ERA_TOTAL / forgingBalance;
