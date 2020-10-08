@@ -3,7 +3,9 @@ package org.erachain.gui.exdata;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
+import org.erachain.core.exdata.ExAuthor;
 import org.erachain.core.exdata.ExData;
+import org.erachain.core.exdata.ExSource;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.exdata.exLink.ExLinkAppendix;
 import org.erachain.core.exdata.exLink.ExLinkReply;
@@ -807,6 +809,11 @@ public class ExDataPanel extends JPanel {
         Account[] recipients = multipleRecipientsPanel.recipientsTableModel.getRecipients();
         boolean signCanOnlyRecipients = multipleRecipientsPanel.signCanRecipientsCheckBox.isSelected();
 
+        ExAuthor[] authors = authorsPanel.authorsAuthorsModel.getAuthors();
+        ExSource[] sources = null;
+
+        String tags = docTypeAppendixPanel.tagsField.getText();
+
         // hashes StandardCharsets.UTF_8
         HashMap<String, String> hashes_Map = new HashMap<String, String>();
         int hR = hashes_Table_Model.getRowCount();
@@ -843,7 +850,7 @@ public class ExDataPanel extends JPanel {
             }
         }
         return ExData.make(exLink, creator, jTextField_Title_Message.getText(),
-                signCanOnlyRecipients, recipients, isEncrypted,
+                signCanOnlyRecipients, recipients, authors, sources, tags, isEncrypted,
                 (TemplateCls) fill_Template_Panel.sel_Template, fill_Template_Panel.get_Params(),
                 fill_Template_Panel.checkBoxMakeHashAndCheckUniqueTemplate.isSelected(),
                 jTextPane_Message.getText(), checkBoxMakeHashAndCheckUniqueText.isSelected(),
