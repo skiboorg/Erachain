@@ -6,7 +6,7 @@
   // external Block Explorer
   "explorer": "http://explorer.darachain.org:9077",
 
-  "sideLicense": "Sidechain Licence Agreement.pdf",
+  "sideLicense": "Chain Licence Agreement.pdf",
 
   "startKey": {
     "assets": -1,
