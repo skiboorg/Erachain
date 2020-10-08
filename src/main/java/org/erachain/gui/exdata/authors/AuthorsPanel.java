@@ -2,17 +2,16 @@ package org.erachain.gui.exdata.authors;
 
 import org.erachain.gui.library.MTable;
 import org.erachain.lang.Lang;
+
 import javax.swing.*;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class AuthorsPanel extends JPanel {
-    public final TableModel AuthorsTableModel;
-    private final MTable jTableAuthors;
+    public final AuthorsModel authorsAuthorsModel;
+    public final MTable jTableAuthors;
     private JScrollPane jScrollPaneAuthors;
     private JButton jButtonAddAuthor;
     private JButton jButtonRemoveAuthor;
@@ -29,31 +28,31 @@ public class AuthorsPanel extends JPanel {
         jButtonAddAuthor.setVisible(false);
         jButtonRemoveAuthor.setVisible(true);
 
-        AuthorsTableModel = new TableModel(0);
-        jTableAuthors = new MTable(AuthorsTableModel);
+        authorsAuthorsModel = new AuthorsModel(0);
+        jTableAuthors = new MTable(authorsAuthorsModel);
 
         this.jButtonRemoveAuthor.addActionListener(new ActionListener() {
             // delete row
             @Override
             public void actionPerformed(ActionEvent e) {
                 int interval = 0;
-                if (AuthorsTableModel.getRowCount() > 0) {
+                if (authorsAuthorsModel.getRowCount() > 0) {
                     int selRow = jTableAuthors.getSelectedRow();
-                    if (selRow != -1 && AuthorsTableModel.getRowCount() >= selRow) {
-                        ((DefaultTableModel) AuthorsTableModel).removeRow(selRow);
+                    if (selRow != -1 && authorsAuthorsModel.getRowCount() >= selRow) {
+                        ((DefaultTableModel) authorsAuthorsModel).removeRow(selRow);
 
                         interval = selRow - 1;
                         if (interval < 0) interval = 0;
                     }
                 }
 
-                if (AuthorsTableModel.getRowCount() < 1) {
-                    AuthorsTableModel.addRow(new Object[]{(int) 0, "","",""});
+                if (authorsAuthorsModel.getRowCount() < 1) {
+                    authorsAuthorsModel.addRow(new Object[]{(int) 0, "", "", ""});
                     interval = 0;
                 }
 
                 jTableAuthors.setRowSelectionInterval(interval, interval);
-                AuthorsTableModel.fireTableDataChanged();
+                authorsAuthorsModel.fireTableDataChanged();
             }
         });
 
