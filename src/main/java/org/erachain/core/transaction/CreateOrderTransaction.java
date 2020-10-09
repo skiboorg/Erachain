@@ -444,6 +444,10 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
                 return INVALID_ECXHANGE_PAIR;
         }
 
+        if (haveKey == AssetCls.BAL_KEY || wantKey == AssetCls.BAL_KEY) {
+            return INVALID_ECXHANGE_PAIR;
+        }
+
         long haveKey = this.haveKey;
         long wantKey = this.wantKey;
 
