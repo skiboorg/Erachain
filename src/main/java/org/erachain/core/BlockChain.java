@@ -454,10 +454,32 @@ public class BlockChain {
             ;
         } else if (CLONE_MODE) {
 
+            // Процент за перевод и Минимальная комиссия
             ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+
+            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
+
+            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
+
+            ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(84L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(85L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(86L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(87L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(88L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(89L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(90L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(91L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(92L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(93L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+
+            // процент сжигания - если тут не задано то берется 1/2
+            ASSET_BURN_PERCENTAGE.put(3L, new BigDecimal("0.5"));
 
             File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
