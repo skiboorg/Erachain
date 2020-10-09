@@ -307,6 +307,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         return getAmount(address);
     }
 
+    static BigDecimal sendBurnPerc = new BigDecimal("0.5");
     @Override
     public long calcBaseFee() {
         if (hasAmount() && getActionType() == ACTION_SEND // только для передачи в собственность!
@@ -318,10 +319,14 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                 // USE MINIMAL VALUE
                 assetFee = percItem.b.setScale(asset.getScale(), RoundingMode.DOWN);
             }
+
             if (!BlockChain.ASSET_BURN_PERCENTAGE.isEmpty()
                     && BlockChain.ASSET_BURN_PERCENTAGE.containsKey(key)) {
                 assetFeeBurn = assetFee.multiply(BlockChain.ASSET_BURN_PERCENTAGE.get(key)).setScale(asset.getScale(), RoundingMode.UP);
+            } else {
+                assetFeeBurn = assetFee.multiply(sendBurnPerc).setScale(asset.getScale(), RoundingMode.UP);
             }
+
             return super.calcBaseFee() >> 1;
         }
         return super.calcBaseFee();
@@ -900,7 +905,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                             return Transaction.INVALID_CLAIM_RECIPIENT;
                         }
 
-                        if (key == 3L) {
+                        if (key == AssetCls.BAL_KEY && !creator.equals(getItem().getOwner())
+                                && !recipient.equals(getItem().getOwner())) {
                             return INVALID_TRANSFER_TYPE;
                         }
 

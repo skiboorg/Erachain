@@ -1803,18 +1803,27 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         } else {
             // это прямое начисление
-            BigDecimal balance;
+            BigDecimal balanceBAL;
+            BigDecimal balanceEXO;
             if (BlockChain.ACTION_ROYALTY_PERSONS_ONLY) {
                 // по всем счетам персоны
-                balance = PersonCls.getTotalBalance(dcSet, royaltyID, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND);
+                balanceBAL = PersonCls.getTotalBalance(dcSet, royaltyID, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND);
+                balanceEXO = PersonCls.getTotalBalance(dcSet, royaltyID, AssetCls.FEE_KEY, TransactionAmount.ACTION_SEND);
             } else {
-                balance = account.getBalance(dcSet, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND).b;
+                balanceBAL = account.getBalance(dcSet, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND).b;
+                balanceEXO = account.getBalance(dcSet, AssetCls.FEE_KEY, TransactionAmount.ACTION_SEND).b;
             }
 
-            if (balance == null || balance.signum() <= 0)
+            if (balanceBAL == null)
+                balanceBAL = BigDecimal.ZERO;
+            if (balanceEXO == null)
+                balanceEXO = BigDecimal.ZERO;
+
+            balanceEXO = balanceBAL.min(balanceEXO);
+            if (balanceEXO.signum() <= 0)
                 return;
 
-            Long royaltyBalance = balance.setScale(BlockChain.FEE_SCALE).unscaledValue().longValue();
+            Long royaltyBalance = balanceEXO.setScale(BlockChain.FEE_SCALE).unscaledValue().longValue();
             Tuple3<Long, Long, Long> lastRoyaltyPoint = peekRoyaltyData(royaltyID);
             if (lastRoyaltyPoint == null) {
                 // уще ничего не было - считать нечего
@@ -1842,8 +1851,8 @@ public abstract class Transaction implements ExplorerJsonLine {
             long percent = diff * koeff;
 
             royaltyBG = BigDecimal.valueOf(percent, BlockChain.FEE_SCALE)
-                    .movePointLeft(3)
-                    .multiply(balance)
+                    .movePointLeft(6) // сдвигаем обратно точность
+                    .multiply(balanceEXO)
                     .setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
 
             if (royaltyBG.compareTo(BlockChain.ACTION_ROYALTY_MIN) < 0) {
@@ -1889,6 +1898,7 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (BlockChain.ACTION_ROYALTY_START <= 0)
             return;
 
+        // для точности умножаем на 1 млн
         long koeff = 1000000L * (long) BlockChain.ACTION_ROYALTY_PERCENT / (30L * (long) BlockChain.BLOCKS_PER_DAY(height));
         Tuple4<Long, Integer, Integer, Integer> personDuration;
 

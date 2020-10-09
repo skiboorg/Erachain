@@ -39,6 +39,11 @@ public abstract class AssetCls extends ItemCls {
     public static final String LIA_NAME = "LIA";
     public static final String LIA_DESCR = "";
 
+    public static final long BAL_KEY = 7L; // see in chainPROTOCOL.json
+    public static final String BAL_ABBREV = "BAL";
+    public static final String BAL_NAME = "BAL";
+    public static final String BAL_DESCR = "";
+
     public static final int UNIQUE = 1;
     public static final int VENTURE = 2;
     public static final int NAME = 3;
