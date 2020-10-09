@@ -386,7 +386,10 @@ public class ExDataPanel extends JPanel {
         }
 
         jTabbedPane_Type.addTab(Lang.getInstance().translate("Recipients"), multipleRecipientsPanel);
-        jTabbedPane_Type.addTab(Lang.getInstance().translate(authorsPanel.getName()),authorsPanel);
+
+        if (false) {
+            jTabbedPane_Type.addTab(Lang.getInstance().translate(authorsPanel.getName()), authorsPanel);
+        }
 
         fill_Template_Panel = new MFillTemplatePanel();
         jTabbedPane_Type.addTab(Lang.getInstance().translate("Template"), fill_Template_Panel);
