@@ -19,7 +19,7 @@
   "referalsOn": true,
 
   // Set valid all transactions before the height. Defaul = 0
-  "allValidBefore": 0,
+  "allValidBefore": 999999,
 
   // Protect from send assets from personal account to anonymous address. Default = true
   "protectSendToAnonymous": false,
