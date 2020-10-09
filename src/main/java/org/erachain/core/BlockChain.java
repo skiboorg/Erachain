@@ -459,10 +459,13 @@ public class BlockChain {
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
+            // BTC
             ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
 
+            // GOLD
             ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
 
+            // CURRENCIES
             ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(84L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
