@@ -868,10 +868,6 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
                         if (key == RIGHTS_KEY) {
 
-                            if (true) {
-                                return INVALID_TRANSFER_TYPE;
-                            }
-
                             // byte[] ss = this.creator.getAddress();
                             if (height > BlockChain.FREEZE_FROM
                                     && BlockChain.FOUNDATION_ADDRESSES.contains(this.creator.getAddress())) {
