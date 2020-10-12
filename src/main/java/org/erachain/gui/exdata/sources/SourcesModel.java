@@ -1,9 +1,8 @@
-package org.erachain.gui.exdata.authors;
+package org.erachain.gui.exdata.sources;
 
 import org.erachain.controller.Controller;
-import org.erachain.core.exdata.exLink.ExLinkAuthor;
-import org.erachain.core.item.ItemCls;
-import org.erachain.core.item.persons.PersonHuman;
+import org.erachain.core.exdata.exLink.ExLinkSource;
+import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.lang.Lang;
 
@@ -15,18 +14,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-public class AuthorsModel extends DefaultTableModel {
+public class SourcesModel extends DefaultTableModel {
     public static final int KEY_COL = 0;
     public static final int SHARE_COL = 1;
     public static final int NAME_COL = 2;
     public static final int MEMO_COL = 3;
 
 
-    public AuthorsModel(int rows) {
+    public SourcesModel(int rows) {
         super(new String[]{Lang.getInstance().translate("Number"),
                         Lang.getInstance().translate("Share"),
-                        Lang.getInstance().translate("Name"),
-                        Lang.getInstance().translate("Mark")
+                        Lang.getInstance().translate("Source"),
+                        Lang.getInstance().translate("Description")
                 },
                 rows);
         addEmpty();
@@ -39,6 +38,7 @@ public class AuthorsModel extends DefaultTableModel {
                 return true;
             case NAME_COL:
                 return false;
+
             default:
                 if (getValueAt(row, NAME_COL).equals("")) return false;
         }
@@ -47,7 +47,7 @@ public class AuthorsModel extends DefaultTableModel {
     }
 
     private void addEmpty() {
-        this.addRow(new Object[]{0L, 1, "", ""});
+        this.addRow(new Object[]{"1-1", 1, "", ""});
     }
 
     public Class<? extends Object> getColumnClass(int c) {     // set column type
@@ -70,18 +70,19 @@ public class AuthorsModel extends DefaultTableModel {
         //IF STRING
         switch (column) {
             case KEY_COL:
-                Long personKey = (Long) aValue;
+                aValue = aValue.toString().trim();
+                Long seqNo = Transaction.parseDBRef((String) aValue);
                 Iterator a = this.dataVector.iterator();
                 // find TWINS
                 while (a.hasNext()) {
                     Vector b = (Vector) a.next();
-                    if (b.get(0).equals(personKey)) return;
+                    if (b.get(0).equals(seqNo)) return;
 
                 }
-                PersonHuman result = (PersonHuman) Controller.getInstance().getPerson(personKey);
+                Transaction result = Controller.getInstance().getTransaction(seqNo);
                 if (result != null) {
                     super.setValueAt(aValue, row, column);
-                    super.setValueAt(result.getName(), row, NAME_COL);
+                    super.setValueAt(result.toStringShortAsCreator(), row, NAME_COL);
                     if (getRowCount() - 1 == row)
                         this.addEmpty();
 
@@ -98,34 +99,24 @@ public class AuthorsModel extends DefaultTableModel {
 
     }
 
-    public void setAuthors(PersonHuman[] Authors) {
-        clearAuthors();
-
-        for (int i = 0; i < Authors.length; ++i) {
-            addRow(new Object[]{Authors[i].getKey(), 1, Authors[i].getName(), Authors[i].getDescription()});
-        }
-    }
-
-    public void clearAuthors() {
-        while (getRowCount() > 0) {
-            this.removeRow(getRowCount() - 1);
-        }
-    }
-
-    public ExLinkAuthor[] getAuthors() {
+    public ExLinkSource[] getSources() {
         if (this.getRowCount() == 0)
             return null;
 
-        List<ExLinkAuthor> temp = new ArrayList<>();
+        List<ExLinkSource> temp = new ArrayList<>();
         Iterator iterator = this.dataVector.iterator();
         while (iterator.hasNext()) {
             Vector item = (Vector) iterator.next();
-            Long personKey;
+            String value = item.elementAt(KEY_COL).toString().trim();
+            if (value.equals("1-1"))
+                continue;
+
+            Long seqNo;
             try {
-                personKey = (Long) item.elementAt(KEY_COL);
-                ItemCls person = DCSet.getInstance().getItemPersonMap().get(personKey);
-                if (person == null) {
-                    // персоны такой нет
+                seqNo = Transaction.parseDBRef(value);
+                Transaction parentTx = DCSet.getInstance().getTransactionFinalMap().get(seqNo);
+                if (parentTx == null) {
+                    // транзакции такой нет
                     continue;
                 }
             } catch (Exception e) {
@@ -133,11 +124,11 @@ public class AuthorsModel extends DefaultTableModel {
                 continue;
             }
 
-            temp.add(new ExLinkAuthor((byte) 0, (Integer) item.elementAt(SHARE_COL),
-                    personKey, ((String) item.elementAt(MEMO_COL)).getBytes(StandardCharsets.UTF_8)));
+            temp.add(new ExLinkSource((byte) 0, (Integer) item.elementAt(SHARE_COL),
+                    seqNo, ((String) item.elementAt(MEMO_COL)).getBytes(StandardCharsets.UTF_8)));
         }
 
-        return temp.toArray(new ExLinkAuthor[0]);
+        return temp.toArray(new ExLinkSource[0]);
 
     }
 
