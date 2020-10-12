@@ -140,24 +140,28 @@ function statement(data) {
     }
 
     if (data.hasOwnProperty('authors')) {
-        output += '<b>' + data.Label_authors + '</b>:';
+        output += '<h4>' + data.Label_Authors + '</h4>';
+        var index = 1;
         for (i in data.authors) {
-            output += '<br>' + i + '. ' + data.authors[i].share + ' x ';
-            output += '<a href=?person=' + data.authors[i].key + get_lang() + '><b>' + data.authors[i].name + '</b></a>';
-            output += ' - ' + data.authors[i].memo;
+            output += index++ + '. ' + data.authors[i].share + ' x ';
+            output += '<a href=?person=' + data.authors[i].ref + get_lang() + '><b>' + data.authors[i].name + '</b></a>';
+            if (data.authors[i].hasOwnProperty('memo')) {
+                output += ' - ' + data.authors[i].memo;
+            }
+            output += '<br>';
         }
         output += '<hr>';
     }
 
     if (data.hasOwnProperty('encrypted')) {
 
-        output += '<b>' + data.encrypted + '</b><br>';
+        output += '<h4>' + data.encrypted + '</h4>';
 
     } else {
 
         if (data.hasOwnProperty('templateKey')) {
-            output += '<a href="?template=' + data.templateKey + get_lang() + '"><b>['
-             + data.templateKey + '] ' + data.templateName + '</b></a><br>';
+            output += '<h4><a href="?template=' + data.templateKey + get_lang() + '">['
+             + data.templateKey + '] ' + data.templateName + '</a><h4>';
 
             output += '<br>' + data.Label_template_hash + ': ';
             if (data.hasOwnProperty('templateUnique')) {
@@ -196,18 +200,25 @@ function statement(data) {
     }
 
     if (data.hasOwnProperty('sources')) {
-        output += '<b>' + data.Label_sources + '</b>:';
+        output += '<h4>' + data.Label_Sources + '</h4>';
+        var index = 1;
         for (i in data.sources) {
-            output += '<br>' + i + '. ' + data.sources[i].weight + ' x ';
-            output += '<a href=?tx=' + data.sources[i].ref + get_lang() + '><b>' + data.sources[i].title + '</b></a>';
-            output += ' - ' + data.sources[i].memo;
+            output += index++ + '. ' + data.sources[i].weight + ' x ';
+            output += '<a href=?tx=' + data.sources[i].ref + get_lang() + '><b>' + data.sources[i].name + '</b></a>';
+            if (data.sources[i].hasOwnProperty('memo')) {
+                output += ' - ' + data.sources[i].memo;
+            }
+            output += '<br>';
+
         }
         output += '<hr>';
     }
 
     if (data.hasOwnProperty('tags')) {
-        output += '<b>' + data.Label_Tags + '</b>: ' + data.tags;
-        output += '<hr>';
+        output += '<br><b>' + data.Label_Tags + '</b>: ';
+        for (tag of data.tags.split(',')) {
+            output += ' <a href=?q=' + encodeURIComponent(tag) + get_lang() + '&search=transactions><b>' + tag + ',</b></a>';
+        }
     }
 
     output += '</div>';
