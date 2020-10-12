@@ -699,12 +699,6 @@ public class BlockChain {
      * @return
      */
     public static boolean isFeeEnough(int height, Account account) {
-        if (true) {
-            // for MAIN NET
-            return false;
-        }
-
-        // FOR CLONES
         if (FEE_ASSET == null)
             FEE_ASSET = Controller.getInstance().getDCSet().getItemAssetMap().get(AssetCls.FEE_KEY);
 
