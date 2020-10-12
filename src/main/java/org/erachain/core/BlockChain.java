@@ -455,9 +455,9 @@ public class BlockChain {
         } else if (CLONE_MODE) {
 
             // Процент за перевод и Минимальная комиссия
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
 
             // BTC
             ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
