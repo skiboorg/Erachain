@@ -1877,7 +1877,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             royaltyBG = BigDecimal.valueOf(percent, BlockChain.FEE_SCALE)
                     // 6 от коэфф + (3+3) от процентов И сдвиг выше в valueOf происходит на FEE_SCALE
                     .movePointLeft(3)
-                    .multiply(balance)
+                    .multiply(balanceEXO)
                     .setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
 
             if (royaltyBG.compareTo(BlockChain.ACTION_ROYALTY_MIN) < 0) {
