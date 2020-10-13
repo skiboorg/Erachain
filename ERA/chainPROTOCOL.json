@@ -6,7 +6,7 @@
   // external Block Explorer
   "explorer": "http://explorer.darachain.org:9077",
 
-  "sideLicense": "Sidechain Licence Agreement.pdf",
+  "sideLicense": "Chain Licence Agreement.pdf",
 
   "startKey": {
     "assets": -1,
@@ -19,7 +19,7 @@
   "referalsOn": true,
 
   // Set valid all transactions before the height. Defaul = 0
-  "allValidBefore": 999999,
+  "allValidBefore": 0,
 
   // Protect from send assets from personal account to anonymous address. Default = true
   "protectSendToAnonymous": false,
