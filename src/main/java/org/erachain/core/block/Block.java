@@ -2306,7 +2306,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
                 if (this.txCalculated != null) {
                     txCalculated.add(new RCalculated(holder, Transaction.FEE_KEY, balanceHold,
-                            "AS-staking", txReference, 0L));
+                            "AS-stacking", txReference, 0L));
                 }
 
                 totalPayedRoyalty = totalPayedRoyalty.add(balanceHold);
@@ -2319,7 +2319,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
             if (this.txCalculated != null) {
                 txCalculated.add(new RCalculated(GenesisBlock.CREATOR, Transaction.FEE_KEY, totalPayedRoyalty.negate(),
-                        "AS-staking OUT", txReference, 0L));
+                        "AS-stacking OUT", txReference, 0L));
             }
 
         } catch (IOException e) {
