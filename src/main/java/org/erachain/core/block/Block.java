@@ -986,41 +986,7 @@ public class Block implements Closeable, ExplorerJsonLine {
     }
 
     public BigDecimal getBonusFee() {
-
-        if (this.heightBlock == 1) {
-            return BigDecimal.ZERO;
-        }
-
-        // in OLD protocol it USED - and heightBlock get AS 1
-        int inDay30 = BlockChain.BLOCKS_PER_DAY(1) * 30;
-
-        BigDecimal bonusFee; // = BlockChain.MIN_FEE_IN_BLOCK;
-
-        if (true) {
-            bonusFee = BlockChain.MIN_FEE_IN_BLOCK_4_10;
-            if (this.heightBlock < inDay30 << 1)
-                return BigDecimal.valueOf(70000, BlockChain.FEE_SCALE); // need SCALE for .unscaled()
-            else if (this.heightBlock < inDay30 << 2) // 120 days = 4 mounth
-                return BigDecimal.valueOf(60000, BlockChain.FEE_SCALE); // need SCALE for .unscaled()
-            else if (this.heightBlock < inDay30 << 3) // 16 mounth - 72000
-                return BigDecimal.valueOf(50000, BlockChain.FEE_SCALE); // need SCALE for .unscaled()
-            else if (this.heightBlock > BlockChain.VERS_30SEC)
-                return BigDecimal.valueOf(2000, BlockChain.FEE_SCALE); // need SCALE for .unscaled()
-            else
-                return BigDecimal.valueOf(20000, BlockChain.FEE_SCALE); // need SCALE for .unscaled()
-        } else {
-            bonusFee = BlockChain.MIN_FEE_IN_BLOCK;
-            if (this.heightBlock < inDay30 << 1)
-                ;
-            else if (this.heightBlock < inDay30 << 2) // 120 days = 4 mounth
-                bonusFee = bonusFee.divide(new BigDecimal(2), 8, BigDecimal.ROUND_DOWN).setScale(BlockChain.FEE_SCALE);
-            else if (this.heightBlock < inDay30 << 3) // 16 mounth
-                bonusFee = bonusFee.divide(new BigDecimal(4), 8, BigDecimal.ROUND_DOWN).setScale(BlockChain.FEE_SCALE);
-            else
-                bonusFee = bonusFee.divide(new BigDecimal(8), 8, BigDecimal.ROUND_DOWN).setScale(BlockChain.FEE_SCALE);
-        }
-
-        return bonusFee;
+        return BigDecimal.ZERO;
     }
 
     private BigDecimal getTotalFee(DCSet db) {
@@ -2069,6 +2035,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
+
             BigDecimal forgerEarn;
             if (BlockChain.CLONE_MODE) {
                 // Авторские начисления на счет Эрачейн от всех комиссий в блоке
