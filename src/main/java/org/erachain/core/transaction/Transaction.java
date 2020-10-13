@@ -428,6 +428,8 @@ public abstract class Transaction implements ExplorerJsonLine {
      */
     public boolean checkedByPool;
 
+    public String errorValue;
+
     // need for genesis
     protected Transaction(byte type, String type_name) {
         this.typeBytes = new byte[]{type, 0, 0, 0}; // for GENESIS
@@ -1873,8 +1875,9 @@ public abstract class Transaction implements ExplorerJsonLine {
             long percent = diff * koeff;
 
             royaltyBG = BigDecimal.valueOf(percent, BlockChain.FEE_SCALE)
-                    .movePointLeft(6) // сдвигаем обратно точность
-                    .multiply(balanceEXO)
+                    // 6 от коэфф + (3+3) от процентов И сдвиг выше в valueOf происходит на FEE_SCALE
+                    .movePointLeft(3)
+                    .multiply(balance)
                     .setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
 
             if (royaltyBG.compareTo(BlockChain.ACTION_ROYALTY_MIN) < 0) {
