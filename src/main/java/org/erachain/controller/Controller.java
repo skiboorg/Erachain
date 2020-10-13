@@ -19,6 +19,7 @@ import org.erachain.core.crypto.AEScrypto;
 import org.erachain.core.crypto.Base32;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
@@ -93,7 +94,7 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "2.0.05";
+    public static String version = "2.0.05.3";
     public static String buildTime = "2020-10-04 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
@@ -2464,6 +2465,10 @@ public class Controller extends Observable {
         return database.getTransactionFinalMap().get(refDB);
     }
 
+    public Transaction getTransaction(String refDB) {
+        return dcSet.getTransactionFinalMap().getRecord(refDB);
+    }
+
     public List<Transaction> getLastWalletTransactions(Account account, int limit) {
         return this.wallet.getLastTransactions(account, limit);
     }
@@ -3266,7 +3271,7 @@ public class Controller extends Observable {
         }
     }
 
-    public Pair<Integer, Transaction> make_R_Send(String creatorStr, Account creator, String recipientStr,
+    public Pair<Integer, Transaction> make_R_Send(String creatorStr, Account creator, ExLink exLink, String recipientStr,
                                                   int feePow, long assetKey, boolean checkAsset, BigDecimal amount, boolean needAmount,
                                                   String title, String message, int messagecode, boolean encrypt, long timestamp) {
 
@@ -3381,30 +3386,26 @@ public class Controller extends Observable {
         }
 
         // CREATE RSend
-        return new Pair<Integer, Transaction>(Transaction.VALIDATE_OK, this.r_Send(privateKeyAccount, feePow, recipient,
+        return new Pair<Integer, Transaction>(Transaction.VALIDATE_OK, this.r_Send(privateKeyAccount, exLink, feePow, recipient,
                 assetKey, amount, title, messageBytes, isTextByte, encrypted, timestamp));
 
     }
 
-    public Transaction r_Send(PrivateKeyAccount sender, int feePow, Account recipient, long key, BigDecimal amount) {
-        return this.r_Send(sender, feePow, recipient, key, amount, "", null, null, null, 0);
-    }
-
-    public Transaction r_Send(PrivateKeyAccount sender, int feePow,
+    public Transaction r_Send(PrivateKeyAccount sender, ExLink exLink, int feePow,
                               Account recipient, long key, BigDecimal amount, String title, byte[] message, byte[] isText,
                               byte[] encryptMessage, long timestamp) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Send(sender, recipient, key, amount, feePow, title, message, isText,
+            return this.transactionCreator.r_Send(sender, exLink, recipient, key, amount, feePow, title, message, isText,
                     encryptMessage, timestamp);
         }
     }
 
     public Transaction r_Send(byte version, byte property1, byte property2,
-                              PrivateKeyAccount sender, int feePow,
+                              PrivateKeyAccount sender, ExLink exLink, int feePow,
                               Account recipient, long key, BigDecimal amount, String title, byte[] message, byte[] isText,
                               byte[] encryptMessage) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Send(version, property1, property2, sender, recipient, key, amount, feePow,
+            return this.transactionCreator.r_Send(version, property1, property2, sender, recipient, key, amount, exLink, feePow,
                     title, message, isText, encryptMessage);
         }
     }
