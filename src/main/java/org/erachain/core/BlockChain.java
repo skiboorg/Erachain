@@ -347,7 +347,7 @@ public class BlockChain {
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
     public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
-    public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
+    public static final int ACTION_ROYALTY_PERCENT = 840000; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
     public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
@@ -364,7 +364,7 @@ public class BlockChain {
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
-    public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
+    public static final int HOLD_ROYALTY_PERIOD_DAYS = 1; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
     public static Account HOLD_ROYALTY_EMITTER = new Account(
             TEST_MODE? "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
