@@ -29,8 +29,8 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1591963920000L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1591963920000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1602173471000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1602173471000L; // DEMO Net
 
     public static String FORK_APP_Name = "Darachain";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
@@ -88,8 +88,8 @@ public class Settings {
     private static final String DEFAULT_TELEGRAM_DIR = "datatele";
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     //NETWORK
-    private static final int DEFAULT_MIN_CONNECTIONS = 10; // for OWN connections
-    private static final int DEFAULT_MAX_CONNECTIONS = 100;
+    private static final int DEFAULT_MIN_CONNECTIONS = 3; // for OWN connections
+    private static final int DEFAULT_MAX_CONNECTIONS = 20;
     private static final boolean DEFAULT_LOCAL_PEER_SCANNER = false;
     // EACH known PEER may send that whit peers to me - not white peer may be white peer for me
     private static final int DEFAULT_MAX_RECEIVE_PEERS = 100;
