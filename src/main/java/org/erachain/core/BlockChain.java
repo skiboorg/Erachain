@@ -329,7 +329,8 @@ public class BlockChain {
     public static final int CONFIRMS_TRUE = MAX_ORPHAN; // for reference by ITEM_KEY
     //public static final int FEE_MIN_BYTES = 200;
     public static final int FEE_PER_BYTE_4_10 = 64;
-    public static final int FEE_PER_BYTE = 10000;
+    public static final int FEE_PER_BYTE = 100;
+    public static final long FEE_KEY = AssetCls.FEE_KEY;
     public static final int FEE_SCALE = 8;
     public static final BigDecimal FEE_RATE = BigDecimal.valueOf(1, FEE_SCALE);
     //public static final BigDecimal MIN_FEE_IN_BLOCK_4_10 = BigDecimal.valueOf(FEE_PER_BYTE_4_10 * 8 * 128, FEE_SCALE);
@@ -346,13 +347,16 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
+    /**
+     * FEE_KEY used here
+     */
     public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
     public static final int ACTION_ROYALTY_PERCENT = 840000; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
     public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
-    public static final long ACTION_ROYALTY_ASSET = AssetCls.BAL_KEY;
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
+    public static final long ACTION_ROYALTY_ASSET_2 = 0L;
 
     /**
      * какие проценты при переводе каких активов - Ключ : процент + минималка.
@@ -366,6 +370,12 @@ public class BlockChain {
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 1; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
+
+    /**
+     * По какому активу считаем дивиденды
+     */
+    public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
+
     /**
      * Если не задан то будет взят счет из Генесиз-блока
      */
@@ -374,8 +384,6 @@ public class BlockChain {
                     "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
                     (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString())
             : null;
-    public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
-    public static final int HOLD_ROYALTY_ASSET_SCALE = 8;
 
 
     /**
