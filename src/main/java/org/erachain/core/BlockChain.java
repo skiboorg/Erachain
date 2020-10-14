@@ -380,6 +380,7 @@ public class BlockChain {
 
     /**
      * Если не задан то будет взят счет из Генесиз-блока
+     * Если есть начисления бонусов по ROYALTY то надо его задать
      */
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
             new PublicKeyAccount(TEST_MODE ?
