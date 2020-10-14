@@ -1846,7 +1846,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             if (balanceEXO.signum() <= 0)
                 return;
 
-            Long royaltyBalance = balance.setScale(BlockChain.HOLD_ROYALTY_ASSET_SCALE).unscaledValue().longValue();
+            Long royaltyBalance = balanceEXO.setScale(BlockChain.HOLD_ROYALTY_ASSET_SCALE).unscaledValue().longValue();
             Tuple3<Long, Long, Long> lastRoyaltyPoint = peekRoyaltyData(royaltyID);
             if (lastRoyaltyPoint == null) {
                 // уще ничего не было - считать нечего
@@ -1876,7 +1876,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             royaltyBG = BigDecimal.valueOf(percent, BlockChain.HOLD_ROYALTY_ASSET_SCALE)
                     // 6 от коэфф + (3+3) от процентов И сдвиг выше в valueOf происходит на BlockChain.HOLD_ROYALTY_ASSET_SCALE
                     .movePointLeft(3)
-                    .multiply(balance)
+                    .multiply(balanceEXO)
                     .setScale(BlockChain.HOLD_ROYALTY_ASSET_SCALE, RoundingMode.DOWN);
 
             if (royaltyBG.compareTo(BlockChain.ACTION_ROYALTY_MIN) < 0) {
