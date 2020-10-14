@@ -1,7 +1,5 @@
 package org.erachain.core.block;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -21,15 +19,12 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
-import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 // import org.slf4j.LoggerFactory;
@@ -375,53 +370,52 @@ public class GenesisBlock extends Block {
             transactions.add(new GenesisIssueStatusRecord(makeStatus(i)));
 
         AssetVenture asset;
-        PublicKeyAccount coinsOwner = new PublicKeyAccount("AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6");
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "EXO",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "EXO",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "AS",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "AS",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "BAL",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "BAL",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 2, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "BTC",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "BTC",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "GOLD",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "GOLD",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "UAH",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "UAH",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
-        asset = new AssetVenture((byte) 0, coinsOwner, "KZT",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "KZT",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
-        asset = new AssetVenture((byte) 0, coinsOwner, "KGS",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "KGS",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
-        asset = new AssetVenture((byte) 0, coinsOwner, "BYN",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "BYN",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
-        asset = new AssetVenture((byte) 0, coinsOwner, "CNY",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
-        asset = new AssetVenture((byte) 0, coinsOwner, "RUB",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "CNY",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "EUR",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "RUB",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, coinsOwner, "USD",
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "EUR",
+                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
+        transactions.add(new GenesisIssueAssetTransaction(asset));
+
+        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "USD",
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
