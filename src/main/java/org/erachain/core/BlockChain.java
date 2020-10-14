@@ -376,6 +376,9 @@ public class BlockChain {
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 30; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
+    /**
+     * Если не задан то будет взят счет из Генесиз-блока
+     */
     public static Account HOLD_ROYALTY_EMITTER = new Account(
             TEST_MODE? "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
                 (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()
@@ -456,7 +459,11 @@ public class BlockChain {
     public BlockChain(DCSet dcSet_in) throws Exception {
 
         trustedPeers.addAll(Settings.getInstance().getTrustedPeers());
-        //HOLD_ROYALTY_EMITTER = new Account("q");
+        if (HOLD_ROYALTY_EMITTER == null) {
+            // для учета эмиссии COMPU и других
+            HOLD_ROYALTY_EMITTER = GenesisBlock.CREATOR;
+        }
+
 
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
