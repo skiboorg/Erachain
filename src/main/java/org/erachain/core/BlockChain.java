@@ -375,6 +375,7 @@ public class BlockChain {
                     (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString())
             : null;
     public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
+    public static final int HOLD_ROYALTY_ASSET_SCALE = 8;
 
 
     /**
