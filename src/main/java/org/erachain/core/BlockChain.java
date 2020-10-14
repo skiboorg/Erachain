@@ -356,7 +356,7 @@ public class BlockChain {
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
     public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
-    public static final long ACTION_ROYALTY_ASSET_2 = 0L;
+    public static final long ACTION_ROYALTY_ASSET_2 = AssetCls.BAL_KEY;
 
     /**
      * какие проценты при переводе каких активов - Ключ : процент + минималка.
@@ -369,7 +369,7 @@ public class BlockChain {
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 1; // как часто начисляем? Если = 0 - на начислять
-    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
+    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
 
     /**
      * По какому активу считаем дивиденды
