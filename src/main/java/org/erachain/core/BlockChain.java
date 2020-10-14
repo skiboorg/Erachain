@@ -378,11 +378,12 @@ public class BlockChain {
 
     /**
      * Если не задан то будет взят счет из Генесиз-блока
+     * Если есть начисления бонусов по ROYALTY то надо его задать
      */
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
             new PublicKeyAccount(TEST_MODE ?
                     "pubKey?7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
-                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6") /// (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString())
+                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
             : null;
 
 
