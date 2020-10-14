@@ -380,11 +380,12 @@ public class BlockChain {
 
     /**
      * Если не задан то будет взят счет из Генесиз-блока
+     * Если есть начисления бонусов по ROYALTY то надо его задать
      */
-    public static Account HOLD_ROYALTY_EMITTER = CLONE_MODE ?
-            new Account(TEST_MODE ?
-                    "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
-                    (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString())
+    public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
+            new PublicKeyAccount(TEST_MODE ?
+                    "pubKey?7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
+                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
             : null;
 
 
@@ -461,9 +462,9 @@ public class BlockChain {
     public BlockChain(DCSet dcSet_in) throws Exception {
 
         trustedPeers.addAll(Settings.getInstance().getTrustedPeers());
-        if (HOLD_ROYALTY_EMITTER == null) {
+        if (FEE_ASSET_EMITTER == null) {
             // для учета эмиссии COMPU и других
-            HOLD_ROYALTY_EMITTER = GenesisBlock.CREATOR;
+            FEE_ASSET_EMITTER = GenesisBlock.CREATOR;
         }
 
 

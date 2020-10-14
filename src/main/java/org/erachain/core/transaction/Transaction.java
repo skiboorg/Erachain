@@ -10,6 +10,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.blockexplorer.ExplorerJsonLine;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
@@ -1776,7 +1777,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                 || personDuration.a <= BlockChain.BONUS_STOP_PERSON_KEY) {
 
             // если рефералку никому не отдавать то она по сути исчезает - надо это отразить в общем балансе
-            BlockChain.HOLD_ROYALTY_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
+            BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
                     BigDecimal.valueOf(fee_gift, BlockChain.FEE_SCALE), true, false);
 
             return;
@@ -1800,6 +1801,10 @@ public abstract class Transaction implements ExplorerJsonLine {
     }
 
     private void calcRoyalty(Block block, Account account, long koeff, boolean asOrphan) {
+
+        if (account.equals(BlockChain.FEE_ASSET_EMITTER)
+                || account.equals(GenesisBlock.CREATOR))
+            return;
 
         Tuple4<Long, Integer, Integer, Integer> personDuration;
         Long royaltyID;
@@ -1903,11 +1908,11 @@ public abstract class Transaction implements ExplorerJsonLine {
         }
 
         // учтем эмиссию
-        BlockChain.HOLD_ROYALTY_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
+        BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
                 royaltyBG, true, false);
 
         // учтем начисления для держателей долей
-        BlockChain.HOLD_ROYALTY_EMITTER.changeBalance(this.dcSet, !asOrphan, false, -FEE_KEY,
+        BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, -FEE_KEY,
                 royaltyBG.multiply(BlockChain.ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT).setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN),
                 true, false);
 
