@@ -322,7 +322,11 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
             if (!BlockChain.ASSET_BURN_PERCENTAGE.isEmpty()
                     && BlockChain.ASSET_BURN_PERCENTAGE.containsKey(key)) {
-                assetFeeBurn = assetFee.multiply(BlockChain.ASSET_BURN_PERCENTAGE.get(key)).setScale(asset.getScale(), RoundingMode.UP);
+                BigDecimal burnKoeff = BlockChain.ASSET_BURN_PERCENTAGE.get(key);
+                if (burnKoeff.signum() > 0)
+                    assetFeeBurn = assetFee.multiply(burnKoeff).setScale(asset.getScale(), RoundingMode.UP);
+                else
+                    assetFeeBurn = BigDecimal.ZERO;
             } else {
                 assetFeeBurn = assetFee.multiply(sendBurnPerc).setScale(asset.getScale(), RoundingMode.UP);
             }
