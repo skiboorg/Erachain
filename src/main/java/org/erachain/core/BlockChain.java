@@ -331,7 +331,7 @@ public class BlockChain {
     public static final int CONFIRMS_TRUE = MAX_ORPHAN; // for reference by ITEM_KEY
     //public static final int FEE_MIN_BYTES = 200;
     public static final int FEE_PER_BYTE_4_10 = 64;
-    public static final int FEE_PER_BYTE = 100;
+    public static final int FEE_PER_BYTE = 10000;
     public static final long FEE_KEY = AssetCls.FEE_KEY;
     public static final int FEE_SCALE = 8;
     public static final BigDecimal FEE_RATE = BigDecimal.valueOf(1, FEE_SCALE);
