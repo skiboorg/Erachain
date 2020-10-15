@@ -34,8 +34,13 @@ public abstract class AssetCls extends ItemCls {
     public static final String FEE_NAME = "EXO";
     public static final String FEE_DESCR = "";
 
+    public static final long AS_KEY = 3L;
+    public static final String AS_ABBREV = "AS";
+    public static final String AS_NAME = "AS";
+    public static final String AS_DESCR = "";
+
     public static final long LIA_KEY = 5L;
-    public static final String LIA_ABBREV = "LIA"; // COMP (main rights units)
+    public static final String LIA_ABBREV = "LIA"; // Live In Asset
     public static final String LIA_NAME = "LIA";
     public static final String LIA_DESCR = "";
 

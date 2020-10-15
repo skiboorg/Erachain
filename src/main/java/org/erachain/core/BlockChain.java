@@ -376,7 +376,7 @@ public class BlockChain {
     /**
      * По какому активу считаем дивиденды
      */
-    public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
+    public static final long HOLD_ROYALTY_ASSET = AssetCls.AS_KEY;
 
     /**
      * Если не задан то будет взят счет из Генесиз-блока
