@@ -2092,8 +2092,8 @@ public class Block implements Closeable, ExplorerJsonLine {
                     assetFee = assetFee.add(transaction.assetFee);
                 }
                 if (transaction.assetFeeBurn != null && transaction.assetFeeBurn.signum() != 0) {
-                    assetFee.subtract(transaction.assetFeeBurn);
-                    assetFeeBurn.add(transaction.assetFeeBurn);
+                    assetFee = assetFee.subtract(transaction.assetFeeBurn);
+                    assetFeeBurn = assetFeeBurn.add(transaction.assetFeeBurn);
                 }
 
                 earnedPair = new Tuple2(assetFee, assetFeeBurn);
@@ -2120,8 +2120,12 @@ public class Block implements Closeable, ExplorerJsonLine {
                     asset.getOwner().changeBalance(dcSet, asOrphan, false, asset.getKey(),
                             earnedPair.b, true, false);
                     if (this.txCalculated != null) {
-                        this.txCalculated.add(new RCalculated(asset.getOwner(), asset.getKey(),
-                                earnedPair.b, "Asset Total Burned", Transaction.makeDBRef(this.heightBlock, 0), 0L));
+                        if (earnedPair.a.signum() != 0)
+                            this.txCalculated.add(new RCalculated(this.creator, asset.getKey(),
+                                    earnedPair.a, "Asset Total Forged", Transaction.makeDBRef(this.heightBlock, 0), 0L));
+                        if (earnedPair.b.signum() != 0)
+                            this.txCalculated.add(new RCalculated(asset.getOwner(), asset.getKey(),
+                                    earnedPair.b, "Asset Total Burned", Transaction.makeDBRef(this.heightBlock, 0), 0L));
                     }
                 }
 
