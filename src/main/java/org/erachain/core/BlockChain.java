@@ -353,7 +353,7 @@ public class BlockChain {
      * FEE_KEY used here
      */
     public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
-    public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
+    public static final int ACTION_ROYALTY_PERCENT = 84000; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.0001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
     public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.10"); // сколько добавляем к награде
