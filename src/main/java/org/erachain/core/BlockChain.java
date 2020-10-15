@@ -514,7 +514,8 @@ public class BlockChain {
             ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // процент сжигания - если тут не задано то берется 1/2
-            ASSET_BURN_PERCENTAGE.put(3L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
             File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
