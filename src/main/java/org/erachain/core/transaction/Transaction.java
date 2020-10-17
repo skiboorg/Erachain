@@ -649,7 +649,6 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     /**
      * Нарастить мясо на скелет из базы состояния - нужно например для созданим вторичных ключей и Номер Сущности
-     *
      */
     public void updateFromStateDB() {
     }
@@ -709,7 +708,7 @@ public abstract class Transaction implements ExplorerJsonLine {
      * this.viewTime(account); }
      */
     public long getKey() {
-        return 0l;
+        return 0L;
     }
 
     public Object[][] getItemsKeys() {
@@ -867,7 +866,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     /**
      * Постраничный поиск по строке поиска
      *
-     * @param offest
+     * @param offset
      * @param filterStr
      * @param useForge
      * @param pageSize
@@ -1388,7 +1387,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     /**
      * for RPC
      *
-     * @param jsonObject
+     * @param x
      * @return
      */
     static public Object decodeJson(String x) {
@@ -1778,7 +1777,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                 || personDuration.a <= BlockChain.BONUS_STOP_PERSON_KEY) {
 
             // если рефералку никому не отдавать то она по сути исчезает - надо это отразить в общем балансе
-            GenesisBlock.CREATOR.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
+            BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
                     BigDecimal.valueOf(fee_gift, BlockChain.FEE_SCALE), true, false);
 
             return;
@@ -1802,6 +1801,10 @@ public abstract class Transaction implements ExplorerJsonLine {
     }
 
     private void calcRoyalty(Block block, Account account, long koeff, boolean asOrphan) {
+
+        if (account.equals(BlockChain.FEE_ASSET_EMITTER)
+                || account.equals(GenesisBlock.CREATOR))
+            return;
 
         Tuple4<Long, Integer, Integer, Integer> personDuration;
         Long royaltyID;
@@ -1827,14 +1830,16 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         } else {
             // это прямое начисление
-            BigDecimal balanceBAL;
             BigDecimal balanceEXO;
+            BigDecimal balanceBAL = null;
             if (BlockChain.ACTION_ROYALTY_PERSONS_ONLY) {
                 // по всем счетам персоны
-                balanceBAL = PersonCls.getTotalBalance(dcSet, royaltyID, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND);
+                if (BlockChain.ACTION_ROYALTY_ASSET_2 > 0)
+                    balanceBAL = PersonCls.getTotalBalance(dcSet, royaltyID, BlockChain.ACTION_ROYALTY_ASSET_2, TransactionAmount.ACTION_SEND);
                 balanceEXO = PersonCls.getTotalBalance(dcSet, royaltyID, AssetCls.FEE_KEY, TransactionAmount.ACTION_SEND);
             } else {
-                balanceBAL = account.getBalance(dcSet, BlockChain.ACTION_ROYALTY_ASSET, TransactionAmount.ACTION_SEND).b;
+                if (BlockChain.ACTION_ROYALTY_ASSET_2 > 0)
+                    balanceBAL = account.getBalance(dcSet, BlockChain.ACTION_ROYALTY_ASSET_2, TransactionAmount.ACTION_SEND).b;
                 balanceEXO = account.getBalance(dcSet, AssetCls.FEE_KEY, TransactionAmount.ACTION_SEND).b;
             }
 
@@ -1875,7 +1880,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             long percent = diff * koeff;
 
             royaltyBG = BigDecimal.valueOf(percent, BlockChain.FEE_SCALE)
-                    // 6 от коэфф + (3+3) от процентов И сдвиг выше в valueOf происходит на FEE_SCALE
+                    // 6 от коэфф + (3+3) от процентов И сдвиг выше в valueOf происходит на BlockChain.ACTION_ROYALTY_ASSET_SCALE
                     .movePointLeft(3)
                     .multiply(balanceEXO)
                     .setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
@@ -1892,7 +1897,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         }
 
-        account.changeBalance(this.dcSet, asOrphan, false, BlockChain.ACTION_ROYALTY_ASSET, royaltyBG, false, true);
+        account.changeBalance(this.dcSet, asOrphan, false, FEE_KEY, royaltyBG, false, true);
         // учтем что получили бонусы
         account.changeCOMPUBonusBalances(dcSet, asOrphan, royaltyBG, Transaction.BALANCE_SIDE_DEBIT);
 
@@ -1903,11 +1908,11 @@ public abstract class Transaction implements ExplorerJsonLine {
         }
 
         // учтем эмиссию
-        GenesisBlock.CREATOR.changeBalance(this.dcSet, !asOrphan, false, BlockChain.ACTION_ROYALTY_ASSET,
+        BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, FEE_KEY,
                 royaltyBG, true, false);
 
         // учтем начисления для держателей долей
-        GenesisBlock.CREATOR.changeBalance(this.dcSet, !asOrphan, false, -BlockChain.ACTION_ROYALTY_ASSET,
+        BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, !asOrphan, false, -FEE_KEY,
                 royaltyBG.multiply(BlockChain.ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT).setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN),
                 true, false);
 
@@ -1920,7 +1925,8 @@ public abstract class Transaction implements ExplorerJsonLine {
      * @param asOrphan
      */
     public void processRoyalty(Block block, boolean asOrphan) {
-        if (BlockChain.ACTION_ROYALTY_START <= 0)
+        if (BlockChain.ACTION_ROYALTY_START <= 0
+                || getType() != SEND_ASSET_TRANSACTION || getKey() != FEE_KEY)
             return;
 
         // для точности умножаем на 1 млн
@@ -2031,6 +2037,9 @@ public abstract class Transaction implements ExplorerJsonLine {
             // UPDATE REFERENCE OF SENDER
             // set last transaction signature for this ACCOUNT
             this.creator.removeLastTimestamp(this.dcSet, timestamp);
+
+            // CALC ROYALTY
+            processRoyalty(block, true);
 
         }
 

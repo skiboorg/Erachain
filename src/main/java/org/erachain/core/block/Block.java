@@ -2064,7 +2064,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
         if (emittedFee != 0) {
             // SUBSTRACT from EMISSION (with minus)
-            GenesisBlock.CREATOR.changeBalance(dcSet, !asOrphan, false, Transaction.FEE_KEY,
+            BlockChain.FEE_ASSET_EMITTER.changeBalance(dcSet, !asOrphan, false, Transaction.FEE_KEY,
                     new BigDecimal(emittedFee).movePointLeft(BlockChain.FEE_SCALE), true, false);
         }
 
@@ -2088,8 +2088,15 @@ public class Block implements Closeable, ExplorerJsonLine {
                     assetFeeBurn = BigDecimal.ZERO;
                 }
 
-                earnedPair = new Tuple2(assetFee.add(transaction.assetFee.subtract(transaction.assetFeeBurn)),
-                        assetFeeBurn.add(transaction.assetFeeBurn));
+                if (transaction.assetFee.signum() != 0) {
+                    assetFee = assetFee.add(transaction.assetFee);
+                }
+                if (transaction.assetFeeBurn != null && transaction.assetFeeBurn.signum() != 0) {
+                    assetFee = assetFee.subtract(transaction.assetFeeBurn);
+                    assetFeeBurn = assetFeeBurn.add(transaction.assetFeeBurn);
+                }
+
+                earnedPair = new Tuple2(assetFee, assetFeeBurn);
                 earnedAllAssets.put(asset, earnedPair);
 
             }
@@ -2098,26 +2105,29 @@ public class Block implements Closeable, ExplorerJsonLine {
             for (AssetCls asset : earnedAllAssets.keySet()) {
                 earnedPair = earnedAllAssets.get(asset);
 
-                // учтем для форжера
-                this.creator.changeBalance(dcSet, asOrphan, false, asset.getKey(),
-                        earnedPair.a, true, false);
+                // учтем для форжера что он нафоржил
+                if (earnedPair.a.signum() != 0) {
+                    this.creator.changeBalance(dcSet, asOrphan, false, asset.getKey(),
+                            earnedPair.a, true, false);
+                    if (this.txCalculated != null) {
+                        this.txCalculated.add(new RCalculated(this.creator, asset.getKey(),
+                                earnedPair.a, "Asset Total Forged", Transaction.makeDBRef(this.heightBlock, 0), 0L));
+                    }
+                }
 
-                // учтем для эмитента
-                asset.getOwner().changeBalance(dcSet, asOrphan, false, asset.getKey(),
-                        earnedPair.b, true, false);
-
-                if (this.txCalculated != null) {
-                    this.txCalculated.add(new RCalculated(this.creator, asset.getKey(),
-                            earnedPair.a, "Asset Total Forged", Transaction.makeDBRef(this.heightBlock, 0), 0L));
-                    this.txCalculated.add(new RCalculated(asset.getOwner(), asset.getKey(),
-                            earnedPair.b, "Asset Total Burned", Transaction.makeDBRef(this.heightBlock, 0), 0L));
+                // учтем для эмитента что для него сгорело
+                if (earnedPair.b.signum() != 0) {
+                    asset.getOwner().changeBalance(dcSet, asOrphan, false, asset.getKey(),
+                            earnedPair.b, true, false);
+                    if (this.txCalculated != null) {
+                        this.txCalculated.add(new RCalculated(asset.getOwner(), asset.getKey(),
+                                earnedPair.b, "Asset Total Burned", Transaction.makeDBRef(this.heightBlock, 0), 0L));
+                    }
                 }
 
             }
 
         }
-
-        //logger.debug("<<< core.block.Block.orphan(DLSet) #3");
 
     }
 
@@ -2273,7 +2283,7 @@ public class Block implements Closeable, ExplorerJsonLine {
             return;
 
         // если сумма малая - не начисляем
-        BigDecimal readyToRoyalty = GenesisBlock.CREATOR.getBalance(dcSet, Transaction.FEE_KEY, TransactionAmount.ACTION_DEBT).b.negate();
+        BigDecimal readyToRoyalty = BlockChain.FEE_ASSET_EMITTER.getBalance(dcSet, BlockChain.FEE_KEY, TransactionAmount.ACTION_DEBT).b.negate();
         if (readyToRoyalty.compareTo(BlockChain.HOLD_ROYALTY_MIN) < 0)
             return;
 
@@ -2290,36 +2300,40 @@ public class Block implements Closeable, ExplorerJsonLine {
             while (iterator.hasNext()) {
                 byte[] key = iterator.next();
                 holder = new Account(ItemAssetBalanceMap.getShortAccountFromKey(key));
+                if (holder.equals(BlockChain.FEE_ASSET_EMITTER)
+                        || holder.equals(asset.getOwner()))
+                    continue;
+
                 balanceHold = map.get(key).a.b;
                 balanceHold = balanceHold.multiply(koeff).setScale(BlockChain.FEE_SCALE, RoundingMode.DOWN);
 
                 if (balanceHold.signum() <= 0)
                     continue;
 
-                holder.changeBalance(dcSet, asOrphan, false, Transaction.FEE_KEY, balanceHold, false, true);
+                holder.changeBalance(dcSet, asOrphan, false, BlockChain.FEE_KEY, balanceHold, false, true);
                 // учтем что получили бонусы
                 holder.changeCOMPUBonusBalances(dcSet, asOrphan, balanceHold, Transaction.BALANCE_SIDE_DEBIT);
 
                 // у эмитента снимем
-                BlockChain.HOLD_ROYALTY_EMITTER.changeBalance(dcSet, !asOrphan, false, Transaction.FEE_KEY, balanceHold, false, true);
-                BlockChain.HOLD_ROYALTY_EMITTER.changeCOMPUBonusBalances(dcSet, !asOrphan, balanceHold, Transaction.BALANCE_SIDE_DEBIT);
+                BlockChain.FEE_ASSET_EMITTER.changeBalance(dcSet, !asOrphan, false, BlockChain.FEE_KEY, balanceHold, false, true);
+                BlockChain.FEE_ASSET_EMITTER.changeCOMPUBonusBalances(dcSet, !asOrphan, balanceHold, Transaction.BALANCE_SIDE_DEBIT);
 
                 if (this.txCalculated != null) {
-                    txCalculated.add(new RCalculated(holder, Transaction.FEE_KEY, balanceHold,
-                            "AS-staking", txReference, 0L));
+                    txCalculated.add(new RCalculated(holder, BlockChain.FEE_KEY, balanceHold,
+                            "AS-stacking", txReference, 0L));
                 }
 
                 totalPayedRoyalty = totalPayedRoyalty.add(balanceHold);
             }
 
             // учтем снятие с начисления для держателей долей
-            GenesisBlock.CREATOR.changeBalance(dcSet, asOrphan, false, -Transaction.FEE_KEY,
+            BlockChain.FEE_ASSET_EMITTER.changeBalance(dcSet, asOrphan, false, -BlockChain.FEE_KEY,
                     totalPayedRoyalty,
                     true, false);
 
             if (this.txCalculated != null) {
-                txCalculated.add(new RCalculated(GenesisBlock.CREATOR, Transaction.FEE_KEY, totalPayedRoyalty.negate(),
-                        "AS-staking OUT", txReference, 0L));
+                txCalculated.add(new RCalculated(BlockChain.FEE_ASSET_EMITTER, BlockChain.FEE_KEY, totalPayedRoyalty.negate(),
+                        "AS-stacking OUT", txReference, 0L));
             }
 
         } catch (IOException e) {

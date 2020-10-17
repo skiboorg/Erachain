@@ -223,8 +223,8 @@ public class BlockChain {
      * Если задан то это режим синхронизации со стрым протоколом - значит нам нельза генерить блоки и трнзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = DEMO_MODE ? 0 : 0; // see in sidePROTOCOL.json as 'allValidBefore'
-    public static final int CANCEL_ORDERS_ALL_VALID = TEST_DB > 0 ? 0 : 0;
+    public static int ALL_VALID_BEFORE = 0; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static final int CANCEL_ORDERS_ALL_VALID = 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
@@ -248,16 +248,18 @@ public class BlockChain {
     public static final long VERS_30SEC_TIME =
             CLONE_MODE || TEST_MODE ? 0 : Settings.DEFAULT_MAINNET_STAMP + (long) VERS_30SEC * 288L;
 
-    public static final int VERS_4_23_01 = TEST_DB > 0 || CLONE_MODE || TEST_MODE ? 0 : 0;
+    public static final int VERS_4_21_02 = 0;
 
-    public static final int VERS_5_01_01 = TEST_DB > 0 || CLONE_MODE ? 0 : DEMO_MODE ? 0 : TEST_MODE ? 0 : 0;
+    public static final int VERS_4_23_01 = 0;
+
+    public static final int VERS_5_01_01 = 0;
 
     /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне
      */
-    public static final int START_ISSUE_RIGHTS = TEST_DB > 0 || CLONE_MODE || TEST_MODE ? 0 : VERS_5_01_01;
+    public static final int START_ISSUE_RIGHTS = VERS_5_01_01;
 
-    public static final int START_ITEM_DUPLICATE = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int START_ITEM_DUPLICATE = VERS_5_01_01;
 
 
     public static final int DEFAULT_DURATION = 365 * 5; // 5 years
@@ -330,6 +332,7 @@ public class BlockChain {
     //public static final int FEE_MIN_BYTES = 200;
     public static final int FEE_PER_BYTE_4_10 = 64;
     public static final int FEE_PER_BYTE = 10000;
+    public static final long FEE_KEY = AssetCls.FEE_KEY;
     public static final int FEE_SCALE = 8;
     public static final BigDecimal FEE_RATE = BigDecimal.valueOf(1, FEE_SCALE);
     //public static final BigDecimal MIN_FEE_IN_BLOCK_4_10 = BigDecimal.valueOf(FEE_PER_BYTE_4_10 * 8 * 128, FEE_SCALE);
@@ -346,13 +349,16 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
+    /**
+     * FEE_KEY used here
+     */
     public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
-    public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.001"); // x0.001
+    public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.0001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
-    public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.01"); // сколько добавляем к награде
-    public static final long ACTION_ROYALTY_ASSET = AssetCls.BAL_KEY;
+    public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.10"); // сколько добавляем к награде
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
+    public static final long ACTION_ROYALTY_ASSET_2 = AssetCls.BAL_KEY;
 
     /**
      * какие проценты при переводе каких активов - Ключ : процент + минималка.
@@ -365,12 +371,22 @@ public class BlockChain {
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
-    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
-    public static Account HOLD_ROYALTY_EMITTER = new Account(
-            TEST_MODE? "7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
-                (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()
-        );
-    public static final long HOLD_ROYALTY_ASSET = AssetCls.ERA_KEY;
+    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
+
+    /**
+     * По какому активу считаем дивиденды
+     */
+    public static final long HOLD_ROYALTY_ASSET = AssetCls.AS_KEY;
+
+    /**
+     * Если не задан то будет взят счет из Генесиз-блока
+     * Если есть начисления бонусов по ROYALTY то надо его задать
+     */
+    public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
+            new PublicKeyAccount(TEST_MODE ?
+                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6" :
+                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
+            : null;
 
 
     /**
@@ -446,55 +462,60 @@ public class BlockChain {
     public BlockChain(DCSet dcSet_in) throws Exception {
 
         trustedPeers.addAll(Settings.getInstance().getTrustedPeers());
-        //HOLD_ROYALTY_EMITTER = new Account("q");
+        if (FEE_ASSET_EMITTER == null) {
+            // для учета эмиссии COMPU и других
+            FEE_ASSET_EMITTER = GenesisBlock.CREATOR;
+        }
+
 
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
         } else if (CLONE_MODE) {
 
             // Процент за перевод и Минимальная комиссия
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // BTC
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.000005")));
+            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
 
             // GOLD
-            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.00005")));
+            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
 
             // CURRENCIES
             // UAH
-            ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // KZT
-            ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // KFS
-            ASSET_TRANSFER_PERCENTAGE.put(84L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(84L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // BYN
-            ASSET_TRANSFER_PERCENTAGE.put(85L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(85L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // TRY
-            ASSET_TRANSFER_PERCENTAGE.put(86L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(86L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // SGN
-            ASSET_TRANSFER_PERCENTAGE.put(87L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(87L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // AUD
-            ASSET_TRANSFER_PERCENTAGE.put(88L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(88L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // CFH
-            ASSET_TRANSFER_PERCENTAGE.put(89L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(89L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // GBP
-            ASSET_TRANSFER_PERCENTAGE.put(90L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(90L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // JPY
-            ASSET_TRANSFER_PERCENTAGE.put(91L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(91L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // RUB
-            ASSET_TRANSFER_PERCENTAGE.put(92L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(92L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // CNY
-            ASSET_TRANSFER_PERCENTAGE.put(93L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(93L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // EUR
-            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             // USD
-            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.03"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // процент сжигания - если тут не задано то берется 1/2
-            ASSET_BURN_PERCENTAGE.put(3L, new BigDecimal("0.5"));
+            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
             File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {

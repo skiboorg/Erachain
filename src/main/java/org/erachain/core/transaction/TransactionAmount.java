@@ -312,7 +312,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     public long calcBaseFee() {
         if (hasAmount() && getActionType() == ACTION_SEND // только для передачи в собственность!
                 && !BlockChain.ASSET_TRANSFER_PERCENTAGE.isEmpty()
-                && BlockChain.ASSET_TRANSFER_PERCENTAGE.containsKey(key)) {
+                && BlockChain.ASSET_TRANSFER_PERCENTAGE.containsKey(key)
+                && creator != null && !creator.equals(asset.getOwner())) {
             Fun.Tuple2<BigDecimal, BigDecimal> percItem = BlockChain.ASSET_TRANSFER_PERCENTAGE.get(key);
             assetFee = amount.abs().multiply(percItem.a).setScale(asset.getScale(), RoundingMode.DOWN);
             if (assetFee.compareTo(percItem.b) < 0) {
@@ -322,7 +323,11 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
             if (!BlockChain.ASSET_BURN_PERCENTAGE.isEmpty()
                     && BlockChain.ASSET_BURN_PERCENTAGE.containsKey(key)) {
-                assetFeeBurn = assetFee.multiply(BlockChain.ASSET_BURN_PERCENTAGE.get(key)).setScale(asset.getScale(), RoundingMode.UP);
+                BigDecimal burnKoeff = BlockChain.ASSET_BURN_PERCENTAGE.get(key);
+                if (burnKoeff.signum() > 0)
+                    assetFeeBurn = assetFee.multiply(burnKoeff).setScale(asset.getScale(), RoundingMode.UP);
+                else
+                    assetFeeBurn = BigDecimal.ZERO;
             } else {
                 assetFeeBurn = assetFee.multiply(sendBurnPerc).setScale(asset.getScale(), RoundingMode.UP);
             }
@@ -1268,15 +1273,12 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             block.addForgingInfoUpdate(this.recipient);
         }
 
-        if (assetFee != null) {
+        if (assetFee != null && assetFee.signum() != 0) {
             // учтем что он еще заплатил коэффицинт с суммы
             this.creator.changeBalance(db, !backward, backward, absKey, this.assetFee, !incomeReverse, false);
             if (block != null && block.txCalculated != null) {
                 block.txCalculated.add(new RCalculated(this.creator, absKey,
                         this.assetFee.negate(), "Asset Fee", this.dbRef, 0L));
-                //block.txCalculated.add(new RCalculated(asset.getOwner(), absKey,
-                //        this.assetFeeBurn, "Asset Burn", this.dbRef, 0L));
-
             }
         }
     }
@@ -1392,7 +1394,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             block.addForgingInfoUpdate(this.recipient);
         }
 
-        if (assetFee != null) {
+        if (assetFee != null && assetFee.signum() != 0) {
             this.creator.changeBalance(db, backward, backward, absKey, this.assetFee, !incomeReverse, false);
         }
 
