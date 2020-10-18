@@ -17,10 +17,7 @@ import org.erachain.core.blockexplorer.ExplorerJsonLine;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.assets.AssetCls;
-import org.erachain.core.transaction.RCalculated;
-import org.erachain.core.transaction.Transaction;
-import org.erachain.core.transaction.TransactionAmount;
-import org.erachain.core.transaction.TransactionFactory;
+import org.erachain.core.transaction.*;
 import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.transaction.OnDealClick;
@@ -621,7 +618,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         } else {
             hashData = new byte[transactionCount * SIGNATURE_LENGTH + atBytesLength];
 
-            rawTransactionsLength = getDataLengthTXs();
+            rawTransactionsLength = getDataLengthTXs() + 100000;
             rawTransactions = new byte[rawTransactionsLength];
 
             int rawPos = 0;
@@ -629,18 +626,27 @@ public class Block implements Closeable, ExplorerJsonLine {
 
             //MAKE TRANSACTIONS HASH
             for (Transaction transaction : transactions) {
+
                 //WRITE TRANSACTION LENGTH
                 int transactionLength = transaction.getDataLength(Transaction.FOR_NETWORK, true);
                 byte[] transactionLengthBytes = Ints.toByteArray(transactionLength);
-                transactionLengthBytes = Bytes.ensureCapacity(transactionLengthBytes, TRANSACTION_SIZE_LENGTH, 0);
                 System.arraycopy(transactionLengthBytes, 0, rawTransactions, rawPos, TRANSACTION_SIZE_LENGTH);
                 rawPos += TRANSACTION_SIZE_LENGTH;
 
-                //WRITE TRANSACTION
-                System.arraycopy(transaction.toBytes(Transaction.FOR_NETWORK, true), 0, rawTransactions, rawPos, transactionLength);
+                // WRITE TRANSACTION
+                byte[] txRAW = transaction.toBytes(Transaction.FOR_NETWORK, true);
+                try {
+                    // if here is error ArrayIndexOutOfBoundsException - see https://lab.erachain.org/erachain/Erachain/-/issues/1440
+                    System.arraycopy(txRAW, 0, rawTransactions, rawPos, transactionLength);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    LOGGER.info("ATTENTION!!! PLEASE remove transaction for Account: "
+                            + ((GenesisTransferAssetTransaction) transaction).getRecipient().getAddress() + " - " + transaction.toStringShortAsCreator());
+                    LOGGER.info("ATTENTION!!! See issue https://lab.erachain.org/erachain/Erachain/-/issues/1440");
+                    throw (e);
+                }
                 rawPos += transactionLength;
 
-                // ACUMULATE SINGNs FOR HASH
+                // ACCUMULATE SINGNs FOR HASH
                 System.arraycopy(transaction.getSignature(), 0, hashData, hashPos, SIGNATURE_LENGTH);
                 hashPos += SIGNATURE_LENGTH;
 
