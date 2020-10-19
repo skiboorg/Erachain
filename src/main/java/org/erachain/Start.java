@@ -3,14 +3,16 @@ package org.erachain;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.erachain.controller.Controller;
+import org.erachain.core.account.Account;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 //import org.erachain.utils.Logging;
@@ -33,7 +35,7 @@ public class Start {
 //    }
 
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws Exception {
 
         //SpringApplicationBuilder builder = new SpringApplicationBuilder(Start.class);
 
@@ -112,16 +114,16 @@ public class Start {
         if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0
             /// && file.exists()
                 ) {
+
             // START SIDE CHAIN
+
             if (false) {
 
                 LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json USED");
-
-                List<String> lines;
                 String jsonString = "";
-
                 try {
-                    lines = Files.readLines(file, Charsets.UTF_8);
+                    List<String> lines = Files.readLines(file, Charsets.UTF_8);
+
                     for (String line : lines) {
                         if (line.trim().startsWith("//")) {
                             // пропускаем //
@@ -135,36 +137,61 @@ public class Start {
                     System.exit(3);
                 }
 
+                //CREATE JSON OBJECT
                 Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
-                List appArray = (List) Settings.genesisJSON.get(0);
+                JSONArray appArray = (JSONArray) Settings.genesisJSON.get(0);
                 Settings.APP_NAME = appArray.get(0).toString();
                 Settings.APP_FULL_NAME = appArray.get(1).toString();
-                List timeArray = (List) Settings.genesisJSON.get(1);
+                JSONArray timeArray = (JSONArray) Settings.genesisJSON.get(1);
                 Settings.genesisStamp = new Long(timeArray.get(0).toString());
 
                 // если там пустой список то включаем "у всех все есть"
-                List holders = (List) Settings.genesisJSON.get(2);
+                JSONArray holders = (JSONArray) Settings.genesisJSON.get(2);
                 if (holders.isEmpty()) {
                     Settings.ERA_COMPU_ALL_UP = true;
                 }
-            } else {
-                // for BRAND
-                Settings.genesisJSON = new JSONArray();
-                Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
-                JSONArray appArray = new JSONArray();
-                appArray.add(Settings.APP_NAME);
-                appArray.add(Settings.APP_FULL_NAME);
-                Settings.genesisJSON.add(appArray);
+                // CHECK VALID
+                for (int i = 0; i < holders.size(); i++) {
+                    JSONArray holder = (JSONArray) holders.get(i);
+                    // SEND FONDs
+                    Fun.Tuple2<Account, String> accountItem = Account.tryMakeAccount(holder.get(0).toString());
+                    if (accountItem.a == null) {
+                        String error = accountItem.b + " - " + holder.get(0).toString();
+                        LOGGER.error(error);
+                        System.exit(4);
+                    }
 
-                Settings.genesisJSON.add(Settings.genesisStamp);
+                    // DEBTORS
+                    JSONArray debtors = (JSONArray) holder.get(3);
+                    BigDecimal totalCredit = BigDecimal.ZERO;
+                    for (int j = 0; j < debtors.size(); j++) {
+                        JSONArray debtor = (JSONArray) debtors.get(j);
 
-                Settings.genesisJSON.add(Settings.HOLDERS);
+                        accountItem = Account.tryMakeAccount(debtor.get(1).toString());
+                        if (accountItem.a == null) {
+                            String error = accountItem.b + " - " + debtor.get(1).toString();
+                            LOGGER.error(error);
+                            System.exit(4);
+                        }
+                    }
 
+                } else{
+                    // for BRAND
+                    Settings.genesisJSON = new JSONArray();
+                    Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
+                    JSONArray appArray = new JSONArray();
+                    appArray.add(Settings.APP_NAME);
+                    appArray.add(Settings.APP_FULL_NAME);
+                    Settings.genesisJSON.add(appArray);
+
+                    Settings.genesisJSON.add(Settings.genesisStamp);
+
+                    Settings.genesisJSON.add(Settings.HOLDERS);
+
+                }
+
+                Settings.NET_MODE = Settings.NET_MODE_CLONE;
             }
-
-            Settings.NET_MODE = Settings.NET_MODE_CLONE;
-
-        }
 
         Settings.getInstance();
 
