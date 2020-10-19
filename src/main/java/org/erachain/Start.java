@@ -113,7 +113,7 @@ public class Start {
         file = null; ///new File("sideGENESIS.json");
         if (Settings.NET_MODE == Settings.NET_MODE_MAIN && Settings.TEST_DB_MODE == 0
             /// && file.exists()
-                ) {
+        ) {
 
             // START SIDE CHAIN
 
@@ -150,6 +150,7 @@ public class Start {
                 if (holders.isEmpty()) {
                     Settings.ERA_COMPU_ALL_UP = true;
                 }
+
                 // CHECK VALID
                 for (int i = 0; i < holders.size(); i++) {
                     JSONArray holder = (JSONArray) holders.get(i);
@@ -174,24 +175,25 @@ public class Start {
                             System.exit(4);
                         }
                     }
-
-                } else{
-                    // for BRAND
-                    Settings.genesisJSON = new JSONArray();
-                    Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
-                    JSONArray appArray = new JSONArray();
-                    appArray.add(Settings.APP_NAME);
-                    appArray.add(Settings.APP_FULL_NAME);
-                    Settings.genesisJSON.add(appArray);
-
-                    Settings.genesisJSON.add(Settings.genesisStamp);
-
-                    Settings.genesisJSON.add(Settings.HOLDERS);
-
                 }
 
-                Settings.NET_MODE = Settings.NET_MODE_CLONE;
+            } else {
+                // for BRAND CHAIN
+                Settings.genesisJSON = new JSONArray();
+                Settings.genesisStamp = Settings.DEFAULT_MAINNET_STAMP;
+                JSONArray appArray = new JSONArray();
+                appArray.add(Settings.APP_NAME);
+                appArray.add(Settings.APP_FULL_NAME);
+                Settings.genesisJSON.add(appArray);
+
+                Settings.genesisJSON.add(Settings.genesisStamp);
+
+                Settings.genesisJSON.add(Settings.HOLDERS);
+
             }
+
+            Settings.NET_MODE = Settings.NET_MODE_CLONE;
+        }
 
         Settings.getInstance();
 
