@@ -708,7 +708,7 @@ public abstract class Transaction implements ExplorerJsonLine {
      * this.viewTime(account); }
      */
     public long getKey() {
-        return 0l;
+        return 0L;
     }
 
     public Object[][] getItemsKeys() {
@@ -866,7 +866,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     /**
      * Постраничный поиск по строке поиска
      *
-     * @param offest
+     * @param offset
      * @param filterStr
      * @param useForge
      * @param pageSize
@@ -1387,7 +1387,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     /**
      * for RPC
      *
-     * @param jsonObject
+     * @param x
      * @return
      */
     static public Object decodeJson(String x) {
@@ -1929,7 +1929,8 @@ public abstract class Transaction implements ExplorerJsonLine {
      * @param asOrphan
      */
     public void processRoyalty(Block block, boolean asOrphan) {
-        if (BlockChain.ACTION_ROYALTY_START <= 0)
+        if (BlockChain.ACTION_ROYALTY_START <= 0
+                || getType() != SEND_ASSET_TRANSACTION || getKey() != FEE_KEY)
             return;
 
         // для точности умножаем на 1 млн
