@@ -331,7 +331,7 @@ public class BlockChain {
     public static final int CONFIRMS_TRUE = MAX_ORPHAN; // for reference by ITEM_KEY
     //public static final int FEE_MIN_BYTES = 200;
     public static final int FEE_PER_BYTE_4_10 = 64;
-    public static final int FEE_PER_BYTE = 100;
+    public static final int FEE_PER_BYTE = 10000;
     public static final long FEE_KEY = AssetCls.FEE_KEY;
     public static final int FEE_SCALE = 8;
     public static final BigDecimal FEE_RATE = BigDecimal.valueOf(1, FEE_SCALE);
@@ -354,11 +354,11 @@ public class BlockChain {
      */
     public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
-    public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.00001"); // x0.001
+    public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.0001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
-    public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.1"); // сколько добавляем к награде
+    public static final BigDecimal ACTION_ROYALTY_TO_HOLD_ROYALTY_PERCENT = new BigDecimal("0.10"); // сколько добавляем к награде
     public static final boolean ACTION_ROYALTY_PERSONS_ONLY = false;
-    public static final long ACTION_ROYALTY_ASSET_2 = 0L;
+    public static final long ACTION_ROYALTY_ASSET_2 = AssetCls.BAL_KEY;
 
     /**
      * какие проценты при переводе каких активов - Ключ : процент + минималка.
@@ -371,7 +371,7 @@ public class BlockChain {
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
-    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.0001"); // если меньше то распределение не делаем
+    public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
 
     /**
      * По какому активу считаем дивиденды
@@ -384,7 +384,7 @@ public class BlockChain {
      */
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
             new PublicKeyAccount(TEST_MODE ?
-                    "pubKey?7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz" :
+                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6" :
                     "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
             : null;
 
@@ -473,9 +473,9 @@ public class BlockChain {
         } else if (CLONE_MODE) {
 
             // Процент за перевод и Минимальная комиссия
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.05"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // BTC
             ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
