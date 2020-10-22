@@ -118,7 +118,7 @@ public class BlockChain {
     /**
      * default = 30 sec
      */
-    private static int BLOCKS_PERIOD = 30; // [sec]
+    private static int BLOCKS_PERIOD = 300; // [sec]
 
     /**
      * set uo all balances ERA to 10000 and COMPU to 100
@@ -166,7 +166,7 @@ public class BlockChain {
     // need RIGHTS for PERSON account
     public static final BigDecimal MINOR_ERA_BALANCE_BD = BigDecimal.valueOf(MINOR_ERA_BALANCE);
 
-    public static final int MIN_GENERATING_BALANCE = 10000;
+    public static final int MIN_GENERATING_BALANCE = 100000;
     public static final BigDecimal MIN_GENERATING_BALANCE_BD = new BigDecimal(MIN_GENERATING_BALANCE);
 
     public static final int MIN_REGISTRATING_BALANCE_10 = 10;
@@ -704,18 +704,7 @@ public class BlockChain {
     }
 
     public static int GENERATING_MIN_BLOCK_TIME(int height) {
-
-        if (CLONE_MODE)
-            return BLOCKS_PERIOD;
-
-        if (VERS_30SEC > 0 && height <= VERS_30SEC) {
-            return 288; // old MainNet
-        }
-
-        if (TEST_MODE && !DEMO_MODE)
-            return 5;
-
-        return 30;
+        return BLOCKS_PERIOD;
     }
 
     public static boolean isWiped(byte[] signature) {
