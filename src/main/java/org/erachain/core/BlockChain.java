@@ -641,6 +641,9 @@ public class BlockChain {
             ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
 
+            // ERROR - MAIN MODE DENIED
+            new Account("--");
+
         }
 
         //CREATE GENESIS BLOCK
