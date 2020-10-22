@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=darachain
-set task=darachain
+set app=wfchain
+set task=wfchain
 
 set pars=
 

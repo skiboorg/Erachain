@@ -112,7 +112,7 @@ public class SysTray implements Observer {
         PopupMenu menu = new PopupMenu();
 
 
-        MenuItem decentralizedWeb = new MenuItem("darachain.org Web/Social Network");
+        MenuItem decentralizedWeb = new MenuItem("wfchain.org Web/Social Network");
         decentralizedWeb.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {

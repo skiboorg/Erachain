@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=darachain-de
+set app=wfchain-de
 set xms=128
 set xmx=256
 set pars=-nogui -pass=1 -seed=5:new:1

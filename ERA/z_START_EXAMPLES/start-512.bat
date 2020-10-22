@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=darachain
+set app=wfchain
 set xms=512
 set xmx=1024
 set mms=512

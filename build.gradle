@@ -34,7 +34,7 @@ ext {
 
 //String versionEra = "4.11.08-${git.head().abbreviatedId}"
 String versionEra = "2.1"
-archivesBaseName = 'Darachain'
+archivesBaseName = 'WFchain'
 group 'org.erachain'
 //version versionEra
 sourceCompatibility = 1.8
@@ -108,8 +108,8 @@ jar {
 //        configurations.runtime
 //    }
 
-    baseName = "darachain"
-    destinationDir project.file('build/libs/Darachain')
+    baseName = "wfchain"
+    destinationDir project.file('build/libs/WFchain')
 
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 
@@ -155,7 +155,7 @@ task CopyResourse {
 
     copy {
         from 'ERA'
-        into 'build/libs/Darachain'
+        into 'build/libs/WFchain'
         include '*Licence*'
         include 'chain*'
         include 'peers*'
@@ -164,57 +164,57 @@ task CopyResourse {
 
     copy {
         from 'ERA/resources'
-        into 'build/libs/Darachain/resources'
+        into 'build/libs/WFchain/resources'
     }
     copy {
         from 'ERA/web'
-        into 'build/libs/Darachain/web'
+        into 'build/libs/WFchain/web'
     }
     copy {
         from 'ERA/languages'
-        into 'build/libs/Darachain/languages'
+        into 'build/libs/WFchain/languages'
     }
     copy {
         from 'ERA/themes'
-        into 'build/libs/Darachain/themes'
+        into 'build/libs/WFchain/themes'
     }
     copy {
         from 'ERA/sounds'
-        into 'build/libs/Darachain/sounds'
+        into 'build/libs/WFchain/sounds'
     }
     copy {
         from 'ERA/images'
-        into 'build/libs/Darachain/images'
+        into 'build/libs/WFchain/images'
     }
     copy {
         from 'ERA/z_SIDECHAIN_EXAMPLES'
-        into 'build/libs/Darachain/z_SIDECHAIN_EXAMPLES'
+        into 'build/libs/WFchain/z_SIDECHAIN_EXAMPLES'
     }
     copy {
         from 'ERA/z_START_EXAMPLES'
-        into 'build/libs/Darachain/z_START_EXAMPLES'
+        into 'build/libs/WFchain/z_START_EXAMPLES'
     }
     copy {
         from 'ERA/SSL'
-        into 'build/libs/Darachain/SSL'
+        into 'build/libs/WFchain/SSL'
     }
 }
 
 task CreateZip(type: Zip) {
 
     from 'build/libs/'
-    include 'Darachain/'
-    exclude 'Darachain/datachain'
-    exclude 'Darachain/datalocal'
-    exclude 'Darachain/datatemp'
-    exclude 'Darachain/dataWallet'
-    exclude 'Darachain/walletKeys'
-    archiveName 'Darachain' + '.zip'
+    include 'WFchain/'
+    exclude 'WFchain/datachain'
+    exclude 'WFchain/datalocal'
+    exclude 'WFchain/datatemp'
+    exclude 'WFchain/dataWallet'
+    exclude 'WFchain/walletKeys'
+    archiveName 'WFchain' + '.zip'
     destinationDir(file('build/libs/'))
 }
 
 //task copyToLib(type: Copy){
-//    into "build/libs/Darachain/libs"
+//    into "build/libs/WFchain/libs"
 //    from configurations.runtime
 //}
 
