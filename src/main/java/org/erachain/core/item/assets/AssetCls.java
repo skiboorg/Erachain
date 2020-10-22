@@ -25,13 +25,13 @@ public abstract class AssetCls extends ItemCls {
 
     // CORE KEY
     public static final long ERA_KEY = 1L;
-    public static final String ERA_ABBREV = "DAR"; // ERA (main rights units)
-    public static final String ERA_NAME = "DAR";
+    public static final String ERA_ABBREV = "ERA"; // ERA (main rights units)
+    public static final String ERA_NAME = "ERA";
     public static final String ERA_DESCR = "";
 
     public static final long FEE_KEY = 2L;
-    public static final String FEE_ABBREV = "EXO"; // COMP (main rights units)
-    public static final String FEE_NAME = "EXO";
+    public static final String FEE_ABBREV = "COMPU"; // COMP (main rights units)
+    public static final String FEE_NAME = "COMPU";
     public static final String FEE_DESCR = "";
 
     public static final long AS_KEY = 3L;
@@ -401,13 +401,13 @@ public abstract class AssetCls extends ItemCls {
         switch ((int) key) {
             case 1:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/DAR.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ERA.png"));
                 } catch (Exception e) {
                 }
                 return icon;
             case 2:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/EXO.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/COMPU.png"));
                 } catch (Exception e) {
                 }
                 return icon;
