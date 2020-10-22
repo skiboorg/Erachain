@@ -10,7 +10,6 @@ import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.AssetVenture;
-import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.item.statuses.Status;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.item.templates.Template;
@@ -19,7 +18,6 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
-import org.mapdb.Fun.Tuple2;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -148,156 +146,9 @@ public class GenesisBlock extends Block {
 
         } else {
 
-            List<Tuple2<Account, BigDecimal>> sends_toUsers = new ArrayList<Tuple2<Account, BigDecimal>>();
+            // ERROR - MAIN MODE DENIED
+            new Account("--");
 
-            /*
-             */
-            ///////// GENEGAL
-            List<List<Object>> generalGenesisUsers = Arrays.asList(
-            );
-            /////////// MAJOR
-            List<List<Object>> majorGenesisUsers = Arrays.asList(
-					/*
-					Arrays.asList(1000, new PersonHuman(new Account("7FoC1wAtbR9Z5iwtcw4Ju1u2DnLBQ1TNS7"),
-							"Симанков, Дмитрий", "1966-08-21", null,
-							(byte)1, "европеец-славянин", (float)43.1330, (float)131.9224,
-							"белый", "серо-зеленый", "серо-коричневый", (int) 188, icon, image, "-")),
-					 */
-            );
-            ////////// MINOR
-            List<List<Object>> minorGenesisUsers = Arrays.asList(
-					/*
-					Arrays.asList(100, new PersonHuman(new Account("73CcZe3PhwvqMvWxDznLAzZBrkeTZHvNzo"),
-							"неизвестный участник", "1966-08-21",  null,
-							(byte)1, "европеец-славянин", (float)0.0, (float)0.0,
-							"белый", "серо-зеленый", "серо-коричневый", (int) 188, icon, image, "-")),
-					 */
-            );
-            List<PersonCls> personGenesisUsers = Arrays.asList(
-					/*
-					new PersonHuman(CREATOR,
-							"Менделеев, Дмитрий Иванович", "1834-02-08", "1907-02-02",
-							(byte)1, "европеец-славянин", (float)58.195278, (float)68.258056,
-							"белый", "серо-зеленый", "серо-коричневый", (int) 180, icon, image, "русский учёный-энциклопедист: химик, физикохимик, физик, метролог, экономист, технолог, геолог, метеоролог, нефтяник, педагог, воздухоплаватель, приборостроитель. Профессор Санкт-Петербургского университета; член-корреспондент по разряду «физический» Императорской Санкт-Петербургской Академии наук. Среди наиболее известных открытий — периодический закон химических элементов, один из фундаментальных законов мироздания, неотъемлемый для всего естествознания. Автор классического труда «Основы химии».")
-					 */
-            );
-
-            ////////// INVESTORS ICO 10%
-            List<List<Object>> genesisInvestors = Arrays.asList(
-            );
-
-            ////////// ACTIVISTS
-            List<List<Object>> genesisActivists = Arrays.asList(
-            );
-
-            // GENESIS FORGERS
-            ArrayList<List<Object>> genesisDebtors = new ArrayList<List<Object>>(Arrays.asList(
-            ));
-
-            // TRANSFERS
-            //
-
-            BigDecimal totalSended = BigDecimal.ZERO;
-
-            for (List<Object> item : generalGenesisUsers) {
-
-                recipient = new Account((String) item.get(0));
-
-                bdAmount0 = new BigDecimal((String) item.get(1)).setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
-                transactions.add(new GenesisTransferAssetTransaction(recipient, AssetCls.ERA_KEY, bdAmount0));
-                totalSended = totalSended.add(bdAmount0);
-
-                // buffer for CREDIT sends
-                sends_toUsers.add(new Tuple2<Account, BigDecimal>(recipient, bdAmount0));
-
-                bdAmount1 = BigDecimal.ONE.setScale(BlockChain.FEE_SCALE);
-                transactions.add(new GenesisTransferAssetTransaction(recipient, AssetCls.FEE_KEY, bdAmount1));
-
-            }
-
-            int pickDebt = 27000;
-            BigDecimal limitOwned = new BigDecimal(pickDebt * 6).setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
-
-            // NOT PERSONALIZE INVESTORS - ICO 10%
-            for (List<Object> item : genesisInvestors) {
-
-                //recipient = new Account((String)item.get(0));
-                if (((String) item.get(0)).length() > 36) {
-                    recipient = new PublicKeyAccount((String) item.get(0));
-                } else {
-                    recipient = new Account((String) item.get(0));
-                }
-
-                bdAmount0 = new BigDecimal((String) item.get(1)).setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
-                transactions.add(new GenesisTransferAssetTransaction(recipient, AssetCls.ERA_KEY, bdAmount0));
-                totalSended = totalSended.add(bdAmount0);
-
-
-                if (bdAmount0.compareTo(limitOwned) < 1) {
-                    addDebt(recipient.getAddress(), 1, genesisDebtors);
-                } else {
-                    // buffer for CREDIT sends
-                    sends_toUsers.add(new Tuple2<Account, BigDecimal>(recipient, bdAmount0));
-                }
-            }
-
-            // ACTIVITES
-            int nonce = genesisActivists.size() >> 1;
-            for (List<Object> item : genesisActivists) {
-
-                recipient = new Account((String) item.get(0));
-
-                bdAmount0 = new BigDecimal((String) item.get(1)).add(new BigDecimal(nonce--)).setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
-                transactions.add(new GenesisTransferAssetTransaction(recipient, AssetCls.ERA_KEY, bdAmount0));
-                totalSended = totalSended.add(bdAmount0);
-
-                addDebt(recipient.getAddress(), 1, genesisDebtors);
-
-            }
-
-            // ADJUST end
-            transactions.add(new GenesisTransferAssetTransaction(
-                    new Account("--"), AssetCls.ERA_KEY,
-                    new BigDecimal(BlockChain.GENESIS_ERA_TOTAL).subtract(totalSended).setScale(BlockChain.AMOUNT_DEDAULT_SCALE)));
-
-            // FOR DEBROTS
-            nonce = genesisDebtors.size() >> 1;
-
-            int i = 0;
-            Account bufferCreditor = sends_toUsers.get(i).a;
-            BigDecimal bufferAmount = sends_toUsers.get(i).b;
-
-            for (List<Object> item : genesisDebtors) {
-
-                if (((String) item.get(0)).length() > 36) {
-                    recipient = new PublicKeyAccount((String) item.get(0));
-                } else {
-                    recipient = new Account((String) item.get(0));
-                }
-
-                bdAmount0 = new BigDecimal((int) item.get(1) * pickDebt + nonce--).setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
-
-                do {
-                    if (bufferAmount.subtract(bdAmount0).compareTo(limitOwned) < 0) {
-                        // use  MIN BALANCE investor!
-                        BigDecimal diffLimit = bufferAmount.subtract(limitOwned);
-                        bdAmount0 = bdAmount0.subtract(diffLimit);
-
-                        transactions.add(new GenesisTransferAssetTransaction(recipient, -AssetCls.ERA_KEY,
-                                diffLimit, bufferCreditor));
-                        i++;
-                        limitOwned = limitOwned.subtract(BigDecimal.ONE);
-                        bufferCreditor = sends_toUsers.get(i).a;
-                        bufferAmount = sends_toUsers.get(i).b;
-                        continue;
-                    } else {
-                        transactions.add(new GenesisTransferAssetTransaction(recipient, -AssetCls.ERA_KEY,
-                                bdAmount0, bufferCreditor));
-                        bufferAmount = bufferAmount.subtract(bdAmount0);
-                        break;
-                    }
-                } while (true);
-            }
         }
 
         //GENERATE AND VALIDATE TRANSACTIONS
