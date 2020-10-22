@@ -262,11 +262,11 @@ function person(data) {
     output += '<h6>' + data.Label_gender + ': &nbsp&nbsp<b> ' + data.gender + '</b></h6>';
 
     if (data.era_balance_a) {
-        output += '<h5>DAR: &nbsp&nbsp<u>A</u>:<b>' + data.era_balance_a + '</b>&nbsp&nbsp<u>B</u>:<b>'
+        output += '<h5>ERA: &nbsp&nbsp<u>A</u>:<b>' + data.era_balance_a + '</b>&nbsp&nbsp<u>B</u>:<b>'
             + data.era_balance_b + '</b>&nbsp&nbsp<u>C</u>:<b>' + data.era_balance_c + '</b></h5>';
     }
     if (data.compu_balance) {
-        output += '<h5>EXO: &nbsp&nbsp <b>' + data.compu_balance + '</b></h5>';
+        output += '<h5>COMPU: &nbsp&nbsp <b>' + data.compu_balance + '</b></h5>';
     }
 
     if (data.lia_balance_a) {
