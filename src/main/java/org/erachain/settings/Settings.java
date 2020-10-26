@@ -29,8 +29,8 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1603269538000L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1603269538000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1603756800000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1603756800000L; // DEMO Net
 
     public static String FORK_APP_Name = "Workflow";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();

@@ -30,7 +30,7 @@ public class ModelAccountTransactions extends TimerTableModelCls<Transaction> im
     private Boolean[] column_AutuHeight = new Boolean[]{true, false, false, false};
     private List<PublicKeyAccount> publicKeyAccounts;
     private Account account;
-    private long filterAssetKey = 1l;
+    private long filterAssetKey = 2L;
     private AssetCls asset = GenesisBlock.makeAsset(filterAssetKey);
     private List<Transaction> assetTransactions;
 

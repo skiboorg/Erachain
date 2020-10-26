@@ -385,7 +385,7 @@ public class BlockChain {
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
             new PublicKeyAccount(TEST_MODE ?
                     "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6" :
-                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
+                    "2Mh5ntMBForLYqwdjugRAGyzepR252ca6ChjQL6EXtYU")
             : null;
 
 
