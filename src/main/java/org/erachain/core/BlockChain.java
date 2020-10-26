@@ -352,7 +352,7 @@ public class BlockChain {
     /**
      * FEE_KEY used here
      */
-    public static final int ACTION_ROYALTY_START = 1; // if - 0 - OFF
+    public static final int ACTION_ROYALTY_START = 0; // if - 0 - OFF
     public static final int ACTION_ROYALTY_PERCENT = 8400; // x0.001
     public static final BigDecimal ACTION_ROYALTY_MIN = new BigDecimal("0.0001"); // x0.001
     public static final int ACTION_ROYALTY_MAX_DAYS = 30; // x0.001
@@ -370,7 +370,7 @@ public class BlockChain {
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
 
-    public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
+    public static final int HOLD_ROYALTY_PERIOD_DAYS = 0; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
 
     /**
@@ -402,7 +402,7 @@ public class BlockChain {
      * Stop referals system on this person Number. Причем рефералка которая должна упасть этим персонам
      * (с номером ниже заданного) по сути просто сжигается - то есть идет дефляция.
      */
-    public static final long BONUS_STOP_PERSON_KEY = TEST_DB > 0 || !MAIN_MODE ? 0 : 13L;
+    public static final long BONUS_STOP_PERSON_KEY = TEST_DB > 0 || !MAIN_MODE ? 0 : 0L;
 
     /**
      * Постаянная награда за байт транзакции
