@@ -113,7 +113,6 @@ public class ExData {
     private byte secretsFlags;
     private byte[][] secrets;
     private byte[] encryptedData;
-    private byte[] decryptedData;
 
     /**
      * OLD version 1-2
@@ -1392,7 +1391,7 @@ public class ExData {
 
         try {
             password = Controller.getInstance().decrypt(account, recipient, secrets[pos]);
-            decryptedData = AEScrypto.aesDecrypt(encryptedData, password);
+            byte[] decryptedData = AEScrypto.aesDecrypt(encryptedData, password);
             Fun.Tuple2<JSONObject, HashMap> jsonAndFiles = parseJsonAndFiles(decryptedData, true);
 
             // это уже не зашифрованный - сбросим
@@ -1527,6 +1526,12 @@ public class ExData {
         if (exLink != null)
             exLink.process(transaction);
 
+        if (authors != null) {
+            for (ExLinkAuthor author : authors) {
+                author.process(transaction);
+            }
+        }
+
         if (sources != null) {
             for (ExLinkSource source : sources) {
                 source.process(transaction);
@@ -1538,6 +1543,12 @@ public class ExData {
     public void orphan(Transaction transaction) {
         if (exLink != null)
             exLink.orphan(transaction);
+
+        if (authors != null) {
+            for (ExLinkAuthor author : authors) {
+                author.orphan(transaction);
+            }
+        }
 
         if (sources != null) {
             for (ExLinkSource source : sources) {
