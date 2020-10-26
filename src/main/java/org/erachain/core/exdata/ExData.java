@@ -113,7 +113,6 @@ public class ExData {
     private byte secretsFlags;
     private byte[][] secrets;
     private byte[] encryptedData;
-    private byte[] decryptedData;
 
     /**
      * OLD version 1-2
@@ -1163,7 +1162,7 @@ public class ExData {
         }
 
         if (isEncrypted) {
-            // случайный пароль и его для всех шифруем
+            // случайный парольmake и его для всех шифруем
             flags[1] = (byte) (flags[1] | ENCRYPT_FLAG_MASK);
 
             byte[][] secrets = new byte[recipients.length + 1][];
@@ -1376,7 +1375,7 @@ public class ExData {
         byte[] password;
         int pos = -1;
         if (account.equals((recipient))) {
-            pos = recipients.length; // последлний в Секретах
+            pos = recipients.length; // последний в Секретах
         } else {
             for (int i = 0; i < recipients.length; i++) {
                 if (recipients[i].equals(recipient)) {
@@ -1387,12 +1386,12 @@ public class ExData {
         }
 
         if (pos < 0) {
-            return new Fun.Tuple3<>(pos, null, null);
+            return new Fun.Tuple3<>(pos, "Address not found", null);
         }
 
         try {
             password = Controller.getInstance().decrypt(account, recipient, secrets[pos]);
-            decryptedData = AEScrypto.aesDecrypt(encryptedData, password);
+            byte[] decryptedData = AEScrypto.aesDecrypt(encryptedData, password);
             Fun.Tuple2<JSONObject, HashMap> jsonAndFiles = parseJsonAndFiles(decryptedData, true);
 
             // это уже не зашифрованный - сбросим
@@ -1527,6 +1526,12 @@ public class ExData {
         if (exLink != null)
             exLink.process(transaction);
 
+        if (authors != null) {
+            for (ExLinkAuthor author : authors) {
+                author.process(transaction);
+            }
+        }
+
         if (sources != null) {
             for (ExLinkSource source : sources) {
                 source.process(transaction);
@@ -1538,6 +1543,12 @@ public class ExData {
     public void orphan(Transaction transaction) {
         if (exLink != null)
             exLink.orphan(transaction);
+
+        if (authors != null) {
+            for (ExLinkAuthor author : authors) {
+                author.orphan(transaction);
+            }
+        }
 
         if (sources != null) {
             for (ExLinkSource source : sources) {
