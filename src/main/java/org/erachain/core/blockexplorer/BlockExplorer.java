@@ -2156,10 +2156,10 @@ public class BlockExplorer {
         output.put("label_asset_key", Lang.getInstance().translateFromLangObj("Key", langObj));
         output.put("label_asset_name", Lang.getInstance().translateFromLangObj("Name", langObj));
 
-        output.put("label_Balance_1", Lang.getInstance().translateFromLangObj("Balance 1 (OWN)", langObj));
-        output.put("label_Balance_2", Lang.getInstance().translateFromLangObj("Balance 2 (DEBT)", langObj));
-        output.put("label_Balance_3", Lang.getInstance().translateFromLangObj("Balance 3 (HOLD)", langObj));
-        output.put("label_Balance_4", Lang.getInstance().translateFromLangObj("Balance 4 (SPEND)", langObj));
+        output.put("label_Balance_1", Lang.getInstance().translateFromLangObj("OWN (1)", langObj));
+        output.put("label_Balance_2", Lang.getInstance().translateFromLangObj("DEBT (2)", langObj));
+        output.put("label_Balance_3", Lang.getInstance().translateFromLangObj("HOLD (3)", langObj));
+        output.put("label_Balance_4", Lang.getInstance().translateFromLangObj("SPEND (4)", langObj));
 
         return output;
 
@@ -3131,10 +3131,7 @@ public class BlockExplorer {
 
         rNote.getExData().makeJSONforHTML(output, block, seqNo, langObj);
 
-        output.put("vouches_table", WebTransactionsHTML.getVouchesNew(rNote, langObj));
-
-        WebTransactionsHTML.getLinks(output, rNote, langObj);
-
+        WebTransactionsHTML.getApps(output, rNote, langObj);
 
         return output;
     }
