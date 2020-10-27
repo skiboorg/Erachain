@@ -2,7 +2,7 @@
   // peers from external source
   //"peersURL": "https://raw.githubusercontent.com/wfchain/wfchain-public/master/peers.json",
   // Blocks period [sec], minumum: 3, default: 30
-  "blockPeriod": 60,
+  "blockPeriod": 300,
   // external Block Explorer
   "explorer": "http://explorer.wfchain.org:9077",
 
@@ -10,7 +10,7 @@
 
   "startKey": {
     "assets": -1,
-    "persons": 1000,
+    "persons": 10000,
     "polls": -1,
     "statuses": -1
   },
