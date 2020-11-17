@@ -164,7 +164,10 @@ public class RSignNote extends Transaction implements Itemable {
             listTags.add(new Object[]{ItemCls.AUTHOR_TYPE, creatorPersonDuration.a});
         }
 
-        if (key != 0) {
+        if (typeBytes[1] > 1 && extendedData != null && extendedData.getTemplateKey() != 0L) {
+            // если новый порядок - ключ в Данных
+            listTags.add(new Object[]{ItemCls.TEMPLATE_TYPE, extendedData.getTemplateKey()});
+        } else if (key != 0L) {
             listTags.add(new Object[]{ItemCls.TEMPLATE_TYPE, key});
         }
 
@@ -269,6 +272,10 @@ public class RSignNote extends Transaction implements Itemable {
 
     @Override
     public long getKey() {
+        if (typeBytes[1] > 1) {
+            // если новый порядок - ключ в Данных
+            return extendedData.getTemplateKey();
+        }
         return this.key;
     }
 
@@ -660,7 +667,8 @@ public class RSignNote extends Transaction implements Itemable {
         if (data == null && key <= 0)
             return INVALID_DATA_LENGTH;
 
-        if (data != null && data.length > BlockChain.MAX_REC_DATA_BYTES) {
+        if (data != null && data.length > MAX_DATA_BYTES_LENGTH) {
+            errorValue = "" + data.length;
             return INVALID_DATA_LENGTH;
         }
 
@@ -676,7 +684,10 @@ public class RSignNote extends Transaction implements Itemable {
         }
 
         result = extendedData.isValid(dcSet, this);
-        if (result != Transaction.VALIDATE_OK) return result;
+        if (result != Transaction.VALIDATE_OK) {
+            // errorValue updated in extendedData
+            return result;
+        }
 
         if (height > BlockChain.VERS_5_01_01) {
             // только уникальные - так как иначе каждый новый перезатрет поиск старого
@@ -773,6 +784,7 @@ public class RSignNote extends Transaction implements Itemable {
                 Long error = null;
                 error++;
             }
+
             extendedData.resolveValues(dcSet);
             exLink = extendedData.getExLink();
         }

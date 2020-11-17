@@ -433,8 +433,8 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         if (this.haveAsset == null || this.wantAsset == null)
             return ITEM_ASSET_NOT_EXIST;
 
-        if (this.wantAsset.isAccounting() ^ this.haveAsset.isAccounting()) {
-
+        if (this.wantAsset.isAccounting() ^ this.haveAsset.isAccounting()
+                || haveAsset.isSelfManaged() || wantAsset.isSelfManaged()) {
             return INVALID_ACCOUNTING_PAIR;
         }
 
@@ -475,7 +475,7 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         // CHECK IF AMOUNT POSITIVE
         BigDecimal amountHave = this.amountHave;
         BigDecimal amountWant = this.amountWant;
-        if (amountHave.compareTo(BigDecimal.ZERO) <= 0 || amountWant.compareTo(BigDecimal.ZERO) <= 0) {
+        if (amountHave.signum() <= 0 || amountWant.signum() <= 0) {
             return NEGATIVE_AMOUNT;
         }
 
@@ -495,11 +495,11 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             ; // NOT CHECK
 
         } else if (wantKey == FEE_KEY
-                && haveKey == RIGHTS_KEY
+                && (haveKey == RIGHTS_KEY || haveKey == BTC_KEY)
                 // VALID if want to BY COMPU by ERA
                 && amountHave.compareTo(BigDecimal.TEN) >= 0 // минимально меняем 1 ЭРА
-                && this.creator.getForSale(this.dcSet, RIGHTS_KEY, height, true).compareTo(amountHave) >= 0 // ЭРА есть на счету
-                && this.creator.getForSale(this.dcSet, FEE_KEY, height, true).signum() > 0
+                && this.creator.getForSale(this.dcSet, haveKey, height, true).compareTo(amountHave) >= 0 // ЭРА|BTC есть на счету
+                && this.creator.getForSale(this.dcSet, FEE_KEY, height, true).signum() >= 0 // и COMPU не отрицательные
         ) { // на балансе компушки не минус
             flags = flags | NOT_VALIDATE_FLAG_FEE;
         } else if (haveKey == FEE_KEY) {
@@ -530,7 +530,7 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             ///}
 
             // if asset is unlimited and me is creator of this asset
-            boolean unLimited = haveAsset.isUnlimited(this.creator);
+            boolean unLimited = haveAsset.isUnlimited(this.creator, false);
 
             if (!unLimited) {
 
