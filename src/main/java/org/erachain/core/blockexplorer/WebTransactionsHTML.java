@@ -643,8 +643,8 @@ public class WebTransactionsHTML {
                     + itemNameHTML(Controller.getInstance().getAsset(rSend.getAbsKey())) + "</b>";
         }
 
-        if (!rSend.getHead().equals(""))
-            out += "<BR>" + Lang.getInstance().translateFromLangObj("Title", langObj) + ": <b>" + rSend.getHead() + "</b>";
+        if (!rSend.getTitle().equals(""))
+            out += "<BR>" + Lang.getInstance().translateFromLangObj("Title", langObj) + ": <b>" + rSend.getTitle() + "</b>";
 
         return out;
 
@@ -754,7 +754,12 @@ public class WebTransactionsHTML {
 
         DCSet dcSet = DCSet.getInstance();
 
-        Fun.Tuple2<Integer, PersonCls> creatorPersonItem = transaction.getCreator().getPerson();
+        PublicKeyAccount creator = transaction.getCreator();
+        if (creator == null) {
+            return;
+        }
+
+        Fun.Tuple2<Integer, PersonCls> creatorPersonItem = creator.getPerson();
         String out;
 
         String personSign;
