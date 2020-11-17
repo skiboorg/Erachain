@@ -1798,6 +1798,7 @@ public class Controller extends Observable {
     }
 
     private int skipNotify = 0;
+    private long skipNotifyTime = 0L;
     // https://127.0.0.1/7pay_in/tools/block_proc/ERA
     public void NotifyWalletIncoming(List<Transaction> transactions) {
 
@@ -1824,12 +1825,16 @@ public class Controller extends Observable {
             }
         }
 
+        // Если моих транзакций нету
         if (seqs.isEmpty()
-                // раз в 10 блоков уведомлять что обновиться  надо
-                && ++skipNotify < 10)
+                // раз в 100 блоков уведомлять что обновиться  надо
+                && (++skipNotify < 10
+                || System.currentTimeMillis() - skipNotifyTime < 200000L
+                || isStatusSynchronizing()))
             return;
 
         skipNotify = 0;
+        skipNotifyTime = System.currentTimeMillis();
 
         // SEE -
         // http://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/
@@ -1845,6 +1850,7 @@ public class Controller extends Observable {
             LOGGER.info("NotifyIncoming " + url_string + ": " + res);
 
         } catch (Exception e) {
+            LOGGER.error("try NotifyIncoming: " + url_string);
             LOGGER.error(e.getMessage(), e);
         }
 
@@ -3699,6 +3705,7 @@ public class Controller extends Observable {
         for (String arg : args) {
             if (arg.equals("-cli")) {
                 cli = true;
+                useGui = false;
                 continue;
             }
 
