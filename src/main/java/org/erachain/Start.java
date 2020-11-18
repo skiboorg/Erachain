@@ -162,20 +162,22 @@ public class Start {
                         System.exit(4);
                     }
 
-                    // DEBTORS
-                    JSONArray debtors = (JSONArray) holder.get(3);
-                    BigDecimal totalCredit = BigDecimal.ZERO;
-                    for (int j = 0; j < debtors.size(); j++) {
-                        JSONArray debtor = (JSONArray) debtors.get(j);
+                        if (holder.size() > 3) {
+                            // DEBTORS
+                            JSONArray debtors = (JSONArray) holder.get(3);
+                            BigDecimal totalCredit = BigDecimal.ZERO;
+                            for (int j = 0; j < debtors.size(); j++) {
+                                JSONArray debtor = (JSONArray) debtors.get(j);
 
-                        accountItem = Account.tryMakeAccount(debtor.get(1).toString());
-                        if (accountItem.a == null) {
-                            String error = accountItem.b + " - " + debtor.get(1).toString();
-                            LOGGER.error(error);
-                            System.exit(4);
+                                accountItem = Account.tryMakeAccount(debtor.get(1).toString());
+                                if (accountItem.a == null) {
+                                    String error = accountItem.b + " - " + debtor.get(1).toString();
+                                    LOGGER.error(error);
+                                    System.exit(4);
+                                }
+                            }
                         }
                     }
-                }
 
             } else {
                 // for BRAND CHAIN
@@ -191,6 +193,7 @@ public class Start {
                 Settings.genesisJSON.add(Settings.HOLDERS);
 
             }
+
 
             Settings.NET_MODE = Settings.NET_MODE_CLONE;
         }
