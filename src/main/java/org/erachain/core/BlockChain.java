@@ -141,7 +141,7 @@ public class BlockChain {
      */
     public static final boolean ANONIM_SERT_USE = TEST_MODE || BlockChain.ERA_COMPU_ALL_UP;
 
-    public static final int MAX_ORPHAN = 40; // max orphan blocks in chain for 30 sec
+    public static final int MAX_ORPHAN = 50; // max orphan blocks in chain for 30 sec
     public static final int SYNCHRONIZE_PACKET = 300; // when synchronize - get blocks packet by transactions
 
     /**
