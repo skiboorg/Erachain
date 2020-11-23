@@ -209,8 +209,11 @@ public class BlockChain {
 
     public static final int GENESIS_WIN_VALUE = TEST_MODE ? 3000 : ERA_COMPU_ALL_UP ? 10000 : 22000;
 
-    public static final String[] GENESIS_ADMINS = !ERA_COMPU_ALL_UP && CLONE_MODE ? new String[]{
-            (((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString()} // GET from chainPROTOCOL.json
+    public static final String[] GENESIS_ADMINS = !ERA_COMPU_ALL_UP && CLONE_MODE ?
+            new String[]{
+                    Settings.FEE_ASSET_EMITTER.getAddress()
+                    //(((List) ((List) Settings.genesisJSON.get(2)).get(0)).get(0)).toString() // GET from chainPROTOCOL.json
+            }
             : new String[]{"78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5",
             "7B3gTXXKB226bxTxEHi8cJNfnjSbuuDoMC"};
 
@@ -383,11 +386,7 @@ public class BlockChain {
      * Если есть начисления бонусов по ROYALTY то надо его задать
      */
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
-            new PublicKeyAccount(TEST_MODE ?
-                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6" :
-                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6")
-            : null;
-
+            Settings.FEE_ASSET_EMITTER : null;
 
     /**
      * Включает реферальную систему
