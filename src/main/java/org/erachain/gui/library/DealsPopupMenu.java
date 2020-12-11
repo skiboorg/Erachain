@@ -40,16 +40,24 @@ public class DealsPopupMenu extends JPopupMenu {
 
     private JMenuItem sendMail;
 
+    private Separator ownSeparator = new Separator();
+    private JLabel ownTitle = new JLabel("    " + Lang.getInstance().translate("Actions for OWN balance") + "  ");
     private JMenuItem sendAsset;
     private JMenuItem sendAssetBackward;
 
+    private Separator debtSeparator = new Separator();
+    private JLabel debtTitle = new JLabel("    " + Lang.getInstance().translate("Actions for DEBT balance") + "  ");
     private JMenuItem debtAsset;
     private JMenuItem debtAssetReturn;
     private JMenuItem debtAssetBackward;
 
+    private Separator holdSeparator = new Separator();
+    private JLabel holdTitle = new JLabel("    " + Lang.getInstance().translate("Actions for HOLD balance") + "  ");
     private JMenuItem holdAsset;
     private JMenuItem holdAssetBackward;
 
+    private Separator spendSeparator = new Separator();
+    private JLabel spendTitle = new JLabel("    " + Lang.getInstance().translate("Actions for SPEND balance") + "  ");
     private JMenuItem spendAsset;
     private JMenuItem spendAssetBackward;
 
@@ -70,14 +78,15 @@ public class DealsPopupMenu extends JPopupMenu {
         });
         this.add(sendMail);
 
-        this.addSeparator();
+        this.add(ownSeparator);
+        this.add(ownTitle);
 
         sendAsset = new JMenuItem(Lang.getInstance().translate("Send"));
         sendAsset.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // AccountAssetLendPanel
                 MainPanel.getInstance().insertNewTab(sendAsset.getText() + ":" + asset.getKey(),
-                        new AccountAssetSendPanel(asset, pubKey, null, null, null, false));
+                        new AccountAssetSendPanel(asset, pubKey, null, null, null, asset.isReverseSend()));
 
             }
         });
@@ -88,13 +97,14 @@ public class DealsPopupMenu extends JPopupMenu {
             public void actionPerformed(ActionEvent e) {
                 // AccountAssetLendPanel
                 MainPanel.getInstance().insertNewTab(sendAssetBackward.getText() + ":" + asset.getKey(),
-                        new AccountAssetSendPanel(asset, pubKey, null, null, null, true));
+                        new AccountAssetSendPanel(asset, pubKey, null, null, null, !asset.isReverseSend()));
 
             }
         });
         this.add(sendAssetBackward);
 
-        this.addSeparator();
+        this.add(debtSeparator);
+        this.add(debtTitle);
 
         debtAsset = new JMenuItem(Lang.getInstance().translate("Lend"));
         debtAsset.addActionListener(new ActionListener() {
@@ -129,7 +139,8 @@ public class DealsPopupMenu extends JPopupMenu {
         });
         this.add(debtAssetBackward);
 
-        this.addSeparator();
+        this.add(holdSeparator);
+        this.add(holdTitle);
 
         holdAsset = new JMenuItem(Lang.getInstance().translate("Hold")); /// GIVE
         holdAsset.addActionListener(new ActionListener() {
@@ -153,7 +164,8 @@ public class DealsPopupMenu extends JPopupMenu {
         });
         this.add(holdAssetBackward);
 
-        this.addSeparator();
+        this.add(spendSeparator);
+        this.add(spendTitle);
 
         spendAsset = new JMenuItem(Lang.getInstance().translate("Spend"));
         spendAsset.addActionListener(new ActionListener() {
@@ -178,6 +190,7 @@ public class DealsPopupMenu extends JPopupMenu {
         this.add(spendAssetBackward);
 
         this.addSeparator();
+        this.add(new JLabel("    " + Lang.getInstance().translate("Account actions") + ":"));
 
         JMenuItem copyAddress = new JMenuItem(Lang.getInstance().translate("Copy Account"));
         copyAddress.addActionListener(new ActionListener() {
@@ -316,7 +329,7 @@ public class DealsPopupMenu extends JPopupMenu {
         String actionName;
 
         /// **** SEND
-        actionName = asset.viewAssetTypeAction(false, TransactionAmount.ACTION_SEND, isCreatorOwner);
+        actionName = asset.viewAssetTypeAction(asset.isReverseSend(), TransactionAmount.ACTION_SEND, isCreatorOwner);
         if (actionName == null) {
             this.sendAsset.setVisible(false);
         } else {
@@ -324,7 +337,7 @@ public class DealsPopupMenu extends JPopupMenu {
             this.sendAsset.setVisible(true);
         }
 
-        actionName = asset.viewAssetTypeAction(true, TransactionAmount.ACTION_SEND, isCreatorOwner);
+        actionName = asset.viewAssetTypeAction(!asset.isReverseSend(), TransactionAmount.ACTION_SEND, isCreatorOwner);
         if (actionName == null) {
             this.sendAssetBackward.setVisible(false);
         } else {
@@ -465,16 +478,18 @@ public class DealsPopupMenu extends JPopupMenu {
             } else {
                 if (balance.a.b.signum() <= 0) {
                     this.sendAsset.setEnabled(false);
-                    this.holdAsset.setEnabled(false);
                     this.debtAsset.setEnabled(false);
                     this.debtAssetBackward.setEnabled(false);
+                    this.holdAsset.setEnabled(false);
                     this.spendAsset.setEnabled(false);
                 } else {
-                    if (balance.b.b.signum() >= 0) {
-                        this.debtAssetBackward.setEnabled(false);
-                    }
+                    this.sendAsset.setEnabled(true);
+                    this.debtAsset.setEnabled(true);
+                    this.debtAssetBackward.setEnabled(balance.b.b.signum() != 0);
+                    this.spendAsset.setEnabled(true);
                     if (balance.a.b.add(balance.b.b).signum() <= 0) {
                         this.debtAsset.setEnabled(false);
+                        this.sendAsset.setEnabled(false);
                     }
                 }
             }
@@ -491,6 +506,18 @@ public class DealsPopupMenu extends JPopupMenu {
             //this.holdAssetBackward.setVisible(isCreatorOwner);
             //this.spendAssetBackward.setVisible(isCreatorOwner);
         }
+
+        ownSeparator.setVisible(sendAsset.isVisible() || sendAssetBackward.isVisible());
+        ownTitle.setVisible(sendAsset.isVisible() || sendAssetBackward.isVisible());
+
+        debtSeparator.setVisible(debtAsset.isVisible() || debtAssetBackward.isVisible() || debtAssetReturn.isVisible());
+        debtTitle.setVisible(debtAsset.isVisible() || debtAssetBackward.isVisible() || debtAssetReturn.isVisible());
+
+        holdSeparator.setVisible(holdAsset.isVisible() || holdAssetBackward.isVisible());
+        holdTitle.setVisible(holdAsset.isVisible() || holdAssetBackward.isVisible());
+
+        spendSeparator.setVisible(spendAsset.isVisible() || spendAssetBackward.isVisible());
+        spendTitle.setVisible(spendAsset.isVisible() || spendAssetBackward.isVisible());
 
     }
 }

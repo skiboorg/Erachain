@@ -37,6 +37,7 @@ import java.util.Map;
 public abstract class ItemCls implements Iconable, ExplorerJsonLine {
 
     protected final static long START_KEY = 1L << 14;
+
     public static final int ASSET_TYPE = 1;
     public static final int IMPRINT_TYPE = 2;
     public static final int TEMPLATE_TYPE = 3;
@@ -135,12 +136,31 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         return db.getItem_Map(type).get(key);
     }
 
-    // RETURN START KEY in not GENESIS
-    public abstract long getStartKey();
+    public abstract int getItemType();
+
+    public abstract long START_KEY();
+
+    public abstract long MIN_START_KEY();
+
+    public static long getStartKey(int itemType, long startKey, long minStartKey) {
+        if (!BlockChain.CLONE_MODE)
+            return minStartKey;
+
+        long startKeyUser = BlockChain.startKeys[itemType];
+
+        if (startKeyUser == 0) {
+            return startKey;
+        } else if (startKeyUser < minStartKey) {
+            return (BlockChain.startKeys[itemType] = minStartKey);
+        }
+        return startKeyUser;
+    }
+
+    public long getStartKey() {
+        return getStartKey(getItemType(), START_KEY(), MIN_START_KEY());
+    }
 
     public abstract int getMinNameLen();
-
-    public abstract int getItemType();
 
     public abstract String getItemTypeName();
     //public abstract FavoriteItemMap getDBFavoriteMap();
@@ -588,7 +608,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         itemJSON.put("key", this.getKey());
         itemJSON.put("name", this.name);
 
-        if (withIcon)
+        if (withIcon && this.getIcon() != null)
             itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
 
         itemJSON.put("owner", this.owner.getAddress());
@@ -610,19 +630,19 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         JSONObject itemJSON = toJsonLite(false, false);
 
         // ADD DATA
-        //itemJSON.put("item_type", this.getItemTypeName());
-        itemJSON.put("itemType", this.getItemTypeName());
-        //itemJSON.put("item_type_sub", this.getItemSubType());
-        itemJSON.put("itemTypeSub", this.getItemSubType());
+        itemJSON.put("item_type", this.getItemTypeName());
+        //itemJSON.put("itemType", this.getItemTypeName());
+        itemJSON.put("item_type_sub", this.getItemSubType());
+        //itemJSON.put("itemTypeSub", this.getItemSubType());
         itemJSON.put("type0", Byte.toUnsignedInt(this.typeBytes[0]));
         itemJSON.put("type1", Byte.toUnsignedInt(this.typeBytes[1]));
-        //itemJSON.put("key", this.getKey());
-        //itemJSON.put("name", this.name);
         itemJSON.put("description", this.description);
         itemJSON.put("creator", this.owner.getAddress()); // @Deprecated
-        //itemJSON.put("owner_publickey", this.owner.getBase58());
-        itemJSON.put("ownerPubkey", this.owner.getBase58());
+        itemJSON.put("owner_public_key", this.owner.getBase58());
+        itemJSON.put("owner_publickey", this.owner.getBase58());
+        //itemJSON.put("ownerPubkey", this.owner.getBase58());
         itemJSON.put("isConfirmed", this.isConfirmed());
+        itemJSON.put("is_confirmed", this.isConfirmed());
         itemJSON.put("reference", Base58.encode(this.reference));
 
         Transaction txReference = Controller.getInstance().getTransaction(this.reference);
@@ -639,8 +659,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         JSONObject itemJSON = new JSONObject();
 
         // ADD DATA
-        itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
-        itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
+        if (getIcon() != null)
+            itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+        if (getImage() != null)
+            itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
 
         return itemJSON;
     }
@@ -685,7 +707,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
 
         ItemMap map = dcSet.getItem_Map(itemType);
         ItemCls element;
-        long size = map.size();
+        long size = map.getLastKey();
 
         if (start < 1 || start > size && size > 0) {
             start = size;

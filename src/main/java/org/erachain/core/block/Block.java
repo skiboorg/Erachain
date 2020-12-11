@@ -1828,7 +1828,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                 } else {
 
                     // for some TRANSACTIONS need add to FINAL MAP etc.
-                    // RSertifyPubKeys - in same BLOCK with IssuePersonRecord
+                    // RCertifyPubKeys - in same BLOCK with IssuePersonRecord
 
                     processTimingLocal = System.nanoTime();
                     Long key = Transaction.makeDBRef(this.heightBlock, seqNo);
@@ -1985,8 +1985,9 @@ public class Block implements Closeable, ExplorerJsonLine {
     @Override
     protected void finalize() throws Throwable {
         if (!isClosed) {
+            boolean hasValidatedForkDB = validatedForkDB != null;
             close();
-            if (BlockChain.CHECK_BUGS > 5) {
+            if (hasValidatedForkDB && BlockChain.CHECK_BUGS > 5) {
                 LOGGER.debug("validatedForkDB is FINALIZED: " + this.toString());
             }
         }

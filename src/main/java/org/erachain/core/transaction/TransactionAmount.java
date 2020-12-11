@@ -8,6 +8,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
@@ -123,9 +124,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     protected AssetCls asset;
 
     // need for calculate fee by feePow into GUI
-    protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, byte feePow, Account recipient,
+    protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, ExLink exLink, byte feePow, Account recipient,
                                 BigDecimal amount, long key, long timestamp, Long reference) {
-        super(typeBytes, name, creator, feePow, timestamp, reference);
+        super(typeBytes, name, creator, exLink, feePow, timestamp, reference);
         this.recipient = recipient;
 
         if (amount == null || amount.equals(BigDecimal.ZERO)) {
@@ -143,7 +144,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     // need for calculate fee
     protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, byte feePow, Account recipient,
                                 BigDecimal amount, long key, long timestamp, Long reference, byte[] signature) {
-        this(typeBytes, name, creator, feePow, recipient, amount, key, timestamp, reference);
+        this(typeBytes, name, creator, null, feePow, recipient, amount, key, timestamp, reference);
         this.signature = signature;
     }
 
@@ -347,6 +348,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     }
 
     public int getActionType() {
+        if (!hasAmount())
+            return 0;
         return getActionType(this.key, this.amount, this.isBackward(), asset.isSelfManaged());
     }
 
@@ -561,6 +564,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         else
             base_len = BASE_LENGTH;
 
+        if (exLink != null)
+            base_len += exLink.length();
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
@@ -695,7 +701,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                 }
 
                 // for PARSE and toBYTES need only AMOUNT_LENGTH bytes
-                if (true || this.getAbsKey() > BlockChain.AMOUNT_SCALE_FROM) {
+                if (absKey > BlockChain.AMOUNT_SCALE_FROM) {
                     byte[] amountBytes = this.amount.unscaledValue().toByteArray();
                     if (amountBytes.length > AMOUNT_LENGTH) {
                         return AMOUNT_LENGHT_SO_LONG;
@@ -703,11 +709,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                     // SCALE wrong
                     int scale = this.amount.scale();
                     if (scale < minSCALE
-                            || scale > maxSCALE) {
-                        return AMOUNT_SCALE_WRONG;
-                    }
-                    scale = this.amount.stripTrailingZeros().scale();
-                    if (scale > asset.getScale()) {
+                            || scale > maxSCALE
+                            || scale > asset.getScale()) {
                         return AMOUNT_SCALE_WRONG;
                     }
                 }
@@ -791,18 +794,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                             // HOLD GOODS, CHECK myself DEBT for CLAIMS
                             case ACTION_HOLD:
 
-                                if (absKey == FEE_KEY
-                                        || absKey == AssetCls.ERA_KEY
-                                        || assetType == AssetCls.AS_INDEX
-                                        || assetType == AssetCls.AS_INSIDE_ACCESS
-                                        || assetType == AssetCls.AS_INSIDE_BONUS
-                                ) {
-                                    if (height > BlockChain.HOLD_VALID_START)
-                                        return NOT_HOLDABLE_ASSET;
-                                }
-
-                                if (asset.isOutsideType()) {
-                                    return INVALID_TRANSFER_TYPE;
+                                if (asset.isUnHoldable()) {
+                                    return NOT_HOLDABLE_ASSET;
                                 }
 
                                 if (backward) {
@@ -958,8 +951,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                                         forSale = forSale.subtract(assetFee);
                                     }
 
-                                    if (!BlockChain.ERA_COMPU_ALL_UP
-                                            && !BlockChain.isFeeEnough(height, creator)
+                                    if (!BlockChain.isFeeEnough(height, creator)
                                             && forSale.compareTo(this.amount.add(this.fee)) < 0) {
 
                                         /// если это девелоп то не проверяем ниже особые счета
@@ -1200,6 +1192,72 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         return VALIDATE_OK;
     }
 
+    private static void processAction(DCSet dcSet, boolean asOrphan, PublicKeyAccount creator, Account recipient,
+                                      int actionType, long absKey, long key, BigDecimal amount,
+                                      boolean backward, boolean isDirect, boolean incomeReverse) {
+
+        boolean subtract = asOrphan ^ backward;
+        // STANDARD ACTION PROCESS
+        // UPDATE SENDER
+        if (absKey == 666L) {
+            creator.changeBalance(dcSet, subtract, backward, key, amount, isDirect, false, !incomeReverse);
+        } else {
+            creator.changeBalance(dcSet, !subtract, backward, key, amount, isDirect, false, !incomeReverse);
+        }
+        // UPDATE RECIPIENT
+        recipient.changeBalance(dcSet, subtract, backward, key, amount, isDirect, true, incomeReverse);
+
+        if (actionType == ACTION_DEBT) {
+            String creatorStr = creator.getAddress();
+            String recipientStr = recipient.getAddress();
+            Tuple3<String, Long, String> creditKey = new Tuple3<>(creatorStr, absKey, recipientStr);
+            Tuple3<String, Long, String> creditKeyRecipient = new Tuple3<>(recipientStr, absKey, creatorStr);
+
+            if (asOrphan) {
+                if (backward) {
+                    // BORROW
+                    dcSet.getCredit_AddressesMap().add(creditKey, amount);
+                } else {
+                    // in BACK order - RETURN CREDIT << CREDIT
+                    // GET CREDIT for left AMOUNT
+                    BigDecimal leftAmount = dcSet.getCredit_AddressesMap().get(creditKey);
+                    if (leftAmount.compareTo(amount) < 0) {
+                        dcSet.getCredit_AddressesMap().sub(creditKey, leftAmount);
+                        // RETURN my DEBT and make reversed DEBT
+                        dcSet.getCredit_AddressesMap().add(creditKeyRecipient, amount.subtract(leftAmount));
+                    } else {
+                        // ONLY RETURN CREDIT
+                        dcSet.getCredit_AddressesMap().sub(creditKey, amount);
+                    }
+                }
+            } else {
+                if (backward) {
+                    // BORROW
+                    dcSet.getCredit_AddressesMap().sub(creditKey, amount);
+                } else {
+                    // CREDIT or RETURN CREDIT
+                    BigDecimal creditAmount = dcSet.getCredit_AddressesMap().get(creditKeyRecipient);
+                    if (creditAmount.compareTo(amount) >= 0) {
+                        // ALL CREDIT RETURN
+                        dcSet.getCredit_AddressesMap().sub(creditKeyRecipient, amount);
+                    } else {
+                        // update creditAmount to 0
+                        BigDecimal leftAmount;
+                        if (creditAmount.signum() != 0) {
+                            dcSet.getCredit_AddressesMap().sub(creditKeyRecipient, creditAmount);
+                            // GET CREDIT for left AMOUNT
+                            leftAmount = amount.subtract(creditAmount);
+                        } else {
+                            leftAmount = amount;
+                        }
+
+                        dcSet.getCredit_AddressesMap().add(creditKey, leftAmount);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void process(Block block, int forDeal) {
 
@@ -1222,45 +1280,12 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         boolean incomeReverse = actionType == ACTION_HOLD;
 
         // STANDARD ACTION PROCESS
-        // UPDATE SENDER
-        if (absKey == 666L) {
-            this.creator.changeBalance(db, backward, backward, key, this.amount, isDirect, false, !incomeReverse);
-        } else {
-            this.creator.changeBalance(db, !backward, backward, key, this.amount, isDirect, false, !incomeReverse);
-        }
-        // UPDATE RECIPIENT
-        this.recipient.changeBalance(db, backward, backward, key, this.amount, isDirect, true, incomeReverse);
+        processAction(dcSet, false, creator, recipient, actionType, absKey, key, amount, backward, isDirect, incomeReverse);
 
-        if (actionType == ACTION_DEBT) {
-            if (backward) {
-                // BORROW
-                Tuple3<String, Long, String> creditKey = new Tuple3<String, Long, String>(this.creator.getAddress(),
-                        absKey, this.recipient.getAddress());
-                db.getCredit_AddressesMap().sub(creditKey, this.amount);
-            } else {
-                // CREDIR or RETURN CREDIT
-                Tuple3<String, Long, String> creditKey = new Tuple3<String, Long, String>(this.recipient.getAddress(),
-                        absKey, this.creator.getAddress());
-                BigDecimal creditAmount = db.getCredit_AddressesMap().get(creditKey);
-                if (creditAmount.compareTo(amount) >= 0) {
-                    // ALL CREDIT RETURN
-                    db.getCredit_AddressesMap().sub(creditKey, this.amount);
-                } else {
-                    // update creditAmount to 0
-                    BigDecimal leftAmount;
-                    if (creditAmount.signum() != 0) {
-                        db.getCredit_AddressesMap().sub(creditKey, creditAmount);
-                        // GET CREDIT for left AMOUNT
-                        leftAmount = amount.subtract(creditAmount);
-                    } else {
-                        leftAmount = amount;
-                    }
-
-                    Tuple3<String, Long, String> leftCreditKey = new Tuple3<String, Long, String>(
-                            this.creator.getAddress(), absKey, this.recipient.getAddress()); // REVERSE
-                    db.getCredit_AddressesMap().add(leftCreditKey, leftAmount);
-                }
-            }
+        if (asset.isChangeDebtBySendActions() && actionType == ACTION_SEND) {
+            // если это актив который должен поменять и балансы Долговые то
+            processAction(dcSet, false, creator, recipient, ACTION_DEBT,
+                    absKey, -key, amount, backward, isDirect, incomeReverse);
         }
 
         if (absKey == Transaction.RIGHTS_KEY && block != null) {
@@ -1298,43 +1323,13 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         int actionType = Account.balancePosition(key, amount, backward, isDirect);
         boolean incomeReverse = actionType == ACTION_HOLD;
 
-        String creatorStr = this.creator.getAddress();
-
         // STANDARD ACTION ORPHAN
-        // UPDATE SENDER
-        if (absKey == 666L) {
-            this.creator.changeBalance(db, !backward, backward, key, this.amount, isDirect, false, !incomeReverse);
-        } else {
-            this.creator.changeBalance(db, backward, backward, key, this.amount, isDirect, false, !incomeReverse);
-        }
-        // UPDATE RECIPIENT
-        this.recipient.changeBalance(db, !backward, backward, key, this.amount, isDirect, true, incomeReverse);
+        processAction(dcSet, true, creator, recipient, actionType, absKey, key, amount, backward, isDirect, incomeReverse);
 
-
-        if (actionType == ACTION_DEBT) {
-            if (backward) {
-                // BORROW
-                Tuple3<String, Long, String> creditKey = new Tuple3<String, Long, String>(creatorStr,
-                        absKey, this.recipient.getAddress());
-                db.getCredit_AddressesMap().add(creditKey, this.amount);
-            } else {
-                // in BACK order - RETURN CREDIT << CREDIT
-                // GET CREDIT for left AMOUNT
-                Tuple3<String, Long, String> leftCreditKey = new Tuple3<String, Long, String>(creatorStr,
-                        absKey, this.recipient.getAddress()); // REVERSE
-                BigDecimal leftAmount = db.getCredit_AddressesMap().get(leftCreditKey);
-                if (leftAmount.compareTo(amount) < 0) {
-                    db.getCredit_AddressesMap().sub(leftCreditKey, leftAmount);
-                    // CREDIR or RETURN CREDIT
-                    Tuple3<String, Long, String> creditKey = new Tuple3<String, Long, String>(
-                            this.recipient.getAddress(), absKey, creatorStr);
-                    db.getCredit_AddressesMap().add(creditKey, amount.subtract(leftAmount));
-                } else {
-                    // ONLY RETURN CREDIT
-                    db.getCredit_AddressesMap().sub(leftCreditKey, amount);
-                }
-
-            }
+        if (asset.isChangeDebtBySendActions() && actionType == ACTION_SEND) {
+            // если это актив который должен поменять и балансы Долговые то
+            processAction(dcSet, true, creator, recipient, ACTION_DEBT,
+                    absKey, -key, amount, backward, isDirect, incomeReverse);
         }
 
         if (absKey == Transaction.RIGHTS_KEY && block != null) {

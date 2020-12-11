@@ -209,7 +209,7 @@ public class Settings {
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
-        EXCHANGE_IN_OUT = isMainNet();
+        EXCHANGE_IN_OUT = isMainNet() || true;
 
         File file = new File("");
         //TRY READ PEERS.JSON
