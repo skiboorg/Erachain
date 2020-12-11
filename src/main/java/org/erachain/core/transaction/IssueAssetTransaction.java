@@ -4,6 +4,7 @@ import com.google.common.primitives.Longs;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.AssetFactory;
 import org.erachain.datachain.DCSet;
@@ -23,38 +24,38 @@ public class IssueAssetTransaction extends IssueItemRecord {
 
     //private AssetCls asset;
 
-    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, AssetCls asset, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, asset, feePow, timestamp, reference);
+    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, AssetCls asset, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, linkTo, asset, feePow, timestamp, reference);
     }
 
-    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, AssetCls asset, byte feePow, long timestamp, Long reference, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, asset, feePow, timestamp, reference, signature);
+    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, AssetCls asset, byte feePow, long timestamp, Long reference, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, asset, feePow, timestamp, reference, signature);
     }
 
-    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, AssetCls asset, byte feePow,
+    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, AssetCls asset, byte feePow,
                                  long timestamp, Long reference, byte[] signature, long seqNo, long feeLong) {
-        super(typeBytes, NAME_ID, creator, asset, feePow, timestamp, reference, signature);
+        super(typeBytes, NAME_ID, creator, linkTo, asset, feePow, timestamp, reference, signature);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
     }
 
     // as pack
-    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, AssetCls asset, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, asset, (byte) 0, 0l, null, signature);
+    public IssueAssetTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, AssetCls asset, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, asset, (byte) 0, 0L, null, signature);
     }
 
     public IssueAssetTransaction(PublicKeyAccount creator, AssetCls asset, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, asset, feePow, timestamp, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, asset, feePow, timestamp, reference, signature);
     }
 
     // as pack
     public IssueAssetTransaction(PublicKeyAccount creator, AssetCls asset, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, asset, (byte) 0, 0l, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, asset, (byte) 0, 0L, reference, signature);
     }
 
-    public IssueAssetTransaction(PublicKeyAccount creator, AssetCls asset, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, asset, feePow, timestamp, reference);
+    public IssueAssetTransaction(PublicKeyAccount creator, ExLink linkTo, AssetCls asset, byte feePow, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, asset, feePow, timestamp, reference);
     }
 
     //GETTERS/SETTERS
@@ -148,6 +149,10 @@ public class IssueAssetTransaction extends IssueItemRecord {
             return INVALID_QUANTITY;
         }
 
+        if (((AssetCls) this.item).isAccounting() && quantity != 0) {
+            return INVALID_QUANTITY;
+        }
+
         if (this.item.isNovaAsset(this.creator, this.dcSet) > 0) {
             Fun.Tuple3<Long, Long, byte[]> item = BlockChain.NOVA_ASSETS.get(this.item.getName());
             if (item.b < quantity) {
@@ -210,6 +215,14 @@ public class IssueAssetTransaction extends IssueItemRecord {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink linkTo;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            linkTo = ExLink.parse(data, position);
+            position += linkTo.length();
+        } else {
+            linkTo = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -252,9 +265,9 @@ public class IssueAssetTransaction extends IssueItemRecord {
         }
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new IssueAssetTransaction(typeBytes, creator, asset, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+            return new IssueAssetTransaction(typeBytes, creator, linkTo, asset, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
         } else {
-            return new IssueAssetTransaction(typeBytes, creator, asset, signatureBytes);
+            return new IssueAssetTransaction(typeBytes, creator, linkTo, asset, signatureBytes);
         }
     }
 
@@ -288,8 +301,10 @@ public class IssueAssetTransaction extends IssueItemRecord {
                     new BigDecimal(quantity).setScale(0), false, false, false);
 
             // make HOLD balance
-            creator.changeBalance(dcSet, false, true, asset.getKey(dcSet),
-                    new BigDecimal(-quantity).setScale(0), false, false, false);
+            if (!asset.isUnHoldable()) {
+                creator.changeBalance(dcSet, false, true, asset.getKey(dcSet),
+                        new BigDecimal(-quantity).setScale(0), false, false, false);
+            }
 
         } else if (quantity == 0) {
             // безразмерные - нужно баланс в таблицу нулевой записать чтобы в блокэксплорере он отображался у счета
@@ -310,12 +325,14 @@ public class IssueAssetTransaction extends IssueItemRecord {
         AssetCls asset = (AssetCls) this.getItem();
         long quantity = asset.getQuantity();
         if (quantity > 0) {
-            this.creator.changeBalance(this.dcSet, true, true, asset.getKey(this.dcSet),
+            this.creator.changeBalance(this.dcSet, true, false, asset.getKey(this.dcSet),
                     new BigDecimal(quantity).setScale(0), false, false, false);
 
             // на балансе На Руках - добавляем тоже
-            creator.changeBalance(dcSet, true, false, asset.getKey(dcSet),
-                    new BigDecimal(-quantity).setScale(0), false, false, false);
+            if (!asset.isUnHoldable()) {
+                creator.changeBalance(dcSet, true, true, asset.getKey(dcSet),
+                        new BigDecimal(-quantity).setScale(0), false, false, false);
+            }
         }
     }
 

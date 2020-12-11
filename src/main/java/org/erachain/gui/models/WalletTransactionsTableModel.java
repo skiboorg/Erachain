@@ -67,9 +67,9 @@ public class WalletTransactionsTableModel extends WalletTableModel<Tuple2<Tuple2
         } else if (transaction instanceof GenesisIssueItemRecord) {
             GenesisIssueItemRecord transIssue = (GenesisIssueItemRecord) transaction;
             item = transIssue.getItem();
-        } else if (transaction instanceof RSertifyPubKeys) {
-            RSertifyPubKeys sertifyPK = (RSertifyPubKeys) transaction;
-            item = dcSet.getItemPersonMap().get(sertifyPK.getAbsKey());
+        } else if (transaction instanceof RCertifyPubKeys) {
+            RCertifyPubKeys certifyPK = (RCertifyPubKeys) transaction;
+            item = dcSet.getItemPersonMap().get(certifyPK.getAbsKey());
         } else {
 
         }
@@ -196,9 +196,13 @@ public class WalletTransactionsTableModel extends WalletTableModel<Tuple2<Tuple2
         }
 
         for (Tuple2<Tuple2<Long, Integer>, Transaction> item : list) {
-
-            item.b.setDC(dcSet, false);
-            item.b.calcFee();
+            try {
+                item.b.setDC(dcSet, false);
+                // тут может выскочить ошибка если кошелек не с той цепочки и тут нет активов
+                item.b.calcFee();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
         }
 
     }

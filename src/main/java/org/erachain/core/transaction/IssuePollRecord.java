@@ -3,6 +3,7 @@ package org.erachain.core.transaction;
 import com.google.common.primitives.Longs;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.polls.PollCls;
 import org.erachain.core.item.polls.PollFactory;
 
@@ -13,40 +14,36 @@ public class IssuePollRecord extends IssueItemRecord {
     private static final byte TYPE_ID = (byte) ISSUE_POLL_TRANSACTION;
     private static final String NAME_ID = "Issue Poll";
 
-    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, PollCls poll, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, poll, feePow, timestamp, reference);
+    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PollCls poll, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, linkTo, poll, feePow, timestamp, reference);
     }
 
-    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, PollCls poll, byte feePow, long timestamp, Long reference, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, poll, feePow, timestamp, reference, signature);
+    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PollCls poll, byte feePow, long timestamp, Long reference, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, poll, feePow, timestamp, reference, signature);
     }
 
-    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, PollCls poll, byte feePow, long timestamp,
+    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PollCls poll, byte feePow, long timestamp,
                            Long reference, byte[] signature, long seqNo, long feeLong) {
-        super(typeBytes, NAME_ID, creator, poll, feePow, timestamp, reference, signature);
+        super(typeBytes, NAME_ID, creator, linkTo, poll, feePow, timestamp, reference, signature);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
     }
 
-    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, PollCls poll, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, poll, (byte) 0, 0l, null, signature);
+    public IssuePollRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PollCls poll, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, poll, (byte) 0, 0L, null, signature);
     }
 
     public IssuePollRecord(PublicKeyAccount creator, PollCls poll, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, poll, feePow, timestamp, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, poll, feePow, timestamp, reference, signature);
     }
 
-    public IssuePollRecord(PublicKeyAccount creator, PollCls poll, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, poll, (byte) 0, 0l, null, signature);
-    }
-
-    public IssuePollRecord(PublicKeyAccount creator, PollCls poll, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, poll, feePow, timestamp, reference);
+    public IssuePollRecord(PublicKeyAccount creator, ExLink linkTo, PollCls poll, byte feePow, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, poll, feePow, timestamp, reference);
     }
 
     public IssuePollRecord(PublicKeyAccount creator, PollCls poll) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, poll, (byte) 0, 0l, null);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, poll, (byte) 0, 0L, null);
     }
 
     //GETTERS/SETTERS
@@ -92,6 +89,14 @@ public class IssuePollRecord extends IssueItemRecord {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink linkTo;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            linkTo = ExLink.parse(data, position);
+            position += linkTo.length();
+        } else {
+            linkTo = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -134,9 +139,9 @@ public class IssuePollRecord extends IssueItemRecord {
         }
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new IssuePollRecord(typeBytes, creator, poll, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+            return new IssuePollRecord(typeBytes, creator, linkTo, poll, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
         } else {
-            return new IssuePollRecord(typeBytes, creator, poll, signatureBytes);
+            return new IssuePollRecord(typeBytes, creator, linkTo, poll, signatureBytes);
         }
     }
 
