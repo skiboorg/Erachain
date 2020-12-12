@@ -353,7 +353,7 @@ public class BlockChain {
     //
     public static final boolean VERS_4_11_USE_OLD_FEE = false;
 
-    public static final int FREE_FEE_LENGTH = 1 << (1 << 16);
+    public static final int FREE_FEE_LENGTH = 1 << 15;
     public static final int FREE_FEE_SEQNO = -1;
 
     /**
