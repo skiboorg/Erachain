@@ -776,7 +776,7 @@ public class RSignNote extends Transaction implements Itemable {
     public long calcBaseFee() {
 
         if (seqNo <= BlockChain.FREE_FEE_SEQNO && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
-            return 0;
+            return 0L;
         } else {
             long fee = super.calcBaseFee();
             byte[][] allHashes = extendedData.getAllHashesAsBytes(true);
