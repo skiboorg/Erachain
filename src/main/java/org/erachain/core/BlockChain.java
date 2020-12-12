@@ -349,7 +349,7 @@ public class BlockChain {
     public static final int FEE_FOR_ANONIMOUSE = 33;
     //
 
-    public static final int FREE_FEE_LENGTH = 1 << (1 << 16);
+    public static final int FREE_FEE_LENGTH = 1 << 16;
     public static final int FREE_FEE_SEQNO = 3;
 
     /**
