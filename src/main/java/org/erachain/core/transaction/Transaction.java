@@ -151,7 +151,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int NOT_ENOUGH_ERA_USE_1000 = 106;
 
     public static final int INVALID_BACKWARD_ACTION = 117;
-    public static final int NOT_SELF_PERSONALIZY = 118;
+    public static final int INVALID_PERSONALIZY_ANOTHER_PERSON = 118;
     public static final int PUB_KEY_NOT_PERSONALIZED = 119;
 
     public static final int INVALID_ISSUE_PROHIBITED = 150;
@@ -442,11 +442,15 @@ public abstract class Transaction implements ExplorerJsonLine {
         this.TYPE_NAME = type_name;
     }
 
-    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, byte feePow, long timestamp,
+    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, ExLink exLink, byte feePow, long timestamp,
                           Long reference) {
         this.typeBytes = typeBytes;
         this.TYPE_NAME = type_name;
         this.creator = creator;
+        if (exLink != null) {
+            typeBytes[2] = (byte) (typeBytes[2] | HAS_EXLINK_MASK);
+            this.exLink = exLink;
+        }
         // this.props = props;
         this.timestamp = timestamp;
         this.reference = reference;
@@ -457,9 +461,9 @@ public abstract class Transaction implements ExplorerJsonLine {
         this.feePow = feePow;
     }
 
-    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, byte feePow, long timestamp,
+    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, ExLink exLink, byte feePow, long timestamp,
                           Long reference, byte[] signature) {
-        this(typeBytes, type_name, creator, feePow, timestamp, reference);
+        this(typeBytes, type_name, creator, exLink, feePow, timestamp, reference);
         this.signature = signature;
     }
 
@@ -957,12 +961,12 @@ public abstract class Transaction implements ExplorerJsonLine {
             }
         }
 
-        if (data == null || data.length == 0)
+        if ((data == null || data.length == 0) && (message == null || message.isEmpty()))
             return false;
 
         if (isText && !isEncrypted) {
             String text = message == null ? new String(data, StandardCharsets.UTF_8) : message;
-            if (text.contains(" ") || text.contains("_"))
+            if ((text.contains(" ") || text.contains("_") || text.contains("-")) && text.length() > 100)
                 return true;
         }
         return false;
@@ -1504,7 +1508,28 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     }
 
-    public abstract int getDataLength(int forDeal, boolean withSignature);
+    public int getDataLength(int forDeal, boolean withSignature) {
+        // not include item reference
+
+        int base_len;
+        if (forDeal == FOR_MYPACK)
+            base_len = BASE_LENGTH_AS_MYPACK;
+        else if (forDeal == FOR_PACK)
+            base_len = BASE_LENGTH_AS_PACK;
+        else if (forDeal == FOR_DB_RECORD)
+            base_len = BASE_LENGTH_AS_DBRECORD;
+        else
+            base_len = BASE_LENGTH;
+
+        if (!withSignature)
+            base_len -= SIGNATURE_LENGTH;
+
+        if (exLink != null)
+            base_len += exLink.length();
+
+        return base_len;
+
+    }
 
     // PROCESS/ORPHAN
     public boolean isWiped() {
@@ -1662,6 +1687,16 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         return VALIDATE_OK;
 
+    }
+
+    public JSONObject makeErrorJSON(int error) {
+        JSONObject out = new JSONObject();
+        out.put("error", error);
+        out.put("message", OnDealClick.resultMess(error));
+        if (errorValue != null) {
+            out.put("value", errorValue);
+        }
+        return out;
     }
 
     public void updateMapByError(int error, HashMap out) {
@@ -2072,6 +2107,7 @@ public abstract class Transaction implements ExplorerJsonLine {
         try {
             return TransactionFactory.getInstance().parse(this.toBytes(FOR_NETWORK, true), Transaction.FOR_NETWORK);
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }

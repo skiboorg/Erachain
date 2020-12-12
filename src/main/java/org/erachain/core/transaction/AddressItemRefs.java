@@ -19,7 +19,7 @@ public abstract class AddressItemRefs extends Transaction {
     public static final long START_KEY = 1000L; // << 20;
 
     public AddressItemRefs(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
         this.item = item;
     }
 
@@ -84,20 +84,9 @@ public abstract class AddressItemRefs extends Transaction {
 
     @Override
     public int getDataLength(int forDeal, boolean withSignature) {
+        int base_len = super.getDataLength(forDeal, withSignature);
+
         // not include item reference
-        int base_len;
-        if (forDeal == FOR_MYPACK)
-            base_len = BASE_LENGTH_AS_MYPACK;
-        else if (forDeal == FOR_PACK)
-            base_len = BASE_LENGTH_AS_PACK;
-        else if (forDeal == FOR_DB_RECORD)
-            base_len = BASE_LENGTH_AS_DBRECORD;
-        else
-            base_len = BASE_LENGTH;
-
-        if (!withSignature)
-            base_len -= SIGNATURE_LENGTH;
-
         return base_len + this.item.getDataLength(false);
     }
 

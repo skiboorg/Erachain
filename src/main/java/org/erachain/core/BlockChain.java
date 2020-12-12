@@ -236,6 +236,7 @@ public class BlockChain {
     /**
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
+
     public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
     public static final int SKIP_VALID_SIGN_BEFORE = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
@@ -314,7 +315,7 @@ public class BlockChain {
     ///final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("2.0").scaleByPowerOfTen(-(BlockChain.TRADE_PRECISION - 1));
     final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("0.001");
 
-    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : VERS_4_11;
+    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : !MAIN_MODE ? 0 : VERS_4_11;
 
     public static final int AMOUNT_SCALE_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
@@ -414,9 +415,9 @@ public class BlockChain {
     public static final int FEE_INVITED_SHIFT_IN_LEVEL = 1;
 
     public static final Tuple2<Integer, byte[]> CHECKPOINT = new Tuple2<Integer, byte[]>(
-            CLONE_MODE || TEST_MODE ? 0 : 0,
+            !MAIN_MODE ? 0 : 0,
             Base58.decode(
-                    CLONE_MODE || TEST_MODE ? "" // sign
+                    !MAIN_MODE ? "" // sign
                             : ""));
 
     // issue PERSON
@@ -655,7 +656,7 @@ public class BlockChain {
             dcSet = DCSet.getInstance();
         }
 
-        if (TEST_MODE || CLONE_MODE) {
+        if (!MAIN_MODE) {
             LOGGER.info(genesisBlock.getTestNetInfo());
         }
 
@@ -814,7 +815,7 @@ public class BlockChain {
 
     public static BigDecimal BONUS_FOR_PERSON(int height) {
 
-        if (CLONE_MODE || TEST_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
+        if (!MAIN_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
             return BigDecimal.valueOf(5000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
         } else {
             return BigDecimal.valueOf(2000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
@@ -1112,7 +1113,7 @@ public class BlockChain {
             return this.genesisTimestamp + (long) height * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
         }
 
-        return this.genesisTimestamp + (CLONE_MODE || TEST_MODE ? 0L : 16667L)
+        return this.genesisTimestamp + (!MAIN_MODE ? 0L : 16667L)
                 + (long) VERS_30SEC * (long) GENERATING_MIN_BLOCK_TIME_MS(VERS_30SEC)
                 + (long) (height - VERS_30SEC) * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
 

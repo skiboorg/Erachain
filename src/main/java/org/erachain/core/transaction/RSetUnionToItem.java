@@ -34,7 +34,7 @@ public class RSetUnionToItem extends Transaction {
 
     public RSetUnionToItem(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key, int itemType, long itemKey,
                            Long beg_date, Long end_date, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
 
         this.key = key;
         this.itemType = itemType;
@@ -292,6 +292,9 @@ public class RSetUnionToItem extends Transaction {
             base_len = BASE_LENGTH_AS_DBRECORD;
         else
             base_len = BASE_LENGTH;
+
+        if (exLink != null)
+            base_len += exLink.length();
 
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
