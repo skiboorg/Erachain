@@ -2,6 +2,7 @@ package org.erachain.core.item;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import org.apache.commons.net.util.Base64;
 import org.erachain.controller.Controller;
 import org.erachain.core.BlockChain;
@@ -59,6 +60,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
     protected static final int IMAGE_SIZE_LENGTH = 4;
     protected static final int DESCRIPTION_SIZE_LENGTH = 4;
     protected static final int REFERENCE_LENGTH = Transaction.SIGNATURE_LENGTH;
+    protected static final int DBREF_LENGTH = Transaction.DBREF_LENGTH;
     protected static final int BASE_LENGTH = TYPE_LENGTH + OWNER_LENGTH + NAME_SIZE_LENGTH + ICON_SIZE_LENGTH + IMAGE_SIZE_LENGTH + DESCRIPTION_SIZE_LENGTH;
 
     protected static final int TIMESTAMP_LENGTH = Transaction.TIMESTAMP_LENGTH;
@@ -75,6 +77,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
      * this is signature of issued record
      */
     protected byte[] reference = null;
+    protected long dbRef;
     protected byte[] icon;
     protected byte[] image;
 
@@ -107,7 +110,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
                 Long date = Long.parseLong(str);
                 return new Pair<Integer, Long>(0, date);
             } catch (Exception e) {
-                return new Pair<Integer, Long>(-1, 0l);
+                return new Pair<Integer, Long>(-1, 0L);
             }
         }
     }
@@ -382,13 +385,15 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
     }
 
     /**
-     * Тут может быть переопределена повторно - если трнзакция валялась в неподтвержденных и была уже проверена
+     * Тут может быть переопределена повторно - если транзакция валялась в неподтвержденных и была уже проверена
      * ранее. Это не страшно
      *
      * @param signature
+     * @param dbRef
      */
-    public void setReference(byte[] signature) {
+    public void setReference(byte[] signature, long dbRef) {
         this.reference = signature;
+        this.dbRef = dbRef;
     }
 
     public Transaction getIssueTransaction(DCSet dcSet) {
@@ -418,7 +423,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         if (dbRef == null)
             return 0;
 
-        int height = Transaction.parseDBRefHeight(dbRef);
+        int height = Transaction.parseHeightDBRef(dbRef);
 
         return 1 + db.getBlockMap().size() - height;
 
@@ -491,6 +496,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         if (useAll && includeReference) {
             //WRITE REFERENCE
             data = Bytes.concat(data, this.reference);
+            data = Bytes.concat(data, Longs.toByteArray(this.dbRef));
         }
 
         return data;
@@ -519,7 +525,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
                 + this.icon.length
                 + this.image.length
                 + this.description.getBytes(StandardCharsets.UTF_8).length
-                + (includeReference ? REFERENCE_LENGTH : 0);
+                + (includeReference ? REFERENCE_LENGTH + DBREF_LENGTH : 0);
     }
 
     //OTHER
