@@ -365,7 +365,8 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int DATA_VERSION_PART_LENGTH = 6;
     public static final int DATA_TITLE_PART_LENGTH = 4;
     protected static final int DATA_NUM_FILE_LENGTH = 4;
-    protected static final int SEQ_LENGTH = 4;
+    protected static final int SEQ_LENGTH = Integer.BYTES;
+    public static final int DBREF_LENGTH = Long.BYTES;
     public static final int DATA_SIZE_LENGTH = 4;
     public static final int ENCRYPTED_LENGTH = 1;
     public static final int IS_TEXT_LENGTH = 1;
@@ -598,7 +599,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     public void setHeightSeq(long seqNo) {
         this.dbRef = seqNo;
-        this.height = parseDBRefHeight(seqNo);
+        this.height = parseHeightDBRef(seqNo);
         this.seqNo = (int) seqNo;
     }
 
@@ -1002,7 +1003,8 @@ public abstract class Transaction implements ExplorerJsonLine {
     // calc FEE by recommended and feePOW
     public void calcFee() {
 
-        if (seqNo <= BlockChain.FREE_FEE_SEQNO && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
+        if (height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
+                && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
             this.fee = BigDecimal.ZERO;
         } else {
             long fee_long = calcBaseFee();
@@ -1152,7 +1154,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     }
 
-    public static int parseDBRefHeight(long dbRef) {
+    public static int parseHeightDBRef(long dbRef) {
         return (int) (dbRef >> 32);
     }
 
