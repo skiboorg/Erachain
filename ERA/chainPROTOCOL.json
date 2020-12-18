@@ -9,10 +9,10 @@
   "sideLicense": "Chain Licence Agreement.pdf",
 
   "startKey": {
-    "assets": -1,
+    //"assets": -1,
     "persons": 16384,
-    "polls": -1,
-    "statuses": -1
+    //"polls": -1,
+    //"statuses": -1
   },
 
   // switch ON multi-level referals system. Default is true
