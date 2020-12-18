@@ -986,7 +986,13 @@ public class Block implements Closeable, ExplorerJsonLine {
     }
 
     public BigDecimal getBonusFee() {
+
+        if (true || this.heightBlock == 1 || this.heightBlock > BlockChain.FREE_FEE_FROM_HEIGHT) {
+            // если транзакции бесплатные то отключаем награду
+            return BigDecimal.ZERO;
+        }
         return BigDecimal.ZERO;
+
     }
 
     private BigDecimal getTotalFee(DCSet db) {
