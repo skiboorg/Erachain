@@ -6,6 +6,7 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
@@ -31,14 +32,7 @@ typeBytes[3].3-7 = point accuracy for WANT amount: -16..16 = BYTE - 16
  */
 public class CreateOrderTransaction extends Transaction implements Itemable {
     public static final byte[][] VALID_REC = new byte[][]{
-        //Base58.decode("3C41sWQNguCxhe66QhKSUr7NTFYQqQ8At6E2LfKDBNxpDtWZDjRBTwVRZN9ZuxQrzXL9R4V4EF1EP7B1HucctkqJ"),
-        //Base58.decode("3BTEfHJ6cQJtrvA2A1QkKwuznN7LckVUU9YDBjaZiBPapQrN6zHtc6JhgBy1tU8k6z6i7iW9Q4H7ZpordUYdfu2t"),
-        //Base58.decode("4EbKCt4QDfMvCHRPM36y5TyDayZUQzURBhS8wJ4Em4ejpbfd2bUn9oDyEWgXKy5Mwkc7MovGcvU5svAVfQyJW8y6"),
-        //Base58.decode("5nv56Enkt24y2Lcxe1Zbjpeuk7Fd5vSNo4gY7oTbAh42RwPtrZ1jpaTZX8CdWAvqQzpbUNFD7AHAuvRxeMirrjnV"),
-        
-        //Base58.decode("2PLy4qTVeYnwAiESvaeaSUTWuGcERQr14bpGj3qo83c4vTP8RRMjnmRXnd6USsbvbLwWUNtjErcdvs5KtZMpyREC"),
-        //Base58.decode("5XMmLXACUPu74absaKQwVSnzf91ppvYcMK8mBqQ18dALQxvVrB46atw2bfv4xXXq7ZXrM1iELKyW5jMiLgf8uHKf"),
-        //Base58.decode("4fWbpHBsEzyG9paXH5oJswn3YMhvxw6fRssk6qZmB7jxQ72sRXJunEQhi9bnTwg2cUjwGCZy54u4ZseLRM7xh2x6")
+        //Base58.decode("4...")
     };
     private static final byte TYPE_ID = (byte) Transaction.CREATE_ORDER_TRANSACTION;
     private static final String NAME_ID = "Create Order";
@@ -63,7 +57,7 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
     public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, long haveKey, long wantKey,
                                   BigDecimal amountHave, BigDecimal amountWant, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
         this.haveKey = haveKey;
         this.wantKey = wantKey;
 
@@ -125,20 +119,10 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         }
     }
 
-    /*
-     * public void makeOrder() { if (this.order == null) this.order = new
-     * Order(new BigInteger(this.signature), this.creator, this.have, this.want,
-     * this.amount, this.amountWant, this.timestamp); }
-     */
-
     public CreateOrderTransaction(PublicKeyAccount creator, long have, long want, BigDecimal amountHave,
                                   BigDecimal amountWant, byte feePow, long timestamp, Long reference) {
         this(new byte[]{TYPE_ID, 0, 0, 0}, creator, have, want, amountHave, amountWant, feePow, timestamp,
                 reference);
-    }
-
-    static public BigDecimal unScaleAmountToDefault(BigDecimal amount, AssetCls asset) {
-        return amount;
     }
 
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
@@ -181,6 +165,14 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         byte[] creatorBytes = Arrays.copyOfRange(data, position, position + CREATOR_LENGTH);
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
+
+        ExLink exLink;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            exLink = ExLink.parse(data, position);
+            position += exLink.length();
+        } else {
+            exLink = null;
+        }
 
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
@@ -416,6 +408,9 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             base_len = BASE_LENGTH_AS_DBRECORD;
         else
             base_len = BASE_LENGTH;
+
+        if (exLink != null)
+            base_len += exLink.length();
 
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;

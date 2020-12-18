@@ -35,7 +35,7 @@ public class VoteOnPollTransaction extends Transaction {
     private String poll;
 
     public VoteOnPollTransaction(byte[] typeBytes, PublicKeyAccount creator, String poll, int option, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
 
         this.creator = creator;
         this.poll = poll;
@@ -320,8 +320,9 @@ public class VoteOnPollTransaction extends Transaction {
     public long calcBaseFee() {
 
         // TODO delete IT
-        if (height > TODO_h1)
-            return calcCommonFee();
-        return 0;
+        if (height <= TODO_h1)
+            return 0;
+
+        return super.calcBaseFee();
     }
 }

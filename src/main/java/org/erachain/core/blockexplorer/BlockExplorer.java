@@ -447,13 +447,9 @@ public class BlockExplorer {
             // top 100
         } else if (info.getQueryParameters().containsKey("top")) {
             output.putAll(jsonQueryTopRichest(info));
-            // asset lite
         } else if (info.getQueryParameters().containsKey("assets")) {
             output.put("type", "assets");
             output.putAll(jsonQueryPages(AssetCls.class, start, pageSize));
-        } else if (info.getQueryParameters().containsKey("assetsLite")) {
-            output.put("assetsLite", jsonQueryAssetsLite());
-            // assets list
         } else if (info.getQueryParameters().containsKey("asset")) {
             if (info.getQueryParameters().get("asset").size() == 1) {
                 try {
@@ -572,7 +568,6 @@ public class BlockExplorer {
         help.put("Block", "blockexplorer.json?block={block}[&page={page}]");
         help.put("Blocks List", "blockexplorer.json?blocks[&start={height}]");
         help.put("Assets List", "blockexplorer.json?assets");
-        help.put("Assets List Lite", "blockexplorer.json?assetsLite");
         help.put("Asset", "blockexplorer.json?asset={asset}");
         help.put("Asset Trade", "blockexplorer.json?asset={assetHave}&asset={assetWant}");
         help.put("Polls List", "blockexplorer.json?polls");
@@ -640,40 +635,25 @@ public class BlockExplorer {
         return output;
     }
 
-    public Map jsonQueryAssetsLite() {
+    // ItemCls.ASSET_TYPE
+    public Map jsonQueryItemsLite(int itemType, Long fromKey) {
 
         Map output = new LinkedHashMap();
-
-        Collection<ItemCls> items = Controller.getInstance().getAllItems(ItemCls.ASSET_TYPE);
-
-        for (ItemCls item : items) {
-            output.put(item.getKey(), item.viewName());
-        }
-
-        return output;
-    }
-
-    public Map jsonQueryStatusesLite() {
-
-        Map output = new LinkedHashMap();
-
-        Collection<ItemCls> items = Controller.getInstance().getAllItems(ItemCls.STATUS_TYPE);
-
-        for (ItemCls item : items) {
-            output.put(item.getKey(), item.viewName());
-        }
-
-        return output;
-    }
-
-    public Map jsonQueryTemplatesLite() {
-
-        Map output = new LinkedHashMap();
-
-        Collection<ItemCls> items = Controller.getInstance().getAllItems(ItemCls.TEMPLATE_TYPE);
-
-        for (ItemCls item : items) {
-            output.put(item.getKey(), item.viewName());
+        ItemMap itemsMap = Controller.getInstance().getItemMap(itemType);
+        try (IteratorCloseable<Long> iterator = itemsMap.getIteratorFrom(fromKey, true)) {
+            Long key;
+            ItemCls item;
+            int size = 25;
+            while (iterator.hasNext()) {
+                if (--size < 0)
+                    break;
+                key = iterator.next();
+                item = itemsMap.get(key);
+                if (item == null)
+                    continue;
+                output.put(key, item.viewName());
+            }
+        } catch (IOException e) {
         }
 
         return output;
@@ -1216,11 +1196,8 @@ public class BlockExplorer {
         tradeJSON.put("assetHaveOwner", pairAssetHave.getOwner().getAddress());
         tradeJSON.put("assetWantOwner", pairAssetWant.getOwner().getAddress());
 
-        //tradeJSON.put("realPrice", trade.calcPrice(pairAssetWant.getScale()).setScale(pairAssetWant.getScale(), RoundingMode.HALF_DOWN).toPlainString());
-        //.setScale(pairAssetWant.getScale(), RoundingMode.HALF_DOWN).toPlainString());
         tradeJSON.put("realPrice", trade.calcPrice());
 
-        //tradeJSON.put("realReversePrice", trade.calcPriceRevers(pairAssetWant.getScale()).setScale(pairAssetWant.getScale(), RoundingMode.HALF_DOWN).toPlainString());
         tradeJSON.put("realReversePrice", trade.calcPriceRevers());
 
         if (orderInitiator == null) {
@@ -1653,18 +1630,6 @@ public class BlockExplorer {
         return output;
     }
 
-    //todo Gleb for future убрать duplicateCodeAssets. Проблема в ключе.  заменит на assetsJSON
-    public Map jsonQueryAssets() {
-        output.put("type", "assets");
-
-        Map output = new LinkedHashMap();
-        Collection<ItemCls> items = Controller.getInstance().getAllItems(ItemCls.ASSET_TYPE);
-        for (ItemCls item : items) {
-            duplicateCodeAssets(output, (AssetCls) item);
-        }
-        return output;
-    }
-
     private void duplicateCodeAssets(Map assetsJSON, AssetCls asset) {
         Map assetJSON = new LinkedHashMap();
 
@@ -2075,7 +2040,6 @@ public class BlockExplorer {
         output.put("Label_Total_coins_in_the_system",
                 Lang.getInstance().translateFromLangObj("Total asset units in the system", langObj));
 
-        output.put("assets", jsonQueryAssetsLite());
         return output;
     }
 
@@ -2137,7 +2101,8 @@ public class BlockExplorer {
 
 
                     if (BlockChain.ERA_COMPU_ALL_UP && side == Transaction.BALANCE_SIDE_LEFT) {
-                        bal.put("balance_1", Account.balanceInPositionAndSide(itemBals, 1, side).add(account.addDEVAmount(assetKey)));
+                        bal.put("balance_1", Account.balanceInPositionAndSide(itemBals, 1, side)
+                                .add(account.addDEVAmount(assetKey)));
                     } else {
                         bal.put("balance_1", Account.balanceInPositionAndSide(itemBals, 1, side));
                     }
@@ -3492,7 +3457,7 @@ public class BlockExplorer {
                         }
 
                         String message = txCalculated.getMessage();
-                        String typeName = transaction.viewFullTypeName();
+                        String typeName = Lang.getInstance().translateFromLangObj(transaction.viewFullTypeName(), langObj);
                         out.put("type", typeName);
 
                         if (typeName.equals("_protocol_")) {
@@ -3511,7 +3476,7 @@ public class BlockExplorer {
                     } else {
                         out.put("signature", Base58.encode(transaction.getSignature()));
                         out.put("timestamp", transaction.getTimestamp());
-                        String typeName = transaction.viewFullTypeName();
+                        String typeName = Lang.getInstance().translateFromLangObj(transaction.viewFullTypeName(), langObj);
                         out.put("type", typeName);
 
                         if (transaction.getCreator() == null) {
@@ -3532,12 +3497,14 @@ public class BlockExplorer {
                                 type = transaction.getType();
                                 if (type == Transaction.SEND_ASSET_TRANSACTION) {
                                     RSend rSend = (RSend) transaction;
-                                    if (rSend.getCreator().equals(account)) {
-                                        outcome = false;
-                                        atSideAccount = rSend.getRecipient();
+                                    if (rSend.hasAmount()) {
+                                        if (rSend.getCreator().equals(account)) {
+                                            outcome = false;
+                                            atSideAccount = rSend.getRecipient();
+                                        }
+                                        // возврат и взять на харенение обратный
+                                        outcome = outcome ^ !rSend.isBackward() ^ (rSend.getActionType() == TransactionAmount.ACTION_HOLD);
                                     }
-                                    // возврат и взять на харенение обратный
-                                    outcome = outcome ^ !rSend.isBackward() ^ (rSend.getActionType() == TransactionAmount.ACTION_HOLD);
                                 }
                             }
 

@@ -79,12 +79,12 @@ public abstract class PersonCls extends ItemCls {
         this.birthday = birthday;
         this.deathday = deathday;
         this.gender = gender;
-        this.race = race;
+        this.race = race == null ? "" : race;
         this.birthLatitude = birthLatitude;
         this.birthLongitude = birthLongitude;
-        this.skinColor = skinColor;
-        this.eyeColor = eyeColor;
-        this.hairСolor = hairСolor;
+        this.skinColor = skinColor == null ? "" : skinColor;
+        this.eyeColor = eyeColor == null ? "" : eyeColor;
+        this.hairСolor = hairСolor == null ? "" : hairСolor;
         this.height = height;
     }
 
@@ -112,23 +112,25 @@ public abstract class PersonCls extends ItemCls {
 
     //GETTERS/SETTERS
 
+    @Override
     public int getItemType() {
         return TYPE_KEY;
     }
 
     @Override
-    public long getStartKey() {
-        if (!BlockChain.CLONE_MODE)
-            return MIN_START_KEY;
+    public long START_KEY() {
+        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
+            return 1L << 18;
 
-        long startKey = BlockChain.startKeys[TYPE_KEY];
+        return START_KEY;
+    }
 
-        if (startKey == 0) {
-            return START_KEY;
-        } else if (startKey < MIN_START_KEY) {
-            return (BlockChain.startKeys[TYPE_KEY] = MIN_START_KEY);
-        }
-        return startKey;
+    @Override
+    public long MIN_START_KEY() {
+        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
+            return 1L << 17;
+
+        return MIN_START_KEY;
     }
 
     public String getItemTypeName() {
@@ -204,7 +206,7 @@ public abstract class PersonCls extends ItemCls {
                 || this.deathday < this.birthday)
             return true;
 
-        if (onThisTime > 0l
+        if (onThisTime > 0L
                 && this.deathday > onThisTime)
             return true;
 

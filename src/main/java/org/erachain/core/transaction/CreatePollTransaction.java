@@ -28,7 +28,7 @@ public class CreatePollTransaction extends Transaction {
     private Poll poll;
 
     public CreatePollTransaction(byte[] typeBytes, PublicKeyAccount creator, Poll poll, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
 
         this.creator = creator;
         this.poll = poll;
@@ -322,8 +322,4 @@ public class CreatePollTransaction extends Transaction {
         return subAssetAmount(null, this.creator.getAddress(), FEE_KEY, this.fee);
     }
 
-    @Override
-    public long calcBaseFee() {
-        return calcCommonFee();
-    }
 }

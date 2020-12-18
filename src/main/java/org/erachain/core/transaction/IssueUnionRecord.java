@@ -3,6 +3,7 @@ package org.erachain.core.transaction;
 import com.google.common.primitives.Longs;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.item.unions.UnionFactory;
 
@@ -16,40 +17,32 @@ public class IssueUnionRecord extends IssueItemRecord {
     private static final byte TYPE_ID = (byte) ISSUE_UNION_TRANSACTION;
     private static final String NAME_ID = "Issue Union";
 
-    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, UnionCls union, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, union, feePow, timestamp, reference);
+    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, UnionCls union, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, null, union, feePow, timestamp, reference);
     }
 
-    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, UnionCls union, byte feePow, long timestamp, Long reference, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, union, feePow, timestamp, reference, signature);
+    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, UnionCls union, byte feePow, long timestamp, Long reference, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, union, feePow, timestamp, reference, signature);
     }
 
-    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, UnionCls union, byte feePow, long timestamp,
+    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, UnionCls union, byte feePow, long timestamp,
                             Long reference, byte[] signature, long seqNo, long feeLong) {
-        super(typeBytes, NAME_ID, creator, union, feePow, timestamp, reference, signature);
+        super(typeBytes, NAME_ID, creator, linkTo, union, feePow, timestamp, reference, signature);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
     }
 
-    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, UnionCls union, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, union, (byte) 0, 0l, null, signature);
+    public IssueUnionRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, UnionCls union, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, union, (byte) 0, 0l, null, signature);
     }
 
     public IssueUnionRecord(PublicKeyAccount creator, UnionCls union, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, union, feePow, timestamp, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, union, feePow, timestamp, reference, signature);
     }
 
-    public IssueUnionRecord(PublicKeyAccount creator, UnionCls union, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, union, (byte) 0, 0l, null, signature);
-    }
-
-    public IssueUnionRecord(PublicKeyAccount creator, UnionCls union, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, union, feePow, timestamp, reference);
-    }
-
-    public IssueUnionRecord(PublicKeyAccount creator, UnionCls union) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, union, (byte) 0, 0l, null);
+    public IssueUnionRecord(PublicKeyAccount creator, ExLink linkTo, UnionCls union, byte feePow, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, union, feePow, timestamp, reference);
     }
 
     //GETTERS/SETTERS
@@ -94,6 +87,14 @@ public class IssueUnionRecord extends IssueItemRecord {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink linkTo;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            linkTo = ExLink.parse(data, position);
+            position += linkTo.length();
+        } else {
+            linkTo = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -136,9 +137,9 @@ public class IssueUnionRecord extends IssueItemRecord {
         }
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new IssueUnionRecord(typeBytes, creator, union, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+            return new IssueUnionRecord(typeBytes, creator, linkTo, union, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
         } else {
-            return new IssueUnionRecord(typeBytes, creator, union, signatureBytes);
+            return new IssueUnionRecord(typeBytes, creator, linkTo, union, signatureBytes);
         }
     }
 

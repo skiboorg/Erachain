@@ -112,10 +112,16 @@ public class AssetVenture extends AssetCls {
         position += descriptionLength;
 
         byte[] reference = null;
+        long dbRef = 0;
         if (includeReference) {
             //READ REFERENCE
             reference = Arrays.copyOfRange(data, position, position + REFERENCE_LENGTH);
             position += REFERENCE_LENGTH;
+
+            //READ SEQNO
+            byte[] dbRefBytes = Arrays.copyOfRange(data, position, position + DBREF_LENGTH);
+            dbRef = Longs.fromByteArray(dbRefBytes);
+            position += DBREF_LENGTH;
         }
 
         //READ QUANTITY
@@ -136,7 +142,7 @@ public class AssetVenture extends AssetCls {
         //RETURN
         AssetVenture venture = new AssetVenture(typeBytes, owner, name, icon, image, description, assetTypeBytes[0], scale, quantity);
         if (includeReference) {
-            venture.setReference(reference);
+            venture.setReference(reference, dbRef);
         }
 
         return venture;
@@ -159,7 +165,8 @@ public class AssetVenture extends AssetCls {
     @Override
     public BigDecimal getReleased(DCSet dcSet) {
         if (quantity > 0) {
-            Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>> bals = this.getOwner().getBalance(this.getKey(dcSet));
+            Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>
+                    bals = this.getOwner().getBalance(this.getKey(dcSet));
             return new BigDecimal(quantity).subtract(bals.a.b).stripTrailingZeros();
         } else {
             Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>> bals = this.getOwner().getBalance(this.getKey(dcSet));

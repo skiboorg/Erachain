@@ -236,6 +236,7 @@ public class BlockChain {
     /**
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
+
     public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
     public static final int SKIP_VALID_SIGN_BEFORE = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
@@ -314,7 +315,7 @@ public class BlockChain {
     ///final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("2.0").scaleByPowerOfTen(-(BlockChain.TRADE_PRECISION - 1));
     final public static BigDecimal TRADE_PRICE_DIFF_LIMIT = new BigDecimal("0.001");
 
-    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : VERS_4_11;
+    public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : !MAIN_MODE ? 0 : VERS_4_11;
 
     public static final int AMOUNT_SCALE_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
@@ -347,7 +348,10 @@ public class BlockChain {
 
     public static final int FEE_FOR_ANONIMOUSE = 33;
     //
-    public static final boolean VERS_4_11_USE_OLD_FEE = false;
+
+    public static final int FREE_FEE_LENGTH = 1 << 13;
+    public static final int FREE_FEE_TO_SEQNO = DEMO_MODE ? 1 : CLONE_MODE? 1 : -1;
+    public static final int FREE_FEE_FROM_HEIGHT = DEMO_MODE ? 1 : CLONE_MODE? 1 : Integer.MAX_VALUE;
 
     /**
      * FEE_KEY used here
@@ -414,9 +418,9 @@ public class BlockChain {
     public static final int FEE_INVITED_SHIFT_IN_LEVEL = 1;
 
     public static final Tuple2<Integer, byte[]> CHECKPOINT = new Tuple2<Integer, byte[]>(
-            CLONE_MODE || TEST_MODE ? 0 : 0,
+            !MAIN_MODE ? 0 : 0,
             Base58.decode(
-                    CLONE_MODE || TEST_MODE ? "" // sign
+                    !MAIN_MODE ? "" // sign
                             : ""));
 
     // issue PERSON
@@ -438,6 +442,11 @@ public class BlockChain {
     private Block waitWinBuffer;
 
     public static long[] startKeys = new long[10];
+    /**
+     * Новый уровень начальных номеров для всех сущностей
+     */
+    public static int START_KEY_UP = MAIN_MODE ? 1700000 : DEMO_MODE ? 23000 : CLONE_MODE? 15000 : Integer.MAX_VALUE;
+    public static int START_KEY_UO_ITEMS = 1 << 17;
 
     //private int target = 0;
     //private byte[] lastBlockSignature;
@@ -451,7 +460,7 @@ public class BlockChain {
 
     /**
      * Учитывает время очистки очереди неподтвержденных трнзакций и сброса на жесткий диск их памяти
-     * И поэтому это число хуже чем в Логе по подстчету обработки транзакций в блоке
+     * И поэтому это число хуже чем в Логе по подсчету обработки транзакций в блоке
      */
     public long transactionProcessTimingAverage;
     public long transactionProcessTimingCounter;
@@ -541,6 +550,9 @@ public class BlockChain {
 
                 //CREATE JSON OBJECT
                 JSONObject chainParams = (JSONObject) JSONValue.parse(jsonString);
+                if (chainParams == null) {
+                    throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
+                }
 
                 if (chainParams.containsKey("assets")) {
                     JSONArray items = (JSONArray) chainParams.get("assets");
@@ -655,7 +667,7 @@ public class BlockChain {
             dcSet = DCSet.getInstance();
         }
 
-        if (TEST_MODE || CLONE_MODE) {
+        if (!MAIN_MODE) {
             LOGGER.info(genesisBlock.getTestNetInfo());
         }
 
@@ -814,7 +826,7 @@ public class BlockChain {
 
     public static BigDecimal BONUS_FOR_PERSON(int height) {
 
-        if (CLONE_MODE || TEST_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
+        if (!MAIN_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
             return BigDecimal.valueOf(5000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
         } else {
             return BigDecimal.valueOf(2000 * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
@@ -1112,7 +1124,7 @@ public class BlockChain {
             return this.genesisTimestamp + (long) height * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
         }
 
-        return this.genesisTimestamp + (CLONE_MODE || TEST_MODE ? 0L : 16667L)
+        return this.genesisTimestamp + (!MAIN_MODE ? 0L : 16667L)
                 + (long) VERS_30SEC * (long) GENERATING_MIN_BLOCK_TIME_MS(VERS_30SEC)
                 + (long) (height - VERS_30SEC) * (long) GENERATING_MIN_BLOCK_TIME_MS(height);
 

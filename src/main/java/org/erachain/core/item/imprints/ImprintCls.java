@@ -6,6 +6,7 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.ItemCls;
+import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
@@ -32,23 +33,25 @@ public abstract class ImprintCls extends ItemCls {
 
     //GETTERS/SETTERS
 
+    @Override
     public int getItemType() {
         return TYPE_KEY;
     }
 
     @Override
-    public long getStartKey() {
-        if (!BlockChain.CLONE_MODE)
-            return MIN_START_KEY;
+    public long START_KEY() {
+        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
+            return BlockChain.START_KEY_UO_ITEMS;
 
-        long startKey = BlockChain.startKeys[TYPE_KEY];
+        return START_KEY;
+    }
 
-        if (startKey == 0) {
-            return START_KEY;
-        } else if (startKey < MIN_START_KEY) {
-            return (BlockChain.startKeys[TYPE_KEY] = MIN_START_KEY);
-        }
-        return startKey;
+    @Override
+    public long MIN_START_KEY() {
+        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
+            return BlockChain.START_KEY_UO_ITEMS;
+
+        return MIN_START_KEY;
     }
 
     public String getItemTypeName() {

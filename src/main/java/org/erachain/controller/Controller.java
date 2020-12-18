@@ -20,6 +20,7 @@ import org.erachain.core.crypto.Base32;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.exdata.exLink.ExLink;
+import org.erachain.core.exdata.exLink.ExLinkSource;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
@@ -2801,7 +2802,7 @@ public class Controller extends Observable {
     // ASSETS
 
     public AssetCls getAsset(long key) {
-        return (AssetCls) this.dcSet.getItemAssetMap().get(key);
+        return this.dcSet.getItemAssetMap().get(key);
     }
 
     public PersonCls getPerson(long key) {
@@ -3014,7 +3015,7 @@ public class Controller extends Observable {
 
     public Object issueAsset(HttpServletRequest request, String x) {
 
-        Object result = Transaction.decodeJson(x);
+        Object result = Transaction.decodeJson(null, x);
         if (result instanceof JSONObject) {
             return result;
         }
@@ -3030,13 +3031,13 @@ public class Controller extends Observable {
             return new Fun.Tuple2<>(error, OnDealClick.resultMess(error));
         }
 
-        String name = (String) jsonObject.getOrDefault("name", null);
-        String description = (String) jsonObject.getOrDefault("description", null);
+        String name = (String) jsonObject.get("name");
+        String description = (String) jsonObject.get("description");
 
         byte[] icon;
-        String icon64 = (String) jsonObject.getOrDefault("icon64", null);
+        String icon64 = (String) jsonObject.get("icon64");
         if (icon64 == null) {
-            String icon58 = (String) jsonObject.getOrDefault("icon", null);
+            String icon58 = (String) jsonObject.get("icon");
             if (icon58 == null)
                 icon = null;
             else
@@ -3046,9 +3047,9 @@ public class Controller extends Observable {
         }
 
         byte[] image;
-        String image64 = (String) jsonObject.getOrDefault("image64", null);
+        String image64 = (String) jsonObject.get("image64");
         if (image64 == null) {
-            String image58 = (String) jsonObject.getOrDefault("image", null);
+            String image58 = (String) jsonObject.get("image");
             if (image58 == null)
                 image = null;
             else
@@ -3057,62 +3058,89 @@ public class Controller extends Observable {
             image = java.util.Base64.getDecoder().decode(image64);
         }
 
-        Integer scale = (Integer) jsonObject.getOrDefault("scale", 0);
-        Integer assetType = (Integer) jsonObject.getOrDefault("assetType", 0);
-        Long quantity = (Long) jsonObject.getOrDefault("quantity", 0L);
+        String linkToRefStr = (String) jsonObject.get("linkTo");
+        ExLink linkTo;
+        if (linkToRefStr == null)
+            linkTo = null;
+        else {
+            Long linkToRef = Transaction.parseDBRef(linkToRefStr);
+            if (linkToRef == null) {
+                throw ApiErrorFactory.getInstance().createError(
+                        Transaction.INVALID_BLOCK_TRANS_SEQ_ERROR);
+            } else {
+                linkTo = new ExLinkSource(linkToRef, null);
+            }
+        }
+
+        Integer scale = null;
+        Integer assetType = null;
+        Long quantity = null;
+        int error;
+        String errorName = null;
+        try {
+            errorName = "scale: -8...24";
+            scale = (Integer) jsonObject.getOrDefault("scale", 0);
+            errorName = "assetType: int";
+            assetType = (Integer) jsonObject.getOrDefault("assetType", 0);
+            errorName = "quantity: long";
+            quantity = (Long) jsonObject.getOrDefault("quantity", 0L);
+        } catch (Exception e) {
+            error = ApiErrorFactory.ERROR_JSON;
+            JSONObject out = new JSONObject();
+            out.put("error", error);
+            out.put("error_message", errorName);
+        }
 
         APIUtils.askAPICallAllowed(password, "POST issue Asset " + name, request, true);
         PrivateKeyAccount creatorPrivate = getWalletPrivateKeyAccountByAddress(creator);
 
         return issueAsset(creatorPrivate,
-                name, description, icon, image, scale,
+                linkTo, name, description, icon, image, scale,
                 assetType, quantity, feePow);
 
     }
 
-    public Transaction issueAsset(PrivateKeyAccount creator, String name, String description, byte[] icon, byte[] image,
+    public Transaction issueAsset(PrivateKeyAccount creator, ExLink linkTo, int feePow, AssetCls asset) {
+        // CREATE ONLY ONE TRANSACTION AT A TIME
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createIssueAssetTransaction(creator, linkTo, asset, feePow);
+        }
+    }
+
+    public Transaction issueAsset(PrivateKeyAccount creator, ExLink linkTo, String name, String description, byte[] icon, byte[] image,
                                   int scale, int assetType, long quantity, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueAssetTransaction(creator, name, description, icon, image, scale,
+            return this.transactionCreator.createIssueAssetTransaction(creator, linkTo, name, description, icon, image, scale,
                     assetType, quantity, feePow);
         }
     }
 
-    public Pair<Transaction, Integer> issueImprint(PrivateKeyAccount creator, String name, String description,
+    public Pair<Transaction, Integer> issueImprint(PrivateKeyAccount creator, ExLink exLink, String name, String description,
                                                    byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueImprintTransaction(creator, name, description, icon, image,
+            return this.transactionCreator.createIssueImprintTransaction(creator, exLink, name, description, icon, image,
                     feePow);
         }
     }
 
-    public Transaction issueImprint1(PrivateKeyAccount creator, String name, String description, byte[] icon,
+    public Transaction issueImprint1(PrivateKeyAccount creator, ExLink exLink, String name, String description, byte[] icon,
                                      byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueImprintTransaction1(creator, name, description, icon, image,
+            return this.transactionCreator.createIssueImprintTransaction1(creator, exLink, name, description, icon, image,
                     feePow);
         }
     }
 
-    public Transaction issueTemplate(PrivateKeyAccount creator, String name, String description, byte[] icon,
-                                     byte[] image, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueTemplateTransaction(creator, name, description, icon, image,
-                    feePow);
-        }
-    }
-
-    public Pair<Transaction, Integer> issuePerson(boolean forIssue, PrivateKeyAccount creator, String fullName,
+    public Pair<Transaction, Integer> issuePerson(boolean forIssue, PrivateKeyAccount creator, ExLink linkTo, String fullName,
                                                   int feePow, long birthday, long deathday, byte gender, String race, float birthLatitude,
                                                   float birthLongitude, String skinColor, String eyeColor, String hairСolor, int height, byte[] icon,
                                                   byte[] image, String description, PublicKeyAccount owner, byte[] ownerSignature) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePersonTransaction(forIssue, creator, fullName, feePow, birthday,
+            return this.transactionCreator.createIssuePersonTransaction(forIssue, creator, linkTo, fullName, feePow, birthday,
                     deathday, gender, race, birthLatitude, birthLongitude, skinColor, eyeColor, hairСolor, height, icon,
                     image, description, owner, ownerSignature);
         }
@@ -3120,11 +3148,12 @@ public class Controller extends Observable {
 
     public Object issuePerson(HttpServletRequest request, String x) {
 
-        Object result = Transaction.decodeJson(x);
+        Object result = Transaction.decodeJson(null, x);
         if (result instanceof JSONObject) {
             return result;
         }
 
+        int error;
         Fun.Tuple4<Account, Integer, String, JSONObject> transactionResult = (Fun.Tuple4<Account, Integer, String, JSONObject>) result;
         Account creator = transactionResult.a;
         int feePow = transactionResult.b;
@@ -3132,17 +3161,31 @@ public class Controller extends Observable {
         JSONObject jsonObject = transactionResult.d;
 
         if (jsonObject == null) {
-            int error = ApiErrorFactory.ERROR_JSON;
+            error = ApiErrorFactory.ERROR_JSON;
             return new Fun.Tuple2<>(error, OnDealClick.resultMess(error));
         }
 
-        String name = (String) jsonObject.getOrDefault("name", null);
-        String description = (String) jsonObject.getOrDefault("description", null);
+        String linkToRefStr = (String) jsonObject.get("linkTo");
+        ExLink linkTo;
+        if (linkToRefStr == null)
+            linkTo = null;
+        else {
+            Long linkToRef = Transaction.parseDBRef(linkToRefStr);
+            if (linkToRef == null) {
+                throw ApiErrorFactory.getInstance().createError(
+                        Transaction.INVALID_BLOCK_TRANS_SEQ_ERROR);
+            } else {
+                linkTo = new ExLinkSource(linkToRef, null);
+            }
+        }
+
+        String name = (String) jsonObject.get("name");
+        String description = (String) jsonObject.get("description");
 
         byte[] icon;
-        String icon64 = (String) jsonObject.getOrDefault("icon64", null);
+        String icon64 = (String) jsonObject.get("icon64");
         if (icon64 == null) {
-            String icon58 = (String) jsonObject.getOrDefault("icon", null);
+            String icon58 = (String) jsonObject.get("icon");
             if (icon58 == null)
                 icon = null;
             else
@@ -3152,9 +3195,9 @@ public class Controller extends Observable {
         }
 
         byte[] image;
-        String image64 = (String) jsonObject.getOrDefault("image64", null);
+        String image64 = (String) jsonObject.get("image64");
         if (image64 == null) {
-            String image58 = (String) jsonObject.getOrDefault("image", null);
+            String image58 = (String) jsonObject.get("image");
             if (image58 == null)
                 image = null;
             else
@@ -3163,65 +3206,141 @@ public class Controller extends Observable {
             image = java.util.Base64.getDecoder().decode(image64);
         }
 
-        Integer scale = (Integer) jsonObject.getOrDefault("scale", 0);
-        Integer assetType = (Integer) jsonObject.getOrDefault("assetType", 0);
-        Long birthday = (Long) jsonObject.getOrDefault("birthday", 0L);
-        Long deathday = (Long) jsonObject.getOrDefault("deathday", null);
-        Integer gender = (Integer) jsonObject.getOrDefault("gender", 0);
-        String race = jsonObject.getOrDefault("race", null).toString();
-        Float birthLatitude = (Float) jsonObject.getOrDefault("birthLatitude", 0.0f);
-        Float birthLongitude = (Float) jsonObject.getOrDefault("birthLongitude", 0.0f);
-        String skinColor = jsonObject.getOrDefault("skinColor", null).toString();
-        String eyeColor = jsonObject.getOrDefault("eyeColor", null).toString();
-        String hairСolor = jsonObject.getOrDefault("hairСolor", null).toString();
-        Integer height = (Integer) jsonObject.getOrDefault("height", 0);
-        String owner58 = jsonObject.getOrDefault("owner", null).toString();
-        PublicKeyAccount owner = new PublicKeyAccount(owner58);
-        String ownerSignature58 = jsonObject.getOrDefault("ownerSignature", null).toString();
-        byte[] ownerSignature = Base58.decode(ownerSignature58);
+        long birthday = 0;
+        long deathday = 0;
+        byte gender = 2;
+        String race = null;
+        float birthLatitude = 0.0f;
+        float birthLongitude = 0.0f;
+        String skinColor = null;
+        String eyeColor = null;
+        String hairСolor = null;
+        int height = 170;
+        String owner58 = null;
+        PublicKeyAccount owner = null;
+        String ownerSignature58 = null;
+        byte[] ownerSignature = null;
 
         APIUtils.askAPICallAllowed(password, "POST issue Person " + name, request, true);
         PrivateKeyAccount creatorPrivate = getWalletPrivateKeyAccountByAddress(creator);
 
-        PersonHuman person = new PersonHuman(owner, name, birthday, deathday, (byte) (int) gender,
+        String errorName = null;
+        try {
+            errorName = "birthday";
+            birthday = (long) (Long) jsonObject.getOrDefault("birthday", 0L);
+            errorName = "deathday";
+            Long deathdayLong = (Long) jsonObject.get("deathday");
+            if (deathdayLong == null) {
+                deathday = birthday - 1;
+            } else {
+                birthday = deathdayLong;
+            }
+
+            errorName = "gender - man:0, wimen:1, none:2";
+            gender = (byte) (int) (long) (Long) jsonObject.get("gender");
+
+            errorName = "birthLatitude: float";
+            birthLatitude = (float) (double) (Double) jsonObject.getOrDefault("birthLatitude", 0.0f);
+            errorName = "birthLongitude: float";
+            birthLongitude = (float) (double) (Double) jsonObject.getOrDefault("birthLongitude", 0.0f);
+
+            errorName = "height: 10..250";
+            height = (int) (long) (Long) jsonObject.get("height");
+
+            race = (String) jsonObject.get("race");
+            skinColor = (String) jsonObject.get("skinColor");
+            eyeColor = (String) jsonObject.get("eyeColor");
+            hairСolor = (String) jsonObject.get("hairСolor");
+
+            owner58 = (String) jsonObject.get("owner");
+            if (owner58 == null) {
+                owner = new PublicKeyAccount(creatorPrivate.getPublicKey());
+            } else {
+                errorName = "owner: Base58";
+                owner = new PublicKeyAccount(owner58);
+
+                ownerSignature58 = (String) jsonObject.get("ownerSignature");
+                errorName = "ownerSignature: Base58";
+                ownerSignature = Base58.decode(ownerSignature58);
+            }
+
+        } catch (Exception e) {
+            error = ApiErrorFactory.ERROR_JSON;
+            JSONObject out = new JSONObject();
+            out.put("error", error);
+            out.put("error_message", errorName);
+            return out;
+        }
+
+        PersonHuman person = new PersonHuman(owner, name, birthday, deathday, gender,
                 race, birthLatitude, birthLongitude,
                 skinColor, eyeColor, hairСolor, height, icon, image, description,
                 ownerSignature);
 
-        return issuePersonHuman(creatorPrivate, feePow, person);
+        return issuePerson(creatorPrivate, linkTo, feePow, person);
 
     }
 
-    public Pair<Transaction, Integer> issuePersonHuman(PrivateKeyAccount creator, int feePow, PersonHuman human) {
+    public Pair<Transaction, Integer> issuePerson(PrivateKeyAccount creator, ExLink linkTo, int feePow, PersonCls person) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePersonHumanTransaction(creator, feePow, human);
+            return this.transactionCreator.createIssuePersonTransaction(creator, linkTo, feePow, person);
         }
     }
 
-    public Transaction issuePoll(PrivateKeyAccount creator, String name, String description, List<String> options,
+    public Transaction issuePoll(PrivateKeyAccount creator, ExLink linkTo, int feePow, PollCls poll) {
+        // CREATE ONLY ONE TRANSACTION AT A TIME
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createIssuePollTransaction(creator, linkTo, feePow, poll);
+        }
+    }
+
+    public Transaction issuePoll(PrivateKeyAccount creator, ExLink linkTo, String name, String description, List<String> options,
                                  byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePollTransaction(creator, name, description, icon, image, options,
+            return this.transactionCreator.createIssuePollTransaction(creator, linkTo, name, description, icon, image, options,
                     feePow);
         }
     }
 
-    public Transaction issueStatus(PrivateKeyAccount creator, String name, String description, boolean unique,
+    public Transaction issueStatus(PrivateKeyAccount creator, ExLink linkTo, int feePow, StatusCls status) {
+        // CREATE ONLY ONE TRANSACTION AT A TIME
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createIssueStatusTransaction(creator, linkTo, feePow, status);
+        }
+    }
+
+    public Transaction issueStatus(PrivateKeyAccount creator, ExLink linkTo, String name, String description, boolean unique,
                                    byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueStatusTransaction(creator, name, description, icon, image, unique,
+            return this.transactionCreator.createIssueStatusTransaction(creator, linkTo, name, description, icon, image, unique,
                     feePow);
         }
     }
 
-    public Transaction issueUnion(PrivateKeyAccount creator, String name, long birthday, long parent,
+    public Transaction issueTemplate(PrivateKeyAccount creator, ExLink linkTo, int feePow, TemplateCls template) {
+        // CREATE ONLY ONE TRANSACTION AT A TIME
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createIssueTemplateTransaction(creator, linkTo, feePow, template);
+        }
+    }
+
+    public Transaction issueTemplate(PrivateKeyAccount creator, ExLink linkTo, String name, String description, byte[] icon,
+                                     byte[] image, int feePow) {
+        // CREATE ONLY ONE TRANSACTION AT A TIME
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createIssueTemplateTransaction(creator, linkTo, name, description, icon, image,
+                    feePow);
+        }
+    }
+
+    public Transaction issueUnion(PrivateKeyAccount creator, ExLink linkTo, String name, long birthday, long parent,
                                   String description, byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueUnionTransaction(creator, name, birthday, parent, description,
+            return this.transactionCreator.createIssueUnionTransaction(creator, linkTo, name, birthday, parent, description,
                     icon, image, feePow);
         }
     }
@@ -3276,7 +3395,7 @@ public class Controller extends Observable {
         }
     }
 
-    public Pair<Integer, Transaction> make_R_Send(String creatorStr, Account creator, ExLink exLink, String recipientStr,
+    public Pair<Integer, Transaction> make_R_Send(String creatorStr, Account creator, ExLink linkTo, String recipientStr,
                                                   int feePow, long assetKey, boolean checkAsset, BigDecimal amount, boolean needAmount,
                                                   String title, String message, int messagecode, boolean encrypt, long timestamp) {
 
@@ -3391,26 +3510,26 @@ public class Controller extends Observable {
         }
 
         // CREATE RSend
-        return new Pair<Integer, Transaction>(Transaction.VALIDATE_OK, this.r_Send(privateKeyAccount, exLink, feePow, recipient,
+        return new Pair<Integer, Transaction>(Transaction.VALIDATE_OK, this.r_Send(privateKeyAccount, linkTo, feePow, recipient,
                 assetKey, amount, title, messageBytes, isTextByte, encrypted, timestamp));
 
     }
 
-    public Transaction r_Send(PrivateKeyAccount sender, ExLink exLink, int feePow,
+    public Transaction r_Send(PrivateKeyAccount sender, ExLink linkTo, int feePow,
                               Account recipient, long key, BigDecimal amount, String title, byte[] message, byte[] isText,
                               byte[] encryptMessage, long timestamp) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Send(sender, exLink, recipient, key, amount, feePow, title, message, isText,
+            return this.transactionCreator.r_Send(sender, linkTo, recipient, key, amount, feePow, title, message, isText,
                     encryptMessage, timestamp);
         }
     }
 
     public Transaction r_Send(byte version, byte property1, byte property2,
-                              PrivateKeyAccount sender, ExLink exLink, int feePow,
+                              PrivateKeyAccount sender, ExLink linkTo, int feePow,
                               Account recipient, long key, BigDecimal amount, String title, byte[] message, byte[] isText,
                               byte[] encryptMessage) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Send(version, property1, property2, sender, recipient, key, amount, exLink, feePow,
+            return this.transactionCreator.r_Send(version, property1, property2, sender, recipient, key, amount, linkTo, feePow,
                     title, message, isText, encryptMessage);
         }
     }
@@ -3423,10 +3542,18 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction r_SertifyPerson(int version, int forDeal, PrivateKeyAccount creator, int feePow, long key,
-                                       List<PublicKeyAccount> userAccounts, int add_day) {
+    public Transaction r_CertifyPubKeysPerson(int version, PrivateKeyAccount creator, ExLink linkTo,
+                                              int feePow, long key, PublicKeyAccount publicKey, int add_day) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_SertifyPerson(version, forDeal, creator, feePow, key, userAccounts,
+            return this.transactionCreator.r_CertifyPubKeysPerson(version, creator, linkTo, feePow, key, publicKey,
+                    add_day);
+        }
+    }
+
+    public Transaction r_CertifyPubKeysPerson(int version, int forDeal, PrivateKeyAccount creator, int feePow, long key,
+                                              List<PublicKeyAccount> userAccounts, int add_day) {
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.r_CertifyPubKeysPerson(version, forDeal, creator, feePow, key, userAccounts,
                     add_day);
         }
     }

@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.erachain.controller.Controller;
 import org.erachain.core.BlockChain;
+import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.lang.Lang;
 import org.erachain.network.Peer;
@@ -44,6 +45,8 @@ public class Settings {
 
     // FOR TEST by default
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
+
+    public final static PublicKeyAccount FEE_ASSET_EMITTER = new PublicKeyAccount("DW21hKJ9CPSWruV7gbuJLdS6AfyG7XWgoKtvst4oDimy");
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
             Arrays.asList("7BAZsQnps7cVMvUvgUw2rj9oVtb3WGZFHG", "2500000", 0), // 2Mh5ntMBForLYqwdjugRAGyzepR252ca6ChjQL6EXtYU
@@ -228,7 +231,7 @@ public class Settings {
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
-        EXCHANGE_IN_OUT = isMainNet();
+        EXCHANGE_IN_OUT = isMainNet() || true;
 
         File file = new File("");
         //TRY READ PEERS.JSON

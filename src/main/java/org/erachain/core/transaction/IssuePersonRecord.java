@@ -5,6 +5,7 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.item.persons.PersonFactory;
@@ -30,40 +31,32 @@ public class IssuePersonRecord extends IssueItemRecord {
     public static final int MAX_DESCRIPTION_LENGTH = 1 << 15;
 
 
-    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, PersonCls person, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, person, feePow, timestamp, reference);
+    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, linkTo, person, feePow, timestamp, reference);
     }
 
-    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, PersonCls person, byte feePow, long timestamp, Long reference, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, person, feePow, timestamp, reference, signature);
+    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte feePow, long timestamp, Long reference, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, person, feePow, timestamp, reference, signature);
     }
 
-    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, PersonCls person, byte feePow, long timestamp,
+    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte feePow, long timestamp,
                              Long reference, byte[] signature, long seqNo, long feeLong) {
-        super(typeBytes, NAME_ID, creator, person, feePow, timestamp, reference, signature);
+        super(typeBytes, NAME_ID, creator, linkTo, person, feePow, timestamp, reference, signature);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
     }
 
-    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, PersonCls person, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, person, (byte) 0, 0l, null, signature);
+    public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, person, (byte) 0, 0L, null, signature);
     }
 
     public IssuePersonRecord(PublicKeyAccount creator, PersonCls person, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, person, feePow, timestamp, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, person, feePow, timestamp, reference, signature);
     }
 
-    public IssuePersonRecord(PublicKeyAccount creator, PersonCls person, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, person, (byte) 0, 0l, null, signature);
-    }
-
-    public IssuePersonRecord(PublicKeyAccount creator, PersonCls person, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, person, feePow, timestamp, reference);
-    }
-
-    public IssuePersonRecord(PublicKeyAccount creator, PersonCls person) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, person, (byte) 0, 0l, null);
+    public IssuePersonRecord(PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte feePow, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, person, feePow, timestamp, reference);
     }
 
     //GETTERS/SETTERS
@@ -117,6 +110,14 @@ public class IssuePersonRecord extends IssueItemRecord {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink linkTo;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            linkTo = ExLink.parse(data, position);
+            position += linkTo.length();
+        } else {
+            linkTo = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -159,9 +160,9 @@ public class IssuePersonRecord extends IssueItemRecord {
         }
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new IssuePersonRecord(typeBytes, creator, person, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+            return new IssuePersonRecord(typeBytes, creator, linkTo, person, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
         } else {
-            return new IssuePersonRecord(typeBytes, creator, person, signatureBytes);
+            return new IssuePersonRecord(typeBytes, creator, linkTo, person, signatureBytes);
         }
     }
 
@@ -372,10 +373,10 @@ public class IssuePersonRecord extends IssueItemRecord {
 
         if (person.isAlive(this.timestamp)) {
             // IF PERSON is LIVE
-            return calcCommonFee() >> 1;
+            return super.calcBaseFee() >> 1;
         }
 
         // is DEAD
-        return calcCommonFee();
+        return super.calcBaseFee();
     }
 }

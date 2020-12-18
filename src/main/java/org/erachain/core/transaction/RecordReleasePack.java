@@ -7,6 +7,7 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.datachain.DCSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,7 +29,7 @@ public class RecordReleasePack extends Transaction {
     private List<Transaction> transactions;
 
     public RecordReleasePack(byte[] typeBytes, PublicKeyAccount creator, List<Transaction> transactions, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
         this.transactions = transactions;
     }
 
@@ -105,6 +106,14 @@ public class RecordReleasePack extends Transaction {
         byte[] creatorBytes = Arrays.copyOfRange(data, position, position + CREATOR_LENGTH);
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
+
+        ExLink exLink;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            exLink = ExLink.parse(data, position);
+            position += exLink.length();
+        } else {
+            exLink = null;
+        }
 
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
@@ -218,6 +227,9 @@ public class RecordReleasePack extends Transaction {
             base_len = BASE_LENGTH_AS_DBRECORD;
         else
             base_len = BASE_LENGTH;
+
+        if (exLink != null)
+            base_len += exLink.length();
 
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
@@ -336,11 +348,6 @@ public class RecordReleasePack extends Transaction {
         }
 
         return assetAmount;
-    }
-
-    @Override
-    public long calcBaseFee() {
-        return calcCommonFee();
     }
 
 }

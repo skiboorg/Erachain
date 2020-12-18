@@ -12,6 +12,7 @@ import org.erachain.core.block.Block;
 import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
@@ -30,7 +31,7 @@ import java.util.*;
 // typeBytes[1] - version =0 - not need sign by person;
 // 		 =1 - need sign by person
 // typeBytes[2] - size of personalized accounts
-public class RSertifyPubKeys extends Transaction implements Itemable {
+public class RCertifyPubKeys extends Transaction implements Itemable {
 
     private static final byte TYPE_ID = (byte) Transaction.CERTIFY_PUB_KEYS_TRANSACTION;
     private static final String NAME_ID = "Certify Person";
@@ -46,56 +47,64 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
     protected Long key; // PERSON KEY
     protected PersonCls person;
     protected Integer add_day; // in days
-    protected List<PublicKeyAccount> sertifiedPublicKeys;
-    protected List<byte[]> sertifiedSignatures;
+    protected List<PublicKeyAccount> certifiedPublicKeys;
+    protected List<byte[]> certifiedSignatures;
 
-    public RSertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, ExLink exLink, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, exLink, feePow, timestamp, reference);
 
         this.key = key;
-        this.sertifiedPublicKeys = sertifiedPublicKeys;
+        this.certifiedPublicKeys = certifiedPublicKeys;
         this.add_day = add_day;
     }
 
-    public RSertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, (byte) version, (byte) sertifiedPublicKeys.size(), 0}, creator, feePow, key,
-                sertifiedPublicKeys,
+        this(new byte[]{TYPE_ID, (byte) version, (byte) certifiedPublicKeys.size(), 0}, creator, null, feePow, key,
+                certifiedPublicKeys,
+                add_day, timestamp, reference);
+    }
+
+    public RCertifyPubKeys(int version, PublicKeyAccount creator, ExLink exLink, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
+                           int add_day, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, (byte) version, (byte) certifiedPublicKeys.size(), 0}, creator, null, feePow, key,
+                certifiedPublicKeys,
                 add_day, timestamp, reference);
     }
 
     // set default date
-    public RSertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, (byte) version, (byte) sertifiedPublicKeys.size(), 0}, creator, feePow, key,
-                sertifiedPublicKeys,
+        this(new byte[]{TYPE_ID, (byte) version, (byte) certifiedPublicKeys.size(), 0}, creator, null, feePow, key,
+                certifiedPublicKeys,
                 0, timestamp, reference);
     }
 
-    public RSertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, long timestamp, Long reference, byte[] signature,
-                           List<byte[]> sertifiedSignatures) {
-        this(typeBytes, creator, feePow, key,
-                sertifiedPublicKeys,
+                           List<byte[]> certifiedSignatures) {
+        this(typeBytes, creator, null, feePow, key,
+                certifiedPublicKeys,
                 add_day, timestamp, reference);
         this.signature = signature;
-        this.sertifiedSignatures = sertifiedSignatures;
+        this.certifiedSignatures = certifiedSignatures;
     }
 
-    public RSertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, ExLink exLink, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, long timestamp, Long reference, byte[] signature, long feeLong,
-                           long seqNo, List<byte[]> sertifiedSignatures) {
-        this(typeBytes, creator, feePow, key,
-                sertifiedPublicKeys,
+                           long seqNo, List<byte[]> certifiedSignatures) {
+        this(typeBytes, creator, exLink, feePow, key,
+                certifiedPublicKeys,
                 add_day, timestamp, reference);
         this.signature = signature;
-        this.sertifiedSignatures = sertifiedSignatures;
+        this.certifiedSignatures = certifiedSignatures;
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
@@ -103,33 +112,33 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
 
     // as pack
-    public RSertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(byte[] typeBytes, PublicKeyAccount creator, ExLink exLink, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, byte[] signature,
-                           List<byte[]> sertifiedSignatures) {
-        this(typeBytes, creator, (byte) 0, key,
-                sertifiedPublicKeys,
+                           List<byte[]> certifiedSignatures) {
+        this(typeBytes, creator, exLink, (byte) 0, key,
+                certifiedPublicKeys,
                 add_day, 0l, null);
         this.signature = signature;
-        this.sertifiedSignatures = sertifiedSignatures;
+        this.certifiedSignatures = certifiedSignatures;
     }
 
-    public RSertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(int version, PublicKeyAccount creator, byte feePow, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, long timestamp, Long reference, byte[] signature,
                            byte[] userSignature1, byte[] userSignature2, byte[] userSignature3) {
-        this(new byte[]{TYPE_ID, (byte) version, (byte) sertifiedPublicKeys.size(), 0}, creator, feePow, key,
-                sertifiedPublicKeys,
+        this(new byte[]{TYPE_ID, (byte) version, (byte) certifiedPublicKeys.size(), 0}, creator, null, feePow, key,
+                certifiedPublicKeys,
                 add_day, timestamp, reference);
     }
 
     // as pack
-    public RSertifyPubKeys(int version, PublicKeyAccount creator, long key,
-                           List<PublicKeyAccount> sertifiedPublicKeys,
+    public RCertifyPubKeys(int version, PublicKeyAccount creator, long key,
+                           List<PublicKeyAccount> certifiedPublicKeys,
                            int add_day, byte[] signature,
                            byte[] userSignature1, byte[] userSignature2, byte[] userSignature3) {
-        this(new byte[]{TYPE_ID, (byte) version, (byte) sertifiedPublicKeys.size(), 0}, creator, (byte) 0, key,
-                sertifiedPublicKeys,
+        this(new byte[]{TYPE_ID, (byte) version, (byte) certifiedPublicKeys.size(), 0}, creator, null, (byte) 0, key,
+                certifiedPublicKeys,
                 add_day, 0l, null);
     }
 
@@ -200,6 +209,14 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink exLink;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            exLink = ExLink.parse(data, position);
+            position += exLink.length();
+        } else {
+            exLink = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -232,16 +249,16 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         position += KEY_LENGTH;
 
         //byte[] item;
-        List<PublicKeyAccount> sertifiedPublicKeys = new ArrayList<PublicKeyAccount>();
-        List<byte[]> sertifiedSignatures = new ArrayList<byte[]>();
+        List<PublicKeyAccount> certifiedPublicKeys = new ArrayList<PublicKeyAccount>();
+        List<byte[]> certifiedSignatures = new ArrayList<byte[]>();
         for (int i = 0; i < getPublicKeysSize(typeBytes); i++) {
             //READ USER ACCOUNT
-            sertifiedPublicKeys.add(new PublicKeyAccount(Arrays.copyOfRange(data, position, position + USER_ADDRESS_LENGTH)));
+            certifiedPublicKeys.add(new PublicKeyAccount(Arrays.copyOfRange(data, position, position + USER_ADDRESS_LENGTH)));
             position += USER_ADDRESS_LENGTH;
 
             if (getVersion(typeBytes) == 1) {
                 //READ USER SIGNATURE
-                sertifiedSignatures.add(Arrays.copyOfRange(data, position, position + SIGNATURE_LENGTH));
+                certifiedSignatures.add(Arrays.copyOfRange(data, position, position + SIGNATURE_LENGTH));
                 position += SIGNATURE_LENGTH;
             }
         }
@@ -251,15 +268,15 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         position += DATE_DAY_LENGTH;
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new RSertifyPubKeys(typeBytes, creator, feePow, key,
-                    sertifiedPublicKeys,
+            return new RCertifyPubKeys(typeBytes, creator, exLink, feePow, key,
+                    certifiedPublicKeys,
                     add_day, timestamp, reference, signature, feeLong,
-                    seqNo, sertifiedSignatures);
+                    seqNo, certifiedSignatures);
         } else {
-            return new RSertifyPubKeys(typeBytes, creator, key,
-                    sertifiedPublicKeys,
+            return new RCertifyPubKeys(typeBytes, creator, exLink, key,
+                    certifiedPublicKeys,
                     add_day, signature,
-                    sertifiedSignatures);
+                    certifiedSignatures);
         }
 
     }
@@ -272,38 +289,41 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     @Override
     public List<PublicKeyAccount> getPublicKeys() {
-        return this.sertifiedPublicKeys;
+        return this.certifiedPublicKeys;
     }
 
-    public List<PublicKeyAccount> getSertifiedPublicKeys() {
-        return this.sertifiedPublicKeys;
+    public List<PublicKeyAccount> getCertifiedPublicKeys() {
+        return this.certifiedPublicKeys;
     }
 
-    public List<String> getSertifiedPublicKeysB58() {
+    public List<String> getCertifiedPublicKeysB58() {
         List<String> pbKeys = new ArrayList<String>();
-        for (PublicKeyAccount key : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount key : this.certifiedPublicKeys) {
             pbKeys.add(Base58.encode(key.getPublicKey()));
         }
         ;
         return pbKeys;
     }
 
-    public List<byte[]> getSertifiedSignatures() {
-        return this.sertifiedSignatures;
+    public List<byte[]> getCertifiedSignatures() {
+        return this.certifiedSignatures;
     }
 
-    public List<String> getSertifiedSignaturesB58() {
+    public List<String> getCertifiedSignaturesB58() {
         List<String> items = new ArrayList<String>();
-        for (byte[] item : this.sertifiedSignatures) {
+        if (this.certifiedSignatures == null)
+            return items;
+
+        for (byte[] item : this.certifiedSignatures) {
             items.add(Base58.encode(item));
         }
-        ;
+
         return items;
     }
 
     @Override
     public List<byte[]> getOtherSignatures() {
-        return sertifiedSignatures;
+        return certifiedSignatures;
     }
 
     public int getAddDay() {
@@ -328,7 +348,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
     @Override
     public String viewRecipient() {
-        return Base58.encode(this.sertifiedPublicKeys.get(0).getPublicKey());
+        return Base58.encode(this.certifiedPublicKeys.get(0).getPublicKey());
     }
 
     //////////////
@@ -341,8 +361,8 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         //ADD CREATOR/SERVICE/DATA
         transaction.put("key", this.key);
         //List<String> pbKeys = new ArrayList<String>();
-        transaction.put("sertified_public_keys", this.getSertifiedPublicKeysB58());
-        transaction.put("sertified_signatures", this.getSertifiedSignaturesB58());
+        transaction.put("certified_public_keys", this.getCertifiedPublicKeysB58());
+        transaction.put("certified_signatures", this.getCertifiedSignaturesB58());
         transaction.put("add_day", this.add_day);
 
         return transaction;
@@ -363,14 +383,14 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
             data = Bytes.concat(data, Ints.toByteArray(port));
         }
 
-        if (this.sertifiedSignatures == null) this.sertifiedSignatures = new ArrayList<byte[]>();
+        if (this.certifiedSignatures == null) this.certifiedSignatures = new ArrayList<byte[]>();
 
         byte[] publicKey;
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             for (PrivateKeyAccount privateAccount : userPrivateAccounts) {
                 publicKey = privateAccount.getPublicKey();
                 if (Arrays.equals((publicKey), publicAccount.getPublicKey())) {
-                    this.sertifiedSignatures.add(Crypto.getInstance().sign(privateAccount, data));
+                    this.certifiedSignatures.add(Crypto.getInstance().sign(privateAccount, data));
                     break;
                 }
             }
@@ -395,11 +415,11 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
         //WRITE USER PUBLIC KEYS
         int i = 0;
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             data = Bytes.concat(data, publicAccount.getPublicKey());
 
             if (withSignature & this.getVersion() == 1) {
-                data = Bytes.concat(data, this.sertifiedSignatures.get(i++));
+                data = Bytes.concat(data, this.certifiedSignatures.get(i++));
             }
         }
 
@@ -423,10 +443,13 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         else
             base_len = BASE_LENGTH;
 
+        if (exLink != null)
+            base_len += exLink.length();
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
-        int accountsSize = this.sertifiedPublicKeys.size();
+        int accountsSize = this.certifiedPublicKeys.size();
         base_len += accountsSize * PublicKeyAccount.PUBLIC_KEY_LENGTH;
         return this.typeBytes[1] == 1 ? base_len + Transaction.SIGNATURE_LENGTH * accountsSize : base_len;
     }
@@ -442,14 +465,14 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
         int pAccountsSize = 0;
         if (this.getVersion() == 1) {
-            pAccountsSize = this.sertifiedPublicKeys.size();
-            if (pAccountsSize > this.sertifiedSignatures.size())
+            pAccountsSize = this.certifiedPublicKeys.size();
+            if (pAccountsSize > this.certifiedSignatures.size())
                 return false;
 
             byte[] singItem;
             for (int i = 0; i < pAccountsSize; i++) {
-                //if (this.sertifiedSignatures.e(i);
-                singItem = this.sertifiedSignatures.get(i);
+                //if (this.certifiedSignatures.e(i);
+                singItem = this.certifiedSignatures.get(i);
                 if (singItem == null || singItem.length != Crypto.SIGNATURE_LENGTH
                         || singItem == new byte[Crypto.SIGNATURE_LENGTH]) {
                     return false;
@@ -476,7 +499,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         // if use signs from person
         if (this.getVersion() == 1) {
             for (int i = 0; i < pAccountsSize; i++) {
-                if (!crypto.verify(this.sertifiedPublicKeys.get(i).getPublicKey(), this.sertifiedSignatures.get(i), data))
+                if (!crypto.verify(this.certifiedPublicKeys.get(i).getPublicKey(), this.certifiedSignatures.get(i), data))
                     return false;
             }
         }
@@ -523,7 +546,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
             return Transaction.ITEM_PERSON_IS_DEAD;
 
         ///////// PUBLIC KEYS
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             //CHECK IF PERSON PUBLIC KEY IS VALID
             if (!publicAccount.isValid()) {
                 return INVALID_PUBLIC_KEY;
@@ -532,11 +555,11 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
             Tuple4<Long, Integer, Integer, Integer> personDuration = publicAccount.getPersonDuration(dcSet);
 
             if (personDuration != null) {
-                // если этот ключ уже удостоврен то его изменять может только сам владелец
-                // снять удостоврение ключа может только сам владелец
+                // если этот ключ уже удостоверен, то его изменять может только сам владелец
+                // снять удостоверение ключа может только сам владелец
                 // или продлить только сам владелец может
                 if (!personDuration.a.equals(this.key)) {
-                    return NOT_SELF_PERSONALIZY;
+                    return INVALID_PERSONALIZY_ANOTHER_PERSON;
                 }
             } else {
                 if (this.add_day < 0) {
@@ -620,7 +643,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         if (!personalized) {
             // IT IS NOT VOUCHED PERSON
 
-            PublicKeyAccount pkAccount = this.sertifiedPublicKeys.get(0);
+            PublicKeyAccount pkAccount = this.certifiedPublicKeys.get(0);
 
             //////////// FIND Issuer (registrar) this PERSON
             // FIND person
@@ -707,7 +730,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
         // SET PERSON ADDRESS
         String address;
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             address = publicAccount.getAddress();
             dcSet.getAddressPersonMap().addItem(publicAccount.getShortAddressBytes(), itemA);
             dcSet.getPersonAddressMap().addItem(this.key, address, itemP);
@@ -732,7 +755,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
 
         //UPDATE RECIPIENT
         String address;
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             address = publicAccount.getAddress();
             dcSet.getAddressPersonMap().removeItem(publicAccount.getShortAddressBytes());
             dcSet.getPersonAddressMap().removeItem(this.key, address);
@@ -760,7 +783,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
         if (!personalized) {
             // IT WAS NOT VOUCHED PERSON BEFORE
 
-            PublicKeyAccount pkAccount = this.sertifiedPublicKeys.get(0);
+            PublicKeyAccount pkAccount = this.certifiedPublicKeys.get(0);
 
             //////////// FIND Issuer (registrar) this PERSON
             // FIND person
@@ -817,7 +840,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
     @Override
     public HashSet<Account> getRecipientAccounts() {
         HashSet<Account> accounts = new HashSet<Account>(3, 1);
-        accounts.addAll(this.sertifiedPublicKeys);
+        accounts.addAll(this.certifiedPublicKeys);
 
         return accounts;
     }
@@ -826,7 +849,7 @@ public class RSertifyPubKeys extends Transaction implements Itemable {
     public boolean isInvolved(Account account) {
         if (account.equals(creator)) return true;
 
-        for (PublicKeyAccount publicAccount : this.sertifiedPublicKeys) {
+        for (PublicKeyAccount publicAccount : this.certifiedPublicKeys) {
             if (publicAccount.equals(account))
                 return true;
         }

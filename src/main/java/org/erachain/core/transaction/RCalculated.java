@@ -29,7 +29,7 @@ public class RCalculated extends TransactionAmount {
 
     public RCalculated(byte[] typeBytes, Account recipient, long key,
                        BigDecimal amount, String message, long txReference, long seqNo) {
-        super(typeBytes, NAME_ID, null, (byte) 0, recipient, amount, key, 0l, txReference);
+        super(typeBytes, NAME_ID, null, null, (byte) 0, recipient, amount, key, 0l, txReference);
 
         this.message = message;
         if (message == null)
@@ -82,6 +82,16 @@ public class RCalculated extends TransactionAmount {
 
     @Override
     public String viewSubTypeName() {
+        return "";
+    }
+
+    @Override
+    public String viewFullTypeName() {
+        return viewTypeName();
+    }
+
+    @Override
+    public String viewActionType() {
         return "";
     }
 

@@ -377,8 +377,8 @@ public class OnDealClick {
             case Transaction.CREATOR_NOT_PERSONALIZED:
                 mess = "Creator Account is not personalized";
                 break;
-            case Transaction.NOT_SELF_PERSONALIZY:
-                mess = "Not Self personalization";
+            case Transaction.INVALID_PERSONALIZY_ANOTHER_PERSON:
+                mess = "Public Key already certified to another Person";
                 break;
             case Transaction.PUB_KEY_NOT_PERSONALIZED:
                 mess = "Public Key is not personalized";
@@ -391,7 +391,7 @@ public class OnDealClick {
                 mess = "Duplicate key";
                 break;
             case Transaction.ITEM_DUPLICATE:
-                mess = "Invalid duplicte item";
+                mess = "Invalid duplicate item";
                 break;
             case Transaction.INVALID_TIMESTAMP_START:
                 mess = "Invalid start timestamp item";

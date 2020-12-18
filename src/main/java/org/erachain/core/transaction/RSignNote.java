@@ -11,6 +11,7 @@ import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Base64;
 import org.erachain.core.exdata.ExData;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.exdata.exLink.ExLinkAuthor;
 import org.erachain.core.exdata.exLink.ExLinkSource;
 import org.erachain.core.item.ItemCls;
@@ -55,7 +56,7 @@ public class RSignNote extends Transaction implements Itemable {
 
     public RSignNote(byte[] typeBytes, PublicKeyAccount creator, byte feePow, long templateKey, byte[] data, long timestamp, Long reference) {
 
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+        super(typeBytes, NAME_ID, creator, null, feePow, timestamp, reference);
 
         this.key = templateKey;
         this.data = data;
@@ -182,6 +183,12 @@ public class RSignNote extends Transaction implements Itemable {
     }
 
     @Override
+    public ExLink getExLink() {
+        // нельзя использовать внутренюю от Трнзакции - так как она начнет по другому байт-код делать и парсить
+        return extendedData.getExLink();
+    }
+
+    @Override
     public String getExTags() {
         if (extendedData != null) {
             byte[] exTags = extendedData.getTags();
@@ -272,8 +279,11 @@ public class RSignNote extends Transaction implements Itemable {
 
     @Override
     public long getKey() {
-        if (typeBytes[1] > 1) {
+        if (this.key == 0 && typeBytes[1] > 1) {
             // если новый порядок - ключ в Данных
+            if (extendedData == null) {
+                parseDataV2WithoutFiles();
+            }
             return extendedData.getTemplateKey();
         }
         return this.key;
@@ -419,12 +429,12 @@ public class RSignNote extends Transaction implements Itemable {
 
         byte[] data = super.toBytes(forDeal, withSignature);
 
-        if (typeBytes[1] < 3 && this.key > 0) {
+        if (forDeal == FOR_DB_RECORD
+                || typeBytes[1] < 3 && this.key > 0) {
             //WRITE KEY
             byte[] keyBytes = Longs.toByteArray(this.key);
             keyBytes = Bytes.ensureCapacity(keyBytes, KEY_LENGTH, 0);
             data = Bytes.concat(data, keyBytes);
-
         }
 
         if (this.data != null) {
@@ -491,6 +501,10 @@ public class RSignNote extends Transaction implements Itemable {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        //
+        // Transaction.exLink not USED here
+        //
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -520,7 +534,8 @@ public class RSignNote extends Transaction implements Itemable {
         //////// local parameters
 
         long key = 0L;
-        if (typeBytes[1] < 3 && hasTemplate(typeBytes)) {
+        if (forDeal == FOR_DB_RECORD
+                || typeBytes[1] < 3 && hasTemplate(typeBytes)) {
             //READ KEY
             byte[] keyBytes = Arrays.copyOfRange(data, position, position + KEY_LENGTH);
             key = Longs.fromByteArray(keyBytes);
@@ -649,7 +664,8 @@ public class RSignNote extends Transaction implements Itemable {
                 add_len += IS_TEXT_LENGTH + ENCRYPTED_LENGTH + DATA_SIZE_LENGTH + this.data.length;
             }
 
-        if (this.key > 0 && getVersion() < 3)
+        if (forDeal == FOR_DB_RECORD
+                || this.key > 0 && getVersion() < 3)
             add_len += KEY_LENGTH;
 
         return base_len + add_len;
@@ -673,7 +689,8 @@ public class RSignNote extends Transaction implements Itemable {
         }
 
         int result;
-        if (data != null && data.length < (1<<16)) {
+        if (height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
+                && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
             // не учитываем комиссию если размер маленький
             result = super.isValid(forDeal, flags | NOT_VALIDATE_FLAG_FEE);
         } else {
@@ -759,25 +776,30 @@ public class RSignNote extends Transaction implements Itemable {
     @Override
     public long calcBaseFee() {
 
-        long fee = calcCommonFee();
-        byte[][] allHashes = extendedData.getAllHashesAsBytes(true);
+        if (height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
+                && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
+            return 0L;
+        } else {
+            long fee = super.calcBaseFee();
+            byte[][] allHashes = extendedData.getAllHashesAsBytes(true);
 
-        if (allHashes != null) {
-            fee += allHashes.length * 100 * BlockChain.FEE_PER_BYTE;
+            if (allHashes != null) {
+                fee += allHashes.length * 100 * BlockChain.FEE_PER_BYTE;
+            }
+
+            if (getExLink() != null)
+                fee += 100 * BlockChain.FEE_PER_BYTE;
+
+            if (extendedData.hasAuthors()) {
+                fee += extendedData.getAuthors().length * 100 * BlockChain.FEE_PER_BYTE;
+            }
+
+            if (extendedData.hasSources()) {
+                fee += extendedData.getSources().length * 100 * BlockChain.FEE_PER_BYTE;
+            }
+
+            return fee;
         }
-
-        if (exLink != null)
-            fee += 100 * BlockChain.FEE_PER_BYTE;
-
-        if (extendedData.hasAuthors()) {
-            fee += extendedData.getAuthors().length * 100 * BlockChain.FEE_PER_BYTE;
-        }
-
-        if (extendedData.hasSources()) {
-            fee += extendedData.getSources().length * 100 * BlockChain.FEE_PER_BYTE;
-        }
-
-        return fee;
     }
 
     public void parseDataV2WithoutFiles() {
@@ -793,7 +815,6 @@ public class RSignNote extends Transaction implements Itemable {
             }
 
             extendedData.resolveValues(dcSet);
-            exLink = extendedData.getExLink();
         }
     }
 
@@ -813,7 +834,6 @@ public class RSignNote extends Transaction implements Itemable {
             }
 
             extendedData.resolveValues(dcSet);
-            exLink = extendedData.getExLink();
         }
     }
 

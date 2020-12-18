@@ -7,6 +7,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -24,23 +25,23 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
     protected ItemCls item;
     protected Long key = 0L;
 
-    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, feePow, timestamp, reference);
+    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ExLink linkTo, ItemCls item, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, linkTo, feePow, timestamp, reference);
         this.item = item;
         if (item.getKey() != 0)
             key = item.getKey();
     }
 
-    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(typeBytes, NAME_ID, creator, item, feePow, timestamp, reference);
+    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ExLink linkTo, ItemCls item, byte feePow, long timestamp, Long reference, byte[] signature) {
+        this(typeBytes, NAME_ID, creator, linkTo, item, feePow, timestamp, reference);
         this.signature = signature;
-        this.item.setReference(signature);
+        this.item.setReference(signature, dbRef);
     }
 
-    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte[] signature) {
-        this(typeBytes, NAME_ID, creator, item, (byte) 0, 0L, null);
+    public IssueItemRecord(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ExLink linkTo, ItemCls item, byte[] signature) {
+        this(typeBytes, NAME_ID, creator, linkTo, item, (byte) 0, 0L, null);
         this.signature = signature;
-        this.item.setReference(signature);
+        this.item.setReference(signature, dbRef);
     }
 
     //GETTERS/SETTERS
@@ -164,21 +165,32 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
 
     @Override
     public int getDataLength(int forDeal, boolean withSignature) {
-        // not include item reference
 
         int base_len;
-        if (forDeal == FOR_MYPACK)
-            base_len = BASE_LENGTH_AS_MYPACK;
-        else if (forDeal == FOR_PACK)
-            base_len = BASE_LENGTH_AS_PACK;
-        else if (forDeal == FOR_DB_RECORD)
-            base_len = BASE_LENGTH_AS_DBRECORD + KEY_LENGTH;
-        else
-            base_len = BASE_LENGTH;
 
-        if (!withSignature)
-            base_len -= SIGNATURE_LENGTH;
+        if (true) {
+            base_len = super.getDataLength(forDeal, withSignature);
+            if (forDeal == FOR_DB_RECORD)
+                base_len += KEY_LENGTH;
+        } else {
+            if (forDeal == FOR_MYPACK)
+                base_len = BASE_LENGTH_AS_MYPACK;
+            else if (forDeal == FOR_PACK)
+                base_len = BASE_LENGTH_AS_PACK;
+            else if (forDeal == FOR_DB_RECORD)
+                base_len = BASE_LENGTH_AS_DBRECORD + KEY_LENGTH;
+            else
+                base_len = BASE_LENGTH;
 
+            if (exLink != null)
+                base_len += exLink.length();
+
+            if (!withSignature)
+                base_len -= SIGNATURE_LENGTH;
+
+        }
+
+        // not include item reference
         return base_len + this.item.getDataLength(false);
 
     }
@@ -257,7 +269,7 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
         //UPDATE CREATOR
         super.process(block, forDeal);
 
-        this.item.setReference(this.signature);
+        this.item.setReference(this.signature, dbRef);
 
         //INSERT INTO DATABASE
         key = this.item.insertToMap(this.dcSet, this.item.getStartKey());

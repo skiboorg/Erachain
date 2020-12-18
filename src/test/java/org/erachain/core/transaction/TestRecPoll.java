@@ -41,6 +41,7 @@ public class TestRecPoll {
     byte FEE_POWER = (byte) 1;
     byte[] pollReference = new byte[64];
     long timestamp = NTP.getTime();
+    long dbRef = 0L;
 
     long flags = 4l;
     //CREATE KNOWN ACCOUNT
@@ -121,7 +122,7 @@ public class TestRecPoll {
         poll = new Poll(certifier, "РСФСР", icon, image, "Россия", options);
 
         //CREATE ISSUE POLL TRANSACTION
-        issuePollTransaction = new IssuePollRecord(certifier, poll, FEE_POWER, timestamp, certifier.getLastTimestamp(db)[0]);
+        issuePollTransaction = new IssuePollRecord(certifier, null, poll, FEE_POWER, timestamp, certifier.getLastTimestamp(db)[0]);
         issuePollTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
 
 
@@ -201,7 +202,7 @@ public class TestRecPoll {
 
         byte[] rawPoll = poll.toBytes(false, false);
         assertEquals(rawPoll.length, poll.getDataLength(false));
-        poll.setReference(new byte[64]);
+        poll.setReference(new byte[64], dbRef);
         rawPoll = poll.toBytes(true, false);
         assertEquals(rawPoll.length, poll.getDataLength(true));
 

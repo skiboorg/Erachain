@@ -5,6 +5,7 @@ import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.ItemFactory;
 import org.erachain.core.item.unions.Union;
@@ -34,8 +35,10 @@ public class TestRecUnion {
     BigDecimal BG_ZERO = BigDecimal.ZERO.setScale(BlockChain.AMOUNT_DEDAULT_SCALE);
     long ERM_KEY = Transaction.RIGHTS_KEY;
     long FEE_KEY = Transaction.FEE_KEY;
+    ExLink linkTo = null;
     //long ALIVE_KEY = StatusCls.ALIVE_KEY;
     byte FEE_POWER = (byte) 1;
+    long dbRef = 0L;
     byte[] unionReference = new byte[64];
     long timestamp = NTP.getTime();
 
@@ -57,8 +60,8 @@ public class TestRecUnion {
     byte[] accountSeed3 = Wallet.generateAccountSeed(seed, nonce++);
     PrivateKeyAccount userAccount3 = new PrivateKeyAccount(accountSeed3);
     String userAddress3 = userAccount3.getAddress();
-    List<PrivateKeyAccount> sertifiedPrivateKeys = new ArrayList<PrivateKeyAccount>();
-    List<PublicKeyAccount> sertifiedPublicKeys = new ArrayList<PublicKeyAccount>();
+    List<PrivateKeyAccount> certifiedPrivateKeys = new ArrayList<PrivateKeyAccount>();
+    List<PublicKeyAccount> certifiedPublicKeys = new ArrayList<PublicKeyAccount>();
     UnionCls unionGeneral;
     UnionCls union;
     long unionKey = -1;
@@ -108,15 +111,15 @@ public class TestRecUnion {
 
 
         //CREATE ISSUE UNION TRANSACTION
-        issueUnionTransaction = new IssueUnionRecord(certifier, union, FEE_POWER, timestamp, certifier.getLastTimestamp(db)[0]);
+        issueUnionTransaction = new IssueUnionRecord(certifier, linkTo, union, FEE_POWER, timestamp, certifier.getLastTimestamp(db)[0]);
 
-        sertifiedPrivateKeys.add(userAccount1);
-        sertifiedPrivateKeys.add(userAccount2);
-        sertifiedPrivateKeys.add(userAccount3);
+        certifiedPrivateKeys.add(userAccount1);
+        certifiedPrivateKeys.add(userAccount2);
+        certifiedPrivateKeys.add(userAccount3);
 
-        sertifiedPublicKeys.add(new PublicKeyAccount(userAccount1.getPublicKey()));
-        sertifiedPublicKeys.add(new PublicKeyAccount(userAccount2.getPublicKey()));
-        sertifiedPublicKeys.add(new PublicKeyAccount(userAccount3.getPublicKey()));
+        certifiedPublicKeys.add(new PublicKeyAccount(userAccount1.getPublicKey()));
+        certifiedPublicKeys.add(new PublicKeyAccount(userAccount2.getPublicKey()));
+        certifiedPublicKeys.add(new PublicKeyAccount(userAccount3.getPublicKey()));
 
     }
 
@@ -195,7 +198,7 @@ public class TestRecUnion {
 
         byte[] rawUnion = union.toBytes(false, false);
         assertEquals(rawUnion.length, union.getDataLength(false));
-        union.setReference(new byte[64]);
+        union.setReference(new byte[64], dbRef);
         rawUnion = union.toBytes(true, false);
         assertEquals(rawUnion.length, union.getDataLength(true));
 

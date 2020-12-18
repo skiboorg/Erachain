@@ -3,6 +3,7 @@ package org.erachain.core.transaction;
 import com.google.common.primitives.Longs;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
+import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.templates.TemplateCls;
 import org.erachain.core.item.templates.TemplateFactory;
 
@@ -16,40 +17,40 @@ public class IssueTemplateRecord extends IssueItemRecord {
     private static final byte TYPE_ID = (byte) ISSUE_TEMPLATE_TRANSACTION;
     private static final String NAME_ID = "Issue Template";
 
-    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, TemplateCls template, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, NAME_ID, creator, template, feePow, timestamp, reference);
+    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, TemplateCls template, byte feePow, long timestamp, Long reference) {
+        super(typeBytes, NAME_ID, creator, linkTo, template, feePow, timestamp, reference);
     }
 
-    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, TemplateCls template, byte feePow, long timestamp, Long reference, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, template, feePow, timestamp, reference, signature);
+    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, TemplateCls template, byte feePow, long timestamp, Long reference, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, template, feePow, timestamp, reference, signature);
     }
 
-    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, TemplateCls template, byte feePow,
+    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, TemplateCls template, byte feePow,
                                long timestamp, Long reference, byte[] signature, long seqNo, long feeLong) {
-        super(typeBytes, NAME_ID, creator, template, feePow, timestamp, reference, signature);
+        super(typeBytes, NAME_ID, creator, linkTo, template, feePow, timestamp, reference, signature);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
     }
 
-    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, TemplateCls template, byte[] signature) {
-        super(typeBytes, NAME_ID, creator, template, (byte) 0, 0l, null, signature);
+    public IssueTemplateRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, TemplateCls template, byte[] signature) {
+        super(typeBytes, NAME_ID, creator, linkTo, template, (byte) 0, 0L, null, signature);
     }
 
     public IssueTemplateRecord(PublicKeyAccount creator, TemplateCls template, byte feePow, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, template, feePow, timestamp, reference, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, template, feePow, timestamp, reference, signature);
     }
 
     public IssueTemplateRecord(PublicKeyAccount creator, TemplateCls template, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, template, (byte) 0, 0l, null, signature);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, template, (byte) 0, 0L, null, signature);
     }
 
-    public IssueTemplateRecord(PublicKeyAccount creator, TemplateCls template, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, template, feePow, timestamp, reference);
+    public IssueTemplateRecord(PublicKeyAccount creator, ExLink linkTo, TemplateCls template, byte feePow, long timestamp, Long reference) {
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, template, feePow, timestamp, reference);
     }
 
     public IssueTemplateRecord(PublicKeyAccount creator, TemplateCls template) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, template, (byte) 0, 0l, null);
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, template, (byte) 0, 0L, null);
     }
 
     //GETTERS/SETTERS
@@ -93,6 +94,14 @@ public class IssueTemplateRecord extends IssueItemRecord {
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
         position += CREATOR_LENGTH;
 
+        ExLink linkTo;
+        if ((typeBytes[2] & HAS_EXLINK_MASK) > 0) {
+            linkTo = ExLink.parse(data, position);
+            position += linkTo.length();
+        } else {
+            linkTo = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -135,9 +144,9 @@ public class IssueTemplateRecord extends IssueItemRecord {
         }
 
         if (forDeal > Transaction.FOR_MYPACK) {
-            return new IssueTemplateRecord(typeBytes, creator, template, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
+            return new IssueTemplateRecord(typeBytes, creator, linkTo, template, feePow, timestamp, reference, signatureBytes, seqNo, feeLong);
         } else {
-            return new IssueTemplateRecord(typeBytes, creator, template, signatureBytes);
+            return new IssueTemplateRecord(typeBytes, creator, linkTo, template, signatureBytes);
         }
     }
 

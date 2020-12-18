@@ -25,6 +25,9 @@ public class TransactionTests3AssetsAsPack {
     static Logger LOGGER = LoggerFactory.getLogger(TransactionTests3AssetsAsPack.class.getName());
     static int asPack = Transaction.FOR_NETWORK;
     //Long Transaction.FOR_NETWORK;
+
+    long dbRef = 0L;
+
     long FEE_KEY = 1l;
     byte FEE_POWER = (byte) 1;
     byte[] assetReference = new byte[64];
@@ -78,7 +81,7 @@ public class TransactionTests3AssetsAsPack {
         AssetUnique asset = new AssetUnique(maker, "test", icon, image, "strontje", 0, 8);
 
         //CREATE ISSUE ASSET TRANSACTION
-        Transaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        Transaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         assertEquals(Transaction.VALIDATE_OK, issueAssetTransaction.isValid(Transaction.FOR_NETWORK, flags));
 
@@ -108,12 +111,12 @@ public class TransactionTests3AssetsAsPack {
         byte[] raw = asset.toBytes(includeReference, false);
         assertEquals(raw.length, asset.getDataLength(includeReference));
 
-        asset.setReference(new byte[64]);
+        asset.setReference(new byte[64], dbRef);
         raw = asset.toBytes(true, false);
         assertEquals(raw.length, asset.getDataLength(true));
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.sign(maker, Transaction.FOR_NETWORK);
         issueAssetTransaction.process(gb, Transaction.FOR_NETWORK);
@@ -191,7 +194,7 @@ public class TransactionTests3AssetsAsPack {
         AssetUnique asset = new AssetUnique(maker, "test", icon, image, "strontje", 0, 8);
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.sign(maker, asPack);
 
@@ -228,7 +231,7 @@ public class TransactionTests3AssetsAsPack {
         AssetUnique asset = new AssetUnique(maker, "test", icon, image, "strontje", 0, 8);
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.sign(maker, asPack);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.process(gb, asPack);
@@ -262,7 +265,7 @@ public class TransactionTests3AssetsAsPack {
         AssetUnique asset = new AssetUnique(maker, "test", icon, image, "strontje", 0, 8);
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.sign(maker, asPack);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.process(gb, asPack);
@@ -295,7 +298,7 @@ public class TransactionTests3AssetsAsPack {
         init();
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, timestamp, 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, timestamp, 0l);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.sign(maker, asPack);
         assertEquals(Transaction.VALIDATE_OK, issueAssetTransaction.isValid(Transaction.FOR_NETWORK, flags));
@@ -666,7 +669,7 @@ public class TransactionTests3AssetsAsPack {
         init();
 
         //CREATE ISSUE ASSET TRANSACTION
-        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, asset, FEE_POWER, System.currentTimeMillis(), 0l);
+        IssueAssetTransaction issueAssetTransaction = new IssueAssetTransaction(maker, null, asset, FEE_POWER, System.currentTimeMillis(), 0l);
         issueAssetTransaction.setDC(db, Transaction.FOR_NETWORK, 1, 1, true);
         issueAssetTransaction.sign(maker, asPack);
         assertEquals(Transaction.VALIDATE_OK, issueAssetTransaction.isValid(Transaction.FOR_NETWORK, flags));
