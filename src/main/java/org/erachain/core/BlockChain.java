@@ -350,8 +350,8 @@ public class BlockChain {
     //
 
     public static final int FREE_FEE_LENGTH = 1 << 13;
-    public static final int FREE_FEE_TO_SEQNO = DEMO_MODE ? 1 : -1;
-    public static final int FREE_FEE_FROM_HEIGHT = DEMO_MODE ? 1 : Integer.MAX_VALUE;
+    public static final int FREE_FEE_TO_SEQNO = DEMO_MODE ? 1 : CLONE_MODE? 1 : -1;
+    public static final int FREE_FEE_FROM_HEIGHT = DEMO_MODE ? 1 : CLONE_MODE? 1 : Integer.MAX_VALUE;
 
     /**
      * FEE_KEY used here
@@ -445,7 +445,7 @@ public class BlockChain {
     /**
      * Новый уровень начальных номеров для всех сущностей
      */
-    public static int START_KEY_UP = MAIN_MODE ? 1700000 : DEMO_MODE ? 23000 : Integer.MAX_VALUE;
+    public static int START_KEY_UP = MAIN_MODE ? 1700000 : DEMO_MODE ? 23000 : CLONE_MODE? 15000 : Integer.MAX_VALUE;
     public static int START_KEY_UO_ITEMS = 1 << 17;
 
     //private int target = 0;
