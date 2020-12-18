@@ -139,28 +139,33 @@ public class Start {
 
                 //CREATE JSON OBJECT
                 Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
+                if (Settings.genesisJSON == null) {
+                    throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
+                }
+
                 JSONArray appArray = (JSONArray) Settings.genesisJSON.get(0);
                 Settings.APP_NAME = appArray.get(0).toString();
                 Settings.APP_FULL_NAME = appArray.get(1).toString();
                 JSONArray timeArray = (JSONArray) Settings.genesisJSON.get(1);
                 Settings.genesisStamp = new Long(timeArray.get(0).toString());
 
-                // если там пустой список то включаем "у всех все есть"
-                JSONArray holders = (JSONArray) Settings.genesisJSON.get(2);
-                if (holders.isEmpty()) {
-                    Settings.ERA_COMPU_ALL_UP = true;
-                }
-
-                // CHECK VALID
-                for (int i = 0; i < holders.size(); i++) {
-                    JSONArray holder = (JSONArray) holders.get(i);
-                    // SEND FONDs
-                    Fun.Tuple2<Account, String> accountItem = Account.tryMakeAccount(holder.get(0).toString());
-                    if (accountItem.a == null) {
-                        String error = accountItem.b + " - " + holder.get(0).toString();
-                        LOGGER.error(error);
-                        System.exit(4);
+                try {
+                    // если там пустой список то включаем "у всех все есть"
+                    JSONArray holders = (JSONArray) Settings.genesisJSON.get(2);
+                    if (holders.isEmpty()) {
+                        Settings.ERA_COMPU_ALL_UP = true;
                     }
+
+                    // CHECK VALID
+                    for (int i = 0; i < holders.size(); i++) {
+                        JSONArray holder = (JSONArray) holders.get(i);
+                        // SEND FONDs
+                        Fun.Tuple2<Account, String> accountItem = Account.tryMakeAccount(holder.get(0).toString());
+                        if (accountItem.a == null) {
+                            String error = accountItem.b + " - " + holder.get(0).toString();
+                            LOGGER.error(error);
+                            System.exit(4);
+                        }
 
                         if (holder.size() > 3) {
                             // DEBTORS
@@ -178,6 +183,11 @@ public class Start {
                             }
                         }
                     }
+                } catch (Exception e) {
+                    LOGGER.info("Error while parse JSON " + file.getAbsolutePath() + " - " + e.getMessage());
+                    LOGGER.error(e.getMessage(), e);
+                    System.exit(3);
+                }
 
             } else {
                 // for BRAND CHAIN
