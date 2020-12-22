@@ -26,10 +26,6 @@ public abstract class AssetCls extends ItemCls {
 
     public static final int TYPE_KEY = ItemCls.ASSET_TYPE;
 
-    public final static long START_KEY = ItemCls.START_KEY;
-    public final static long START_KEY_UO_ITEMS = 1 << 20;
-    public static final long MIN_START_KEY = 1000L;
-
     // CORE KEY
     public static final long ERA_KEY = 1L;
     public static final String ERA_ABBREV = "ERA"; // ERA (main rights units)
@@ -286,17 +282,17 @@ public abstract class AssetCls extends ItemCls {
     @Override
     public long START_KEY() {
         if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
-            return BlockChain.START_KEY_UO_ITEMS;
+            return BlockChain.START_KEY_UP_ITEMS;
 
-        return START_KEY;
+        return START_KEY_OLD;
     }
 
     @Override
     public long MIN_START_KEY() {
         if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
-            return BlockChain.START_KEY_UO_ITEMS;
+            return BlockChain.START_KEY_UP_ITEMS;
 
-        return MIN_START_KEY;
+        return MIN_START_KEY_OLD;
     }
 
     @Override
@@ -656,7 +652,7 @@ public abstract class AssetCls extends ItemCls {
     }
 
     public static boolean isUnHoldable(long key, int assetType) {
-        if (key < getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY, AssetCls.MIN_START_KEY)
+        if (key < getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD)
                 || assetType == AS_INSIDE_ASSETS
                 || assetType > AS_OUTSIDE_OTHER_CLAIM
                 && assetType <= AS_INSIDE_OTHER_CLAIM
