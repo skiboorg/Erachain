@@ -1364,6 +1364,13 @@ public class Controller extends Observable {
         Tuple2<Integer, Long> myHWeight = this.getBlockChain().getHWeightFull(dcSet);
         peerInfo.put("h", myHWeight.a);
         peerInfo.put("w", myHWeight.b);
+        JSONObject info = new JSONObject();
+        if (Settings.getInstance().isWebEnabled() && Settings.getInstance().getWebAllowed().length == 0) {
+            // разрешено всем - передадим его
+            info.put("port", Settings.getInstance().getWebPort());
+            info.put("scheme", Settings.getInstance().isWebUseSSL() ? "https" : "http");
+        }
+        peerInfo.put("i", info);
 
         // CheckPointSign
         peerInfo.put("cps", Base58.encode(blockChain.getMyHardCheckPointSign()));
@@ -1591,6 +1598,10 @@ public class Controller extends Observable {
                     Long peerWeight = Long.parseLong(peerIhfo.get("w").toString());
                     peer.setHWeight(new Tuple2<>(peerHeight, peerWeight));
                     peer.setVersion(peerIhfo.get("v").toString());
+                    try {
+                        peer.setNodeInfo((JSONObject) JSONValue.parse(peerIhfo.get("i").toString()));
+                    } catch (Exception e) {
+                    }
 
                 } catch (Exception e) {
                     peer.setVersion(infoStr);
