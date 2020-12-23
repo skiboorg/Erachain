@@ -94,7 +94,7 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "2.1.04";
+    public static String version = "2.1.04.1";
     public static String buildTime = "2020-11-17 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
@@ -1364,6 +1364,13 @@ public class Controller extends Observable {
         Tuple2<Integer, Long> myHWeight = this.getBlockChain().getHWeightFull(dcSet);
         peerInfo.put("h", myHWeight.a);
         peerInfo.put("w", myHWeight.b);
+        JSONObject info = new JSONObject();
+        if (Settings.getInstance().isWebEnabled() && Settings.getInstance().getWebAllowed().length == 0) {
+            // разрешено всем - передадим его
+            info.put("port", Settings.getInstance().getWebPort());
+            info.put("scheme", Settings.getInstance().isWebUseSSL() ? "https" : "http");
+        }
+        peerInfo.put("i", info);
 
         // CheckPointSign
         peerInfo.put("cps", Base58.encode(blockChain.getMyHardCheckPointSign()));
@@ -1591,6 +1598,10 @@ public class Controller extends Observable {
                     Long peerWeight = Long.parseLong(peerIhfo.get("w").toString());
                     peer.setHWeight(new Tuple2<>(peerHeight, peerWeight));
                     peer.setVersion(peerIhfo.get("v").toString());
+                    try {
+                        peer.setNodeInfo((JSONObject) JSONValue.parse(peerIhfo.get("i").toString()));
+                    } catch (Exception e) {
+                    }
 
                 } catch (Exception e) {
                     peer.setVersion(infoStr);
