@@ -257,8 +257,7 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
             return INVALID_DESCRIPTION_LENGTH_MAX;
         }
 
-        return super.isValid(forDeal, flags | NOT_VALIDATE_FLAG_PUBLIC_TEXT
-                );
+        return super.isValid(forDeal, flags);
 
     }
 
