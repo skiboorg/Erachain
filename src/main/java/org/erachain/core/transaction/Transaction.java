@@ -2062,7 +2062,6 @@ public abstract class Transaction implements ExplorerJsonLine {
         }
 
         if (forDeal > Transaction.FOR_PACK) {
-            // this.calcFee();
 
             // CALC ROYALTY
             processRoyalty(block, false);

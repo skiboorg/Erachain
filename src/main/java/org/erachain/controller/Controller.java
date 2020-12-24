@@ -761,7 +761,8 @@ public class Controller extends Observable {
         this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.getInstance().translate("Open Wallet")));
         this.wallet = new Wallet(this.dcSetWithObserver, this.dynamicGUI);
 
-        if (this.seedCommand != null && this.seedCommand.length > 1) {
+        boolean walletKeysRecovered = false;
+        if (this.seedCommand != null && this.seedCommand.length > 1 && !Wallet.walletKeysExists()) {
             /// 0 - Accounts number, 1 - seed, 2 - password, [3 - path]
             byte[] seed;
             if (this.seedCommand[1].length() < 30) {
@@ -793,13 +794,16 @@ public class Controller extends Observable {
                         path = Settings.getInstance().getWalletKeysPath();
                     }
 
-                    boolean res = recoverWallet(seed,
+                    walletKeysRecovered = recoverWallet(seed,
                             this.seedCommand.length > 2 ? this.seedCommand[2] : "1",
                             accsNum, path);
                     this.seedCommand = null;
                 }
             }
 
+        }
+
+        if (!walletKeysRecovered) {
         }
 
         if (BlockChain.TEST_DB == 0) {
@@ -1188,9 +1192,9 @@ public class Controller extends Observable {
     }
 
     public void playWalletEvent(Object object) {
-        if (gui == null || gui.walletTimer == null)
+        if (gui == null || gui.walletNotifyTimer == null)
             return;
-        gui.walletTimer.playEvent(object);
+        gui.walletNotifyTimer.playEvent(object);
     }
 
     /**
@@ -2185,7 +2189,7 @@ public class Controller extends Observable {
 
     public boolean doesWalletExists() {
         // CHECK IF WALLET EXISTS
-        return !noUseWallet && this.wallet != null && this.wallet.exists();
+        return !noUseWallet && this.wallet != null && this.wallet.walletKeysExists();
     }
 
     public boolean doesWalletDatabaseExists() {
