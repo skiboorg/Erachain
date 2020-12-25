@@ -258,6 +258,8 @@ public class BlockChain {
 
     public static final int VERS_5_01_01 = 0;
 
+    public static final int USE_NEW_ISSUE_FEE = MAIN_MODE ? 1622000 : 0;
+
     /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне
      */
