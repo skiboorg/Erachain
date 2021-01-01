@@ -205,7 +205,7 @@ public class Account {
      * @return
      */
     public static int balancePosition(long key, BigDecimal amount, boolean isBackward, boolean isDirect) {
-        if (key == 0l || amount == null || amount.signum() == 0)
+        if (key == 0L || amount == null || amount.signum() == 0)
             return 0;
 
         int type;
@@ -232,7 +232,32 @@ public class Account {
 
     }
 
-    public static String getDetailsForEncrypt(String address, long itemKey, boolean forEncrypt) {
+    /**
+     * Sign asset + sign amount
+     *
+     * @param balancePos
+     * @return
+     */
+    public static Tuple2<Integer, Integer> getSignsForBalancePos(int balancePos) {
+
+        switch (balancePos) {
+            case TransactionAmount.ACTION_SEND:
+            case TransactionAmount.ACTION_PLEDGE:
+                return new Tuple2(1, 1);
+            case TransactionAmount.ACTION_HOLD:
+            case TransactionAmount.ACTION_RESERCED_6:
+                return new Tuple2(1, -1);
+            case TransactionAmount.ACTION_DEBT:
+                return new Tuple2(-1, 1);
+            case TransactionAmount.ACTION_SPEND:
+                return new Tuple2(-1, -1);
+        }
+
+        return null;
+
+    }
+
+    public static String getDetailsForEncrypt(String address, long itemKey, boolean forEncrypt, boolean okAsMess) {
 
         if (address.isEmpty()) {
             return "";
@@ -250,7 +275,7 @@ public class Account {
                 }
                 return " + " + account.getBalance(itemKey).a.b.toPlainString();
             }
-            return "address is OK";
+            return okAsMess ? "address is OK" : "";
         } else {
             // Base58 string len = 33-34 for ADDRESS and 40-44 for PubKey
             if (PublicKeyAccount.isValidPublicKey(address)) {
@@ -261,7 +286,7 @@ public class Account {
                     }
                     return " + " + account.getBalance(itemKey).a.b.toPlainString();
                 }
-                return "public key is OK";
+                return okAsMess ? "public key is OK" : "";
             } else {
                 return "address or public key is invalid";
             }

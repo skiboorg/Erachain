@@ -3,7 +3,7 @@
 set app=wfchain
 set task=wfchain-test
 
-set pars=-pass=1 -seed=10:new:1 -dbschain=mapdb -bugs=7 -datachainpath=dataTEST -testnet
+set pars=-pass=1 -seed=10:new:1 -datachainpath=dataTEST -testnet
 
 set jpars=
 
