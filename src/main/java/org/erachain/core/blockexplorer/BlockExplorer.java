@@ -696,6 +696,7 @@ public class BlockExplorer {
 
         output.put("charKey", poll.getItemTypeChar());
         output.put("label_Actions", Lang.getInstance().translateFromLangObj("Actions", langObj));
+        output.put("label_RAW", Lang.getInstance().translateFromLangObj("Bytecode", langObj));
 
         Map output = new LinkedHashMap();
         Long assetKey;
@@ -910,6 +911,7 @@ public class BlockExplorer {
 
         output.put("charKey", asset.getItemTypeChar());
         output.put("label_Actions", Lang.getInstance().translateFromLangObj("Actions", langObj));
+        output.put("label_RAW", Lang.getInstance().translateFromLangObj("Bytecode", langObj));
 
         Map output = new LinkedHashMap();
 
@@ -1668,6 +1670,7 @@ public class BlockExplorer {
         output.put("charKey", person.getItemTypeChar());
         output.put("label_Actions", Lang.getInstance().translateFromLangObj("Actions", langObj));
         output.put("label_Authorship", Lang.getInstance().translateFromLangObj("Authorship", langObj));
+        output.put("label_RAW", Lang.getInstance().translateFromLangObj("Bytecode", langObj));
 
         Tuple2<Map, Transaction> itemBase = itemBase(person);
         Map output = itemBase.a;
@@ -3021,6 +3024,7 @@ public class BlockExplorer {
 
         output.put("charKey", template.getItemTypeChar());
         output.put("label_Actions", Lang.getInstance().translateFromLangObj("Actions", langObj));
+        output.put("label_RAW", Lang.getInstance().translateFromLangObj("Bytecode", langObj));
 
         Map output = new LinkedHashMap();
 
@@ -3047,6 +3051,7 @@ public class BlockExplorer {
 
         output.put("charKey", status.getItemTypeChar());
         output.put("label_Actions", Lang.getInstance().translateFromLangObj("Actions", langObj));
+        output.put("label_RAW", Lang.getInstance().translateFromLangObj("Bytecode", langObj));
 
         Map output = new LinkedHashMap();
 
