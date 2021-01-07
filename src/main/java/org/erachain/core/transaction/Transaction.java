@@ -1820,6 +1820,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                 && this.hasPublicText()
                 && !BlockChain.TRUSTED_ANONYMOUS.contains(this.creator.getAddress())
                 && !this.creator.isPerson(dcSet, height)) {
+            errorValue = creator.getBase58();
             return CREATOR_NOT_PERSONALIZED;
         }
 
@@ -2349,7 +2350,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     }
 
     public String toStringFullAndCreatorLang() {
-        return Lang.getInstance().translate(viewFullTypeName())
+        return Lang.T(viewFullTypeName())
                 + ": " + getTitle() + (creator == null ? "" : " - " + creator.getPersonAsString());
     }
 
