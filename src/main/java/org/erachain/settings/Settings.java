@@ -645,7 +645,7 @@ public class Settings {
                 }
             }
 
-            //logger.info(Lang.getInstance().translate("Peers loaded from Internet : ") + this.cacheInternetPeers.size());
+            //logger.info(Lang.T("Peers loaded from Internet : ") + this.cacheInternetPeers.size());
 
             return this.cacheInternetPeers;
 
@@ -653,7 +653,7 @@ public class Settings {
             //RETURN EMPTY LIST
 
             //logger.debug(e.getMessage(), e);
-            LOGGER.info(Lang.getInstance().translate("Peers loaded from Internet with errors : ") + this.cacheInternetPeers.size());
+            LOGGER.info(Lang.T("Peers loaded from Internet with errors : ") + this.cacheInternetPeers.size());
 
             return this.cacheInternetPeers;
         }
