@@ -3,7 +3,6 @@ package org.erachain.core.item;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import org.apache.commons.net.util.Base64;
 import org.erachain.controller.Controller;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -435,6 +435,18 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         return Controller.getInstance().isItemFavorite(this);
     }
 
+    @Override
+    public int hashCode() {
+        return Ints.fromByteArray(reference);
+    }
+
+    @Override
+    public boolean equals(Object item) {
+        if (item instanceof ItemCls)
+            return Arrays.equals(this.reference, ((ItemCls) item).reference);
+        return false;
+    }
+
     // forOwnerSign - use only DATA needed for making signature
     public byte[] toBytes(boolean includeReference, boolean forOwnerSign) {
 
@@ -610,8 +622,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         itemJSON.put("key", this.getKey());
         itemJSON.put("name", this.name);
 
-        if (withIcon && this.getIcon() != null)
+        if (withIcon && this.getIcon() != null && this.getIcon().length > 0)
             itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+        else
+            itemJSON.put("icon", "");
 
         itemJSON.put("owner", this.owner.getAddress());
         if (showPerson) {
@@ -661,10 +675,15 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
         JSONObject itemJSON = new JSONObject();
 
         // ADD DATA
-        if (getIcon() != null)
+        if (getIcon() != null && getIcon().length > 0)
             itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
-        if (getImage() != null)
+        else
+            itemJSON.put("icon", "");
+
+        if (getImage() != null && getImage().length > 0)
             itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
+        else
+            itemJSON.put("image", "");
 
         return itemJSON;
     }
@@ -698,8 +717,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine {
             json.put("person_key", person.b.getKey());
         }
 
-        if (icon != null && icon.length > 0)
-            json.put("icon", Base64.encodeBase64String(getIcon()));
+        if (getIcon() != null && getIcon().length > 0)
+            json.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+        else
+            json.put("icon", "");
 
         return json;
     }

@@ -58,11 +58,6 @@ public abstract class Transaction implements ExplorerJsonLine {
      * };
      */
 
-    public static final int BALANCE_SIDE_DEBIT = 1;
-    public static final int BALANCE_SIDE_LEFT = 2;
-    public static final int BALANCE_SIDE_CREDIT = 3;
-    public static final int BALANCE_SIDE_FORGED = 4;
-
     // toBYTE & PARSE fields for different DEALs
     public static final int FOR_MYPACK = 1; // not use this.timestamp & this.feePow
     public static final int FOR_PACK = 2; // not use feePow
@@ -139,9 +134,12 @@ public abstract class Transaction implements ExplorerJsonLine {
 
     public static final int NO_INCLAIM_BALANCE = 49;
 
-    public static final int HASH_ALREDY_EXIST = 51;
+    public static final int HASH_ALREADY_EXIST = 51;
 
     public static final int WRONG_SIGNER = 55;
+
+    public static final int INVALID_BALANCE_POS = 56;
+    public static final int INVALID_BALANCE_SIDE = 57;
 
     public static final int INVALID_CLAIM_DEBT_CREATOR = 61;
 
@@ -375,7 +373,7 @@ public abstract class Transaction implements ExplorerJsonLine {
     protected static final int DATA_NUM_FILE_LENGTH = 4;
     protected static final int SEQ_LENGTH = Integer.BYTES;
     public static final int DBREF_LENGTH = Long.BYTES;
-    public static final int DATA_SIZE_LENGTH = 4;
+    public static final int DATA_SIZE_LENGTH = Integer.BYTES;
     public static final int ENCRYPTED_LENGTH = 1;
     public static final int IS_TEXT_LENGTH = 1;
     protected static final int FEE_POWER_LENGTH = 1;
@@ -891,6 +889,10 @@ public abstract class Transaction implements ExplorerJsonLine {
         return "";
     }
 
+    public String getTitle(JSONObject langObj) {
+        return getTitle();
+    }
+
     public ExLink getExLink() {
         return exLink;
     }
@@ -1253,17 +1255,33 @@ public abstract class Transaction implements ExplorerJsonLine {
         if (refStr == null)
             return null;
 
+        Long seqNo = parseDBRefSeqNo(refStr);
+        if (seqNo != null)
+            return seqNo;
+
+        try {
+            return Long.parseLong(refStr);
+        } catch (Exception e1) {
+        }
+
+        return null;
+    }
+
+    public static Long parseDBRefSeqNo(String refStr) {
+        if (refStr == null)
+            return null;
+
         try {
             String[] strA = refStr.split("\\-");
+            if (strA.length > 2)
+                // это скорее всег время типа 2020-10-11
+                return null;
+
             int height = Integer.parseInt(strA[0]);
             int seq = Integer.parseInt(strA[1]);
             byte[] ref = Ints.toByteArray(height);
             return Longs.fromByteArray(Bytes.concat(ref, Ints.toByteArray(seq)));
         } catch (Exception e) {
-            try {
-                return Long.parseLong(refStr);
-            } catch (Exception e1) {
-            }
         }
         return null;
     }
@@ -1919,7 +1937,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             BigDecimal giftBG = BigDecimal.valueOf(fee_gift, BlockChain.FEE_SCALE);
             invitedAccount.changeBalance(this.dcSet, asOrphan, false, FEE_KEY, giftBG, false, false, false);
             // учтем что получили бонусы
-            invitedAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Transaction.BALANCE_SIDE_DEBIT);
+            invitedAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Account.BALANCE_SIDE_DEBIT);
 
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " top level";
@@ -1947,7 +1965,7 @@ public abstract class Transaction implements ExplorerJsonLine {
             issuerAccount.changeBalance(this.dcSet, asOrphan, false, FEE_KEY, giftBG, false, false, false);
 
             // учтем что получили бонусы
-            issuerAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Transaction.BALANCE_SIDE_DEBIT);
+            issuerAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Account.BALANCE_SIDE_DEBIT);
 
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " @P:" + invitedPersonKey + " level." + (1 + BlockChain.FEE_INVITED_DEEP - level);
@@ -1967,7 +1985,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                     BigDecimal.valueOf(fee_gift, BlockChain.FEE_SCALE), false, false, false);
 
             // учтем что получили бонусы
-            issuerAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Transaction.BALANCE_SIDE_DEBIT);
+            issuerAccount.changeCOMPUBonusBalances(dcSet, asOrphan, giftBG, Account.BALANCE_SIDE_DEBIT);
 
             if (txCalculated != null && !asOrphan) {
                 messageLevel = message + " @P:" + invitedPersonKey + " level." + (1 + BlockChain.FEE_INVITED_DEEP - level);
@@ -2111,7 +2129,7 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         account.changeBalance(this.dcSet, asOrphan, false, FEE_KEY, royaltyBG, false, false, false);
         // учтем что получили бонусы
-        account.changeCOMPUBonusBalances(dcSet, asOrphan, royaltyBG, Transaction.BALANCE_SIDE_DEBIT);
+        account.changeCOMPUBonusBalances(dcSet, asOrphan, royaltyBG, Account.BALANCE_SIDE_DEBIT);
 
         if (block != null && block.txCalculated != null && !asOrphan) {
             block.txCalculated.add(new RCalculated(account, FEE_KEY, royaltyBG,
@@ -2194,7 +2212,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                 // NOT update INCOME balance
                 this.creator.changeBalance(this.dcSet, true, false, FEE_KEY, this.fee, false, false, true);
                 // учтем траты
-                this.creator.changeCOMPUBonusBalances(this.dcSet, true, this.fee, BALANCE_SIDE_CREDIT);
+                this.creator.changeCOMPUBonusBalances(this.dcSet, true, this.fee, Account.BALANCE_SIDE_CREDIT);
             }
 
             // Multi Level Referal
@@ -2233,7 +2251,7 @@ public abstract class Transaction implements ExplorerJsonLine {
                 // NOT update INCOME balance
                 this.creator.changeBalance(this.dcSet, false, false, FEE_KEY, this.fee, false, false, true);
                 // учтем траты
-                this.creator.changeCOMPUBonusBalances(this.dcSet, false, this.fee, BALANCE_SIDE_CREDIT);
+                this.creator.changeCOMPUBonusBalances(this.dcSet, false, this.fee, Account.BALANCE_SIDE_CREDIT);
 
             }
 
@@ -2266,6 +2284,15 @@ public abstract class Transaction implements ExplorerJsonLine {
     public Transaction copy() {
         try {
             return TransactionFactory.getInstance().parse(this.toBytes(FOR_NETWORK, true), Transaction.FOR_NETWORK);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public Transaction copy(int forDeal) {
+        try {
+            return TransactionFactory.getInstance().parse(this.toBytes(forDeal, true), forDeal);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return null;
