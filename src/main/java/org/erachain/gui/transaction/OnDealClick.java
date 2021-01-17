@@ -68,7 +68,7 @@ public class OnDealClick {
                 mess = "Negative amount";
                 break;
             case Transaction.NOT_ENOUGH_FEE:
-                mess = "Not enought fee";
+                mess = "Not enough fee";
                 break;
             case Transaction.INVALID_FEE_POWER:
                 mess = "Invalid fee power";
@@ -174,11 +174,17 @@ public class OnDealClick {
                 mess = "Unknown public key for encrypt";
                 break;
 
-            case Transaction.HASH_ALREDY_EXIST:
-                mess = "Hash already exist";
+            case Transaction.HASH_ALREADY_EXIST:
+                mess = "HASH_ALREADY_EXIST";
                 break;
             case Transaction.WRONG_SIGNER:
                 mess = "Wrong Signer";
+                break;
+            case Transaction.INVALID_BALANCE_POS:
+                mess = "Invalid balance Position";
+                break;
+            case Transaction.INVALID_BALANCE_SIDE:
+                mess = "Invalid balance Side";
                 break;
 
             case Transaction.NAME_NOT_LOWER_CASE:
@@ -401,7 +407,7 @@ public class OnDealClick {
                 mess = "Duplicate key";
                 break;
             case Transaction.ITEM_DUPLICATE:
-                mess = "Invalid duplicate item";
+                mess = "ITEM_DUPLICATE";
                 break;
             case Transaction.INVALID_TIMESTAMP_START:
                 mess = "Invalid start timestamp item";
