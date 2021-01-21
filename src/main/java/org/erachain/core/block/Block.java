@@ -987,8 +987,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
     public BigDecimal getBonusFee() {
 
-        if (true || this.heightBlock == 1 || this.heightBlock > BlockChain.FREE_FEE_FROM_HEIGHT) {
-            // если транзакции бесплатные то отключаем награду
+        if (this.heightBlock == 1) {
             return BigDecimal.ZERO;
         }
         return BigDecimal.ZERO;
@@ -2042,7 +2041,6 @@ public class Block implements Closeable, ExplorerJsonLine {
 
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
-
             BigDecimal forgerEarn;
             if (BlockChain.CLONE_MODE) {
                 // Авторские начисления на счет Эрачейн от всех комиссий в блоке
