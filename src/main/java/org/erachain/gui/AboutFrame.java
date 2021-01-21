@@ -74,7 +74,7 @@ public class AboutFrame extends JDialog implements Observer {
         gbl_aboutPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         aboutPanel.setLayout(gbl_aboutPanel);
 
-        JLabel lblAuthorsLabel = new JLabel(//Lang.T("Author") + ": " +
+        lblAuthorsLabel = new JLabel(//Lang.T("Author") + ": " +
                 //+ "Ермолаев Дмитрий Сергеевич");
                 Lang.T("ERACHAIN WORLD PTE LTD.")); //"Dmitrii Ermolaev"));
         lblAuthorsLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));
