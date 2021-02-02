@@ -116,7 +116,7 @@ function statement(data) {
     output += '<br>' + data.Label_signature + ': <b>' + data.tx.signature + '</b>';
 
     if (data.hasOwnProperty('title')) {
-        output += '<h3>' + data.Label_title + ': <b>' + escapeHtml(data.title) + '</h3>';
+        output += '<h3>' + data.Label_title + ': ' + escapeHtml(data.title) + '</h3>';
     }
 
     if (data.hasOwnProperty('exLink')) {
@@ -129,10 +129,10 @@ function statement(data) {
         exPays = data.exPays;
         output += '<h3>'
             //+ '<img src="img/parentTx.png" style="height:1.5em"> '
-            + data.Label_Payouts + '</h3>';
+            + data.Label_Accruals + '</h3>';
 
-        if (exPays.hasOwnProperty('filteredPayoutsCount')) {
-            output += exPays.Label_Counter + ': <b>' + exPays.filteredPayoutsCount + '</b><br>';
+        if (exPays.hasOwnProperty('filteredAccrualsCount')) {
+            output += exPays.Label_Counter + ': <b>' + exPays.filteredAccrualsCount + '</b><br>';
             output += exPays.Label_Total_Amount + ': <b>' + exPays.totalPay + '</b><br>';
             output += exPays.Label_Additional_Fee + ': <b>' + exPays.totalFee + '</b><br>';
 
@@ -170,7 +170,7 @@ function statement(data) {
         output += '<h4>' + exPays.Label_Filter_by_Persons + '</h4>';
         if (exPays.filterByGender)
         output += exPays.Label_filterByGender + ': <b>' + exPays.filterByGenderName + '</b><br>';
-        output += exPays.Label_selfPay + ': <b>' + exPays.selfPay + '</b><br>';
+        output += exPays.Label_selfUse + ': <b>' + exPays.useSelfBalance + '</b><br>';
 
     }
 
@@ -209,10 +209,10 @@ function statement(data) {
     } else {
 
         if (data.hasOwnProperty('templateKey')) {
-            output += '<h4><a href="?template=' + data.templateKey + get_lang() + '">['
-             + data.templateKey + '] ' + data.templateName + '</a><h4>';
+            output += data.Label_Used_Template + ': <a href="?template=' + data.templateKey + get_lang() + '">['
+             + data.templateKey + '] ' + data.templateName + '</a></br>';
 
-            output += '<br>' + data.Label_template_hash + ': ';
+            output += data.Label_template_hash + ': ';
             if (data.hasOwnProperty('templateUnique')) {
                 output += '<a href="?search=transactions&q=' + data.templateHash + get_lang() + '"><b>'
                  + data.templateHash + '</b></a><br>';
@@ -221,6 +221,7 @@ function statement(data) {
             }
 
             if (data.hasOwnProperty('body')) {
+                output += '<hr>';
                 output += fformat(data.body);
             }
             output += '<hr>';
