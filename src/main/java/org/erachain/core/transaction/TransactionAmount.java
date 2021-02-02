@@ -318,7 +318,6 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         return getAmount(address);
     }
 
-    static BigDecimal sendBurnPerc = new BigDecimal("0.5");
     @Override
     public long calcBaseFee(boolean withFreeProtocol) {
 
