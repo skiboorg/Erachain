@@ -12,6 +12,7 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.blockexplorer.ExplorerJsonLine;
+import org.erachain.core.blockexplorer.WebTransactionsHTML;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.exdata.exLink.ExLink;
@@ -181,6 +182,8 @@ public abstract class Transaction implements ExplorerJsonLine {
     public static final int INVALID_MESSAGE_FORMAT = 195;
     public static final int INVALID_MESSAGE_LENGTH = 196;
     public static final int UNKNOWN_PUBLIC_KEY_FOR_ENCRYPT = 197;
+
+    public static final int INVALID_FLAGS = 199;
 
 
     // ITEMS
@@ -1513,6 +1516,22 @@ public abstract class Transaction implements ExplorerJsonLine {
         return toJson();
     }
 
+    /**
+     * Version 2 maker for BlockExplorer
+     */
+    public void makeJSONforHTML(JSONObject output, JSONObject langObj) {
+
+        String title = getTitle();
+        if (title != null && !title.isEmpty()) {
+            output.put("Label_title", Lang.T("Title", langObj));
+            output.put("title", title);
+        }
+
+        WebTransactionsHTML.getAppLink(output, this, langObj);
+        WebTransactionsHTML.getApps(output, this, langObj);
+
+    }
+
     public abstract JSONObject toJson();
 
     @SuppressWarnings("unchecked")
@@ -1795,6 +1814,12 @@ public abstract class Transaction implements ExplorerJsonLine {
 
         if (height < BlockChain.ALL_VALID_BEFORE) {
             return VALIDATE_OK;
+        }
+
+        if (typeBytes[0] == -1 || typeBytes[1] == -1 || typeBytes[2] == -1 || typeBytes[3] == -1) {
+            // не может быть чтобы все флаги были подняты - скорее всего это и JS ошибка
+            errorValue = (typeBytes[0] == -1 ? "[0]" : typeBytes[1] == -1 ? "[1]" : typeBytes[2] == -1 ? "[2]" : "[3]") + " = -1";
+            return INVALID_FLAGS;
         }
 
         // CHECK IF REFERENCE IS OK

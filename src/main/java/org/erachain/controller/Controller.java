@@ -44,6 +44,7 @@ import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.AboutFrame;
 import org.erachain.gui.Gui;
 import org.erachain.gui.GuiTimer;
+import org.erachain.gui.PasswordPane;
 import org.erachain.gui.library.IssueConfirmDialog;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
@@ -637,7 +638,7 @@ public class Controller extends Observable {
         // OPENING DATABASES
         try {
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Try Open DataChain")));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Try Open DataChain"));
             LOGGER.info("Try Open DataChain");
             if (Settings.simpleTestNet) {
                 // -testnet
@@ -646,8 +647,8 @@ public class Controller extends Observable {
                 this.dcSet = DCSet.getInstance(this.dcSetWithObserver, this.dynamicGUI, inMemoryDC);
             }
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("DataChain OK")));
-            LOGGER.info("DataChain OK");
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "DataChain OK"));
+            LOGGER.info("DataChain OK - " + Settings.getInstance().getDataChainPath());
         } catch (Throwable e) {
             // Error open DB
             error = 1;
@@ -742,7 +743,7 @@ public class Controller extends Observable {
         // START API SERVICE
         if (Settings.getInstance().isRpcEnabled()) {
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Start API Service")));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Start API Service"));
             LOGGER.info(Lang.T("Start API Service"));
             this.rpcService = new ApiService();
             this.rpcServiceRestart();
@@ -751,7 +752,7 @@ public class Controller extends Observable {
         // START WEB SERVICE
         if (Settings.getInstance().isWebEnabled()) {
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Start WEB Service")));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Start WEB Service"));
             LOGGER.info(Lang.T("Start WEB Service"));
             this.webService = WebService.getInstance();
             this.webService.start();
@@ -759,7 +760,7 @@ public class Controller extends Observable {
 
         // CREATE WALLET
         this.setChanged();
-        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Open Wallet")));
+        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Try Open Wallet"));
         this.wallet = new Wallet(this.dcSetWithObserver, this.dynamicGUI);
 
         boolean walletKeysRecovered = false;
@@ -814,12 +815,13 @@ public class Controller extends Observable {
                 this.wallet.initiateItemsFavorites();
             }
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Wallet OK")));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Wallet OK" + " " + Settings.getInstance().getDataWalletPath()));
+            LOGGER.info("Wallet OK" + " " + Settings.getInstance().getDataWalletPath());
 
             // create telegtam
 
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Open Telegram")));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Open Telegram"));
             this.telegramStore = TelegramStore.getInstanse(this.dcSetWithObserver, this.dynamicGUI);
 
 
@@ -869,7 +871,57 @@ public class Controller extends Observable {
     }
 
     public int loadWalletFromDir() {
-        return this.wallet.loadFromDir(this.dcSetWithObserver, this.dynamicGUI);
+        JFileChooser fileopen = new JFileChooser();
+        fileopen.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        String pathOld = Settings.getInstance().getWalletKeysPath();
+        File ff = new File(pathOld);
+        if (!ff.exists())
+            pathOld = "." + File.separator;
+        fileopen.setCurrentDirectory(new File(pathOld));
+        int ret = fileopen.showDialog(null, Lang.T("Open Wallet Dir"));
+        if (ret != JFileChooser.APPROVE_OPTION) {
+            //is abort
+            return 3;
+
+        }
+
+        String selectedDir = fileopen.getSelectedFile().toString();
+
+        // set wallet dir
+        Settings.getInstance().setWalletKeysPath(selectedDir);
+
+        // open wallet
+        Controller.getInstance().wallet = new Wallet(dcSetWithObserver, dynamicGUI);
+        // not wallet return 0;
+        if (!Controller.getInstance().wallet.walletKeysExists()) {
+            Settings.getInstance().setWalletKeysPath(pathOld);
+            return 2;
+        }
+
+        if (!Controller.getInstance().isWalletUnlocked()) {
+            // ASK FOR PASSWORD
+            String password = PasswordPane.showUnlockWalletDialog(null);
+            if (!Controller.getInstance().unlockWallet(password)) {
+                // WRONG PASSWORD
+                JOptionPane.showMessageDialog(null, Lang.T("Invalid password"),
+                        Lang.T("Unlock Wallet"), JOptionPane.ERROR_MESSAGE);
+                return 5;
+            }
+        }
+
+        // LOAD accounts
+        Controller.getInstance().wallet.updateAccountsFromSecretKeys();
+
+        if (Controller.getInstance().wallet.isWalletDatabaseExisting()) {
+            Controller.getInstance().wallet.initiateItemsFavorites();
+            // save path from setting json
+            Settings.getInstance().updateSettingsValue();
+            // is ok
+            return 1;
+        } else {
+            Settings.getInstance().setWalletKeysPath(pathOld);
+            return 3;
+        }
     }
 
     public void replaseFavoriteItems(int type) {

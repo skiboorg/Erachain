@@ -318,7 +318,6 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         return getAmount(address);
     }
 
-    static BigDecimal sendBurnPerc = new BigDecimal("0.5");
     @Override
     public long calcBaseFee(boolean withFreeProtocol) {
 
@@ -867,10 +866,10 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                                     return Transaction.INVALID_CLAIM_RECIPIENT;
                                 }
 
-                        if (absKey == AssetCls.BAL_KEY && !creator.equals(asset.getOwner())
-                                && !recipient.equals(asset.getOwner())) {
-                            return INVALID_TRANSFER_TYPE;
-                        }
+                                if (absKey == AssetCls.BAL_KEY && !creator.equals(asset.getOwner())
+                                        && !recipient.equals(asset.getOwner())) {
+                                    return INVALID_TRANSFER_TYPE;
+                                }
 
                                 if (absKey == FEE_KEY) {
 
