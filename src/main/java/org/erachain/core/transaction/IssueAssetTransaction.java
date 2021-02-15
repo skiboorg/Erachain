@@ -9,7 +9,6 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.AssetFactory;
 import org.erachain.core.item.assets.AssetUnique;
 import org.erachain.datachain.DCSet;
-import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 
 import java.math.BigDecimal;
@@ -159,7 +158,7 @@ public class IssueAssetTransaction extends IssueItemRecord {
         //CHECK QUANTITY
         AssetCls asset = (AssetCls) this.getItem();
 
-        if (asset.isUnique()) {
+        if (height > BlockChain.START_ASSET_UNIQUE && asset.isUnique()) {
             if (asset instanceof AssetUnique) {
                 ;
             } else {
@@ -189,17 +188,6 @@ public class IssueAssetTransaction extends IssueItemRecord {
         }
 
         return Transaction.VALIDATE_OK;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public JSONObject toJson() {
-        //GET BASE
-        JSONObject transaction = super.toJson();
-        AssetCls asset = (AssetCls) getItem();
-        //ADD CREATOR/NAME/DISCRIPTION/QUANTITY/DIVISIBLE
-        transaction.put("asset", asset.toJson());
-        return transaction;
     }
 
     //PARSE CONVERT

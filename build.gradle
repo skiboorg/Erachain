@@ -157,6 +157,7 @@ task CopyResourse {
         from 'ERA'
         into 'build/libs/Darachain'
         include '*Licence*'
+        include 'market.json'
         include 'chain*'
         include 'peers*'
         include 'start*'
