@@ -149,11 +149,12 @@ public class Start {
                     System.exit(3);
                 }
 
-                //CREATE JSON OBJECT
-                Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
-                if (Settings.genesisJSON == null) {
-                    throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
-                }
+            //CREATE JSON OBJECT
+            Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
+            if (Settings.genesisJSON == null) {
+                LOGGER.error("Wrong JSON or not UTF-8 encode in " + file.getName());
+                throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
+            }
 
                 JSONArray appArray = (JSONArray) Settings.genesisJSON.get(0);
                 Settings.APP_NAME = appArray.get(0).toString();

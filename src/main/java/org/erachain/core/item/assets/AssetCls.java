@@ -10,6 +10,7 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
+import org.erachain.gui.library.Library;
 import org.erachain.lang.Lang;
 import org.erachain.utils.NumberAsString;
 import org.json.simple.JSONArray;
@@ -718,8 +719,9 @@ public abstract class AssetCls extends ItemCls {
         return isUnHoldable(key, assetType);
     }
 
-    public static boolean isUnique(int assetType) {
-        if (assetType == AS_OUTSIDE_BILL
+    public static boolean isTypeUnique(int assetType, long quantity) {
+        if (quantity == 1L
+                || assetType == AS_OUTSIDE_BILL
                 || assetType == AS_OUTSIDE_BILL_EX
                 || assetType == AS_BANK_GUARANTEE
         ) {
@@ -728,9 +730,7 @@ public abstract class AssetCls extends ItemCls {
         return false;
     }
 
-    public boolean isUnique() {
-        return isUnique(assetType);
-    }
+    public abstract boolean isUnique();
 
     public abstract boolean isUnlimited(Account address, boolean notAccounting);
 
@@ -2106,6 +2106,26 @@ public abstract class AssetCls extends ItemCls {
         itemJson.put("properties", viewProperties(langObj));
 
         return itemJson;
+    }
+
+    public String makeHTMLHeadView() {
+
+        String text = super.makeHTMLHeadView();
+        text += Lang.T("Asset Class") + ":&nbsp;"
+                + Lang.T(getItemSubType() + "") + "<br>"
+                + Lang.T("Asset Type") + ":&nbsp;"
+                + "<b>" + charAssetType() + viewAssetTypeAbbrev() + "</b>:" + Lang.T(viewAssetTypeFull() + "") + "<br>"
+                + Lang.T("Quantity") + ":&nbsp;" + getQuantity() + ", "
+                + Lang.T("Scale") + ":&nbsp;" + getScale() + "<br>"
+                + Lang.T("Description") + ":<br>";
+        if (getKey() > 0 && getKey() < START_KEY()) {
+            text += Library.to_HTML(Lang.T(viewDescription())) + "<br>";
+        } else {
+            text += Library.to_HTML(viewDescription()) + "<br>";
+        }
+
+        return text;
+
     }
 
     public int getDataLength(boolean includeReference) {

@@ -83,7 +83,7 @@ function asset(data, forPrint) {
     output += itemHead(item, forPrint);
 
     //////// BODY
-    output += '<p style="font-size:1.3em">';
+    output += '<p style="font-size:1.3em; margin-top:0.5em; margin-bottom:0px">';
 
     if (item.isUnique) {
         output += '<b>' + item.Label_Unique + '</b>';
@@ -101,11 +101,12 @@ function asset(data, forPrint) {
         output += ', &nbsp&nbsp<a href=?top=all&asset=' + item.key + get_lang() + ' class="button ll-blue-bgc"><b>' + item.Label_Holders + '</b></a>';
 
     output += '<br>' + item.Label_AssetType + ': <b>' + item.assetTypeNameFull + '</b><br>';
-    if (item.properties)
-        output += item.Label_Properties + ': ' + item.properties + '<br>';
+    if (item.properties) {
+        output += '</p><p style="margin-bottom:0px">';
+        output += '<b>' + item.Label_Properties + '</b>: ' + item.properties + '</p>';
+    }
 
-    output += item.Label_AssetType_Desc + ': ' + item.assetTypeDesc + '<br>';
-    output += '</p>';
+    output += '<p style="margin-bottom:0px"><b>' + item.Label_AssetType_Desc + '</b>: ' + item.assetTypeDesc + '</p>';
 
     output += itemFoot(item, forPrint);
 
@@ -121,40 +122,56 @@ function asset(data, forPrint) {
     output += '<h3>' + item.Label_Available_pairs + '</h3>';
 
     output += '<table border="0" cellspacing="10" class="tiny table table-striped" style="border: 1px solid #ddd;"><tr>';
-    output += '<td><b>' + item.Label_Pair + '</b></td><td><b>' + item.Label_Orders_Count + '</b></td>';
-    output += '<td><b>' + item.Label_Open_Orders_Volume + '</b></td>';
-    output += '<td><b>' + item.Label_Trades_Count + '</b></td><td><b>' + item.Label_Trades_Volume + '</b></td></tr>';
+    output += '<td><b>' + item.Label_Asset + '<td><b>' + data.Label_Last_Price + '</b></td>';
+    output += '<td><b>' + data.Label_Price_Change + '<br>' + data.Label_Trades_Count;
+    output += '<td><b>' + data.Label_Bit_Ask;
+    output += '<td><b>' + data.Label_Volume24;
+    output += '<td><b>' + data.Label_Price_Low_High + '</b></td></tr>';
 
+    var totalOpenOrdersCount = 0;
+    var totalTradeVolume = 0.0;
     for (key in data.pairs) {
         var pair = data.pairs[key];
+        totalOpenOrdersCount += pair.count_24h;
+        totalTradeVolume += pair.base_volume;
+
         output += '<tr>';
 
         output += '<td><b>';
-        output += '<a href="?asset=' + key + get_lang() + '">';
-        output += getAssetName2(key, data.pairs[key].assetName);
+        output += '<a href="?asset=' + pair.quote_id + get_lang() + '">';
+        output += getAssetName2(pair.quote_id, pair.quote_name);
 
-        output += '<td>' + pair.openOrdersCount;
+
+        output += '<td><a href="?asset=' + pair.base_id + '&asset=' + pair.quote_id  + get_lang() + '"><b>'
+                + addCommas(pair.last_price.toPrecision(8)) + '</a><br>';
+        output += '<a href="?asset=' + pair.quote_id + '&asset=' + pair.base_id  + get_lang() + '"><b>'
+                + addCommas((1.0 / pair.last_price).toPrecision(8));
+
+        output += '<td>';
+        if (pair.price_change_percent_24h > 0) {
+            output += '<span style="color:green"><b>+' + pair.price_change_percent_24h.toPrecision(3) + '</b></span>';
+        } else if (pair.price_change_percent_24h < 0) {
+            output += '<span style="color:red"><b>' + pair.price_change_percent_24h.toPrecision(3) + '</b></span>';
+        } else {
+            output += '0';
+        }
+        output += '<br>' + pair.count_24h;
+
+        output += '<td>';
+        output += addCommas(pair.highest_bid.toPrecision(8)) + ' / ' + addCommas(pair.lowest_ask.toPrecision(8));
+        output += '<br>' + addCommas((1.0 / pair.lowest_ask).toPrecision(8)) + ' / ' + addCommas((1.0 / pair.highest_bid).toPrecision(8));
 
         output += '<td nowrap>';
-        output += '<a href="?asset=' + item.key + '&asset=' + key + get_lang() + '"><b>'
-        output += addCommas(pair.last);
-        output += '</b></a> / <a href="?asset=' + key + '&asset=' + item.key + get_lang() + '"><b>'
-        output += addCommas(pair.lastReverse) + '</b></a><br>';
+        output += addCommas(pair.quote_volume.toPrecision(8)) + '<br>' + addCommas(pair.base_volume.toPrecision(8));
 
-        output += addCommas(pair.ordersPriceVolume) + ' / ' + addCommas(pair.ordersAmountVolume);
-
-        output += '<td>' + pair.tradesCount;
-
-        output += '<td nowrap>';
-        output += addCommas(pair.tradeAmountVolume) + ' ' + getAssetNameMini(key, pair.assetName);
-        output += '<br>' + addCommas(pair.tradesPriceVolume) + ' ' + getAssetNameMini(item.key, item.name);
+        output += '<td>';
+        output += addCommas(pair.lowest_price_24h.toPrecision(8)) + ' / ' + addCommas(pair.highest_price_24h.toPrecision(8));
+        output += '<br>' + addCommas((1.0 / pair.highest_price_24h).toPrecision(8)) + ' / ' + addCommas((1.0 / pair.lowest_price_24h).toPrecision(8));
 
     }
     output += '<tr><td><b>' + data.Label_Total + ':';
-    output += '<td>' + data.totalOpenOrdersCount;
-    output += '<td>' + addCommas(data.totalOrdersVolume) + ' ' + getAssetNameMini(item.key, item.name);
-    output += '<td>' + data.totalTradesCount;
-    output += '<td>' + addCommas(data.totalTradesVolume) + ' ' + getAssetNameMini(item.key, item.name);
+    output += '<td><td><b>' + totalOpenOrdersCount;
+    output += '<td><td><b>' + totalTradeVolume;
     output += '<td></td></tr></table>';
 
 

@@ -1,0 +1,77 @@
+{
+  "spot": [
+    // USD market
+    // BTC
+    [
+      12,
+      95,
+      true
+    ],
+    // ERA
+    [
+      1,
+      95,
+      true
+    ],
+    // COMPU
+    [
+      2,
+      95,
+      true
+    ],
+    // GOLD
+    [
+      21,
+      95,
+      true
+    ],
+    // RUB market
+    [
+      12,
+      92,
+      true
+    ],
+    [
+      1,
+      92,
+      true
+    ],
+    [
+      2,
+      92,
+      true
+    ],
+    [
+      21,
+      92,
+      true
+    ],
+    [
+      95,
+      92,
+      true
+    ],
+    // BTC market
+    [
+      1,
+      12,
+      true
+    ],
+    [
+      2,
+      12,
+      true
+    ],
+    [
+      21,
+      12,
+      true
+    ]
+    // COMPU market
+    [
+      1,
+      2,
+      true
+    ]
+  ]
+}
