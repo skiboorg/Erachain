@@ -7,6 +7,7 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.datachain.DCSet;
+import org.erachain.lang.Lang;
 import org.mapdb.Fun.Tuple2;
 import org.mapdb.Fun.Tuple5;
 
@@ -105,6 +106,11 @@ public class AssetVenture extends AssetCls {
     @Override
     public boolean isUnlimited(Account address, boolean notAccounting) {
         return !notAccounting && isAccounting() || getQuantity() == 0L && owner.equals(address);
+    }
+
+    @Override
+    public boolean isUnique() {
+        return quantity == 1L;
     }
 
     //PARSE
@@ -232,6 +238,17 @@ public class AssetVenture extends AssetCls {
         data = Bytes.concat(data, assetTypeBytes);
 
         return data;
+    }
+
+    public String makeHTMLView() {
+
+        String text = super.makeHTMLHeadView();
+        text += Lang.T("Quantity") + ":&nbsp;" + getQuantity() + ", "
+                + Lang.T("Scale") + ":&nbsp;" + getScale() + "<br>";
+        text += super.makeHTMLFootView();
+
+        return text;
+
     }
 
     @Override

@@ -102,6 +102,7 @@ public class DCSet extends DBASet implements Closeable {
     public static final int ORDERS_MAP = DBS_MAP_DB;
     public static final int COMPLETED_ORDERS_MAP = DBS_ROCK_DB;
     public static final int TRADES_MAP = DBS_MAP_DB;
+    public static final int PAIRS_MAP = DBS_MAP_DB;
 
     /**
      * если задано то выбран такой КЭШ который нужно самим чистить иначе реперолнение будет
@@ -1328,7 +1329,7 @@ public class DCSet extends DBASet implements Closeable {
      * Хранит сделки на бирже
      * Ключ: ссылка на иницатора + ссылка на цель
      * Значение - Сделка
-     Initiator DBRef (Long) + Target DBRef (Long) -> Trade
+     * Initiator DBRef (Long) + Target DBRef (Long) -> Trade
      */
     public TradeMapImpl getTradeMap() {
         return this.tradeMap;
@@ -1338,11 +1339,11 @@ public class DCSet extends DBASet implements Closeable {
         return this.itemImprintMap;
     }
 
-/**
- * see datachain.IssueItemMap
- *
- * @return
- */
+    /**
+     * see datachain.IssueItemMap
+     *
+     * @return
+     */
     public IssueImprintMap getIssueImprintMap() {
         return this.issueImprintMap;
     }

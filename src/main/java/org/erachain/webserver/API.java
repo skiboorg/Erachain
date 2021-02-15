@@ -774,6 +774,7 @@ public class API {
 
                 out.put("error", result.getB());
                 out.put("message", langObj == null ? OnDealClick.resultMess(result.getB()) : Lang.T(OnDealClick.resultMess(result.getB()), langObj));
+                out.put("lang", lang);
                 if (result.getA() != null && result.getA().errorValue != null) {
                     out.put("value", langObj == null ? result.getA().errorValue : Lang.T(result.getA().errorValue, langObj));
                 }
@@ -781,6 +782,7 @@ public class API {
             }
 
         } catch (Exception e) {
+            LOGGER.warn(" on step: " + step + " - " + e.toString() + " - " + e.getMessage(), e);
             Transaction.updateMapByErrorSimple(-1, e.toString() + " on step: " + step, out);
             return out;
         }

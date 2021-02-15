@@ -45,6 +45,11 @@ public class AssetUnique extends AssetCls {
     }
 
     @Override
+    public boolean isUnique() {
+        return true;
+    }
+
+    @Override
     public int getScale() {
         return 0;
     }
@@ -171,5 +176,13 @@ public class AssetUnique extends AssetCls {
     }
 
     //OTHER
+    public String makeHTMLView() {
+
+        String text = super.makeHTMLHeadView();
+        text += super.makeHTMLFootView();
+
+        return text;
+
+    }
 
 }

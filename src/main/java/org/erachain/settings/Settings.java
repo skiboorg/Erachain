@@ -224,6 +224,10 @@ public class Settings {
 
                 String jsonString = "";
                 for (String line : lines) {
+                    if (line.trim().startsWith("//")) {
+                        // пропускаем //
+                        continue;
+                    }
                     jsonString += line;
                 }
 
@@ -564,6 +568,10 @@ public class Settings {
 
                 String jsonString = "";
                 for (String line : lines) {
+                    if (line.trim().startsWith("//")) {
+                        // пропускаем //
+                        continue;
+                    }
                     jsonString += line;
                 }
 
@@ -1343,6 +1351,10 @@ public class Settings {
 
                 String jsonString = "";
                 for (String line : lines) {
+                    if (line.trim().startsWith("//")) {
+                        // пропускаем //
+                        continue;
+                    }
                     jsonString += line;
                 }
 
