@@ -246,7 +246,7 @@ public class StatementsMySplitPanel extends SplitPanel {
         menuSaveCopy.add(copyNumber);
 
         JMenuItem copySign = new JMenuItem(Lang.T("Copy Signature"));
-        copyNumber.addActionListener(e -> {
+        copySign.addActionListener(e -> {
             if (jTableJScrollPanelLeftPanel.getSelectedRow() < 0) return;
             Transaction transaction = my_Statements_Model.getItem(jTableJScrollPanelLeftPanel
                     .convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow())).b;
@@ -387,7 +387,7 @@ public class StatementsMySplitPanel extends SplitPanel {
         // get component from right panel
         Component c1 = jScrollPaneJPanelRightPanel.getViewport().getView();
         // if PersonInfo 002 delay on close
-        if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
+        //if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
 
     }
 
