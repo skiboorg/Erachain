@@ -9,7 +9,6 @@ import org.erachain.gui.SplitPanel;
 import org.erachain.gui.WalletTableRenderer;
 import org.erachain.gui.items.persons.ItemsPersonsTableModel;
 import org.erachain.gui.items.statement.IssueDocumentPanel;
-import org.erachain.gui.items.statement.RNoteInfo;
 import org.erachain.gui.library.Library;
 import org.erachain.gui.library.MTable;
 import org.erachain.gui.records.toSignRecordDialog;
@@ -135,7 +134,7 @@ public class FavoriteTransactionsSplitPanel extends SplitPanel {
         menuSaveCopy.add(copyNumber);
 
         JMenuItem copySign = new JMenuItem(Lang.T("Copy Signature"));
-        copyNumber.addActionListener(e -> {
+        copySign.addActionListener(e -> {
             Transaction transaction = (Transaction) favotitesTable.getItem(jTableJScrollPanelLeftPanel.convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
             StringSelection stringSelection = new StringSelection(transaction.viewSignature());
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
@@ -304,7 +303,7 @@ public class FavoriteTransactionsSplitPanel extends SplitPanel {
         // get component from right panel
         Component c1 = jScrollPaneJPanelRightPanel.getViewport().getView();
         // if PersonInfo 002 delay on close
-        if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
+        //if (c1 instanceof RNoteInfo) ((RNoteInfo) c1).delay_on_Close();
 
     }
 
