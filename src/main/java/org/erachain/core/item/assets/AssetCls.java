@@ -1,12 +1,14 @@
 package org.erachain.core.item.assets;
 
 
+import org.erachain.controller.PairsController;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
+import org.erachain.database.PairMap;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.IssueItemMap;
 import org.erachain.datachain.ItemMap;
@@ -18,6 +20,7 @@ import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -719,6 +722,26 @@ public abstract class AssetCls extends ItemCls {
         return isUnHoldable(key, assetType);
     }
 
+    public static boolean isUnSpendable(long key, int assetType) {
+        return key < 100
+                || assetType == AssetCls.AS_INDEX
+                || assetType == AssetCls.AS_INSIDE_ACCESS
+                || assetType == AssetCls.AS_INSIDE_BONUS;
+    }
+
+    public boolean isUnSpendable() {
+        return isUnSpendable(key, assetType);
+    }
+
+    public static boolean isUnDebtable(long key, int assetType) {
+        return assetType == AssetCls.AS_INDEX
+                || assetType == AssetCls.AS_INSIDE_BONUS;
+    }
+
+    public boolean isUnDebtable() {
+        return isUnDebtable(key, assetType);
+    }
+
     public static boolean isTypeUnique(int assetType, long quantity) {
         if (quantity == 1L
                 || assetType == AS_OUTSIDE_BILL
@@ -753,11 +776,18 @@ public abstract class AssetCls extends ItemCls {
     }
 
     public static boolean isAccounting(int assetType) {
-        return assetType >= AS_SELF_MANAGED_ACCOUNTING;
+        return assetType >= AS_ACCOUNTING;
     }
 
     public boolean isAccounting() {
         return isAccounting(assetType);
+    }
+
+    public boolean isPersonProtected() {
+        return (key <= AssetCls.ERA_KEY || key > getStartKey()) // GATE Assets
+                && !isAccounting()
+                && assetType != AssetCls.AS_INSIDE_BONUS
+                && assetType != AssetCls.AS_INSIDE_VOTE;
     }
 
     /**
@@ -1839,9 +1869,8 @@ public abstract class AssetCls extends ItemCls {
 
     }
 
-    public long getOperations(DCSet dcSet) {
-        long total = dcSet.getOrderMap().getCountOrders(key);
-        return total;
+    public int getOperations(DCSet dcSet) {
+        return dcSet.getOrderMap().getCountOrders(key);
     }
 
     //OTHER
@@ -2032,16 +2061,42 @@ public abstract class AssetCls extends ItemCls {
         return assetJSON;
     }
 
-    public JSONObject jsonForExplorerPage(JSONObject langObj) {
+    public JSONObject jsonForExplorerPage(JSONObject langObj, Object[] args) {
 
-        JSONObject assetJSON = super.jsonForExplorerPage(langObj);
-        assetJSON.put("assetTypeKey", this.assetType);
+        JSONObject assetJSON = super.jsonForExplorerPage(langObj, args);
+        //assetJSON.put("assetTypeKey", this.assetType);
         assetJSON.put("assetTypeNameFull", charAssetType() + viewAssetTypeAbbrev() + ":" + Lang.T(viewAssetTypeFull(), langObj));
-        assetJSON.put("released", getReleased());
-        assetJSON.put("orders", getOperations(DCSet.getInstance()));
 
-        assetJSON.put("scale", this.getScale());
+        //assetJSON.put("orders", getOperations(DCSet.getInstance()));
+
+        //assetJSON.put("scale", this.getScale());
         assetJSON.put("quantity", this.getQuantity());
+
+        BigDecimal released = getReleased();
+        assetJSON.put("released", released);
+
+        if (args != null) {
+            // параметры для показа Объемов торгов
+            AssetCls quoteAsset = (AssetCls) args[0];
+            TradePair tradePair = PairsController.reCalcAndUpdate(this, quoteAsset, (PairMap) args[1], 10);
+
+            BigDecimal price = tradePair.getLower_askPrice();
+            if (price.signum() == 0) {
+                price = tradePair.getHighest_bidPrice();
+                if (price.signum() == 0) {
+                    price = tradePair.getLastPrice();
+                }
+            }
+            BigDecimal marketCap = released.multiply(price);
+            assetJSON.put("marketCap", marketCap);
+            assetJSON.put("lastPrice", tradePair.getLastPrice());
+
+            assetJSON.put("changePrice", tradePair.getFirstPrice().signum() > 0 ?
+                    tradePair.getLastPrice().subtract(tradePair.getFirstPrice())
+                            .movePointRight(2).divide(tradePair.getFirstPrice(), 3, RoundingMode.DOWN)
+                    : 0.0);
+
+        }
 
         return assetJSON;
     }

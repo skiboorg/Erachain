@@ -1589,7 +1589,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         return transaction;
     }
 
-    public JSONObject jsonForExplorerPage(JSONObject langObj) {
+    public JSONObject jsonForExplorerPage(JSONObject langObj, Object[] args) {
         return toJson();
     }
 
@@ -1650,6 +1650,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         if (height > 0) {
             transaction.put("seqNo", this.getSeqNo());
             transaction.put("height", height);
+            transaction.put("block", height);
         }
 
         boolean isSigned = this.signature != null;

@@ -8,10 +8,14 @@ package org.erachain.webserver;
 import org.erachain.api.ApiErrorFactory;
 import org.erachain.api.TradeResource;
 import org.erachain.controller.Controller;
+import org.erachain.controller.PairsController;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
 import org.erachain.core.item.assets.Trade;
+import org.erachain.core.item.assets.TradePair;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.web.ServletUtils;
+import org.erachain.database.PairMapImpl;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.ItemAssetMap;
 import org.erachain.utils.StrJSonFine;
@@ -60,6 +64,8 @@ public class APIExchange {
 
         help.put("GET apiexchange/order/[seqNo|signature]",
                 "Get Order by seqNo or Signature. For example: 4321-2");
+        help.put("GET apiexchange/v2/pair/{baseAssetKey}/{quoteAssetKey}",
+                "Get Pair info fot baseAssetKey / quoteAssetKey");
         help.put("GET apiexchange/pair/{have}/{want}",
                 "Get Pair info fot Have / Want");
         help.put("GET apiexchange/ordersbook/[have]/[want]?limit=[limit]",
@@ -306,6 +312,34 @@ public class APIExchange {
         return Response.status(200).header("Content-Type", "application/json; charset=utf-8")
                 .header("Access-Control-Allow-Origin", "*")
                 .entity(out.toJSONString())
+                .build();
+    }
+
+    @GET
+    @Path("v2/pair/{baseAssetKey}/{quoteAssetKey}")
+    // apiexchange/v2/pair/1/2
+    public Response getPair2(@PathParam("baseAssetKey") Long baseAssetKey, @PathParam("quoteAssetKey") Long quoteAssetKey) {
+
+        ItemAssetMap map = this.dcSet.getItemAssetMap();
+        // DOES ASSETID EXIST
+        if (baseAssetKey == null || !map.contains(baseAssetKey)) {
+            throw ApiErrorFactory.getInstance().createError(
+                    Transaction.ITEM_ASSET_NOT_EXIST);
+        }
+        if (quoteAssetKey == null || !map.contains(quoteAssetKey)) {
+            throw ApiErrorFactory.getInstance().createError(
+                    Transaction.ITEM_ASSET_NOT_EXIST);
+        }
+
+        PairMapImpl mapPairs = Controller.getInstance().dlSet.getPairMap();
+        AssetCls asset1 = map.get(quoteAssetKey);
+        AssetCls asset2 = map.get(baseAssetKey);
+
+        TradePair tradePair = PairsController.reCalcAndUpdate(asset1, asset2, mapPairs, 30);
+
+        return Response.status(200).header("Content-Type", "application/json; charset=utf-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .entity(tradePair.toJson().toJSONString())
                 .build();
     }
 
