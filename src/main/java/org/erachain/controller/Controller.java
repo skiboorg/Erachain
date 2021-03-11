@@ -1429,6 +1429,7 @@ public class Controller extends Observable {
             // разрешено всем - передадим его
             info.put("port", Settings.getInstance().getWebPort());
             info.put("scheme", Settings.getInstance().isWebUseSSL() ? "https" : "http");
+
         }
         peerInfo.put("i", info);
 
