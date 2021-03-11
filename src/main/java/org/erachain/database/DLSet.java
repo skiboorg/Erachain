@@ -13,6 +13,8 @@ import java.nio.file.Files;
 @Slf4j
 public class DLSet extends DBASet {
 
+    final static int CURRENT_VERSION = 1;
+
     private PeerMap peerMap;
     private PairMapImpl pairMap;
 
@@ -30,7 +32,7 @@ public class DLSet extends DBASet {
                 ///// добавил dcSet.clearCache(); --
                 ///.cacheDisable()
 
-                // это чистит сама память если соталось 25% от кучи - так что она безопасная
+                // это чистит сама память если осталось 25% от кучи - так что она безопасная
                 //.cacheHardRefEnable()
                 //.cacheLRUEnable()
                 ///.cacheSoftRefEnable()
@@ -63,11 +65,26 @@ public class DLSet extends DBASet {
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             try {
-                Files.walkFileTree(dbFile.toPath(), new SimpleFileVisitorForRecursiveFolderDeletion());
+                Files.walkFileTree(dbFile.getParentFile().toPath(),
+                        new SimpleFileVisitorForRecursiveFolderDeletion());
             } catch (Throwable e1) {
-                logger.error(e.getMessage(), e1);
+                logger.error(e1.getMessage(), e1);
             }
             database = makeDB(dbFile);
+        }
+
+        if (DBASet.getVersion(database) != CURRENT_VERSION) {
+            database.close();
+            logger.warn("New Version: " + CURRENT_VERSION + ". Try remake DLSet.");
+            try {
+                Files.walkFileTree(dbFile.getParentFile().toPath(),
+                        new SimpleFileVisitorForRecursiveFolderDeletion());
+            } catch (Throwable e) {
+                logger.error(e.getMessage(), e);
+            }
+            database = makeDB(dbFile);
+            DBASet.setVersion(database, CURRENT_VERSION);
+
         }
 
         return new DLSet(dbFile, database, true, true);
