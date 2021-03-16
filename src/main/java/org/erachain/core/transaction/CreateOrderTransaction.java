@@ -130,8 +130,18 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         if (long_fee == 0)
             return 0L;
 
+        if (wantAsset.isUnTransferable() || haveAsset.isUnTransferable()) {
+            return 0L;
+        }
+
+        if (wantKey == AssetCls.ERA_KEY || haveKey == AssetCls.ERA_KEY
+                || wantKey == AssetCls.FEE_KEY || haveKey == AssetCls.FEE_KEY) {
+            return 100L * BlockChain.FEE_PER_BYTE;
+        }
+
+
         if (!BlockChain.MAIN_MODE || height > BlockChain.VERS_5_01_01) {
-            return 1000 * BlockChain.FEE_PER_BYTE;
+            return 1000L * BlockChain.FEE_PER_BYTE;
         } else {
             return long_fee;
         }
@@ -445,6 +455,10 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         if (this.wantAsset.isAccounting() ^ this.haveAsset.isAccounting()
                 || haveAsset.isSelfManaged() || wantAsset.isSelfManaged()) {
             return INVALID_ACCOUNTING_PAIR;
+        }
+        if (wantAsset.isUnTransferable() && haveKey != AssetCls.ERA_KEY
+                || haveAsset.isUnTransferable() && wantKey != AssetCls.ERA_KEY) {
+            return INVALID_ECXHANGE_PAIR;
         }
 
         if (this.wantAsset.isInsideBonus() ^ this.haveAsset.isInsideBonus()) {
