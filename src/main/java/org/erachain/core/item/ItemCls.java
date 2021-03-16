@@ -54,8 +54,8 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
     public static final int POLL_TYPE = 8;
     public static final int AUTHOR_TYPE = 41;
 
-    public static final int MAX_ICON_LENGTH = 11000; //(int) Math.pow(256, ICON_SIZE_LENGTH) - 1;
-    public static final int MAX_IMAGE_LENGTH = 1100000; //(int) Math.pow(256, IMAGE_SIZE_LENGTH) - 1;
+    public static final int MAX_ICON_LENGTH = 150000; //(int) Math.pow(256, ICON_SIZE_LENGTH) - 1;
+    public static final int MAX_IMAGE_LENGTH = 1500000; //(int) Math.pow(256, IMAGE_SIZE_LENGTH) - 1;
     protected static final int TYPE_LENGTH = 2;
     protected static final int OWNER_LENGTH = PublicKeyAccount.PUBLIC_KEY_LENGTH;
     protected static final int NAME_SIZE_LENGTH = 1;
@@ -222,11 +222,20 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
     public String getTickerName() {
         String[] words = this.name.split(" ");
         String name = words[0].trim();
-        if (name.length() >6) {
+        if (name.length() > 6) {
             name = name.substring(0, 6);
         }
         return name;
 
+    }
+
+    /**
+     * доп метки для поиска данной сущности или её типа
+     *
+     * @return
+     */
+    public String[] getTags() {
+        return null;
     }
 
     public byte[] getIcon() {
@@ -283,7 +292,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
      * @param itemType
      * @return
      */
-    public static String getItemTypeChar(int itemType) {
+    public static String getItemTypeAndKey(int itemType) {
         switch (itemType) {
             case ItemCls.ASSET_TYPE:
                 return "A";
@@ -309,12 +318,16 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         }
     }
 
-    public static String getItemTypeChar(int itemType, Object itemKey) {
-        return "@" + getItemTypeChar(itemType) + itemKey.toString();
+    public static String getItemTypeAndKey(int itemType, Object itemKey) {
+        return "@" + getItemTypeAndKey(itemType) + itemKey.toString();
     }
 
-    public String getItemTypeChar() {
-        return getItemTypeChar(getItemType(), key);
+    public static String getItemTypeAndTag(int itemType, Object tag) {
+        return "@" + getItemTypeAndKey(itemType) + tag.toString();
+    }
+
+    public String getItemTypeAndKey() {
+        return getItemTypeAndKey(getItemType(), key);
     }
 
     public static String getItemTypeName(int itemType) {
@@ -654,10 +667,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
         JSONObject itemJSON = toJsonLite(false, false);
 
-        itemJSON.put("charKey", getItemTypeChar());
+        itemJSON.put("charKey", getItemTypeAndKey());
 
         // ADD DATA
-        itemJSON.put("itemCharKey", getItemTypeChar());
+        itemJSON.put("itemCharKey", getItemTypeAndKey());
         itemJSON.put("item_type", this.getItemTypeName());
         //itemJSON.put("itemType", this.getItemTypeName());
         itemJSON.put("item_type_sub", this.getItemSubType());

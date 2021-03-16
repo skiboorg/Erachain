@@ -264,10 +264,6 @@ public class BlockExplorer {
             logger.error("Wrong search while process assets... ", e.getMessage());
             throw new WrongSearchException();
         }
-        if (keys == null || keys.isEmpty()) {
-            logger.info("Wrong search while process assets... ");
-            throw new WrongSearchException();
-        }
 
         makePage(type, keys, start, pageSize, result, langObj, expArgs);
 
@@ -687,7 +683,7 @@ public class BlockExplorer {
             return;
         }
 
-        output.put("charKey", poll.getItemTypeChar());
+        output.put("charKey", poll.getItemTypeAndKey());
         output.put("Label_Actions", Lang.T("Actions", langObj));
         output.put("Label_RAW", Lang.T("Bytecode", langObj));
 
