@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.block.Block;
+import org.erachain.core.transaction.CreateOrderTransaction;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.CompletedOrderMap;
 import org.erachain.datachain.DCSet;
@@ -953,7 +954,7 @@ public class Order implements Comparable<Order> {
                 if (tradeAmountForHave.signum() <= 0
                         || tradeAmountForWant.signum() < 0) {
                     Long error = null;
-                    error ++;
+                    error++;
                 }
 
                 trade = new Trade(this.getId(), order.getId(), this.haveAssetKey, this.wantAssetKey,
@@ -963,8 +964,8 @@ public class Order implements Comparable<Order> {
                 //ADD TRADE TO DATABASE
                 tradesMap.put(trade);
 
-                /// так как у нас Индексы высчитываются по плавающей цене для остатков и она сейчас измениится
-                /// то сперва удалим Ордер - до изменения Остатокв и цены по Остаткам
+                /// так как у нас Индексы высчитываются по плавающей цене для остатков и она сейчас изменится
+                /// то сперва удалим Ордер - до изменения Остатков и цены по Остаткам
                 /// тогда можно ключи делать по цене на Остатки
                 //REMOVE FROM ORDERS
                 ordersMap.delete(order);
@@ -992,10 +993,14 @@ public class Order implements Comparable<Order> {
                 }
 
                 //TRANSFER FUNDS
-                order.getCreator().changeBalance(this.dcSet, false, false, order.wantAssetKey,
-                        tradeAmountForWant, false, false, false);
-                transaction.addCalculated(block, order.getCreator(), order.getWantAssetKey(), tradeAmountForWant,
-                        "Trade Order @" + Transaction.viewDBRef(order.id));
+                if (false) {
+                    AssetCls.processTrade(block, (CreateOrderTransaction) transaction, order, false, tradeAmountForWant);
+                } else {
+                    order.getCreator().changeBalance(this.dcSet, false, false, order.wantAssetKey,
+                            tradeAmountForWant, false, false, false);
+                    transaction.addCalculated(block, order.getCreator(), order.getWantAssetKey(), tradeAmountForWant,
+                            "Trade Order @" + Transaction.viewDBRef(order.id));
+                }
 
                 // Учтем что у стороны ордера обновилась форжинговая информация
                 if (order.wantAssetKey == Transaction.RIGHTS_KEY && block != null) {

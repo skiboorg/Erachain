@@ -98,11 +98,24 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
     }
 
     // GETTERS/SETTERS
+
+    public void setDC(DCSet dcSet, boolean andUpdateFromState) {
+
+        super.setDC(dcSet, false);
+
+        this.haveAsset = dcSet.getItemAssetMap().get(this.haveKey);
+        this.wantAsset = dcSet.getItemAssetMap().get(this.wantKey);
+
+        if (false && andUpdateFromState && !isWiped())
+            updateFromStateDB();
+
+    }
+
     // public static String getName() { return "Create Order"; }
 
     public String getTitle() {
         ///return viewTypeName();
-        return ItemCls.getItemTypeChar(ItemCls.ASSET_TYPE, haveKey) + " " + ItemCls.getItemTypeChar(ItemCls.ASSET_TYPE, wantKey);
+        return ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE, haveKey) + " " + ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE, wantKey);
     }
 
     @Override
@@ -117,8 +130,18 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         if (long_fee == 0)
             return 0L;
 
+        if (wantAsset.isUnTransferable() || haveAsset.isUnTransferable()) {
+            return 0L;
+        }
+
+        if (wantKey == AssetCls.ERA_KEY || haveKey == AssetCls.ERA_KEY
+                || wantKey == AssetCls.FEE_KEY || haveKey == AssetCls.FEE_KEY) {
+            return 100L * BlockChain.FEE_PER_BYTE;
+        }
+
+
         if (!BlockChain.MAIN_MODE || height > BlockChain.VERS_5_01_01) {
-            return 1000 * BlockChain.FEE_PER_BYTE;
+            return 1000L * BlockChain.FEE_PER_BYTE;
         } else {
             return long_fee;
         }
@@ -247,20 +270,6 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
         return new CreateOrderTransaction(typeBytes, creator, have, want, amountHave, amountWant, feePow, timestamp,
                 reference, signatureBytes, seqNo, feeLong);
-    }
-
-    public void setDC(DCSet dcSet, boolean andUpdateFromState) {
-
-        super.setDC(dcSet, false);
-
-        if (dcSet != null && dcSet.getItemAssetMap() != null) {
-            this.haveAsset = dcSet.getItemAssetMap().get(this.haveKey);
-            this.wantAsset = dcSet.getItemAssetMap().get(this.wantKey);
-        }
-
-        if (false && andUpdateFromState && !isWiped())
-            updateFromStateDB();
-
     }
 
     public Long getOrderId() {
@@ -447,6 +456,10 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
                 || haveAsset.isSelfManaged() || wantAsset.isSelfManaged()) {
             return INVALID_ACCOUNTING_PAIR;
         }
+        if (wantAsset.isUnTransferable() && haveKey != AssetCls.ERA_KEY
+                || haveAsset.isUnTransferable() && wantKey != AssetCls.ERA_KEY) {
+            return INVALID_ECXHANGE_PAIR;
+        }
 
         if (this.wantAsset.isInsideBonus() ^ this.haveAsset.isInsideBonus()) {
             if (this.height < BlockChain.VERS_4_12 || this.haveKey != AssetCls.FEE_KEY && this.wantKey != AssetCls.FEE_KEY)
@@ -611,6 +624,26 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         }
 
         return super.isValid(forDeal, flags);
+    }
+
+    @Override
+    public void makeItemsKeys() {
+        if (isWiped()) {
+            itemsKeys = new Object[][]{};
+        }
+
+        if (creatorPersonDuration == null) {
+            itemsKeys = new Object[][]{
+                    new Object[]{ItemCls.ASSET_TYPE, haveKey, haveAsset == null ? null : haveAsset.getTags()}, // транзакция ошибочная
+                    new Object[]{ItemCls.ASSET_TYPE, wantKey, wantAsset == null ? null : wantAsset.getTags()},
+            };
+        } else {
+            itemsKeys = new Object[][]{
+                    new Object[]{ItemCls.PERSON_TYPE, creatorPersonDuration.a, creatorPerson.getTags()},
+                    new Object[]{ItemCls.ASSET_TYPE, haveKey, haveAsset == null ? null : haveAsset.getTags()},
+                    new Object[]{ItemCls.ASSET_TYPE, wantKey, wantAsset == null ? null : wantAsset.getTags()},
+            };
+        }
     }
 
     // PROCESS/ORPHAN
