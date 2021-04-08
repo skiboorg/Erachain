@@ -17,7 +17,7 @@ import org.erachain.datachain.TransactionFinalMap;
 import org.erachain.datachain.TransactionFinalSuit;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.dbs.IteratorCloseableImpl;
-import org.erachain.dbs.MergedIteratorNoDuplicates;
+import org.erachain.dbs.MergedOR_IteratorsNoDuplicates;
 import org.erachain.utils.ReverseComparator;
 import org.mapdb.BTreeKeySerializer.BasicKeySerializer;
 import org.mapdb.BTreeMap;
@@ -404,7 +404,7 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
     }
 
     @Override
-    public IteratorCloseable<Long> getBiDirectionIterator(Long fromSeqNo, boolean descending) {
+    public IteratorCloseable<Long> getBiDirectionIterator_old(Long fromSeqNo, boolean descending) {
 
         if (descending) {
             IteratorCloseable result =
@@ -506,7 +506,7 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
             Iterator<Long> recipientKeysIterator = recipientKeys.iterator();
 
             // тут нельзя обратный КОМПАРАТОР REVERSE_COMPARATOR использоваьт ак как все перемешается
-            Iterator<Long> mergedIterator = new MergedIteratorNoDuplicates((Iterable) ImmutableList.of(senderKeysIterator, recipientKeysIterator), Fun.COMPARATOR);
+            Iterator<Long> mergedIterator = new MergedOR_IteratorsNoDuplicates((Iterable) ImmutableList.of(senderKeysIterator, recipientKeysIterator), Fun.COMPARATOR);
             return new IteratorCloseableImpl(Lists.reverse(Lists.newArrayList(mergedIterator)).iterator());
 
         }
@@ -525,7 +525,10 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
     public IteratorCloseable<Long> getBiDirectionAddressIterator(byte[] addressShort, Long fromSeqNo, boolean descending) {
 
         if (addressShort == null)
-            return getBiDirectionIterator(fromSeqNo, descending);
+            if (true)
+                return getIterator(fromSeqNo, descending);
+            else
+                return getBiDirectionIterator_old(fromSeqNo, descending);
 
         byte[] addressKey = new byte[TransactionFinalMap.ADDRESS_KEY_LEN];
         System.arraycopy(addressShort, 0, addressKey, 0, TransactionFinalMap.ADDRESS_KEY_LEN);

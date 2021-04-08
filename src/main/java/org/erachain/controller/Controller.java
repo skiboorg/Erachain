@@ -22,6 +22,7 @@ import org.erachain.core.crypto.Crypto;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
+import org.erachain.core.item.assets.AssetVenture;
 import org.erachain.core.item.assets.Order;
 import org.erachain.core.item.assets.Trade;
 import org.erachain.core.item.imprints.ImprintCls;
@@ -96,7 +97,7 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "2.2.02.01";
+    public static String version = "2.3";
     public static String buildTime = "2021-03-11 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
@@ -104,8 +105,6 @@ public class Controller extends Observable {
     // IF new abilities is made - new license insert in CHAIN and set this KEY
     public static final long LICENSE_VERS = 107; // version of LICENSE
     public static HashMap<String, Long> LICENSE_LANG_REFS;
-
-    public static TreeMap<String, Tuple2<BigDecimal, String>> COMPU_RATES = new TreeMap();
 
     public final String APP_NAME;
     public final static long MIN_MEMORY_TAIL = 64 * (1 << 20); // Машина Явы вылетает если меньше 50 МБ
@@ -860,7 +859,6 @@ public class Controller extends Observable {
         MemoryViewer mamoryViewer = new MemoryViewer(this);
         mamoryViewer.start();
 
-        updateCompuRaes();
     }
 
     // need for TESTS
@@ -1177,12 +1175,6 @@ public class Controller extends Observable {
             }
         }
 
-        // CLOSE DATABABASE
-        this.setChanged();
-        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Closing database")));
-        LOGGER.info("Closing database");
-        this.dcSet.close();
-
         if (this.wallet != null) {
             // CLOSE WALLET
             this.setChanged();
@@ -1204,6 +1196,12 @@ public class Controller extends Observable {
             LOGGER.info("Closing telegram");
             this.telegramStore.close();
         }
+
+        // CLOSE DATABABASE
+        this.setChanged();
+        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Closing database")));
+        LOGGER.info("Closing database");
+        this.dcSet.close();
 
         LOGGER.info("Closed.");
         // FORCE CLOSE
@@ -1435,6 +1433,7 @@ public class Controller extends Observable {
 
         // CheckPointSign
         peerInfo.put("cps", Base58.encode(blockChain.getMyHardCheckPointSign()));
+        peerInfo.put("cph", blockChain.getMyHardCheckPointHeight());
 
         if (!peer.directSendMessage(
                 MessageFactory.getInstance().createVersionMessage(peerInfo.toString(), buildTimestamp))) {
@@ -1649,23 +1648,16 @@ public class Controller extends Observable {
 
                 // ADD TO LIST
                 String infoStr = versionMessage.getStrVersion();
-                try {
-                    JSONObject peerIhfo = (JSONObject) JSONValue.parse(infoStr);
-                    if (!blockChain.validageHardCheckPointPeerSign(peerIhfo.get("cps").toString())) {
-                        peer.ban(30, "NOT FOUND CHECKPOINT!");
-                        return;
-                    }
-                    Integer peerHeight = Integer.parseInt(peerIhfo.get("h").toString());
-                    Long peerWeight = Long.parseLong(peerIhfo.get("w").toString());
-                    peer.setHWeight(new Tuple2<>(peerHeight, peerWeight));
-                    peer.setVersion(peerIhfo.get("v").toString());
-                    try {
-                        peer.setNodeInfo((JSONObject) JSONValue.parse(peerIhfo.get("i").toString()));
-                    } catch (Exception e) {
-                    }
+                JSONObject peerIhfo = (JSONObject) JSONValue.parse(infoStr);
+                Integer peerHeight = Integer.parseInt(peerIhfo.get("h").toString());
+                Long peerWeight = (Long) peerIhfo.get("w");
+                peer.setHWeight(new Tuple2<>(peerHeight, peerWeight));
+                peer.setVersion((String) peerIhfo.get("v"));
+                peer.setNodeInfo((JSONObject) peerIhfo.get("i"));
 
-                } catch (Exception e) {
-                    peer.setVersion(infoStr);
+                if (!blockChain.validateHardCheckPointPeerSign((Long) peerIhfo.get("cph"), (String) peerIhfo.get("cps"))) {
+                    peer.ban(10, "WRONG HARD CHECKPOINT!");
+                    return;
                 }
 
                 break;
@@ -3156,8 +3148,13 @@ public class Controller extends Observable {
         APIUtils.askAPICallAllowed(password, "POST issue Asset " + name, request, true);
         PrivateKeyAccount creatorPrivate = getWalletPrivateKeyAccountByAddress(creator);
 
-        return issueAsset(creatorPrivate,
-                linkTo, name, description, icon, image, scale,
+        int profitTaxMin = 0;
+        int profitTaxMax = 0;
+        int profitFee = 0;
+        int loanInterest = 0;
+
+        return issueAsset(null, creatorPrivate, linkTo, profitTaxMin, profitTaxMax, profitFee, loanInterest,
+                name, description, icon, image, scale,
                 assetType, quantity, feePow);
 
     }
@@ -3169,40 +3166,37 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction issueAsset(PrivateKeyAccount creator, ExLink linkTo, String name, String description, byte[] icon, byte[] image,
-                                  int scale, int assetType, long quantity, int feePow) {
+    //public Transaction issueAsset(PrivateKeyAccount creator, String name, String description, byte[] icon, byte[] image,
+    //                              int scale, int assetType, long quantity, int feePow) {
+    public Transaction issueAsset(byte[] appData, PrivateKeyAccount creator, ExLink linkTo, int profitTaxMin, int profitTaxMax,
+                                  int profitFee, long loanInterest,
+                                  String name, String description, byte[] icon, byte[] image,
+                                  int scale, int asset_type, long quantity, int feePow) {
+
+        AssetCls asset = new AssetVenture(appData, creator, name, icon, image, description, asset_type, scale, quantity);
+
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueAssetTransaction(creator, linkTo, name, description, icon, image, scale,
-                    assetType, quantity, feePow);
+            return this.transactionCreator.createIssueAssetTransaction(creator, linkTo, asset, feePow);
         }
     }
 
-    public Pair<Transaction, Integer> issueImprint(PrivateKeyAccount creator, ExLink exLink, String name, String description,
-                                                   byte[] icon, byte[] image, int feePow) {
-        // CREATE ONLY ONE TRANSACTION AT A TIME
-        synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueImprintTransaction(creator, exLink, name, description, icon, image,
-                    feePow);
-        }
-    }
-
-    public Transaction issueImprint1(PrivateKeyAccount creator, ExLink exLink, String name, String description, byte[] icon,
+    public Transaction issueImprint1(byte[] itemAppData, PrivateKeyAccount creator, ExLink exLink, String name, String description, byte[] icon,
                                      byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueImprintTransaction1(creator, exLink, name, description, icon, image,
+            return this.transactionCreator.createIssueImprintTransaction1(itemAppData, creator, exLink, name, description, icon, image,
                     feePow);
         }
     }
 
-    public Pair<Transaction, Integer> issuePerson(boolean forIssue, PrivateKeyAccount creator, ExLink linkTo, String fullName,
+    public Pair<Transaction, Integer> issuePerson(boolean forIssue, byte[] itemAppData, PrivateKeyAccount creator, ExLink linkTo, String fullName,
                                                   int feePow, long birthday, long deathday, byte gender, String race, float birthLatitude,
                                                   float birthLongitude, String skinColor, String eyeColor, String hairСolor, int height, byte[] icon,
                                                   byte[] image, String description, PublicKeyAccount owner, byte[] ownerSignature) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePersonTransaction(forIssue, creator, linkTo, fullName, feePow, birthday,
+            return this.transactionCreator.createIssuePersonTransaction(forIssue, itemAppData, creator, linkTo, fullName, feePow, birthday,
                     deathday, gender, race, birthLatitude, birthLongitude, skinColor, eyeColor, hairСolor, height, icon,
                     image, description, owner, ownerSignature);
         }
@@ -3326,7 +3320,7 @@ public class Controller extends Observable {
             return out;
         }
 
-        PersonHuman person = new PersonHuman(owner, name, birthday, deathday, gender,
+        PersonHuman person = new PersonHuman(null, owner, name, birthday, deathday, gender,
                 race, birthLatitude, birthLongitude,
                 skinColor, eyeColor, hairСolor, height, icon, image, description,
                 ownerSignature);
@@ -3349,11 +3343,11 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction issuePoll(PrivateKeyAccount creator, ExLink linkTo, String name, String description, List<String> options,
+    public Transaction issuePoll(byte[] itemAppData, PrivateKeyAccount creator, ExLink linkTo, String name, String description, List<String> options,
                                  byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePollTransaction(creator, linkTo, name, description, icon, image, options,
+            return this.transactionCreator.createIssuePollTransaction(itemAppData, creator, linkTo, name, description, icon, image, options,
                     feePow);
         }
     }
@@ -3365,11 +3359,11 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction issueStatus(PrivateKeyAccount creator, ExLink linkTo, String name, String description, boolean unique,
+    public Transaction issueStatus(byte[] itemAppData, PrivateKeyAccount creator, ExLink linkTo, String name, String description, boolean unique,
                                    byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueStatusTransaction(creator, linkTo, name, description, icon, image, unique,
+            return this.transactionCreator.createIssueStatusTransaction(itemAppData, creator, linkTo, name, description, icon, image, unique,
                     feePow);
         }
     }
@@ -3381,20 +3375,20 @@ public class Controller extends Observable {
         }
     }
 
-    public Transaction issueTemplate(PrivateKeyAccount creator, ExLink linkTo, String name, String description, byte[] icon,
+    public Transaction issueTemplate(byte[] itemAppData, PrivateKeyAccount creator, ExLink linkTo, String name, String description, byte[] icon,
                                      byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueTemplateTransaction(creator, linkTo, name, description, icon, image,
+            return this.transactionCreator.createIssueTemplateTransaction(itemAppData, creator, linkTo, name, description, icon, image,
                     feePow);
         }
     }
 
-    public Transaction issueUnion(PrivateKeyAccount creator, ExLink linkTo, String name, long birthday, long parent,
+    public Transaction issueUnion(byte[] itemAppData, PrivateKeyAccount creator, ExLink linkTo, String name, long birthday, long parent,
                                   String description, byte[] icon, byte[] image, int feePow) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssueUnionTransaction(creator, linkTo, name, birthday, parent, description,
+            return this.transactionCreator.createIssueUnionTransaction(itemAppData, creator, linkTo, name, birthday, parent, description,
                     icon, image, feePow);
         }
     }
@@ -3631,17 +3625,17 @@ public class Controller extends Observable {
         }
     }
 
-    public Pair<Transaction, Integer> r_Hashes(PrivateKeyAccount sender, int feePow, String url, String data,
-                                               String hashes) {
+    public Transaction r_Hashes(PrivateKeyAccount sender, ExLink exLink, int feePow, String url, String data,
+                                String hashes) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Hashes(sender, feePow, url, data, hashes);
+            return this.transactionCreator.r_Hashes(sender, exLink, feePow, url, data, hashes);
         }
     }
 
-    public Pair<Transaction, Integer> r_Hashes(PrivateKeyAccount sender, int feePow, String url, String data,
-                                               String[] hashes) {
+    public Transaction r_Hashes(PrivateKeyAccount sender, ExLink exLink, int feePow, String url, String data,
+                                String[] hashes) {
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.r_Hashes(sender, feePow, url, data, hashes);
+            return this.transactionCreator.r_Hashes(sender, exLink, feePow, url, data, hashes);
         }
     }
 
@@ -3678,16 +3672,6 @@ public class Controller extends Observable {
      *
      * }
      */
-
-    public void updateCompuRaes() {
-        BigDecimal rate = new BigDecimal(Settings.getInstance().getCompuRate());
-        long rateAssetKey = Settings.getInstance().getCompuRateAsset();
-        if (rateAssetKey == 95) {
-            this.COMPU_RATES.put("en", new Tuple2<BigDecimal, String>(rate, "$"));
-        } else if (rateAssetKey == 92){
-            this.COMPU_RATES.put("ru", new Tuple2<BigDecimal, String>(rate, "RUB"));
-        }
-    }
 
     public Block getBlockByHeight(DCSet db, int parseInt) {
         return db.getBlockMap().getAndProcess(parseInt);

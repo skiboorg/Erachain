@@ -14,7 +14,7 @@ import org.erachain.datachain.TransactionFinalMap;
 import org.erachain.datachain.TransactionFinalSuit;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.dbs.IteratorCloseableImpl;
-import org.erachain.dbs.MergedIteratorNoDuplicates;
+import org.erachain.dbs.MergedOR_IteratorsNoDuplicates;
 import org.erachain.dbs.rocksDB.common.RocksDbSettings;
 import org.erachain.dbs.rocksDB.indexes.ArrayIndexDB;
 import org.erachain.dbs.rocksDB.indexes.ListIndexDB;
@@ -505,7 +505,7 @@ public class TransactionFinalSuitRocksDB extends DBMapSuit<Long, Transaction> im
             Iterator recipientKeys = map.getIndexIteratorFilter(recipientTxs.getColumnFamilyHandle(), addressKey, descending, true);
 
             // тут нельзя обратный КОМПАРАТОР REVERSE_COMPARATOR использовать ак как все перемешается
-            Iterator<Long> mergedIterator = new MergedIteratorNoDuplicates((Iterable) ImmutableList.of(senderKeys, recipientKeys), Fun.COMPARATOR);
+            Iterator<Long> mergedIterator = new MergedOR_IteratorsNoDuplicates((Iterable) ImmutableList.of(senderKeys, recipientKeys), Fun.COMPARATOR);
 
             // а тут уже оьбратный порядок дать
             return new IteratorCloseableImpl(Lists.reverse(Lists.newArrayList(mergedIterator)).iterator());
@@ -514,7 +514,7 @@ public class TransactionFinalSuitRocksDB extends DBMapSuit<Long, Transaction> im
     }
 
     @Override
-    public IteratorCloseable<Long> getBiDirectionIterator(Long fromSeqNo, boolean descending) {
+    public IteratorCloseable<Long> getBiDirectionIterator_old(Long fromSeqNo, boolean descending) {
         byte[] fromKey;
 
         if (fromSeqNo == null || fromSeqNo == 0) {
@@ -532,7 +532,10 @@ public class TransactionFinalSuitRocksDB extends DBMapSuit<Long, Transaction> im
     public IteratorCloseable<Long> getBiDirectionAddressIterator(byte[] addressShort, Long fromSeqNo, boolean descending) {
 
         if (addressShort == null)
-            return getBiDirectionIterator(fromSeqNo, descending);
+            if (true)
+                return getIterator(fromSeqNo, descending);
+            else
+                return getBiDirectionIterator_old(fromSeqNo, descending);
 
         byte[] fromKey;
 

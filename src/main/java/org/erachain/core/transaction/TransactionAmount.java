@@ -573,7 +573,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                                                AssetCls asset) {
         if (BlockChain.PERSON_SEND_PROTECT && creatorIsPerson && absKey != FEE_KEY
                 && actionType != ACTION_DEBT && actionType != ACTION_HOLD && actionType != ACTION_SPEND
-                && asset.isPersonProtected()
+                && asset.isSendPersonProtected()
         ) {
             if (!recipient.isPerson(dcSet, height)
                     && !BlockChain.ANONYMASERS.contains(recipient.getAddress())) {
@@ -603,7 +603,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             return Transaction.INVALID_AMOUNT;
         }
 
-        if (asset.isUnTransferable()) {
+        if (asset.isUnTransferable(asset.getMaker().equals(creator))) {
             return Transaction.NOT_TRANSFERABLE_ASSET;
         }
 
@@ -1200,7 +1200,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             flags = flags | NOT_VALIDATE_FLAG_FEE;
         }
 
-
+        //////////////////////////////
         // CHECK IF AMOUNT AND ASSET
         if ((flags & NOT_VALIDATE_FLAG_BALANCE) == 0L
                 && this.amount != null) {
@@ -1354,9 +1354,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         if (assetFee != null && assetFee.signum() != 0) {
             // учтем что он еще заплатил коэффициент с суммы
             this.creator.changeBalance(db, !backward, backward, absKey, this.assetFee, false, false, !incomeReverse);
-            if (block != null && block.txCalculated != null) {
-                block.txCalculated.add(new RCalculated(this.creator, absKey,
-                        this.assetFee.negate(), "Asset Fee", this.dbRef, 0L));
+            if (block != null) {
+                block.addCalculated(this.creator, absKey,
+                        this.assetFee.negate(), "Asset Fee", this.dbRef);
             }
         }
     }

@@ -42,6 +42,8 @@ public class GenesisBlock extends Block {
     private long genesisTimestamp;
     private String sideSettingString;
 
+    private static final byte[] itemAppData = null;
+
     public GenesisBlock() {
 
         super(genesisVersion, genesisReference, CREATOR);
@@ -169,7 +171,7 @@ public class GenesisBlock extends Block {
     public static AssetVenture makeAsset(long key) {
         switch ((int) key) {
             case (int) AssetCls.ERA_KEY:
-                return new AssetVenture(CREATOR, AssetCls.ERA_NAME, icon, image, AssetCls.ERA_DESCR, 0, 8, 0L);
+                return new AssetVenture(itemAppData, CREATOR, AssetCls.ERA_NAME, icon, image, AssetCls.ERA_DESCR, 0, 8, 0L);
             case (int) AssetCls.FEE_KEY:
                 return new AssetVenture(CREATOR, AssetCls.FEE_NAME, icon, image, AssetCls.FEE_DESCR, 0, 8, 0L);
         }
@@ -207,7 +209,7 @@ public class GenesisBlock extends Block {
             AssetVenture asset = makeAsset(i);
             // MAKE OLD STYLE ASSET with DEVISIBLE:
             // PROP1 = 0 (unMOVABLE, SCALE = 8, assetTYPE = 1 (divisible)
-            asset = new AssetVenture((byte) 0, asset.getMaker(), asset.getName(),
+            asset = new AssetVenture((byte) 0, itemAppData, asset.getMaker(), asset.getName(),
                     asset.getIcon(), asset.getImage(), asset.getDescription(), AssetCls.AS_INSIDE_ASSETS, 8, 0L);
             transactions.add(new GenesisIssueAssetTransaction(asset));
         }
