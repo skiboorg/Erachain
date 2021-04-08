@@ -538,13 +538,13 @@ public abstract class AssetCls extends ItemCls {
         switch ((int) key) {
             case 1:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ERA.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/FOIL.png"));
                 } catch (Exception e) {
                 }
                 return icon;
             case 2:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/COMPU.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/MVolt.png"));
                 } catch (Exception e) {
                 }
                 return icon;

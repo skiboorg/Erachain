@@ -224,7 +224,7 @@ public class GenesisBlock extends Block {
 
         AssetVenture asset;
 
-        asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, AssetCls.FEE_NAME,
+        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, AssetCls.FEE_NAME,
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
@@ -232,7 +232,7 @@ public class GenesisBlock extends Block {
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 100000000L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        //asset = new AssetVenture((byte) 0, BlockChain.FEE_ASSET_EMITTER, "BAL",
+        //asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "BAL",
         //        null, null, "", AssetCls.AS_INSIDE_ASSETS, 2, 0L);
         //transactions.add(new GenesisIssueAssetTransaction(asset));
 

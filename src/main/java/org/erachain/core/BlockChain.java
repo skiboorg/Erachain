@@ -93,7 +93,7 @@ public class BlockChain {
     /**
      * Защита от платежей с удостоверенного на анонима
      */
-    public static boolean PERSON_SEND_PROTECT = true;
+    public static boolean PERSON_SEND_PROTECT = false;
 
     /**
      * Подмена реального на чужой - для синхронизации из старой ветки
@@ -118,19 +118,19 @@ public class BlockChain {
     /**
      * default = 30 sec
      */
-    private static int BLOCKS_PERIOD = 300; // [sec]
+    private static int BLOCKS_PERIOD = 30; // [sec]
 
     /**
      * set uo all balances ERA to 10000 and COMPU to 100
      */
     public static final boolean ERA_COMPU_ALL_UP = TEST_MODE || TEST_DB > 0 || Settings.ERA_COMPU_ALL_UP;
 
-    public static int NETWORK_PORT = TEST_DB > 0 ? 9006 : TEST_MODE ? 9066 : CLONE_MODE ? 9096 : 0;
+    public static int NETWORK_PORT = TEST_DB > 0 ? 9006 : TEST_MODE ? 9066 : CLONE_MODE ? 9076 : 0;
 
     public static final int DEFAULT_WEB_PORT = NETWORK_PORT + 1;
     public static final int DEFAULT_RPC_PORT = NETWORK_PORT + 2;
 
-    public static final String DEFAULT_EXPLORER = "http://explorer.wfchain.org:" + DEFAULT_WEB_PORT;
+    public static final String DEFAULT_EXPLORER = "http://explorer.foil.network:" + DEFAULT_WEB_PORT;
 
     //public static final String TIME_ZONE = "GMT+3";
     //
