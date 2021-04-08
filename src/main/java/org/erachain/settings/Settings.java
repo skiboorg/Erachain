@@ -33,7 +33,7 @@ public class Settings {
     public static final long DEFAULT_MAINNET_STAMP = 1603756800000L; // MAIN Net
     public static final long DEFAULT_DEMO_NET_STAMP = 1603756800000L; // DEMO Net
 
-    public static String FORK_APP_Name = "Workflow";
+    public static String FORK_APP_Name = "Foil Network";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
     public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
 
@@ -94,7 +94,7 @@ public class Settings {
             Arrays.asList("7MPBeGZyAM6PSKuWLDhx6NnLHbXub41MvE", "2500000", 0)
         );
 
-    public static String peersURL = "https://raw.githubusercontent.com/erachain/erachain-public/master/peers.json";
+    public static String peersURL = "https://gitlab.com/FoilNetwork/foilnetwork-public/-/raw/master/peers.json";
     public static String cloneLicense; // see sidePROTOCOL_example.json
 
     public static final String CLONE_OR_SIDE = "Chain"; // cloneChain or SideChain
