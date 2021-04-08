@@ -178,7 +178,7 @@ public abstract class DCUMapImpl<T, U> extends DBTabImpl<T, U> implements Forked
             }
 
             /// тут нет дублей они уже удалены и дубли не взяты
-            /// return new MergedIteratorNoDuplicates((Iterable) ImmutableList.of(list.iterator(), map.keySet().iterator()), Fun.COMPARATOR);
+            /// return new MergedOR_IteratorsNoDuplicates((Iterable) ImmutableList.of(list.iterator(), map.keySet().iterator()), Fun.COMPARATOR);
             return new IteratorCloseableImpl(Iterators.mergeSorted((Iterable) ImmutableList.of(list.iterator(), map.keySet().iterator()), Fun.COMPARATOR));
 
         } finally {
@@ -210,13 +210,41 @@ public abstract class DCUMapImpl<T, U> extends DBTabImpl<T, U> implements Forked
             }
 
             /// тут нет дублей они уже удалены и дубли не взяты
-            /// return new MergedIteratorNoDuplicates((Iterable) ImmutableList.of(list.iterator(), map.keySet().iterator()), Fun.COMPARATOR);
+            /// return new MergedOR_IteratorsNoDuplicates((Iterable) ImmutableList.of(list.iterator(), map.keySet().iterator()), Fun.COMPARATOR);
             return new IteratorCloseableImpl(Iterators.mergeSorted((Iterable) ImmutableList.of(list.iterator(),
                     ((NavigableMap) map).descendingMap().keySet().iterator()), Fun.COMPARATOR));
 
         } finally {
             this.outUses();
         }
+
+    }
+
+    public IteratorCloseable<T> getIterator(T fromKey, boolean descending) {
+        this.addUses();
+
+        if (descending) {
+            IteratorCloseable result =
+                    // делаем закрываемый Итератор
+                    IteratorCloseableImpl.make(
+                            // берем индекс с обратным отсчетом
+                            ((NavigableMap) this.map).descendingMap()
+                                    // задаем границы, так как он обратный границы меняем местами
+                                    .subMap(fromKey == null || fromKey.equals(0L) ? Long.MAX_VALUE : fromKey, 0L).keySet().iterator());
+            return result;
+        }
+
+        IteratorCloseable result =
+                // делаем закрываемый Итератор
+                IteratorCloseableImpl.make(
+                        ((NavigableMap) this.map)
+                                // задаем границы, так как он обратный границы меняем местами
+                                .subMap(fromKey == null || fromKey.equals(0L) ? 0L : fromKey,
+                                        Long.MAX_VALUE).keySet().iterator());
+
+
+        this.outUses();
+        return new IteratorCloseableImpl(result);
 
     }
 

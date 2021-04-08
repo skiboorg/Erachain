@@ -2,10 +2,8 @@ package org.erachain.api;
 
 import org.erachain.controller.Controller;
 import org.erachain.core.account.PrivateKeyAccount;
-import org.erachain.core.crypto.Base58;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.utils.APIUtils;
-import org.erachain.utils.Pair;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun.Tuple3;
 import org.slf4j.Logger;
@@ -18,14 +16,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 
+@Deprecated
 @Path("rec_hashes")
 @Produces(MediaType.APPLICATION_JSON)
 public class RecHashesResource {
 
 
-    private static final Logger LOGGER = LoggerFactory            .getLogger(RecHashesResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecHashesResource.class);
 
     @Context
     HttpServletRequest request;
@@ -94,28 +92,21 @@ public class RecHashesResource {
 			}
 			*/
 
-            String beginStr = hashesStr.substring(0, 100);
-            List<String> twins;
-            String[] hashes;
-            if (beginStr.contains("-")) {
-                hashes = hashesStr.split("-");
-            } else {
-                hashes = hashesStr.split(" ");
-            }
+            String[] hashes = hashesStr.split("[-, ]");
 
-            Pair<Transaction, Integer> result = Controller.getInstance()
-                    .r_Hashes(maker, feePow,
+            Transaction transaction = Controller.getInstance()
+                    .r_Hashes(maker, null, feePow,
                             url, message, hashes);
 
-            if (result.getB() == Transaction.VALIDATE_OK) {
-                //return result.getA().toJson().toJSONString();
-                JSONObject json_result = new JSONObject();
-                String b58 = Base58.encode(result.getA().getSignature());
-                json_result.put("signature", b58);
+            int validate = Controller.getInstance().getTransactionCreator().afterCreate(transaction, Transaction.FOR_NETWORK, false, false);
 
-                return json_result.toJSONString();
-            } else
-                throw ApiErrorFactory.getInstance().createError(result.getB());
+            if (validate == Transaction.VALIDATE_OK)
+                return transaction.toJson().toJSONString();
+            else {
+                JSONObject out = new JSONObject();
+                Transaction.updateMapByErrorSimple(validate, out);
+                return out.toJSONString();
+            }
 
         } catch (NullPointerException | ClassCastException e) {
             // JSON EXCEPTION
