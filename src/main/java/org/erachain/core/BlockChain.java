@@ -258,6 +258,8 @@ public class BlockChain {
 
     public static final int VERS_5_01_01 = 0;
 
+    public static final int VERS_5_3 = TEST_DB > 0 || !MAIN_MODE ? 0 : 1870000;
+
     /**
      * Новый уровень начальных номеров для всех сущностей
      */
@@ -705,8 +707,7 @@ public class BlockChain {
 
         }
 
-        //lastBlockSignature = dcSet.getBlocksHeadMap().getLastBlockSignature();
-        //HWeight = dcSet.getBlockSignsMap().get(lastBlockSignature);
+        FEE_ASSET = Controller.getInstance().getDCSet().getItemAssetMap().get(AssetCls.FEE_KEY);
 
     }
 
@@ -768,6 +769,12 @@ public class BlockChain {
      * @return
      */
     public static boolean isFeeEnough(int height, Account account) {
+        if (true) {
+            // for MAIN NET
+            return false;
+        }
+
+        // FOR CLONES
         if (FEE_ASSET == null)
             FEE_ASSET = Controller.getInstance().getDCSet().getItemAssetMap().get(AssetCls.FEE_KEY);
 
@@ -885,8 +892,34 @@ public class BlockChain {
         }
     }
 
-    public boolean validageHardCheckPointPeerSign(String peerSign) {
-        return Arrays.equals(getMyHardCheckPointSign(), Base58.decode(peerSign));
+    public int getMyHardCheckPointHeight() {
+        if (CHECKPOINT.a > 1) {
+            return CHECKPOINT.a;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * @param peerHeight  Long чтобы преобразования JSON не делать лоя Нуля
+     * @param peerSignStr
+     * @return
+     */
+    public boolean validateHardCheckPointPeerSign(Long peerHeight, String peerSignStr) {
+
+        byte[] peerSign = Base58.decode(peerSignStr);
+        if (Arrays.equals(getMyHardCheckPointSign(), peerSign))
+            return true;
+
+        DCSet dcSet = DCSet.getInstance();
+        if (dcSet.getBlockSignsMap().contains(peerSign))
+            return true;
+
+        if (peerHeight == null || // OLD version
+                peerHeight > getHeight(dcSet))
+            return true;
+
+        return false;
     }
 
     public boolean isPeerTrusted(Peer peer) {

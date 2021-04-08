@@ -44,7 +44,7 @@ public class APIItemPoll {
         help.put("GET apipoll/last", "Get last ID");
         help.put("GET apipoll/{key}", "GET by ID");
         help.put("GET apipoll/raw/{key}", "Returns RAW in Base58 of poll with the given key.");
-        help.put("GET apipoll/find/{filter_name_string}", "GET by words in Name. Use patterns from 5 chars in words");
+        help.put("GET apipoll/find?filter={name_string}&from{keyID}&&offset=0&limit=0desc={descending}", "Get by words in Name. Use patterns from 5 chars in words. Default {descending} - true");
         help.put("Get apipoll/image/{key}", "GET Poll Image");
         help.put("Get apipoll/icon/{key}", "GET Poll Icon");
         help.put("Get apipoll/listfrom/{start}?page={pageSize}&showperson={showPerson}&desc={descending}", "Gel list from {start} limit by {pageSize}. {ShowPerson} default - true, {descending} - true. If START = -1 list from last");
@@ -103,7 +103,7 @@ public class APIItemPoll {
         }
 
         ItemCls item = Controller.getInstance().getPoll(asLong);
-        byte[] issueBytes = item.toBytes(false, false);
+        byte[] issueBytes = item.toBytes(Transaction.FOR_NETWORK, false, false);
         return Response.status(200)
                 .header("Content-Type", "application/json; charset=utf-8")
                 .header("Access-Control-Allow-Origin", "*")
@@ -111,9 +111,28 @@ public class APIItemPoll {
                 .build();
     }
 
+    @Deprecated
     @GET
     @Path("find/{filter_name_string}")
-    public Response find(@PathParam("filter_name_string") String filter) {
+    public static Response findOld(@PathParam("filter_name_string") String filter,
+                                   @QueryParam("from") Long fromID,
+                                   @QueryParam("offset") int offset,
+                                   @QueryParam("limit") int limit) {
+
+        return find(filter, fromID, offset, limit, true);
+    }
+
+    @GET
+    @Path("find")
+    public static Response find(@QueryParam("filter") String filter,
+                                @QueryParam("from") Long fromID,
+                                @QueryParam("offset") int offset,
+                                @QueryParam("limit") int limit,
+                                @DefaultValue("true") @QueryParam("desc") boolean descending) {
+
+        if (limit > 100) {
+            limit = 100;
+        }
 
         if (filter == null || filter.isEmpty()) {
             return Response.status(501)
@@ -124,7 +143,7 @@ public class APIItemPoll {
         }
 
         ItemPollMap map = DCSet.getInstance().getItemPollMap();
-        List<ItemCls> list = map.getByFilterAsArray(filter, 0, 100);
+        List<ItemCls> list = map.getByFilterAsArray(filter, fromID, offset, limit, descending);
 
         JSONArray array = new JSONArray();
 
@@ -166,7 +185,7 @@ public class APIItemPoll {
 
         if (poll.getImage() != null) {
             // image to byte[] hot scale (param2 =0)
-            //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
+            //	byte[] b = ImagesTools.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
             ///return Response.ok(new ByteArrayInputStream(poll.getImage())).build();
             return Response.status(200)
                     .header("Access-Control-Allow-Origin", "*")
@@ -203,7 +222,7 @@ public class APIItemPoll {
 
         if (poll.getIcon() != null) {
             // image to byte[] hot scale (param2 =0)
-            //	byte[] b = Images_Work.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
+            //	byte[] b = ImagesTools.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
             //return Response.ok(new ByteArrayInputStream(poll.getIcon())).build();
             return Response.status(200)
                     .header("Access-Control-Allow-Origin", "*")

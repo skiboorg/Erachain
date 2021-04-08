@@ -7,7 +7,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.item.ItemCls;
-import org.erachain.core.transaction.CreateOrderTransaction;
+import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.database.PairMap;
@@ -28,7 +28,10 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-// 1019 - Movable = true; Divisible = NO; Quantity = 1
+/**
+ * flag[0] - profitFeeMin[int] + profitFeeMax[int]
+ * flag[1] - profitTax[int] + loanInterest[int] //  use "/apiasset/image/1048664" "/apiasset/icon/1048664"
+ */
 public abstract class AssetCls extends ItemCls {
 
     public static final int TYPE_KEY = ItemCls.ASSET_TYPE;
@@ -36,7 +39,6 @@ public abstract class AssetCls extends ItemCls {
     protected static final int ASSET_TYPE_LENGTH = 1;
     //
     protected int assetType;
-
 
     // CORE KEY
     public static final long ERA_KEY = 1L;
@@ -282,14 +284,14 @@ public abstract class AssetCls extends ItemCls {
      */
     public static final int AS_SELF_MANAGED_SHARE = 129;
 
-    protected AssetCls(byte[] typeBytes, PublicKeyAccount owner, String name, byte[] icon, byte[] image, String description, int assetType) {
-        super(typeBytes, owner, name, icon, image, description);
+    protected AssetCls(byte[] typeBytes, byte[] appData, PublicKeyAccount maker, String name, byte[] icon, byte[] image, String description, int assetType) {
+        super(typeBytes, appData, maker, name, icon, image, description);
         this.assetType = assetType;
 
     }
 
-    public AssetCls(int type, byte pars, PublicKeyAccount owner, String name, byte[] icon, byte[] image, String description, int assetType) {
-        this(new byte[TYPE_LENGTH], owner, name, icon, image, description, assetType);
+    public AssetCls(int type, byte pars, byte[] appData, PublicKeyAccount maker, String name, byte[] icon, byte[] image, String description, int assetType) {
+        this(new byte[TYPE_LENGTH], appData, maker, name, icon, image, description, assetType);
         this.typeBytes[0] = (byte) type;
         this.typeBytes[1] = pars;
     }
@@ -748,12 +750,12 @@ public abstract class AssetCls extends ItemCls {
         return isUnSpendable(key, assetType);
     }
 
-    public static boolean isUnTransferable(long key, int assetType) {
-        return assetType == AssetCls.AS_NON_FUNGIBLE;
+    public static boolean isUnTransferable(long key, int assetType, boolean senderIsAssetMaker) {
+        return assetType == AssetCls.AS_NON_FUNGIBLE && !senderIsAssetMaker;
     }
 
-    public boolean isUnTransferable() {
-        return isUnTransferable(key, assetType);
+    public boolean isUnTransferable(boolean senderIsAssetMaker) {
+        return isUnTransferable(key, assetType, senderIsAssetMaker);
     }
 
     public static boolean isUnDebtable(long key, int assetType) {
@@ -807,8 +809,9 @@ public abstract class AssetCls extends ItemCls {
         return isAccounting(assetType);
     }
 
-    public boolean isPersonProtected() {
+    public boolean isSendPersonProtected() {
         return (key <= AssetCls.ERA_KEY || key > getStartKey()) // GATE Assets
+                && assetType != AssetCls.AS_NON_FUNGIBLE
                 && !isAccounting()
                 && assetType != AssetCls.AS_INSIDE_BONUS
                 && assetType != AssetCls.AS_INSIDE_VOTE;
@@ -1165,7 +1168,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_BANK_GUARANTEE_TOTAL:
                 return "A digital accounting bank guarantee";
             case AS_NON_FUNGIBLE:
-                return "A non fungible token (unique)";
+                return "AS_NON_FUNGIBLE_D";
             case AS_INDEX:
                 return "Index on foreign and domestic assets, for example currencies on FOREX";
             case AS_INSIDE_OTHER_CLAIM:
@@ -1187,6 +1190,19 @@ public abstract class AssetCls extends ItemCls {
 
         }
         return "";
+    }
+
+    public static String viewAssetTypeDescriptionDEX(int assetType, long key) {
+        if (key < 100)
+            return "AS_CURRENCY_100_DEX";
+
+        switch (assetType) {
+            case AS_OUTSIDE_CURRENCY:
+            case AS_INSIDE_CURRENCY:
+            case AS_NON_FUNGIBLE:
+                return "AS_NON_FUNGIBLE_DEX";
+        }
+        return null;
     }
 
     public static String viewAssetTypeAction(long assetKey, int assetType, boolean backward, int actionType, boolean isCreatorMaker) {
@@ -1399,6 +1415,12 @@ public abstract class AssetCls extends ItemCls {
                     default:
                         return null;
                 }
+            case AS_NON_FUNGIBLE: {
+                if (actionType == Account.BALANCE_POS_OWN) {
+                    return backward ? null : isCreatorMaker ? "AS_NON_FUNGIBLE_Issue" : null;
+                }
+                return null;
+            }
             case AS_INDEX:
                 break;
             case AS_INSIDE_OTHER_CLAIM:
@@ -1647,28 +1669,6 @@ public abstract class AssetCls extends ItemCls {
     }
 
     public String viewAssetTypeActionTitle(boolean backward, int actionType, boolean isCreatorMaker) {
-        switch (assetType) {
-            case AS_BANK_GUARANTEE:
-            case AS_BANK_GUARANTEE_TOTAL:
-            case AS_OUTSIDE_IMMOVABLE:
-            case AS_OUTSIDE_CURRENCY:
-            case AS_OUTSIDE_SERVICE:
-            case AS_OUTSIDE_SHARE:
-            case AS_OUTSIDE_BILL:
-            case AS_OUTSIDE_BILL_EX:
-            case AS_OUTSIDE_OTHER_CLAIM:
-            case AS_INSIDE_ASSETS:
-            case AS_INSIDE_CURRENCY:
-            case AS_INSIDE_UTILITY:
-            case AS_INSIDE_SHARE:
-            case AS_INSIDE_BONUS:
-            case AS_INSIDE_ACCESS:
-            case AS_INSIDE_VOTE:
-            case AS_INDEX:
-            case AS_INSIDE_OTHER_CLAIM:
-            case AS_ACCOUNTING:
-        }
-
         return viewAssetTypeAction(backward, actionType, isCreatorMaker);
     }
 
@@ -1707,6 +1707,11 @@ public abstract class AssetCls extends ItemCls {
                         return backward ? "Beneficiary" : null;
                     case Account.BALANCE_POS_SPEND:
                         return "Spender";
+                }
+            case AS_NON_FUNGIBLE:
+                switch (actionType) {
+                    case Account.BALANCE_POS_OWN:
+                        return backward ? null : isCreatorMaker ? "Author" : null;
                 }
             case AS_SELF_MANAGED_ACCOUNTING:
             case AS_SELF_MANAGED_DIRECT_SEND:
@@ -1805,6 +1810,11 @@ public abstract class AssetCls extends ItemCls {
                     case Account.BALANCE_POS_SPEND:
                         return "Spender";
                 }
+            case AS_NON_FUNGIBLE:
+                switch (actionType) {
+                    case Account.BALANCE_POS_OWN:
+                        return backward ? null : "Recipient";
+                }
             case AS_SELF_MANAGED_ACCOUNTING:
             case AS_SELF_MANAGED_DIRECT_SEND:
             case AS_SELF_MANAGED_SHARE:
@@ -1893,6 +1903,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_INSIDE_VOTE:
             case AS_BANK_GUARANTEE:
             case AS_BANK_GUARANTEE_TOTAL:
+            case AS_NON_FUNGIBLE:
             case AS_INDEX:
             case AS_INSIDE_OTHER_CLAIM:
             case AS_ACCOUNTING:
@@ -1914,8 +1925,9 @@ public abstract class AssetCls extends ItemCls {
         assetTypeJson.put("name", Lang.T(AssetCls.viewAssetTypeCls(assetType), langObj));
         assetTypeJson.put("nameFull", Lang.T(AssetCls.viewAssetTypeFullCls(assetType), langObj));
 
-        List<Fun.Tuple2<Fun.Tuple2<Integer, Boolean>, String>> actions = AssetCls.viewAssetTypeActionsList(ItemCls.getStartKey(
-                AssetCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD),
+        long startKey = ItemCls.getStartKey(
+                AssetCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD);
+        List<Fun.Tuple2<Fun.Tuple2<Integer, Boolean>, String>> actions = AssetCls.viewAssetTypeActionsList(startKey,
                 assetType, null, true);
         StringJoiner joiner = new StringJoiner(", ");
         JSONArray actionsArray = new JSONArray();
@@ -1955,6 +1967,11 @@ public abstract class AssetCls extends ItemCls {
         }
         description += "<b>" + Lang.T("Acceptable actions", langObj) + ":</b><br>" + joiner.toString();
 
+        String dexDesc = AssetCls.viewAssetTypeDescriptionDEX(assetType, startKey);
+        if (dexDesc != null) {
+            description += "<br><b>" + Lang.T("DEX rules and taxes", langObj) + ":</b><br>" + Lang.T(dexDesc, langObj);
+        }
+
         assetTypeJson.put("description", description);
 
         return assetTypeJson;
@@ -1991,12 +2008,17 @@ public abstract class AssetCls extends ItemCls {
 
         JSONObject langObj = Lang.getInstance().getLangJson("en");
 
+        long startKey = getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD);
         typeJson.put("key", type);
-        typeJson.put("char", charAssetType(getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD), type));
+        typeJson.put("char", charAssetType(startKey, type));
         typeJson.put("abbrev", viewAssetTypeAbbrev(type));
         typeJson.put("name", Lang.T(assetTypeName, langObj));
         typeJson.put("name_full", Lang.T(viewAssetTypeFullCls(type), langObj));
         typeJson.put("desc", Lang.T(viewAssetTypeDescriptionCls(type), langObj));
+        String dexDesc = AssetCls.viewAssetTypeDescriptionDEX(type, startKey);
+        if (dexDesc != null) {
+            typeJson.put("desc_DEX", Lang.T(dexDesc, langObj));
+        }
 
         return typeJson;
     }
@@ -2055,17 +2077,25 @@ public abstract class AssetCls extends ItemCls {
 
         JSONObject assetJSON = super.toJson();
 
+        JSONObject landObj = Lang.getInstance().getLangJson("en");
+
         // ADD DATA
         assetJSON.put("assetTypeKey", this.assetType);
-        assetJSON.put("assetTypeName", viewAssetType());
-        assetJSON.put("assetTypeDesc", viewAssetTypeDescriptionCls(assetType));
+        assetJSON.put("assetTypeName", Lang.T(viewAssetType(), landObj));
+        assetJSON.put("assetTypeDesc", Lang.T(viewAssetTypeDescriptionCls(assetType), landObj));
+
+        String dexDesc = AssetCls.viewAssetTypeDescriptionDEX(assetType, START_KEY());
+        if (dexDesc != null) {
+            assetJSON.put("type_desc_DEX", Lang.T(dexDesc, landObj));
+        }
+
         assetJSON.put("released", this.getReleased());
         assetJSON.put("type_key", this.assetType);
         assetJSON.put("type_char", charAssetType());
         assetJSON.put("type_abbrev", viewAssetTypeAbbrev());
-        assetJSON.put("type_name", viewAssetType());
-        assetJSON.put("type_name_full", viewAssetTypeFull());
-        assetJSON.put("type_desc", viewAssetTypeDescriptionCls(assetType));
+        assetJSON.put("type_name", Lang.T(viewAssetType(), landObj));
+        assetJSON.put("type_name_full", Lang.T(viewAssetTypeFull(), landObj));
+        assetJSON.put("type_desc", Lang.T(viewAssetTypeDescriptionCls(assetType), landObj));
 
         assetJSON.put("scale", this.getScale());
         assetJSON.put("quantity", this.getQuantity());
@@ -2183,9 +2213,16 @@ public abstract class AssetCls extends ItemCls {
         for (Fun.Tuple2<?, String> item : viewAssetTypeActionsList(null, true)) {
             joiner.add(Lang.T(item.b, langObj));
         }
-        itemJson.put("assetTypeDesc", Lang.T(viewAssetTypeDescriptionCls(getAssetType()), langObj)
-                + ".<br><b>" + Lang.T("Acceptable actions", langObj) + "</b>: " + joiner.toString()
-        );
+
+        String desc = Lang.T(viewAssetTypeDescriptionCls(getAssetType()), langObj)
+                + ".<br><b>" + Lang.T("Acceptable actions", langObj) + "</b>: " + joiner.toString();
+        String dexDesc = AssetCls.viewAssetTypeDescriptionDEX(assetType, START_KEY());
+        if (dexDesc != null) {
+            desc += "<br><b>" + Lang.T("DEX rules and taxes", langObj) + ":</b><br>" + Lang.T(dexDesc, langObj);
+        }
+
+        itemJson.put("assetTypeDesc", desc);
+
 
         itemJson.put("properties", viewProperties(langObj));
 
@@ -2219,29 +2256,107 @@ public abstract class AssetCls extends ItemCls {
     static BigDecimal taxCoefficient = new BigDecimal("0.1");
     static BigDecimal referralsCoefficient = new BigDecimal("0.02");
 
-    public static void processTrade(Block block, CreateOrderTransaction transaction, Order order,
-                                    boolean asOrphan, BigDecimal tradeAmountForWant) {
+    public static void processTrade(DCSet dcSet, Block block, Account receiver,
+                                    boolean isInitiator, AssetCls assetHave, AssetCls assetWant,
+                                    boolean asOrphan, BigDecimal tradeAmountForWant, long timestamp, Long orderID) {
         //TRANSFER FUNDS
-        if (transaction.getHaveAsset().getAssetType() == AS_NON_FUNGIBLE) {
-            BigDecimal tax = tradeAmountForWant.multiply(taxCoefficient);
-            BigDecimal referral = tradeAmountForWant.multiply(referralsCoefficient);
-            tradeAmountForWant = tradeAmountForWant.subtract(tax);
-            tax = tax.subtract(referral);
+        BigDecimal tradeAmount = tradeAmountForWant.setScale(assetWant.getScale());
+        BigDecimal assetMakerRoyalty;
+        BigDecimal inviterRoyalty;
+        BigDecimal forgerFee;
+        int scale = assetWant.getScale();
+        Long assetWantKey = assetWant.getKey();
 
-            AssetCls wantAsset = transaction.getWantAsset();
-            wantAsset.getReference();
+        PublicKeyAccount haveAssetMaker = assetHave.getMaker();
+        PublicKeyAccount inviter;
+        if (assetHave.getAssetType() == AS_NON_FUNGIBLE) {
+            // значит приход + это тот актив который мы можем поделить
+            if (receiver.equals(haveAssetMaker)) {
+                assetMakerRoyalty = BigDecimal.ZERO;
+            } else {
+                // это не сам автор продает
+                assetMakerRoyalty = tradeAmount.movePointLeft(1).setScale(scale, RoundingMode.DOWN);
+            }
 
-            //wantAsset.getCreator().changeBalance(transaction.getDCSet(), asOrphan, false, order.getWantAssetKey(),
-            //        tradeAmountForWant, false, false, false);
-            //transaction.addCalculated(block, order.getCreator(), order.getWantAssetKey(), tradeAmountForWant,
-            //        "Trade Order @" + Transaction.viewDBRef(order.getId()));
+            Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = haveAssetMaker.getPersonDuration(dcSet);
+            if (issuerPersonDuration != null) {
+                inviter = PersonCls.getIssuer(dcSet, issuerPersonDuration.a);
+                if (inviter == null) {
+                    inviterRoyalty = BigDecimal.ZERO;
+                } else {
+                    if (receiver.equals(haveAssetMaker)) {
+                        // сам автор продает - 1/100
+                        inviterRoyalty = tradeAmount.movePointLeft(2).setScale(scale, RoundingMode.DOWN);
+                    } else {
+                        inviterRoyalty = assetMakerRoyalty.movePointLeft(1).setScale(scale, RoundingMode.DOWN);
+                    }
+                }
+            } else {
+                inviter = null;
+                inviterRoyalty = BigDecimal.ZERO;
+            }
 
+            // всегда 1% форжеру
+            forgerFee = tradeAmount.movePointLeft(2).setScale(scale, RoundingMode.DOWN);
+
+        } else if (assetWant.getKey() < 100 && !isInitiator) {
+            // это системные активы - берем комиссию за них
+            assetMakerRoyalty = BigDecimal.ZERO;
+            forgerFee = tradeAmount.movePointLeft(3).setScale(scale, RoundingMode.DOWN);
+
+            // за рефералку тут тоже
+            Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = receiver.getPersonDuration(dcSet);
+            if (issuerPersonDuration != null) {
+                inviter = PersonCls.getIssuer(dcSet, issuerPersonDuration.a);
+                if (inviter == null)
+                    inviterRoyalty = BigDecimal.ZERO;
+                else
+                    inviterRoyalty = forgerFee;
+            } else {
+                inviter = null;
+                inviterRoyalty = BigDecimal.ZERO;
+            }
+
+        } else {
+            assetMakerRoyalty = BigDecimal.ZERO;
+            inviterRoyalty = BigDecimal.ZERO;
+            inviter = null;
+            forgerFee = BigDecimal.ZERO;
         }
 
-        order.getCreator().changeBalance(transaction.getDCSet(), asOrphan, false, order.getWantAssetKey(),
-                tradeAmountForWant, false, false, false);
-        transaction.addCalculated(block, order.getCreator(), order.getWantAssetKey(), tradeAmountForWant,
-                "Trade Order @" + Transaction.viewDBRef(order.getId()));
+        if (assetMakerRoyalty.signum() > 0) {
+            tradeAmount = tradeAmount.subtract(assetMakerRoyalty);
+
+            haveAssetMaker.changeBalance(dcSet, asOrphan, false, assetWantKey,
+                    assetMakerRoyalty, false, false, false);
+            if (!asOrphan && block != null)
+                block.addCalculated(haveAssetMaker, assetWantKey, assetMakerRoyalty,
+                        "NFT Royalty by Order @" + Transaction.viewDBRef(orderID), orderID);
+        }
+
+        if (inviterRoyalty.signum() > 0) {
+            tradeAmount = tradeAmount.subtract(inviterRoyalty);
+
+            long inviterRoyaltyLong = inviterRoyalty.setScale(assetWant.getScale()).unscaledValue().longValue();
+            Transaction.process_gifts(dcSet, BlockChain.FEE_INVITED_DEEP, inviterRoyaltyLong, inviter, asOrphan,
+                    assetWant, block,
+                    "NFT Royalty referral bonus " + "@" + Transaction.viewDBRef(orderID),
+                    orderID, timestamp);
+        }
+
+        if (forgerFee.signum() > 0) {
+            tradeAmount = tradeAmount.subtract(forgerFee);
+
+            if (block != null) {
+                block.addAssetFee(assetWant, forgerFee, null);
+            }
+        }
+
+        receiver.changeBalance(dcSet, asOrphan, false, assetWantKey,
+                tradeAmount, false, false, false);
+        if (!asOrphan && block != null)
+            block.addCalculated(receiver, assetWantKey, tradeAmount,
+                    "Trade Order @" + Transaction.viewDBRef(orderID), orderID);
 
     }
 
