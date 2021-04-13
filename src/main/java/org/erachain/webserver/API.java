@@ -17,6 +17,7 @@ import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionFactory;
 import org.erachain.datachain.*;
+import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.lang.Lang;
 import org.erachain.utils.APIUtils;
@@ -94,7 +95,8 @@ public class API {
         help.put("GET Child Block", "childblock/{signature}[?onlyhead]");
 
         help.put("*** BLOCKS ***", "");
-        help.put("GET Blocks from Height by Limit (end:1 if END is reached)", "blocksfromheight/{height}/{limit}[?onlyhead]");
+        help.put("GET Blocks from Height by Limit", "blocks?from={height}&offset={0}&limit=50&onlyhead&desc");
+        help.put("GET Blocks from Height by Limit (end:1 if END is reached)", "blocksfromheight/{height}/{limit}?onlyhead&desc={false}");
         help.put("GET Blocks Signatures from Height by Limit (end:1 if END id reached)", "/blockssignaturesfromheight/{height}/{limit}");
 
         help.put("*** RECORD ***", "");
@@ -123,7 +125,7 @@ public class API {
         //help.put("GET Person Height", "personheight");
         help.put("GET Person Key by PubKey of Owner", "personkeybyownerpublickey/{publickey}");
         //help.put("GET Person", "person/{key}");
-        help.put("GET Person Data", "persondata/{key}");
+        //help.put("GET Person Data", "persondata/{key}");
         help.put("GET Person Key by Address", "personkeybyaddress/{address}");
         help.put("GET Person by Address", "personbyaddress/{address}");
         help.put("GET Person Key by Public Key", "personkeybypublickey/{publickey}");
@@ -444,10 +446,6 @@ public class API {
             ++step;
             Block block;
             LinkedList eee = null;
-            //LinkedList eee = ((LinkedList) dcSet.getBlocksHeadMap().map);//.keySet());
-            //LinkedList eee = ((LinkedList) dcSet.getBlocksHeadMap().map.keySet());
-            //LinkedList eee = ((LinkedList) dcSet.getBlocksHeadMap().map.values());
-            //LinkedList eee = ((LinkedList) dcSet.getBlocksHeadMap().map.entrySet());
             ListIterator listIterator = eee.listIterator(height);
             block = (Block) listIterator.next();
 
@@ -480,9 +478,9 @@ public class API {
 
     @GET
     @Path("/blocksfromheight/{height}/{limit}")
-    public Response getBlocksFromHeight(@Context UriInfo info,
-                                        @PathParam("height") int height,
-                                        @PathParam("limit") int limit) {
+    public Response getBlocksFromHeightV2(@Context UriInfo info,
+                                          @PathParam("height") Integer fromHeight,
+                                          @DefaultValue("10") @PathParam("limit") int limit) {
 
         boolean onlyhead;
         String value = info.getQueryParameters().getFirst("onlyhead");
@@ -492,56 +490,163 @@ public class API {
             onlyhead = value.isEmpty() || new Boolean(value);
         }
 
-        if (limit > 30)
-            limit = 30;
+        boolean desc;
+        value = info.getQueryParameters().getFirst("desc");
+        if (value == null) {
+            desc = false;
+        } else {
+            desc = value.isEmpty() || new Boolean(value);
+        }
 
-        //Map out = new LinkedHashMap();
+        int limitTo = onlyhead ? 200 : 50;
+        if (limit > limitTo)
+            limit = limitTo;
+
         JSONObject out = new JSONObject();
-        int step = 1;
 
-        try {
-
-            JSONArray array = new JSONArray();
-            if (onlyhead) {
-                BlocksHeadsMap blockHeadsMap = dcSet.getBlocksHeadsMap();
+        JSONArray array = new JSONArray();
+        if (onlyhead) {
+            BlocksHeadsMap blockHeadsMap = dcSet.getBlocksHeadsMap();
+            if (true) {
+                try {
+                    try (IteratorCloseable<Integer> iterator = blockHeadsMap.getIterator(fromHeight, desc)) {
+                        while (iterator.hasNext() && limit-- > 0) {
+                            array.add(blockHeadsMap.get(iterator.next()).toJson());
+                        }
+                        if (limit > 0) {
+                            out.put("end", 1);
+                        }
+                    }
+                } catch (IOException e) {
+                }
+            } else {
+                // OLD
                 int max = blockHeadsMap.size();
-                for (int i = height; i < height + limit; i++) {
+                for (int i = fromHeight; i < fromHeight + limit; i++) {
                     if (i > max) {
                         out.put("end", 1);
                         break;
                     }
                     array.add(blockHeadsMap.get(i).toJson());
                 }
-                out.put("blockHeads", array);
+            }
+            out.put("blockHeads", array);
 
+        } else {
+            BlockMap blockMap = dcSet.getBlockMap();
+            if (true) {
+                try {
+                    try (IteratorCloseable<Integer> iterator = blockMap.getIterator(fromHeight, desc)) {
+                        int txCount = 0;
+                        while (iterator.hasNext() && limit-- > 0) {
+                            Block block = blockMap.get(iterator.next());
+                            array.add(block.toJson());
+                            txCount += block.getTransactionCount();
+                            if (txCount > 10000) {
+                                limit = 0;
+                                out.put("broken", "by tx count: " + txCount);
+                                break;
+                            }
+                        }
+                        if (limit > 0) {
+                            out.put("end", 1);
+                        }
+                    }
+                } catch (IOException e) {
+                }
             } else {
-                BlockMap blockMap = dcSet.getBlockMap();
+                // OLD
                 int max = blockMap.size();
-                for (int i = height; i < height + limit; i++) {
+                for (int i = fromHeight; i < fromHeight + limit; i++) {
                     if (i > max) {
                         out.put("end", 1);
                         break;
                     }
                     array.add(blockMap.getAndProcess(i).toJson());
                 }
-                out.put("blocks", array);
             }
-
-        } catch (Exception e) {
-
-            out.put("error", step);
-            if (step == 1)
-                out.put("message", "height error, use integer value");
-            else if (step == 2)
-                out.put("message", "block not found");
-            else
-                out.put("message", e.getMessage());
+            out.put("blocks", array);
         }
 
         return Response.status(200)
                 .header("Content-Type", "application/json; charset=utf-8")
                 .header("Access-Control-Allow-Origin", "*")
                 .entity(out.toString())
+                .build();
+    }
+
+    @GET
+    @Path("/blocks")
+    public Response getBlocksFromHeightV1(@Context UriInfo info,
+                                          @QueryParam("from") Integer fromHeight,
+                                          @QueryParam("offset") int offset,
+                                          @QueryParam("limit") int limit) {
+        boolean onlyhead;
+        String value = info.getQueryParameters().getFirst("onlyhead");
+        if (value == null) {
+            onlyhead = false;
+        } else {
+            onlyhead = value.isEmpty() || new Boolean(value);
+        }
+
+        boolean desc;
+        value = info.getQueryParameters().getFirst("desc");
+        if (value == null) {
+            desc = false;
+        } else {
+            desc = value.isEmpty() || new Boolean(value);
+        }
+
+        int limitMax = onlyhead ? 200 : 50;
+        if (limit > limitMax)
+            limit = limitMax;
+        if (offset > limitMax)
+            offset = limitMax;
+
+        JSONArray array = new JSONArray();
+        if (onlyhead) {
+            BlocksHeadsMap blockHeadsMap = dcSet.getBlocksHeadsMap();
+            try {
+                try (IteratorCloseable<Integer> iterator = blockHeadsMap.getIterator(fromHeight, desc)) {
+                    while (iterator.hasNext() && limit > 0) {
+                        if (offset-- > 0) {
+                            iterator.next();
+                            continue;
+                        }
+                        limit--;
+                        array.add(blockHeadsMap.get(iterator.next()).toJson());
+                    }
+                }
+            } catch (IOException e) {
+            }
+
+        } else {
+            BlockMap blockMap = dcSet.getBlockMap();
+            try {
+                try (IteratorCloseable<Integer> iterator = blockMap.getIterator(fromHeight, desc)) {
+                    int txCount = 0;
+                    while (iterator.hasNext() && limit > 0) {
+                        if (offset-- > 0) {
+                            iterator.next();
+                            continue;
+                        }
+                        limit--;
+                        Block block = blockMap.get(iterator.next());
+                        array.add(block.toJson());
+                        txCount += block.getTransactionCount();
+                        if (txCount > 10000) {
+                            //out.put("broken", "by tx count: " + txCount);
+                            break;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+            }
+        }
+        return Response.status(200)
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .entity(array.toJSONString())
                 .build();
     }
 
@@ -1470,6 +1575,7 @@ public class API {
      * ************* ASSET **************
      */
     @GET
+    @Deprecated
     @Path("assetheight")
     public Response assetHeight() {
 
@@ -1484,6 +1590,7 @@ public class API {
     }
 
     @GET
+    @Deprecated
     @Path("asset/{key}")
     public Response asset(@PathParam("key") long key) {
 
@@ -1503,6 +1610,7 @@ public class API {
     }
 
     @GET
+    @Deprecated
     @Path("assetdata/{key}")
     public Response assetData(@PathParam("key") long key) {
 
@@ -1677,7 +1785,7 @@ public class API {
 
     @Path("assetimage/{key}")
     @GET
-    @Produces({"image/png", "image/jpg"})
+    @Produces({"image/png", "image/jpeg"})
     public Response assetImage(@PathParam("key") long key) throws IOException {
 
         int weight = 0;
@@ -1716,7 +1824,7 @@ public class API {
     @Deprecated
     @Path("asseticon/{key}")
     @GET
-    @Produces({"image/png", "image/jpg"})
+    @Produces({"image/png", "image/jpeg"})
     public Response assetIcon(@PathParam("key") long key) throws IOException {
 
         if (key <= 0) {
@@ -1753,7 +1861,7 @@ public class API {
     @Deprecated
     @Path("personimage/{key}")
     @GET
-    @Produces({"image/png", "image/jpg"})
+    @Produces({"image/png", "image/jpeg"})
     public Response getFullImage(@PathParam("key") long key) throws IOException {
 
         int weight = 0;
@@ -1784,6 +1892,7 @@ public class API {
 
 
     @GET
+    @Deprecated
     @Path("persondata/{key}")
     public Response personData(@PathParam("key") long key) {
 
