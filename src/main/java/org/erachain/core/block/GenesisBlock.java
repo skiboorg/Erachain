@@ -132,7 +132,7 @@ public class GenesisBlock extends Block {
 
                         transactions.add(new GenesisTransferAssetTransaction(new Account(debtor.get(1).toString()),
                                 -AssetCls.ERA_KEY,
-                                creditAmount, founder));
+                                    creditAmount, founder));
 
                         totalCredit = totalCredit.add(creditAmount);
                     }
