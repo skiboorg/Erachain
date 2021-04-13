@@ -34,6 +34,8 @@ public class Settings {
     public static final long DEFAULT_DEMO_NET_STAMP = 1602173471000L; // DEMO Net
 
     public static String FORK_APP_Name = "Darachain";
+    public static String FORK_APP_URL_Name = "Darachain.com";
+    public static String FORK_APP_URL = "https://darachain.org";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
     public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
 
