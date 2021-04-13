@@ -34,6 +34,8 @@ public class Settings {
     public static final long DEFAULT_DEMO_NET_STAMP = 1603756800000L; // DEMO Net
 
     public static String FORK_APP_Name = "Foil Network";
+    public static String FORK_APP_URL_Name = "Foil.Network";
+    public static String FORK_APP_URL = "https://foil.network";
     public static String FORK_APP_NAME = FORK_APP_Name.toUpperCase();
     public static String FORK_APP_name = FORK_APP_Name.toLowerCase();
 
