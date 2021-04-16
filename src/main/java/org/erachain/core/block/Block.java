@@ -988,12 +988,7 @@ public class Block implements Closeable, ExplorerJsonLine {
     }
 
     public BigDecimal getBonusFee() {
-
-        if (this.heightBlock == 1) {
-            return BigDecimal.ZERO;
-        }
-        return BigDecimal.ZERO;
-
+        return BlockChain.FORGE_BONUS;
     }
 
     private BigDecimal getTotalFee(DCSet db) {
