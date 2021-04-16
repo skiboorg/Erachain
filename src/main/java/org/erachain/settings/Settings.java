@@ -41,6 +41,7 @@ public class Settings {
 
     public static String APP_NAME = FORK_APP_Name;
     public static String APP_FULL_NAME = FORK_APP_NAME;
+
     public static boolean ERA_COMPU_ALL_UP;
 
     public static boolean EXCHANGE_IN_OUT = false;
