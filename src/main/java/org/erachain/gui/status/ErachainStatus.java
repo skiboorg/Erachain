@@ -13,7 +13,6 @@ import java.net.URISyntaxException;
 
 public class ErachainStatus extends JLabel {
 
-
     public ErachainStatus() {
         super("<HTML><a href =''> " + Settings.FORK_APP_URL_Name + " </a>&nbsp;|");
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -65,6 +64,5 @@ public class ErachainStatus extends JLabel {
 
         });
     }
-
 
 }

@@ -861,7 +861,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
         JSONObject itemJSON = new JSONObject();
 
-        // ADD DATA
+        itemJSON.put("item_type", this.getItemTypeName());
+        itemJSON.put("itemType", this.getItemTypeName());
+        itemJSON.put("startKey", this.getStartKey());
+
         itemJSON.put("key", this.getKey());
         itemJSON.put("name", this.name);
 
@@ -904,7 +907,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
         // ADD DATA
         itemJSON.put("itemCharKey", getItemTypeAndKey());
-        itemJSON.put("item_type", this.getItemTypeName());
         //itemJSON.put("itemType", this.getItemTypeName());
         itemJSON.put("item_type_sub", this.getItemSubType());
         //itemJSON.put("itemTypeSub", this.getItemSubType());
