@@ -367,7 +367,7 @@ public class BlockChain {
     public static final int FREE_FEE_TO_SEQNO = DEMO_MODE ? 1 : CLONE_MODE? 1 : -1;
     public static final int FREE_FEE_FROM_HEIGHT = DEMO_MODE ? 1 : CLONE_MODE? 1 : Integer.MAX_VALUE;
 
-    public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 0;
+    public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 1000;
 
 
     /**
