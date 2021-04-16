@@ -270,7 +270,7 @@ public class BlockChain {
 
     public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 2000;
 
-    public static final BigDecimal FORGE_BONUS = new BigDecimal("0.00002745");
+    public static final BigDecimal FORGE_BONUS = new BigDecimal("0.00001245");
 
     /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне
