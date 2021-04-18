@@ -55,11 +55,7 @@ public class Settings {
     Evgenii Evgenii Kuzin, [18.04.21 19:32]
 
 
-
 Evgenii Evgenii Kuzin, [18.04.21 19:32]
-
-
-
 
 
 Evgenii Evgenii Kuzin, [18.04.21 19:33]
@@ -96,7 +92,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
             Arrays.asList("7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT", "2500000", 10), // 7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT
             Arrays.asList("7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH", "2500000", 10), // 7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH
 
-            Arrays.asList("73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8", "2500000", 10),
+            Arrays.asList("7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5", "2500000", 10),
             Arrays.asList("799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji", "2500000", 10),
             Arrays.asList("73NGFDuvsPbv4XhX9CCvHL1TZ1vp4tPzEQ", "2500000", 10),
             Arrays.asList("7FDBPBFzUbr4A2UyHBU354MFnhu6fKKvtw", "2500000", 10),
