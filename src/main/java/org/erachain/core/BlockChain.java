@@ -194,15 +194,14 @@ public class BlockChain {
     public static final int ON_CONNECT_SEND_UNCONFIRMED_NEED_COUNT = 10;
 
     //public static final int GENERATING_MAX_BLOCK_TIME = 1000;
-    public static final int MAX_BLOCK_SIZE_BYTES = MAIN_MODE ? 1 << 25 : 1 << 30;
-    public static final int MAX_BLOCK_SIZE = MAX_BLOCK_SIZE_BYTES >> 8;
-    public static final int MAX_REC_DATA_BYTES = MAX_BLOCK_SIZE_BYTES >> 2;
+    public static final int MAX_BLOCK_SIZE_BYTES = 20 * (1 << 20);
+    public static final int MAX_BLOCK_SIZE = MAX_BLOCK_SIZE_BYTES >> 1024;
+    public static final int MAX_REC_DATA_BYTES = 10 * (1 << 20);
 
     // переопределим размеры по HARD
     static private final int MAX_BLOCK_SIZE_GEN_TEMP = MAX_BLOCK_SIZE_BYTES / 100 * (10 * Controller.HARD_WORK + 10);
-    public static final int MAX_BLOCK_SIZE_BYTES_GEN = TEST_DB > 0 ? TEST_DB << 9
-            : MAX_BLOCK_SIZE_GEN_TEMP > MAX_BLOCK_SIZE_BYTES ? MAX_BLOCK_SIZE_BYTES : MAX_BLOCK_SIZE_GEN_TEMP;
-    public static final int MAX_BLOCK_SIZE_GEN = TEST_DB > 0 ? TEST_DB << 1 : MAX_BLOCK_SIZE_BYTES_GEN >> 8;
+    public static final int MAX_BLOCK_SIZE_BYTES_GEN = MAX_BLOCK_SIZE_BYTES;
+    public static final int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE;
 
     public static final int MAX_UNCONFIGMED_MAP_SIZE = MAX_BLOCK_SIZE_GEN << 2;
     public static final int ON_CONNECT_SEND_UNCONFIRMED_UNTIL = MAX_UNCONFIGMED_MAP_SIZE;
