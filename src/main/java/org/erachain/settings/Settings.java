@@ -30,8 +30,8 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1618776000000L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1618776000000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1618821000000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1618821000000L; // DEMO Net
 
     public static String FORK_APP_Name = "Foil Network";
     public static String FORK_APP_URL_Name = "Foil.Network";
@@ -42,7 +42,7 @@ public class Settings {
     public static String APP_NAME = FORK_APP_Name;
     public static String APP_FULL_NAME = FORK_APP_NAME;
 
-    public static boolean ERA_COMPU_ALL_UP = true;
+    public static boolean ERA_COMPU_ALL_UP = false;
 
     public static boolean EXCHANGE_IN_OUT = false;
 
@@ -62,29 +62,29 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5 - admin 1 000 000
      */
     public final static List<List<Object>> HOLDERS = Arrays.asList(
-            Arrays.asList("7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi", "2500000", 10), // 7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi
-            Arrays.asList("7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7", "2500000", 10), // 7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7
-            Arrays.asList("7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY", "2500000", 10), // 7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY
-            Arrays.asList("7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE", "2500000", 10), // 7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE
-            Arrays.asList("7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY", "2500000", 10), // 7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY
+            Arrays.asList("7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi", "2500000", 100), // 7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi
+            Arrays.asList("7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7", "2500000", 100), // 7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7
+            Arrays.asList("7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY", "2500000", 100), // 7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY
+            Arrays.asList("7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE", "2500000", 100), // 7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE
+            Arrays.asList("7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY", "2500000", 100), // 7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY
 
-            Arrays.asList("7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K", "2500000", 10), // 7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K
-            Arrays.asList("7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC", "2500000", 10), // 7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC
-            Arrays.asList("7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z", "2500000", 10), // 7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z
-            Arrays.asList("73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD", "2500000", 10), // 73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD
-            Arrays.asList("7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X", "2500000", 10), // 7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X
+            Arrays.asList("7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K", "2500000", 100), // 7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K
+            Arrays.asList("7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC", "2500000", 100), // 7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC
+            Arrays.asList("7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z", "2500000", 100), // 7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z
+            Arrays.asList("73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD", "2500000", 100), // 73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD
+            Arrays.asList("7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X", "2500000", 100), // 7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X
             //
-            Arrays.asList("7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq", "2500000", 10), // 7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq
-            Arrays.asList("7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP", "2500000", 10), // 7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP
-            Arrays.asList("7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG", "2500000", 10), // 7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG
-            Arrays.asList("7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh", "2500000", 10), // 7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh
-            Arrays.asList("77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD", "2500000", 10), // 77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD
+            Arrays.asList("7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq", "2500000", 100), // 7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq
+            Arrays.asList("7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP", "2500000", 100), // 7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP
+            Arrays.asList("7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG", "2500000", 100), // 7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG
+            Arrays.asList("7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh", "2500000", 100), // 7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh
+            Arrays.asList("77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD", "2500000", 100), // 77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD
 
-            Arrays.asList("78671KhRVfsn93HyhEUoyEiFFFn5oekYta", "2500000", 10), // 78671KhRVfsn93HyhEUoyEiFFFn5oekYta
-            Arrays.asList("75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz", "2500000", 10), // 75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz
-            Arrays.asList("7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd", "2500000", 10), // 7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd
-            Arrays.asList("7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw", "2500000", 10), // 7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw
-            Arrays.asList("7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS", "2500000", 10), // 7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS
+            Arrays.asList("78671KhRVfsn93HyhEUoyEiFFFn5oekYta", "2500000", 100), // 78671KhRVfsn93HyhEUoyEiFFFn5oekYta
+            Arrays.asList("75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz", "2500000", 100), // 75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz
+            Arrays.asList("7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd", "2500000", 100), // 7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd
+            Arrays.asList("7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw", "2500000", 100), // 7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw
+            Arrays.asList("7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS", "2500000", 100), // 7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS
             //
             Arrays.asList("73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8", "2500000", 10), // 73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8
             Arrays.asList("799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji", "2500000", 10), // 799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji
@@ -103,6 +103,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
             Arrays.asList("7ChJh9DwvdW1GXtXEKmfnL9RrLsppnTgJ2", "2500000", 10),
             Arrays.asList("7Ca3TNja7kNayzVuXCZ57Ra4zh1EgtXeZ1", "2500000", 10),
             Arrays.asList("73vPmQmRkB7SaBCGfZ7X14DPu9rnnTubgQ", "2500000", 10),
+
             Arrays.asList("7CE1RjHhNXMim8NzV89Bjk7L7sseFAWQGx", "2500000", 10),
             Arrays.asList("798wEXpczHn6yggJ4xZsPszXgN7V1enHEX", "2500000", 10),
             Arrays.asList("7Ri9SFTAeCJQe1GfGFsMXS9W8x2Djt5h8m", "2500000", 10),
