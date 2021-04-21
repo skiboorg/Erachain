@@ -62,7 +62,13 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5 - admin 1 000 000
      */
     public final static List<List<Object>> HOLDERS = Arrays.asList(
-            Arrays.asList("7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi", "2500000", 100), // 7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi
+            Arrays.asList("7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi", 2500000, 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K"),
+                            Arrays.asList(600000, "7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC"),
+                            Arrays.asList(600000, "7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z"),
+                            Arrays.asList(600000, "73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD")
+                    )), // 7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi
             Arrays.asList("7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7", "2500000", 100), // 7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7
             Arrays.asList("7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY", "2500000", 100), // 7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY
             Arrays.asList("7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE", "2500000", 100), // 7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE
