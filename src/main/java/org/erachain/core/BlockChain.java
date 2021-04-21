@@ -145,12 +145,6 @@ public class BlockChain {
     public static final int SYNCHRONIZE_PACKET = 300; // when synchronize - get blocks packet by transactions
 
     /**
-     * степень от 2 блоков для усреднения ЦЕЛи победы
-     */
-    public static final int TARGET_COUNT_SHIFT = 10;
-    public static final int TARGET_COUNT = 1 << TARGET_COUNT_SHIFT;
-    public static final int BASE_TARGET = 10000;///1 << 15;
-    /**
      * минимальное расстояние для сборки блоков
      */
     public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 10 : CLONE_MODE ? 15 : 40;
@@ -160,6 +154,14 @@ public class BlockChain {
     public static final int GENERAL_ERA_BALANCE = GENESIS_ERA_TOTAL / 100;
     public static final int MAJOR_ERA_BALANCE = 50000;
     public static final int MINOR_ERA_BALANCE = 10000;
+
+    /**
+     * степень от 2 блоков для усреднения ЦЕЛи победы
+     */
+    public static final int TARGET_COUNT_SHIFT = 10;
+    public static final int TARGET_COUNT = 1 << TARGET_COUNT_SHIFT;
+    public static final int BASE_TARGET = 10000;
+
     // SERTIFY
     // need RIGHTS for non PERSON account
     public static final BigDecimal MAJOR_ERA_BALANCE_BD = BigDecimal.valueOf(MAJOR_ERA_BALANCE);
@@ -961,16 +963,11 @@ public class BlockChain {
         int base;
         if (height < BlockChain.REPEAT_WIN)
             // FOR not repeated WINS - not need check BASE_TARGET
-            /////base = BlockChain.BASE_TARGET>>1;
-            base = BlockChain.BASE_TARGET - (BlockChain.BASE_TARGET >> 2); // ONLY UP
+            base = BlockChain.BASE_TARGET >> 4; // ONLY UP
         else if (ERA_COMPU_ALL_UP)
-            base = 1; //BlockChain.BASE_TARGET >>5;
-        else if (height < 110000)
-            base = (BlockChain.BASE_TARGET >> 3); // + (BlockChain.BASE_TARGET>>4);
-        else if (height < 115000)
-            base = (BlockChain.BASE_TARGET >> 1) - (BlockChain.BASE_TARGET >> 4);
+            base = 1;
         else
-            base = (BlockChain.BASE_TARGET >> 1) + (BlockChain.BASE_TARGET >> 4);
+            base = BlockChain.BASE_TARGET >> 4;
 
         return base;
 
@@ -1052,7 +1049,7 @@ public class BlockChain {
         if (height <= BlockChain.REPEAT_WIN) {
             repeatsMin = height - 2;
         } else {
-            repeatsMin = BlockChain.GENESIS_ERA_TOTAL / forgingBalance;
+            repeatsMin = GENESIS_ERA_TOTAL / forgingBalance;
             repeatsMin = (repeatsMin >> 2);
 
             if (repeatsMin < REPEAT_WIN) {
@@ -1066,20 +1063,13 @@ public class BlockChain {
 
         long win_value;
 
+
+        forgingBalance /= 1000;
+
         if (difference > 1)
             win_value = (long) forgingBalance * (long) difference;
         else
             win_value = forgingBalance;
-
-        if (ERA_COMPU_ALL_UP || BlockChain.TEST_MODE)
-            return win_value;
-
-        if (height < BlockChain.REPEAT_WIN)
-            win_value >>= 2;
-        else if (height < (BlockChain.REPEAT_WIN << 2))
-            win_value >>= 5;
-        else
-            win_value >>= 7;
 
         return win_value;
 

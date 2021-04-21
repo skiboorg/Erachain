@@ -4,6 +4,7 @@ import com.google.common.primitives.Longs;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.exdata.exLink.ExLink;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.item.statuses.StatusFactory;
 
@@ -155,13 +156,11 @@ public class IssueStatusRecord extends IssueItemRecord {
         int result = super.isValid(forDeal, flags);
         if (result != Transaction.VALIDATE_OK) return result;
 
-		/*
-		BigDecimal balERA = this.creator.getBalanceUSE(RIGHTS_KEY, db);
-		if ( balERA.compareTo(BlockChain.MAJOR_ERA_BALANCE_BD)<0 )
-		{
-			return Transaction.NOT_ENOUGH_RIGHTS;
-		}
-		*/
+        BigDecimal balERA = this.creator.getBalanceUSE(RIGHTS_KEY, dcSet);
+        if (balERA.compareTo(BlockChain.MAJOR_ERA_BALANCE_BD) < 0) {
+            errorValue = "Balance in USE of " + AssetCls.ERA_ABBREV + " < " + BlockChain.MAJOR_ERA_BALANCE;
+            return Transaction.NOT_ENOUGH_RIGHTS;
+        }
 
         return Transaction.VALIDATE_OK;
     }
