@@ -169,6 +169,11 @@ public class BlockChain {
     public static final int MIN_GENERATING_BALANCE = 100000;
     public static final BigDecimal MIN_GENERATING_BALANCE_BD = new BigDecimal(MIN_GENERATING_BALANCE);
 
+    public static final int MIN_REGISTRATING_BALANCE_OWN = 100000;
+    public static final BigDecimal MIN_REGISTRATING_BALANCE_OWN_BD = new BigDecimal(MIN_REGISTRATING_BALANCE_OWN);
+    public static final int MIN_REGISTRATING_BALANCE_USE = 100000;
+    public static final BigDecimal MIN_REGISTRATING_BALANCE_USE_BD = new BigDecimal(MIN_REGISTRATING_BALANCE_USE);
+
     public static final int MIN_REGISTRATING_BALANCE_10 = 10;
     public static final BigDecimal MIN_REGISTRATING_BALANCE_10_BD = new BigDecimal(MIN_REGISTRATING_BALANCE_10);
 
@@ -819,25 +824,9 @@ public class BlockChain {
 
     public static int VALID_PERSON_CERT_ERA(int height, BigDecimal totalERA, BigDecimal totalLIA) {
 
-        if (START_ISSUE_RIGHTS > 0 && height < START_ISSUE_RIGHTS) {
-            if (totalERA.compareTo(MIN_REGISTRATING_BALANCE_100_BD) < 0) {
-                return Transaction.NOT_ENOUGH_ERA_OWN_100;
-            }
-            return 0;
+        if (totalERA.compareTo(MIN_REGISTRATING_BALANCE_USE_BD) < 0) {
+            return Transaction.NOT_ENOUGH_ERA_USE;
         }
-
-        if (totalLIA.compareTo(BigDecimal.TEN) < 0) {
-            ;
-        } else if (totalLIA.compareTo(new BigDecimal("20")) < 0) {
-            if (totalERA.compareTo(MIN_REGISTRATING_BALANCE_100_BD) < 0) {
-                return Transaction.NOT_ENOUGH_ERA_OWN_100;
-            }
-        } else {
-            if (totalERA.compareTo(MIN_REGISTRATING_BALANCE_1000_BD) < 0) {
-                return Transaction.NOT_ENOUGH_ERA_OWN_1000;
-            }
-        }
-
         return 0;
 
     }

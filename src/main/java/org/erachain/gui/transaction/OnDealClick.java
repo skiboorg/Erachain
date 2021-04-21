@@ -356,6 +356,10 @@ public class OnDealClick {
                 mess = "Not enough rights";
                 break;
 
+            case Transaction.NOT_ENOUGH_ERA_USE:
+                mess = "Need 10 ERA in OWN or more";
+                break;
+
             case Transaction.NOT_ENOUGH_ERA_OWN_10:
                 mess = "Need 10 ERA in OWN or more";
                 break;
