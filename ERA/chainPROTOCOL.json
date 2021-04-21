@@ -4,13 +4,13 @@
   // Blocks period [sec], minumum: 3, default: 30
   // "blockPeriod": 30,
   // external Block Explorer
-  "explorer": "http://explorer.wfchain.org:9077",
+  "explorer": "http://explorer.foil.network:9077",
 
   "sideLicense": "Chain Licence Agreement.pdf",
 
   "startKey": {
     //"assets": -1,
-    "persons": 16384,
+    //"persons": 16384,
     //"polls": -1,
     //"statuses": -1
   },
@@ -19,7 +19,7 @@
   "referalsOn": true,
 
   // Set valid all transactions before the height. Defaul = 0
-  "allValidBefore": 28000,
+  //"allValidBefore": 28000,
 
   // Protect from send assets from personal account to anonymous address. Default = true
   "protectSendToAnonymous": false,
