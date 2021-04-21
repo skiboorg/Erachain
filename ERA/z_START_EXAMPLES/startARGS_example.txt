@@ -2,5 +2,7 @@
 // set arguments for start Erachain here
 // This is example
 // make startARGS.txt in Erachain folder
+pass=123
 seed=5:new:1
 dbs=mapdb
+weballowed=*
