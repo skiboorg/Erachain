@@ -1,6 +1,7 @@
 package org.erachain.gui.transaction;
 
 import org.erachain.controller.Controller;
+import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.gui.MainFrame;
 import org.erachain.gui.PasswordPane;
@@ -356,8 +357,11 @@ public class OnDealClick {
                 mess = "Not enough rights";
                 break;
 
+            case Transaction.NOT_ENOUGH_ERA_OWN:
+                mess = "Not enough " + AssetCls.ERA_ABBREV + " balance in OWN";
+                break;
             case Transaction.NOT_ENOUGH_ERA_USE:
-                mess = "Need 10 ERA in OWN or more";
+                mess = "Not enough " + AssetCls.ERA_ABBREV + " balance in USE";
                 break;
 
             case Transaction.NOT_ENOUGH_ERA_OWN_10:
