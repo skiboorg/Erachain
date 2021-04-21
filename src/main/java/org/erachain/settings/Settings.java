@@ -68,53 +68,128 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
                             Arrays.asList(600000, "7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC"),
                             Arrays.asList(600000, "7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z"),
                             Arrays.asList(600000, "73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD")
-                    )), // 7NmUE5LwwhEshvdtmj672qPFU2ptTdZTPi
-            Arrays.asList("7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7", "2500000", 100), // 7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7
-            Arrays.asList("7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY", "2500000", 100), // 7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY
-            Arrays.asList("7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE", "2500000", 100), // 7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE
-            Arrays.asList("7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY", "2500000", 100), // 7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY
+                    )),
+            Arrays.asList("7N8Dx5g8GkspRxW5YxpPxLhgNThqzNZgD7", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X"),
+                            Arrays.asList(600000, "7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq"),
+                            Arrays.asList(600000, "7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP"),
+                            Arrays.asList(600000, "7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG")
+                    )),
+            Arrays.asList("7MzzcTWpo4srzCeU3gyGQUiPjNtQD5bnjY", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh"),
+                            Arrays.asList(600000, "77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD"),
+                            Arrays.asList(600000, "78671KhRVfsn93HyhEUoyEiFFFn5oekYta"),
+                            Arrays.asList(600000, "75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz")
+                    )),
+            Arrays.asList("7LLBRJHYieYDQ7e3Q4vmHAyLPXB8SeALDE", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd"),
+                            Arrays.asList(600000, "7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw"),
+                            Arrays.asList(600000, "7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS"),
+                            Arrays.asList(600000, "73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8")
+                    )),
+            Arrays.asList("7FNc9xqNd67fSWXWrSNEbwiqidbn4KPCqY", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji"),
+                            Arrays.asList(600000, "79sGZzJAWpfzsHBrES346S68sYS64mHS71"),
+                            Arrays.asList(600000, "7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT"),
+                            Arrays.asList(600000, "7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH")
+                    )),
 
-            Arrays.asList("7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K", "2500000", 100), // 7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K
-            Arrays.asList("7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC", "2500000", 100), // 7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC
-            Arrays.asList("7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z", "2500000", 100), // 7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z
-            Arrays.asList("73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD", "2500000", 100), // 73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD
-            Arrays.asList("7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X", "2500000", 100), // 7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X
+            Arrays.asList("7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "73MTRF6R5irAmzGmBdcqnvKUQrtH8dsp9R"),
+                            Arrays.asList(600000, "7MuvguyQLBA4XqCiEUhPor4KG2rRJVZx5a"),
+                            Arrays.asList(600000, "77MWxrB6BuykCrZrsTqmfgfC3vGTgwFQYS"),
+                            Arrays.asList(600000, "7DSq7fNPghvUCgaz92XFwV6G2Pxc96Uz91")
+                    )),
+            Arrays.asList("7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "73Q9MDPe2nf1hBzA4BrZiojAhZ4oZFfm1T"),
+                            Arrays.asList(600000, "7APZjduaFX14CkfbzpU1WeZpk6APGePpJ2"),
+                            Arrays.asList(600000, "73tTksVMX6knZtPqKpbtokADWenYNrtN4b"),
+                            Arrays.asList(600000, "7KpNx2xbDXiytQz5DDiHHJS5e3Dy3nVmBp")
+                    )),
+            Arrays.asList("7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7B3JXw7MshpQyy8co4NVB9NdWyRa18Yggq"),
+                            Arrays.asList(600000, "74a92GxQ2qJK6rtMiBAVsSeVQ2LZSjkz1R"),
+                            Arrays.asList(600000, "7Q9P8f7fsMpA4NUZFWyb7on4PC14VG98em"),
+                            Arrays.asList(600000, "7DQTzYvRogxZod1p2BNq4Q5eHj7AD3asdC")
+                    )),
+            Arrays.asList("73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7EhMaD3TRusQyjDzydjbdbeLMrm4jvnuZR"),
+                            Arrays.asList(600000, "7LdXnToCaVpuNX8RNgu6gMGPV6EgzKkDjV"),
+                            Arrays.asList(600000, "7QMRMdmz9VF2SmjfPGWesmnsqo8Q5a4HPb"),
+                            Arrays.asList(600000, "7DVy6Jrep6pqLL6sNfnP2bUVNknb8b3PZG")
+                    )),
+            Arrays.asList("7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7BnFb1tNbLwJijVbyWGUwiqnzajvMFY78y"),
+                            Arrays.asList(600000, "7EyxQxQwuwtbVuya1ZNjCssetsGMFq9vwU"),
+                            Arrays.asList(600000, "7Cs26RSdymfSYj4xF8pu5H8QFfJcEbnNcc"),
+                            Arrays.asList(600000, "7RG5RTbvwvLXsC13vyMHTWurH9uCDsKKkQ")
+                    )),
             //
-            Arrays.asList("7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq", "2500000", 100), // 7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq
-            Arrays.asList("7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP", "2500000", 100), // 7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP
-            Arrays.asList("7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG", "2500000", 100), // 7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG
-            Arrays.asList("7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh", "2500000", 100), // 7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh
-            Arrays.asList("77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD", "2500000", 100), // 77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD
+            Arrays.asList("7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7RxsAG25Efkw1f7sg3cgu3tDLuBwrnvmxn"),
+                            Arrays.asList(600000, "74eauFxCrEzuYY1Gqd44xrMmjKo1xCKmbB"),
+                            Arrays.asList(600000, "7A2RpnUr8NW7iVRdxkdqcCn1w1Wb12Bcnt"),
+                            Arrays.asList(600000, "78ekn4VKhc6TNkfwEFTSyrWE6asTjTwASn")
+                    )),
+            Arrays.asList("7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "76zzSwxgUwakFwjDqSgPvN7wJo7YCGEsb9"),
+                            Arrays.asList(600000, "7DuhWzHobTdFuQZyzazSj4fC8dzDnf8NfB"),
+                            Arrays.asList(600000, "7PQV59gkPPkQwTP1wTZXajtDpJqhFdbzsF"),
+                            Arrays.asList(600000, "735cccL8La6EmpFDuJnYrxRNHMUJm23TiZ")
+                    )),
+            Arrays.asList("7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7BAb1MkFL9oC7DofJKWFkxN6VPfdq1sJzH"),
+                            Arrays.asList(600000, "7CvxuFxzgSBRkGKZG4bdPE5G64LSReyrBU"),
+                            Arrays.asList(600000, "77su7AEFdZSyZxYE3VSfMoe9yboCY1iX1D"),
+                            Arrays.asList(600000, "7Rz9rhWY7dokc8ZknMs1CsoHamUVmb9zzP")
+                    )),
+            Arrays.asList("7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7DZdUg6BohyRXeFYsbyyGThoqHUFjAWPpJ"),
+                            Arrays.asList(600000, "7Qw8JAELLzsmsPAUTQfWUhMRNWmWEvGe1b"),
+                            Arrays.asList(600000, "7Bpza7S3WfDHVhGnmrcZmTMmiJTYtDJ52Q"),
+                            Arrays.asList(600000, "7CnQHYi3TPJ3xGSLamGw1NzBK2pCfRnyiv")
+                    )),
+            Arrays.asList("77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7SNj8YEpaGaQF24ujqgusu5h9eGSUHHXSg"),
+                            Arrays.asList(600000, "7SKQqEj7RWYffu7GxAsQN4YKy5wiracdoj"),
+                            Arrays.asList(600000, "7NDRHBWRhMVvx3Y7qj2zsGBtEBUHzknkZf"),
+                            Arrays.asList(600000, "7RoLoC4sLtALbBTwo7Xt7AhL5ifjgAQhXc")
+                    )),
 
-            Arrays.asList("78671KhRVfsn93HyhEUoyEiFFFn5oekYta", "2500000", 100), // 78671KhRVfsn93HyhEUoyEiFFFn5oekYta
-            Arrays.asList("75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz", "2500000", 100), // 75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz
-            Arrays.asList("7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd", "2500000", 100), // 7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd
-            Arrays.asList("7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw", "2500000", 100), // 7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw
-            Arrays.asList("7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS", "2500000", 100), // 7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS
+            Arrays.asList("78671KhRVfsn93HyhEUoyEiFFFn5oekYta", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7MW7cNHebGGYBzSudrXC99EgYYsCy8KLNv"),
+                            Arrays.asList(600000, "7MBgDw2Ve935vrAG5iT3FAhPHEZtqVos5q"),
+                            Arrays.asList(600000, "77EVdQzosQnp4DpY92xpZ4itz654WXtc2g"),
+                            Arrays.asList(600000, "7RR8UBHuruU3Q7Meiv4DGhGfLnJ9k3tjWD")
+                    )),
+            Arrays.asList("75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz", "2500000", 100,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7RmyFRUnvACyJsoGSVZkZ1J6GHA7EzFrBG")
+                    )),
+            Arrays.asList("7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd", "2500000", 100),
+            Arrays.asList("7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw", "2500000", 100),
+            Arrays.asList("7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS", "2500000", 100),
             //
-            Arrays.asList("73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8", "2500000", 10), // 73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8
-            Arrays.asList("799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji", "2500000", 10), // 799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji
-            Arrays.asList("79sGZzJAWpfzsHBrES346S68sYS64mHS71", "2500000", 10), // 79sGZzJAWpfzsHBrES346S68sYS64mHS71
-            Arrays.asList("7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT", "2500000", 10), // 7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT
-            Arrays.asList("7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH", "2500000", 10), // 7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH
+            Arrays.asList("73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8", "2500000", 100),
+            Arrays.asList("79sGZzJAWpfzsHBrES346S68sYS64mHS71", "2500000", 100),
+            Arrays.asList("7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT", "2500000", 100),
+            Arrays.asList("7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH", "2500000", 100)
 
-            Arrays.asList("7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5", "2500000", 10),
-            Arrays.asList("799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji", "2500000", 10),
-            Arrays.asList("73NGFDuvsPbv4XhX9CCvHL1TZ1vp4tPzEQ", "2500000", 10),
-            Arrays.asList("7FDBPBFzUbr4A2UyHBU354MFnhu6fKKvtw", "2500000", 10),
-            Arrays.asList("7Nxg7DUaQBnEjXuC9ta5pryPtwuHY1wiu3", "2500000", 10),
-            //
-            Arrays.asList("7AALAa5oLaRoAoY7BGuueAmn4dP9wi197R", "2500000", 10),
-            Arrays.asList("7G7emTR6gyER2ocRVhxjgtd67f8VeTfsVy", "2500000", 10),
-            Arrays.asList("7ChJh9DwvdW1GXtXEKmfnL9RrLsppnTgJ2", "2500000", 10),
-            Arrays.asList("7Ca3TNja7kNayzVuXCZ57Ra4zh1EgtXeZ1", "2500000", 10),
-            Arrays.asList("73vPmQmRkB7SaBCGfZ7X14DPu9rnnTubgQ", "2500000", 10),
-
-            Arrays.asList("7CE1RjHhNXMim8NzV89Bjk7L7sseFAWQGx", "2500000", 10),
-            Arrays.asList("798wEXpczHn6yggJ4xZsPszXgN7V1enHEX", "2500000", 10),
-            Arrays.asList("7Ri9SFTAeCJQe1GfGFsMXS9W8x2Djt5h8m", "2500000", 10),
-            Arrays.asList("7NYksc75DqV5QhHb81b63CqpWwLPn6AGW1", "2500000", 10),
-            Arrays.asList("7MPBeGZyAM6PSKuWLDhx6NnLHbXub41MvE", "2500000", 10)
         );
 
     public static String peersURL = "https://gitlab.com/FoilNetwork/foilnetwork-public/-/raw/master/peers.json";
