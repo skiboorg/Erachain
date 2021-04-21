@@ -138,18 +138,25 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
             // Marketing and Partnership
             Arrays.asList("7LJr2XRqb9iyRYrGQgqgYDd5j1P4ZGphpw", 10000000, 1),
             // Stakin pool 2022
-            Arrays.asList("7B5XJ27XvgSXLeXQAesnBN7evKSiaemFUJ", 10000000, 1),
-
-            // ERACHAIN frezee
-            Arrays.asList("7Erachain1SXLeXQAesnBN7evKSiaemFUJ", 4000000, 1),
-            Arrays.asList("7Erachain2SXLeXQAesnBN7evKSiaemFUJ", 6000000, 1,
+            Arrays.asList("7B5XJ27XvgSXLeXQAesnBN7evKSiaemFUJ", 10000000, 1,
                     Arrays.asList(
-                                Arrays.asList(600000, "7RoLoC4sLtALbBTwo7Xt7AhL5ifjgAQhXc"),
+                            Arrays.asList(600000, "7RoLoC4sLtALbBTwo7Xt7AhL5ifjgAQhXc"),
                             Arrays.asList(600000, "7MW7cNHebGGYBzSudrXC99EgYYsCy8KLNv"),
                             Arrays.asList(600000, "7MBgDw2Ve935vrAG5iT3FAhPHEZtqVos5q"),
                             Arrays.asList(600000, "77EVdQzosQnp4DpY92xpZ4itz654WXtc2g"),
                             Arrays.asList(600000, "7RR8UBHuruU3Q7Meiv4DGhGfLnJ9k3tjWD"),
                             Arrays.asList(600000, "7RmyFRUnvACyJsoGSVZkZ1J6GHA7EzFrBG")
+                    )),
+
+            // ERACHAIN frezee
+            Arrays.asList("7S8qgSTdzDiBmyw7j3xgvXbVWdKSJVFyZv", 4000000, 1),
+            Arrays.asList("78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5", 6000000, 1,
+                    Arrays.asList(
+                            Arrays.asList(600000, "7BYAzADf7k2hy2QBSBTJj59XBpmEDvdnva"),
+                            Arrays.asList(600000, "7HVM1v9gJq17WpcNu87qvVWmhik4zSMGav"),
+                            Arrays.asList(600000, "77FuPA2C2CSfWBQLeK97qTn5LnNepB2JfR"),
+                            Arrays.asList(600000, "7RKXdsmDFp3ZnWX1PZoLmGHQ8EZMTMmr65"),
+                            Arrays.asList(600000, "73Cpxh1kL6VqkzursACzFz623jaRkLoc4W")
                     ))
 
             );
