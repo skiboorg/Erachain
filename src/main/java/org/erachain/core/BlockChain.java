@@ -250,16 +250,13 @@ public class BlockChain {
     public static final int VERS_30SEC = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
 
     // TODO поидее отрицательное тоже работать будет как надо
-    public static final long VERS_30SEC_TIME =
-            CLONE_MODE || TEST_MODE ? 0 : Settings.DEFAULT_MAINNET_STAMP + (long) VERS_30SEC * 288L;
-
-    public static final int VERS_4_21_02 = 0;
+    public static final long VERS_30SEC_TIME = 0L;
 
     public static final int VERS_4_23_01 = 0;
 
     public static final int VERS_5_01_01 = 0;
 
-    public static final int VERS_5_3 = TEST_DB > 0 || !MAIN_MODE ? 0 : 1870000;
+    public static final int VERS_5_3 = 0;
 
     /**
      * Новый уровень начальных номеров для всех сущностей
