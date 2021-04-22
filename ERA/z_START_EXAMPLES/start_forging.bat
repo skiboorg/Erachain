@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=wfchain
+set app=foilchain
 set jpars=
 set pars= -pass=123456789 -dbschain=mapdb
 

@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=wfchain
+set app=foilchain
 set jpars=-Xms512m
 
 // USE new TESTNET chain

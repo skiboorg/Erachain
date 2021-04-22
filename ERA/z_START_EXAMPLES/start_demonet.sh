@@ -3,7 +3,7 @@
 LOG=`basename $0`.log
 DTFMT='+ %d-%m-%Y %T'
 
-app=wfchain
+app=foilchain
 xms=512
 xmx=1024
 mms=256

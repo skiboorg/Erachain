@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=wfchain
+set app=foilchain
 set xms=512
 
 :start

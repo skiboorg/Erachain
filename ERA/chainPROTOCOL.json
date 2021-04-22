@@ -1,6 +1,6 @@
 {
   // peers from external source
-  //"peersURL": "https://raw.githubusercontent.com/wfchain/wfchain-public/master/peers.json",
+  //"peersURL": "https://raw.githubusercontent.com/foilchain/foilchain-public/master/peers.json",
   // Blocks period [sec], minumum: 3, default: 30
   // "blockPeriod": 30,
   // external Block Explorer

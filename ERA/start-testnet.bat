@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=wfchain
-set task=wfchain-test
+set app=foilchain
+set task=foilchain-test
 
 set pars=-pass=1 -seed=10:new:1 -datachainpath=dataTEST -testnet
 

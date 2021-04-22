@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=wfchain
-set task=wfchain
+set app=foilchain
+set task=foilchain
 
 set pars=
 

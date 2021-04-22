@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=wfchain
+set app=foilchain
 set xms=512
 set xmx=1024
 set mms=256
