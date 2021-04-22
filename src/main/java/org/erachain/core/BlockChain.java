@@ -1052,7 +1052,7 @@ public class BlockChain {
             repeatsMin = GENESIS_ERA_TOTAL / forgingBalance;
             repeatsMin = (repeatsMin >> 2);
 
-            if (repeatsMin < REPEAT_WIN) {
+            if (true || repeatsMin < REPEAT_WIN) {
                 repeatsMin = REPEAT_WIN;
             }
         }
