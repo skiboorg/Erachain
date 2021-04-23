@@ -496,7 +496,7 @@ public class BlockChain {
 
         if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
             ;
-        } else if (CLONE_MODE) {
+        } else if (CLONE_MODE || DEMO_MODE) {
 
             // Процент за перевод и Минимальная комиссия
             ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
@@ -540,8 +540,8 @@ public class BlockChain {
             ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // процент сжигания - если тут не задано то берется 1/2
-            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
-            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
+            //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            //ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
             File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
             if (file.exists()) {
@@ -636,7 +636,6 @@ public class BlockChain {
                     GENESIS_SIGNATURE = Base58.decode(array.get(0).toString());
                     GENESIS_SIGNATURE_TRUE = Base58.decode(array.get(1).toString());
                 }
-
 
             }
         } else if (DEMO_MODE) {
