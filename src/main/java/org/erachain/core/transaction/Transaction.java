@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -1477,7 +1478,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         fontSize *= 1.4;
         String text = "<span style='vertical-align: 10px; font-size: 1.4em' ><b>" + fee.toString() + "</b>"
                 + "<img width=" + fontSize + " height=" + fontSize
-                + " src='file:images\\icons\\assets\\COMPU.png'></span>";
+                + " src='file:images\\icons\\assets\\" + AssetCls.FEE_NAME + ".png'></span>";
 
         boolean useDEX = Settings.getInstance().getCompuRateUseDEX();
 
@@ -1503,8 +1504,20 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
         if (compuRate.signum() > 0) {
             BigDecimal fee_fiat = fee.multiply(compuRate).setScale(asset.getScale(), BigDecimal.ROUND_HALF_UP);
-            if (asset.getKey() != AssetCls.FEE_KEY)
-                text += " (" + fee_fiat.toString() + " " + asset.getTickerName() + ")";
+            if (asset.getKey() != AssetCls.FEE_KEY) {
+                text += " (" + fee_fiat.toString();
+                String fileName = "images" + File.separator + "icons" + File.separator + "assets" + File.separator + asset.getName() + ".png";
+                File file = new File(fileName);
+                if (file.exists()) {
+                    text += "<img width=" + fontSize + " height=" + fontSize
+                            + " src=file:'" + fileName + "'>";
+                } else {
+                    text += " " + asset.getTickerName();
+                }
+
+                text += ")";
+
+            }
         }
 
         return text;
