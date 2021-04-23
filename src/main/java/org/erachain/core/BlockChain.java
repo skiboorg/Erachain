@@ -111,7 +111,7 @@ public class BlockChain {
     public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
 
     /**
-     * Счет на который начисляются %% для Эрачейн с сайдченов
+     * Счет на который начисляются %% для Эрачейн с сайдченов. If = NULL - not used
      */
     public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
 
