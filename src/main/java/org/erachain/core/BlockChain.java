@@ -113,7 +113,7 @@ public class BlockChain {
     /**
      * Счет на который начисляются %% для Эрачейн с сайдченов. If = NULL - not used
      */
-    public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
+    public static Account CLONE_ROYALTY_ERACHAIN_ACCOUNT = null; //new Account("7RYEVPZg7wbu2bmz3tWnzrhPavjpyQ4tnp");
 
     /**
      * default = 30 sec
