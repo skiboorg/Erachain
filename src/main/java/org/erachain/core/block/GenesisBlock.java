@@ -150,8 +150,8 @@ public class GenesisBlock extends Block {
 
         } else {
 
-            // ERROR - MAIN MODE DENIED
-            new Account("--");
+            ///// ERROR - MAIN MODE DENIED
+            // new Account("--");
 
         }
 
