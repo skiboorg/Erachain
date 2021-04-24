@@ -337,6 +337,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                 && !isInvolved(asset.getMaker())) {
             Fun.Tuple2<BigDecimal, BigDecimal> percItem = BlockChain.ASSET_TRANSFER_PERCENTAGE.get(key);
             assetFee = amount.abs().multiply(percItem.a).setScale(asset.getScale(), RoundingMode.DOWN);
+            if (assetFee.compareTo(percItem.a.movePointRight(4)) > 0) {
+                assetFee = percItem.a.movePointLeft(4);
+            }
             if (assetFee.compareTo(percItem.b) < 0) {
                 // USE MINIMAL VALUE
                 assetFee = percItem.b.setScale(asset.getScale(), RoundingMode.DOWN);
@@ -345,7 +348,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                     && BlockChain.ASSET_BURN_PERCENTAGE.containsKey(key)) {
                 assetFeeBurn = assetFee.multiply(BlockChain.ASSET_BURN_PERCENTAGE.get(key)).setScale(asset.getScale(), RoundingMode.UP);
             }
-            return long_fee >> 1;
+            return 0L;
         }
         return long_fee;
     }

@@ -771,14 +771,23 @@ public class Account {
 
     // Добавляем величины для тестовых режимов
     public static BigDecimal addDEVAmount(long key, byte[] shortAddressBytes) {
-        if (BlockChain.ERA_COMPU_ALL_UP && key == 1)
-            return BigDecimal.valueOf(BlockChain.GENESIS_ERA_TOTAL / 1000 * (7000 + shortAddressBytes[10]) / 5000);
-        else if (BlockChain.ERA_COMPU_ALL_UP && key == 2)
-            return new BigDecimal("1000.0");
-        else if (BlockChain.ERA_COMPU_ALL_UP && key == 12)
-            return new BigDecimal("10.0");
-        else if (BlockChain.ERA_COMPU_ALL_UP && key == 95)
-            return new BigDecimal("100000.0");
+        if (BlockChain.ERA_COMPU_ALL_UP) {
+            switch ((int) key) {
+                case 1:
+                    return BigDecimal.valueOf(BlockChain.GENESIS_ERA_TOTAL / 1000 * (7000 + shortAddressBytes[10]) / 5000);
+                case 2:
+                    return new BigDecimal("1000.0");
+                case 12:
+                    return new BigDecimal("10.0");
+                case 21:
+                    return new BigDecimal("100.0");
+                case 93:
+                    return new BigDecimal("700000.0");
+                case 94:
+                case 95:
+                    return new BigDecimal("100000.0");
+            }
+        }
 
         return BigDecimal.ZERO;
 
