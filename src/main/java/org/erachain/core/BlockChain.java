@@ -493,10 +493,103 @@ public class BlockChain {
             FEE_ASSET_EMITTER = GenesisBlock.CREATOR;
         }
 
+        /// FOR SIDE and DEMO load PARAMS
+        File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
+        if (file.exists()) {
+            LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
+            // START SIDE CHAIN
+            String jsonString = "";
+            try {
+                List<String> lines = Files.readLines(file, Charsets.UTF_8);
 
-        if (TEST_DB > 0 || TEST_MODE && !DEMO_MODE) {
-            ;
-        } else if (CLONE_MODE) {
+                for (String line : lines) {
+                    if (line.trim().startsWith("//")) {
+                        // пропускаем //
+                        continue;
+                    }
+                    jsonString += line;
+                }
+
+            } catch (Exception e) {
+                LOGGER.info("Error while reading " + file.getAbsolutePath());
+                LOGGER.error(e.getMessage(), e);
+                System.exit(3);
+            }
+
+            //CREATE JSON OBJECT
+            JSONObject chainParams = (JSONObject) JSONValue.parse(jsonString);
+            if (chainParams == null) {
+                throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
+            }
+
+            if (chainParams.containsKey("assets")) {
+                JSONArray items = (JSONArray) chainParams.get("assets");
+                for (Object item : items) {
+                    JSONArray json = (JSONArray) item;
+                    NOVA_ASSETS.put(json.get(1).toString(),
+                            new Tuple3<>((Long) json.get(0), (Long) json.get(2),
+                                    Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
+                }
+            }
+
+            if (chainParams.containsKey("persons")) {
+                JSONArray items = (JSONArray) chainParams.get("persons");
+                for (Object item : items) {
+                    JSONArray json = (JSONArray) item;
+                    NOVA_PERSONS.put(json.get(1).toString(),
+                            new Tuple3<>((Long) json.get(0), (Long) json.get(2),
+                                    Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
+                }
+            }
+
+            if (chainParams.containsKey("blockPeriod")) {
+                BLOCKS_PERIOD = Integer.parseInt(chainParams.get("blockPeriod").toString());
+                if (BLOCKS_PERIOD < 3) {
+                    BLOCKS_PERIOD = 3;
+                }
+            }
+
+            if (chainParams.containsKey("peersURL")) {
+                Settings.peersURL = chainParams.get("peersURL").toString();
+            }
+
+            if (chainParams.containsKey(Settings.CLONE_OR_SIDE.toLowerCase() + "License")) {
+                Settings.cloneLicense = chainParams.get(Settings.CLONE_OR_SIDE.toLowerCase() + "License").toString();
+            }
+
+            if (chainParams.containsKey("startKey")) {
+                JSONObject startKeysJson = (JSONObject) chainParams.get("startKey");
+                for (Object key : startKeysJson.keySet()) {
+                    startKeys[ItemCls.getItemTypeByName((String) key)] = (long) startKeysJson.get(key);
+                }
+            }
+
+            if (chainParams.containsKey("explorer")) {
+                Settings.getInstance().explorerURL = chainParams.get("explorer").toString();
+            }
+
+            if (chainParams.containsKey("referalsOn")) {
+                REFERRAL_BONUS_FOR_PERSON = (Boolean) chainParams.get("referalsOn") ? 0 : Integer.MAX_VALUE;
+            }
+
+            if (chainParams.containsKey("allValidBefore")) {
+                ALL_VALID_BEFORE = Integer.parseInt(chainParams.get("allValidBefore").toString());
+            }
+
+            if (chainParams.containsKey("protectSendToAnonymous")) {
+                PERSON_SEND_PROTECT = (Boolean) chainParams.get("protectSendToAnonymous");
+            }
+
+            if (chainParams.containsKey("genesisSignature")) {
+                // нужно для синхронизации из другой ветки например если потокол сильно поменялся
+                // используется совместно с ключем - ALL_VALID_BEFORE
+                JSONArray array = (JSONArray) chainParams.get("genesisSignature");
+                GENESIS_SIGNATURE = Base58.decode(array.get(0).toString());
+                GENESIS_SIGNATURE_TRUE = Base58.decode(array.get(1).toString());
+            }
+        }
+
+        if (CLONE_MODE) {
 
             // Процент за перевод и Минимальная комиссия
             ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
@@ -543,131 +636,28 @@ public class BlockChain {
             ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
             ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
-            File file = new File(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json");
-            if (file.exists()) {
-                LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "PROTOCOL.json USED");
-                // START SIDE CHAIN
-                String jsonString = "";
-                try {
-                    List<String> lines = Files.readLines(file, Charsets.UTF_8);
+        } else if (TEST_MODE) {
 
-                    for (String line : lines) {
-                        if (line.trim().startsWith("//")) {
-                            // пропускаем //
-                            continue;
-                        }
-                        jsonString += line;
-                    }
-
-                } catch (Exception e) {
-                    LOGGER.info("Error while reading " + file.getAbsolutePath());
-                    LOGGER.error(e.getMessage(), e);
-                    System.exit(3);
-                }
-
-                //CREATE JSON OBJECT
-                JSONObject chainParams = (JSONObject) JSONValue.parse(jsonString);
-                if (chainParams == null) {
-                    throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
-                }
-
-                if (chainParams.containsKey("assets")) {
-                    JSONArray items = (JSONArray) chainParams.get("assets");
-                    for (Object item : items) {
-                        JSONArray json = (JSONArray) item;
-                        NOVA_ASSETS.put(json.get(1).toString(),
-                                new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                        Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
-                    }
-                }
-
-                if (chainParams.containsKey("persons")) {
-                    JSONArray items = (JSONArray) chainParams.get("persons");
-                    for (Object item : items) {
-                        JSONArray json = (JSONArray) item;
-                        NOVA_PERSONS.put(json.get(1).toString(),
-                                new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                        Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
-                    }
-                }
-
-                if (chainParams.containsKey("blockPeriod")) {
-                    BLOCKS_PERIOD = Integer.parseInt(chainParams.get("blockPeriod").toString());
-                    if (BLOCKS_PERIOD < 3) {
-                        BLOCKS_PERIOD = 3;
-                    }
-                }
-
-                if (chainParams.containsKey("peersURL")) {
-                    Settings.peersURL = chainParams.get("peersURL").toString();
-                }
-
-                if (chainParams.containsKey(Settings.CLONE_OR_SIDE.toLowerCase() + "License")) {
-                    Settings.cloneLicense = chainParams.get(Settings.CLONE_OR_SIDE.toLowerCase() + "License").toString();
-                }
-
-                if (chainParams.containsKey("startKey")) {
-                    JSONObject startKeysJson = (JSONObject) chainParams.get("startKey");
-                    for (Object key : startKeysJson.keySet()) {
-                        startKeys[ItemCls.getItemTypeByName((String) key)] = (long) startKeysJson.get(key);
-                    }
-                }
-
-                if (chainParams.containsKey("explorer")) {
-                    Settings.getInstance().explorerURL = chainParams.get("explorer").toString();
-                }
-
-                if (chainParams.containsKey("referalsOn")) {
-                    REFERRAL_BONUS_FOR_PERSON = (Boolean) chainParams.get("referalsOn") ? 0 : Integer.MAX_VALUE;
-                }
-
-                if (chainParams.containsKey("allValidBefore")) {
-                    ALL_VALID_BEFORE = Integer.parseInt(chainParams.get("allValidBefore").toString());
-                }
-
-                if (chainParams.containsKey("protectSendToAnonymous")) {
-                    PERSON_SEND_PROTECT = (Boolean) chainParams.get("protectSendToAnonymous");
-                }
-
-                if (chainParams.containsKey("genesisSignature")) {
-                    // нужно для синхронизации из другой ветки например если потокол сильно поменялся
-                    // используется совместно с ключем - ALL_VALID_BEFORE
-                    JSONArray array = (JSONArray) chainParams.get("genesisSignature");
-                    GENESIS_SIGNATURE = Base58.decode(array.get(0).toString());
-                    GENESIS_SIGNATURE_TRUE = Base58.decode(array.get(1).toString());
-                }
-
-
-            }
-        } else if (DEMO_MODE) {
-
-            // это как пример для отладки
+            // Процент за перевод и Минимальная комиссия
             ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
             ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-            ASSET_BURN_PERCENTAGE.put(2L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
-            // GENERAL TRUST
-            TRUSTED_ANONYMOUS.add("7BAXHMTuk1vh6AiZU65oc7kFVJGqNxLEpt");
-            TRUSTED_ANONYMOUS.add("7PvUGfFTYPjYi5tcoKHL4UWcf417C8B3oh");
-            //TRUSTED_ANONYMOUS.add("79ZVGgCFrQPoVTsFm6qCNTZNkRbYNsTY4u");
+            // BTC
+            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
 
-            // права для Кибальникова
-            ASSET_OWNERS.put(7L, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"));
-            ASSET_OWNERS.put(8L, new PublicKeyAccount("FgdfKGEQkP1RobtbGqVSQN61AZYGy6W1WSAJvE9weYMe"));
+            // GOLD
+            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
 
-            // из p130 счета для прорверки
-            NOVA_ASSETS.put("BTC",
-                    new Tuple3<Long, Long, byte[]>(12L, 0L, new Account("7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz").getShortAddressBytes()));
-            NOVA_ASSETS.put("USD",
-                    new Tuple3<Long, Long, byte[]>(95L, 0L, new Account("7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz").getShortAddressBytes()));
+            // EUR
+            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            // USD
+            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
-            LOCKED__ADDRESSES.put("7EPhDbpjsaRDFwB2nY8Cvn7XukF58kGdkz", "7A94JWgdnNPZtbmbphhpMQdseHpKCxbrZ1");
-            TRUSTED_ANONYMOUS.add("762eatKnsB3xbyy2t9fwjjqUG1GoxQ8Rhx");
-            ANONYMASERS.add("7CzxxwH7u9aQtx5iNHskLQjyJvybyKg8rF");
+            // процент сжигания - если тут не задано то берется 1/2
+            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
-
-            ANONYMASERS.add("7KC2LXsD6h29XQqqEa7EpwRhfv89i8imGK"); // face2face
         } else {
 
         }
