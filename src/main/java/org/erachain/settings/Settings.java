@@ -180,7 +180,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
     private static final String DEFAULT_TELEGRAM_DIR = "datatele";
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     //NETWORK
-    private static final int DEFAULT_MIN_CONNECTIONS = 3; // for OWN connections
+    private static final int DEFAULT_MIN_CONNECTIONS = 8; // for OWN connections
     private static final int DEFAULT_MAX_CONNECTIONS = 20;
     private static final boolean DEFAULT_LOCAL_PEER_SCANNER = false;
     // EACH known PEER may send that whit peers to me - not white peer may be white peer for me
