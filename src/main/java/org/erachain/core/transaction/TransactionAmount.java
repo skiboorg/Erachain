@@ -870,8 +870,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                                     return Transaction.INVALID_CLAIM_RECIPIENT;
                                 }
 
-                                if (absKey == AssetCls.BAL_KEY && !creator.equals(asset.getOwner())
-                                        && !recipient.equals(asset.getOwner())) {
+                                if (absKey == AssetCls.BAL_KEY && !creator.equals(asset.getMaker())
+                                        && !recipient.equals(asset.getMaker())) {
                                     return INVALID_TRANSFER_TYPE;
                                 }
 
