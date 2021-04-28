@@ -68,7 +68,6 @@ public class AboutFrame extends JDialog implements Observer {
         //ADD GENERAL TABPANE TO FRAME
         getContentPane().add(this.aboutPanel);
         GridBagLayout gbl_aboutPanel = new GridBagLayout();
-        //gbl_aboutPanel.columnWidths = new int[]{0, 0, 0, 0};
         gbl_aboutPanel.rowHeights = new int[]{252, 0, 0, 0, 0, 0};
         gbl_aboutPanel.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         gbl_aboutPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
@@ -158,7 +157,6 @@ public class AboutFrame extends JDialog implements Observer {
         console_Text.setText(str);
 
     }
-
 
     @Override
     public void update(Observable o, Object arg) {
