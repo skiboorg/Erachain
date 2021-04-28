@@ -8,6 +8,8 @@ public class ClosingDialog  {
 
        AboutFrame.getInstance().setUserClose(false);
        AboutFrame.getInstance().setModal(false);
+
+       AboutFrame.getInstance().console_Text.setVisible(true);
        AboutFrame.getInstance().setVisible(true);
 
         new Thread() {
