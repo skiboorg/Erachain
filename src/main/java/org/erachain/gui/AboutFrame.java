@@ -106,7 +106,7 @@ public class AboutFrame extends JDialog implements Observer {
                 Lang.T("Version") + ": " + Controller.getVersion(true));
         lblversionLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));
         lblversionLabel.setForeground(Color.WHITE);
-        lblversionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblversionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         ++gbc.gridy;
         aboutPanel.add(lblversionLabel, gbc);
 
@@ -117,7 +117,7 @@ public class AboutFrame extends JDialog implements Observer {
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setForeground(Color.WHITE);
         label.setFont(new Font("Tahoma", Font.PLAIN, 13));
-        label.setHorizontalAlignment(SwingConstants.RIGHT);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
         ++gbc.gridy;
         aboutPanel.add(label, gbc);
 
