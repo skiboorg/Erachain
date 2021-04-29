@@ -30,7 +30,7 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1619033400000L; // MAIN Net
+    public static final long DEFAULT_MAINNET_STAMP = 1619677800000L; // MAIN Net
     public static final long DEFAULT_DEMO_NET_STAMP = 1619236800000L; // DEMO Net
 
     public static String FORK_APP_Name = "Foil Network";
