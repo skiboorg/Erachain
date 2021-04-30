@@ -237,13 +237,8 @@ public class IssuePersonRecord extends IssueItemRecord {
 
         int result = person.isValid();
         if (result != Transaction.VALIDATE_OK) {
-            if (result == Transaction.INVALID_IMAGE_LENGTH_MAX
-                    && BlockChain.MAIN_MODE && height < 157640) {
-                ;
-            } else {
-                errorValue = person.errorValue;
-                return result;
-            }
+            errorValue = person.errorValue;
+            return result;
         }
 
         // TODO  удалить правки протокола для новой цепочки NEW CHAIN
@@ -257,11 +252,8 @@ public class IssuePersonRecord extends IssueItemRecord {
             }
             int len = person.getImage().length;
             if (len < person.getImageMINLength()) {
-                // 2998-1 - транзакция забаненная
-                if (!BlockChain.MAIN_MODE || height != 2998) {
-                    errorValue = "" + len + " < " + person.getImageMINLength();
-                    return Transaction.INVALID_IMAGE_LENGTH_MIN;
-                }
+                errorValue = "" + len + " < " + person.getImageMINLength();
+                return Transaction.INVALID_IMAGE_LENGTH_MIN;
             }
 
         } else {
@@ -315,16 +307,25 @@ public class IssuePersonRecord extends IssueItemRecord {
         }
 
         if (isPersonAlive && height > BlockChain.START_ISSUE_RIGHTS) {
-            Fun.Tuple4<Long, Integer, Integer, Integer> creatorPerson = creator.getPersonDuration(dcSet);
-            if (creatorPerson != null) {
-                Set<String> thisPersonAddresses = dcSet.getPersonAddressMap().getItems(creatorPerson.a).keySet();
-
-                BigDecimal totalERAOwned = Account.totalForAddresses(dcSet, thisPersonAddresses, AssetCls.ERA_KEY, TransactionAmount.ACTION_SEND);
-                BigDecimal totalLIAOwned = Account.totalForAddresses(dcSet, thisPersonAddresses, AssetCls.LIA_KEY, TransactionAmount.ACTION_SEND);
-
-                int resultERA = BlockChain.VALID_PERSON_REG_ERA(this, height, totalERAOwned, totalLIAOwned);
+            if (true) {
+                // FOIL PROTOCOL
+                BigDecimal balERA = this.creator.getBalanceUSE(RIGHTS_KEY, dcSet);
+                int resultERA = BlockChain.VALID_PERSON_REG_ERA(this, height, balERA, null);
                 if (resultERA > 0) {
                     return resultERA;
+                }
+            } else {
+                Fun.Tuple4<Long, Integer, Integer, Integer> creatorPerson = creator.getPersonDuration(dcSet);
+                if (creatorPerson != null) {
+                    Set<String> thisPersonAddresses = dcSet.getPersonAddressMap().getItems(creatorPerson.a).keySet();
+
+                    BigDecimal totalERAOwned = Account.totalForAddresses(dcSet, thisPersonAddresses, AssetCls.ERA_KEY, TransactionAmount.ACTION_SEND);
+                    BigDecimal totalLIAOwned = Account.totalForAddresses(dcSet, thisPersonAddresses, AssetCls.LIA_KEY, TransactionAmount.ACTION_SEND);
+
+                    int resultERA = BlockChain.VALID_PERSON_REG_ERA(this, height, totalERAOwned, totalLIAOwned);
+                    if (resultERA > 0) {
+                        return resultERA;
+                    }
                 }
             }
         }
