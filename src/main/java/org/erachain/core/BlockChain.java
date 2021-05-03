@@ -799,12 +799,7 @@ public class BlockChain {
     }
 
     public static BigDecimal BONUS_FOR_PERSON(int height) {
-
-        if (!MAIN_MODE || START_ISSUE_RIGHTS == 0 || height > START_ISSUE_RIGHTS) {
-            return feeBG(5000);
-        } else {
-            return feeBG(2000);
-        }
+        return feeBG(10000);
     }
 
     public static boolean REFERAL_BONUS_FOR_PERSON(int height) {
