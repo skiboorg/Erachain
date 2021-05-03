@@ -63,8 +63,39 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
      */
     public final static List<List<Object>> HOLDERS = Arrays.asList(
             Arrays.asList("7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5", 1000000, 1000000), // ADMIN GENESIS
-            Arrays.asList("78cYzVXM69nsBBcf6hJ8Qpyqfkyy88Kv3N", 20000000, 1), // Presale ICO
-            Arrays.asList("7RvLUrfq1theCpqQ4KT1iAvduwD77yiTSW", 10000000, 1), // Binance IDO
+
+            Arrays.asList("78cYzVXM69nsBBcf6hJ8Qpyqfkyy88Kv3N", 1000000, 1), // Presale ICO
+            Arrays.asList("7M3NizXTkJARCnawqvYUHLE9YVfEeaZddy", 1000000, 1), // Presale ICO
+            Arrays.asList("7FHmKh4VsUHQGeGegCLjEJZHCHvYmaZU8H", 1000000, 1), // Presale ICO
+            Arrays.asList("78sz6NAP7GQ43qDH4yxk4mQBpEzSj35X2p", 1000000, 1), // Presale ICO
+            Arrays.asList("75opvfza3w5VyPTKHtboGz8mkpFaA9No5W", 1000000, 1), // Presale ICO
+            Arrays.asList("7QhwTrFctNVqiGHCeSDbvX7cdCSUEAL6dr", 1000000, 1), // Presale ICO
+            Arrays.asList("73CgJma5jahiB2PvjZoLCAhQ8oFm4iHCfM", 1000000, 1), // Presale ICO
+            Arrays.asList("7LYw7kK7SRAvaALJ6MAMUTYP2zgheQYyjN", 1000000, 1), // Presale ICO
+            Arrays.asList("7EZw7aFLpkvHCGjmwiuJHiCiriFpFPhfRv", 1000000, 1), // Presale ICO
+            Arrays.asList("7Dn7oga1VmA8iMGJT8HZRvCf8vdPXvkozK", 1000000, 1), // Presale ICO
+
+            Arrays.asList("7Gsyi9v4k94QGhjYocTe8SiVvpfUGgF229", 1000000, 1), // Presale ICO
+            Arrays.asList("7LxXuGwDUHjjQFjFFUYTih49S5EVHHBXJD", 1000000, 1), // Presale ICO
+            Arrays.asList("7AQmXkyf5VXXCXYcSKNPsRnjirPB6cYEou", 1000000, 1), // Presale ICO
+            Arrays.asList("7DkLcPZVziG9LKaGYW3UFZ8pKbzTLyApdC", 1000000, 1), // Presale ICO
+            Arrays.asList("7GFXSC71vDPzYnfgoV2MqtBdEXFnHfdoD3", 1000000, 1), // Presale ICO
+            Arrays.asList("7D9SQF1GpTs3KRHPEFfGLmtwvSzpmrHy33", 1000000, 1), // Presale ICO
+            Arrays.asList("7PfkTgFtPWtWfeHDiBTLfGFjZ8sNp2nZ5F", 1000000, 1), // Presale ICO
+            Arrays.asList("7RJDsh6EMnLApRHCTrcRdLtkiv3HnhZjCi", 1000000, 1), // Presale ICO
+            Arrays.asList("7N8TqPS91cWDwwjN6iodJivmk2PBbAu4Ht", 1000000, 1), // Presale ICO
+            Arrays.asList("7Euk3sjYrVsnTJtUkemV9aiE3TwDBh6fWs", 1000000, 1), // Presale ICO
+
+            Arrays.asList("7RvLUrfq1theCpqQ4KT1iAvduwD77yiTSW", 1000000, 1), // Binance IDO
+            Arrays.asList("7LgJphKaC9BNQLnvHL47itzxD6aVZy8dFt", 1000000, 1), // Binance IDO
+            Arrays.asList("79eB52TX21TJAW4JkFTrJMZcgEeGnwuEP5", 1000000, 1), // Binance IDO
+            Arrays.asList("7AkpW5KpBPbJX1Sxzgg8ChSUF1376SdsH5", 1000000, 1), // Binance IDO
+            Arrays.asList("7Dcfnigh9EbzjKMCoAz17dm4pdGH6qjSm5", 1000000, 1), // Binance IDO
+            Arrays.asList("7LEP97NL6mAbGgD6wjogPXDKpWPEVyTrH7", 1000000, 1), // Binance IDO
+            Arrays.asList("75mKLwRoCy9H2XrZ8Kc76sfbLc377DrfF2", 1000000, 1), // Binance IDO
+            Arrays.asList("7BGoK2DLDuRy7jLnGE3h69LCn2Q38Ucbjh", 1000000, 1), // Binance IDO
+            Arrays.asList("7QZUmCtnckXcZBviJ5oSq7gCVNCC824w6E", 1000000, 1), // Binance IDO
+            Arrays.asList("75sn62qdVXXEw6qResQtcHLgBvuSKWoeXm", 1000000, 1), // Binance IDO
 
             // Governance and development
             Arrays.asList("7PRTfkQf9uB2rJW1fvsxhUR2TP9iFeVqF9", 30000000, 1,
@@ -137,6 +168,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 
             // Marketing and Partnership
             Arrays.asList("7LJr2XRqb9iyRYrGQgqgYDd5j1P4ZGphpw", 10000000, 1),
+
             // Stakin pool 2022
             Arrays.asList("7B5XJ27XvgSXLeXQAesnBN7evKSiaemFUJ", 10000000, 1,
                     Arrays.asList(
