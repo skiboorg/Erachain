@@ -180,9 +180,9 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
                             Arrays.asList(600000, "7RmyFRUnvACyJsoGSVZkZ1J6GHA7EzFrBG")
                     )),
 
-            // ERACHAIN frezee
-            Arrays.asList("7S8qgSTdzDiBmyw7j3xgvXbVWdKSJVFyZv", 4000000, 1),
-            Arrays.asList("78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5", 6000000, 1,
+            // ERACHAIN freeze
+            Arrays.asList("7G1G45RX4td59daBv6PoN84nAJA49NZ47i", 4000000, 1),
+            Arrays.asList("7QTDHp15vcHN3F4zP2BTcDXJkeotzQZkG4", 6000000, 1,
                     Arrays.asList(
                             Arrays.asList(600000, "7BYAzADf7k2hy2QBSBTJj59XBpmEDvdnva"),
                             Arrays.asList(600000, "7HVM1v9gJq17WpcNu87qvVWmhik4zSMGav"),
