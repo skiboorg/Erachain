@@ -152,7 +152,7 @@ public class BlockChain {
     // RIGHTs
     public static final int GENESIS_ERA_TOTAL = 100000000;
     public static final int GENERAL_ERA_BALANCE = GENESIS_ERA_TOTAL / 100;
-    public static final int MAJOR_ERA_BALANCE = 50000;
+    public static final int MAJOR_ERA_BALANCE = 500000;
     public static final int MINOR_ERA_BALANCE = 10000;
 
     /**
@@ -171,9 +171,9 @@ public class BlockChain {
     public static final int MIN_GENERATING_BALANCE = 100000;
     public static final BigDecimal MIN_GENERATING_BALANCE_BD = new BigDecimal(MIN_GENERATING_BALANCE);
 
-    public static final int MIN_REGISTERING_BALANCE_OWN = 100000;
+    public static final int MIN_REGISTERING_BALANCE_OWN = 0;
     public static final BigDecimal MIN_REGISTERING_BALANCE_OWN_BD = new BigDecimal(MIN_REGISTERING_BALANCE_OWN);
-    public static final int MIN_REGISTERING_BALANCE_USE = 100000;
+    public static final int MIN_REGISTERING_BALANCE_USE = 500000;
     public static final BigDecimal MIN_REGISTERING_BALANCE_USE_BD = new BigDecimal(MIN_REGISTERING_BALANCE_USE);
 
     public static final int MIN_REGISTERING_BALANCE_10 = 10;
