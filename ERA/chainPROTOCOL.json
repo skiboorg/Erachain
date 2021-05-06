@@ -32,100 +32,137 @@
       7,
       "BAL",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     /////// CRYPTOCURRENCY
     [
       12,
       "BTC",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
-    /////// COMMODITY
     [
-      21,
-      "GOLD",
+      14,
+      "ETH",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      15,
+      "BNB",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      16,
+      "DOGE",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      17,
+      "LTC",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
       22,
-      "OIL",
+      "DASH",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
       23,
-      "GAS",
+      "ZEN",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
-    ],
-    [
-      24,
-      "BRENT",
-      0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     /////// FIATCURRENCY
+    // https://www.iban.ru/currency-codes
     [
-      86,
+      1949,
       "TRY",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      87,
+      1702,
       "SGD",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      88,
+      1036,
       "AUD",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      89,
+      1756,
       "CHF",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      90,
+      1826,
       "GBP",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      91,
+      1392,
       "JPY",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      92,
+      1643,
       "RUB",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      93,
+      1156,
       "CNY",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      94,
+      1978,
       "EUR",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ],
     [
-      95,
+      1840,
       "USD",
       0,
-      "744SjRS3ZgTpAT8yrcMSw4aBmbSFNRWXnW"
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    /////// COMMODITY
+    [
+      3003,
+      "GOLD",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      3103,
+      "OIL",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      3105,
+      "GAS",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
+    ],
+    [
+      3107,
+      "BRENT",
+      0,
+      "7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5"
     ]
   ],
 
