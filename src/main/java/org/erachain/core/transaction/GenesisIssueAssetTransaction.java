@@ -71,9 +71,14 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
 
     public void process(Block block, int forDeal) {
 
+        AssetCls asset = (AssetCls) item;
+        if (BlockChain.CLONE_MODE && BlockChain.NOVA_ASSETS.containsKey(asset.getName())) {
+            // skip invalid Maker assets
+            return;
+        }
+
         super.process(block, forDeal);
 
-        AssetCls asset = (AssetCls) item;
         long quantity = asset.getQuantity();
         if (quantity > 0L) {
             Account maker = item.getMaker();
