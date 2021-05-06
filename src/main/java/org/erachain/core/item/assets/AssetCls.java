@@ -549,61 +549,67 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
-            case 3:
-                try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/AS.png"));
-                } catch (Exception e) {
-                }
-                return icon;
             case 12:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/BTC.gif"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 82:
+            case 14:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/UAH.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ETH.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 83:
+            case 16:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/KZT.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/BNB.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 84:
+            case 18:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/KGS.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/DOGE.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 85:
+            case 20:
                 try {
-                    icon = Files.readAllBytes(Paths.get("images/icons/assets/BYN.png"));
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/LTC.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 92:
+            case 22:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/DASH.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 24:
+                try {
+                    icon = Files.readAllBytes(Paths.get("images/icons/assets/ZEN.png"));
+                } catch (Exception e) {
+                }
+                return icon;
+            case 1643:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/RUB.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 93:
+            case 1156:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/CNY.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 94:
+            case 1978:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/EUR.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 95:
+            case 1840:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/USD.png"));
                 } catch (Exception e) {

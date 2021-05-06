@@ -778,13 +778,14 @@ public class Account {
                 case 2:
                     return new BigDecimal("1000.0");
                 case 12:
+                case 14:
                     return new BigDecimal("10.0");
-                case 21:
+                case 3003:
                     return new BigDecimal("100.0");
-                case 93:
+                case 1643:
                     return new BigDecimal("700000.0");
-                case 94:
-                case 95:
+                case 1978:
+                case 1840:
                     return new BigDecimal("100000.0");
             }
         }
