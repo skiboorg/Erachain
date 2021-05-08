@@ -108,7 +108,7 @@ public class BlockChain {
     public static final boolean CLONE_MODE = Settings.getInstance().isCloneNet();
     public static final boolean DEMO_MODE = Settings.getInstance().isDemoNet();
     public static final boolean TEST_MODE = Settings.getInstance().isTestNet();
-    public static final boolean MAIN_MODE = !TEST_MODE && !CLONE_MODE;
+    public static final boolean MAIN_MODE = false;
 
     /**
      * Счет на который начисляются %% для Эрачейн с сайдченов. If = NULL - not used
