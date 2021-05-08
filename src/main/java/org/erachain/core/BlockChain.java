@@ -766,6 +766,9 @@ public class BlockChain {
 
     public static int VALID_PERSON_REG_ERA(Transaction transaction, int height, BigDecimal totalERA, BigDecimal totalLIA) {
 
+        if (!CLONE_MODE)
+            return 0;
+
         if (MIN_REGISTERING_BALANCE_OWN > 0 && totalERA.compareTo(MIN_REGISTERING_BALANCE_OWN_BD) < 0) {
             transaction.setErrorValue("balance in OWN less then " + MIN_REGISTERING_BALANCE_OWN);
             return Transaction.NOT_ENOUGH_ERA_OWN;
@@ -780,6 +783,9 @@ public class BlockChain {
     }
 
     public static int VALID_PERSON_CERT_ERA(Transaction transaction, int height, BigDecimal totalERA, BigDecimal totalLIA) {
+
+        if (!CLONE_MODE)
+            return 0;
 
         if (MIN_REGISTERING_BALANCE_OWN > 0 && totalERA.compareTo(MIN_REGISTERING_BALANCE_OWN_BD) < 0) {
             transaction.setErrorValue("balance in OWN less then " + MIN_REGISTERING_BALANCE_OWN);
