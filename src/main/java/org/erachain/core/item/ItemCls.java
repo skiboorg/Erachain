@@ -77,7 +77,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
             + NAME_SIZE_LENGTH + ICON_SIZE_LENGTH + IMAGE_SIZE_LENGTH + DESCRIPTION_SIZE_LENGTH;
 
     public static final int MAX_ICON_LENGTH = (int) Math.pow(256, ICON_SIZE_LENGTH) - 1;
-    public static final int MAX_IMAGE_LENGTH = BlockChain.MAIN_MODE ? 1500000 : Transaction.MAX_DATA_BYTES_LENGTH >> 1;
+    public static final int MAX_IMAGE_LENGTH = Transaction.MAX_DATA_BYTES_LENGTH;
 
     protected static final int TIMESTAMP_LENGTH = Transaction.TIMESTAMP_LENGTH;
 
