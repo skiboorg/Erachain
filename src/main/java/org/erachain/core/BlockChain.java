@@ -930,10 +930,10 @@ public class BlockChain {
         if (height < BlockChain.REPEAT_WIN)
             // FOR not repeated WINS - not need check BASE_TARGET
             base = BlockChain.BASE_TARGET >> 4; // ONLY UP
-        else if (ERA_COMPU_ALL_UP)
+        else if (ERA_COMPU_ALL_UP || !CLONE_MODE)
             base = 1;
         else
-            base = BlockChain.BASE_TARGET >> 2;
+            base = BlockChain.BASE_TARGET >> 1 + 100;
 
         return base;
 
