@@ -19,7 +19,7 @@ public class AssetType {
                 + AssetCls.viewAssetTypeAbbrev(assetType) + "</b>:" + Lang.T(AssetCls.viewAssetTypeFullCls(assetType));
 
         long startKey = ItemCls.getStartKey(
-                AssetCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD);
+                AssetCls.ASSET_TYPE, ItemCls.START_KEY_OLD, ItemCls.MIN_START_KEY_OLD);
         StringJoiner joiner = new StringJoiner(", ");
         for (Fun.Tuple2<?, String> action : AssetCls.viewAssetTypeActionsList(startKey,
                 assetType, null, true)) {

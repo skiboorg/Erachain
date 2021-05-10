@@ -829,7 +829,7 @@ public abstract class AssetCls extends ItemCls {
     }
 
     public static boolean isUnHoldable(long key, int assetType) {
-        if (key < getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD)
+        if (key < getStartKey(ItemCls.ASSET_TYPE, START_KEY_OLD, MIN_START_KEY_OLD)
                 || assetType == AS_INSIDE_ASSETS
                 || assetType > AS_OUTSIDE_OTHER_CLAIM
                 && assetType <= AS_INSIDE_OTHER_CLAIM
@@ -2042,7 +2042,7 @@ public abstract class AssetCls extends ItemCls {
         assetTypeJson.put("nameFull", Lang.T(AssetCls.viewAssetTypeFullCls(assetType), langObj));
 
         long startKey = ItemCls.getStartKey(
-                AssetCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD);
+                AssetCls.ASSET_TYPE, START_KEY_OLD, MIN_START_KEY_OLD);
         List<Fun.Tuple2<Fun.Tuple2<Integer, Boolean>, String>> actions = AssetCls.viewAssetTypeActionsList(startKey,
                 assetType, null, true);
         StringJoiner joiner = new StringJoiner(", ");
@@ -2124,7 +2124,7 @@ public abstract class AssetCls extends ItemCls {
 
         JSONObject langObj = Lang.getInstance().getLangJson("en");
 
-        long startKey = getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD);
+        long startKey = getStartKey(ItemCls.ASSET_TYPE, START_KEY_OLD, MIN_START_KEY_OLD);
         typeJson.put("key", type);
         typeJson.put("char", charAssetType(startKey, type));
         typeJson.put("abbrev", viewAssetTypeAbbrev(type));

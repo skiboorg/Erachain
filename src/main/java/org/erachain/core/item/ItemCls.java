@@ -44,8 +44,8 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
     static Logger LOGGER = LoggerFactory.getLogger(ItemCls.class.getName());
 
-    public final static long START_KEY_OLD = 1L << 14;
-    public static final long MIN_START_KEY_OLD = 1000L;
+    public final static long START_KEY_OLD = BlockChain.START_KEY_UP_ITEMS;
+    public static final long MIN_START_KEY_OLD = BlockChain.START_KEY_UP_ITEMS;
 
     public static final int ASSET_TYPE = 1;
     public static final int IMPRINT_TYPE = 2;

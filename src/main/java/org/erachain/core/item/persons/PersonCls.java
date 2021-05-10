@@ -114,24 +114,6 @@ public abstract class PersonCls extends ItemCls {
         return TYPE_KEY;
     }
 
-    @Override
-    public long START_KEY() {
-        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
-            return BlockChain.START_KEY_UP_ITEMS;
-        //return START_KEY_UP_ITEMS;
-
-        return START_KEY_OLD;
-    }
-
-    @Override
-    public long MIN_START_KEY() {
-        if (Transaction.parseHeightDBRef(dbRef) > BlockChain.START_KEY_UP)
-            return BlockChain.START_KEY_UP_ITEMS;
-        //return START_KEY_UP_ITEMS;
-
-        return MIN_START_KEY_OLD;
-    }
-
     public String getItemTypeName() {
         return "person";
     }
