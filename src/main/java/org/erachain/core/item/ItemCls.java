@@ -283,9 +283,13 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
     public abstract int getItemType();
 
-    public abstract long START_KEY();
+    public long START_KEY() {
+        return START_KEY_OLD;
+    }
 
-    public abstract long MIN_START_KEY();
+    public long MIN_START_KEY() {
+        return MIN_START_KEY_OLD;
+    }
 
     public static long getStartKey(int itemType, long startKey, long minStartKey) {
         if (!BlockChain.CLONE_MODE)
