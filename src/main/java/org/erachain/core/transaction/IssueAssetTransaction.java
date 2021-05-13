@@ -21,6 +21,7 @@ public class IssueAssetTransaction extends IssueItemRecord {
     public static final String TYPE_NAME = "Issue Asset";
 
     //private static final int BASE_LENGTH = Transaction.BASE_LENGTH;
+    public static final int MINIMAL_ISSUE_NFT_FEE = 10000;
 
     //private AssetCls asset;
 
@@ -71,7 +72,11 @@ public class IssueAssetTransaction extends IssueItemRecord {
                 if (len < BlockChain.MINIMAL_ISSUE_FEE_ACCOUNTING_ASSET)
                     len = BlockChain.MINIMAL_ISSUE_FEE_ACCOUNTING_ASSET;
             } else {
-                if (len < BlockChain.MINIMAL_ISSUE_FEE)
+                if (((AssetCls)item).getAssetType() == AssetCls.AS_NON_FUNGIBLE) {
+                    // NFT
+                    if (len < MINIMAL_ISSUE_NFT_FEE)
+                        len = MINIMAL_ISSUE_NFT_FEE;
+                } else if (len < BlockChain.MINIMAL_ISSUE_FEE)
                     len = BlockChain.MINIMAL_ISSUE_FEE;
             }
         }

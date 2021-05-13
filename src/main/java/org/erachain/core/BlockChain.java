@@ -271,7 +271,7 @@ public class BlockChain {
     public static final int MINIMAL_ISSUE_FEE_ACCOUNTING_ASSET = BlockChain.MINIMAL_ISSUE_FEE / 5;
     public static final int MINIMAL_ISSUE_FEE_IMPRINT = BlockChain.MINIMAL_ISSUE_FEE / 20;
 
-    public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 2000;
+    public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 200;
 
     public static final BigDecimal FORGE_BONUS = new BigDecimal("0.00001245");
 
