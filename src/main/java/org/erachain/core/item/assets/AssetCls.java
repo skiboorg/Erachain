@@ -2194,16 +2194,16 @@ public abstract class AssetCls extends ItemCls {
             for (int i = 0; i < dexAwards.length; ++i) {
                 ExLinkAddress exAddress = dexAwards[i];
                 if (exAddress.getValue1() <= 0) {
-                    errorValue = "Award[" + i + "] percent is so small";
+                    errorValue = "Award[" + i + "] percent is so small (<=0%)";
                     return Transaction.INVALID_AWARD;
                 } else if (exAddress.getValue1() > 50000) {
-                    errorValue = "Award[" + i + "] percent is so big";
+                    errorValue = "Award[" + i + "] percent is so big (>50%)";
                     return Transaction.INVALID_AWARD;
                 }
 
                 total += exAddress.getValue1();
                 if (total > 50000) {
-                    errorValue = "Total Award percent is so big";
+                    errorValue = "Total Award percent is so big (>50%)";
                     return Transaction.INVALID_AWARD;
                 }
             }
