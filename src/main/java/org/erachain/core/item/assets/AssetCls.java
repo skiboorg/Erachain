@@ -2189,6 +2189,12 @@ public abstract class AssetCls extends ItemCls {
 
     public int isValid() {
         if (hasDEXAwards()) {
+
+            if (isAccounting()) {
+                errorValue = "Award is denied for Accounting Asset";
+                return Transaction.INVALID_AWARD;
+            }
+
             // нельзя делать ссылку на иконку у Персон
             int total = 0;
             for (int i = 0; i < dexAwards.length; ++i) {
@@ -2196,14 +2202,14 @@ public abstract class AssetCls extends ItemCls {
                 if (exAddress.getValue1() <= 0) {
                     errorValue = "Award[" + i + "] percent is so small (<=0%)";
                     return Transaction.INVALID_AWARD;
-                } else if (exAddress.getValue1() > 50000) {
-                    errorValue = "Award[" + i + "] percent is so big (>50%)";
+                } else if (exAddress.getValue1() > 25000) {
+                    errorValue = "Award[" + i + "] percent is so big (>25%)";
                     return Transaction.INVALID_AWARD;
                 }
 
                 total += exAddress.getValue1();
-                if (total > 50000) {
-                    errorValue = "Total Award percent is so big (>50%)";
+                if (total > 25000) {
+                    errorValue = "Total Award percent is so big (>25%)";
                     return Transaction.INVALID_AWARD;
                 }
             }
@@ -2414,6 +2420,12 @@ public abstract class AssetCls extends ItemCls {
         int scale = assetWant.getScale();
         Long assetWantKey = assetWant.getKey();
 
+        PublicKeyAccount haveAssetMaker = assetHave.getMaker();
+        PublicKeyAccount inviter = null;
+
+
+        //////// ACCOUNTING assets is Denied for Awards //////
+
         ExLinkAddress[] dexAwards = assetHave.getDEXAwards();
         if (dexAwards != null) {
             for (ExLinkAddress dexAward : dexAwards) {
@@ -2436,28 +2448,23 @@ public abstract class AssetCls extends ItemCls {
             }
         }
 
-        PublicKeyAccount haveAssetMaker = assetHave.getMaker();
-        PublicKeyAccount inviter;
         if (assetHave.getAssetType() == AS_NON_FUNGIBLE) {
-
-            Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = haveAssetMaker.getPersonDuration(dcSet);
-            if (issuerPersonDuration != null) {
-                inviter = PersonCls.getIssuer(dcSet, issuerPersonDuration.a);
-                if (inviter == null) {
-                    inviterRoyalty = BigDecimal.ZERO;
-                } else {
-                    inviterRoyalty = tradeAmount.movePointLeft(2).setScale(scale, RoundingMode.DOWN);
-                }
-            } else {
-                inviter = null;
-                inviterRoyalty = BigDecimal.ZERO;
-            }
 
             // всегда 1% форжеру
             forgerFee = tradeAmount.movePointLeft(2).setScale(scale, RoundingMode.DOWN);
 
-        } else if (!assetWant.isAccounting()
-                && assetWant.getKey() < assetWant.getStartKey()
+            Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = haveAssetMaker.getPersonDuration(dcSet);
+            if (issuerPersonDuration != null) {
+                inviter = PersonCls.getIssuer(dcSet, issuerPersonDuration.a);
+            }
+
+            if (inviter == null) {
+                inviterRoyalty = BigDecimal.ZERO;
+            } else {
+                inviterRoyalty = forgerFee;
+            }
+
+        } else if (assetWant.getKey() < assetWant.getStartKey()
                 && !isInitiator) {
             // это системные активы - берем комиссию за них
             forgerFee = tradeAmount.movePointLeft(3).setScale(scale, RoundingMode.DOWN);
@@ -2476,9 +2483,27 @@ public abstract class AssetCls extends ItemCls {
             }
 
         } else {
-            inviterRoyalty = BigDecimal.ZERO;
-            inviter = null;
-            forgerFee = BigDecimal.ZERO;
+
+            if (assetRoyaltyTotal.signum() > 0) {
+
+                forgerFee = assetRoyaltyTotal.movePointLeft(2).setScale(scale, RoundingMode.DOWN);
+
+                Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = haveAssetMaker.getPersonDuration(dcSet);
+                if (issuerPersonDuration != null) {
+                    inviter = PersonCls.getIssuer(dcSet, issuerPersonDuration.a);
+                }
+
+                if (inviter == null) {
+                    inviterRoyalty = BigDecimal.ZERO;
+                } else {
+                    inviterRoyalty = forgerFee;
+                }
+
+            } else {
+                inviterRoyalty = BigDecimal.ZERO;
+                inviter = null;
+                forgerFee = BigDecimal.ZERO;
+            }
         }
 
         if (assetRoyaltyTotal.signum() > 0) {
