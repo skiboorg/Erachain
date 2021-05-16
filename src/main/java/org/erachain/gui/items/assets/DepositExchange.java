@@ -146,15 +146,23 @@ public class DepositExchange extends IconPanel {
             case 1:
                 urlPars = "FOIL/" + urlPars + "/500";
                 assetIncomeName = assetIncomeABBR = "FOIL";
+                urlPars = assetInput.getName() + "/" + urlPars + "/500";
+                assetIncomeName = assetIncomeABBR = assetInput.getName();
                 break;
             case 2:
                 urlPars = "MVLT/" + urlPars + "/1";
                 assetIncomeName = assetIncomeABBR = "MVOLT";
+                urlPars = assetInput.getName() + "/" + urlPars + "/1";
+                assetIncomeName = assetIncomeABBR = assetInput.getName();
                 break;
             case 12:
                 urlPars = "BTC/" + urlPars + "/0.001";
                 assetIncomeName = "bitcoins";
                 assetIncomeABBR = "BTC";
+            case 12:
+                urlPars = assetInput.getName() + "/" + urlPars + "/0.001";
+                assetIncomeName = "bitcoins";
+                assetIncomeABBR = assetInput.getName();
                 break;
             case (int) DepositExchange.TEST_ASSET:
                 urlPars = "ETH/" + urlPars + "/1";
@@ -162,6 +170,7 @@ public class DepositExchange extends IconPanel {
                 assetIncomeABBR = "ETH";
                 break;
             default:
+                // rate not need
                 urlPars = assetInput.getName() + "/" + urlPars + "/10";
                 assetIncomeName = assetIncomeABBR = assetInput.getName();
         }
@@ -604,16 +613,9 @@ public class DepositExchange extends IconPanel {
 
         switch ((int) asset.getKey()) {
             case 1:
-                //jLabel_Details.setText(Lang.T("Address for buy") + ":");
-                refreshReceiverDetails(Lang.T("Payment details for buy") + " FOIL",
-                        detailsHead);
-                jLabel_Asset.setText(Lang.T("What to buy"));
-                jLabel_AssetInput.setVisible(true);
-                cbxAssetsInput.setVisible(true);
-                break;
             case 2:
                 //jLabel_Details.setText(Lang.T("Address for buy") + ":");
-                refreshReceiverDetails(Lang.T("Payment details for buy") + " MVOLT",
+                refreshReceiverDetails(Lang.T("Payment details for buy") + " " + asset.getName(),
                         detailsHead);
                 jLabel_Asset.setText(Lang.T("What to buy"));
                 jLabel_AssetInput.setVisible(true);
@@ -859,10 +861,10 @@ public class DepositExchange extends IconPanel {
 
                                 resultText +=
                                         //+ " &#9654; "
-                                         " &#10144; "
-                                        + pay_out.get("amo_taken") + " " + curr_out.get("abbrev")
-                                        + " - " + pay_out.get("created_on")
-                                        + " <a href='" + txURLout + pay_out.get("txid").toString() + "'>(TX)</a>"
+                                        " &#10144; "
+                                                + pay_out.get("amo_taken") + " " + curr_out.get("abbrev")
+                                                + " - " + pay_out.get("created_on")
+                                                + " <a href='" + txURLout + pay_out.get("txid").toString() + "'>(TX)</a>"
                                 ;
                             } else if (json.containsKey("stasus")) {
                                 /** есди выплаты не было и платеж со статусом ожидания и т.д.
