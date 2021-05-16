@@ -89,10 +89,6 @@ public class WithdrawExchange extends IconPanel {
             assetIn = (AssetCls) cbxAssets.getSelectedItem();
             String abbrevIN = assetIn.getName();
             switch ((int) assetIn.getKey()) {
-                case 12:
-                    urlGetDetails += "fBTC/BTC/" + address + "/0.1"; // eBTC -> BTC
-                    message += "BTC";
-                    break;
                 case 1840:
                     urlGetDetails += "fUSD/BTC/" + address + "/100"; // eUSD -> BTC
                     message += "BTC";
