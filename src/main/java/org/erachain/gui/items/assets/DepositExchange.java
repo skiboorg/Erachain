@@ -156,17 +156,13 @@ public class DepositExchange extends IconPanel {
                 assetIncomeName = "bitcoins";
                 assetIncomeABBR = "BTC";
                 break;
-            case 95:
-                urlPars = "RUB/" + urlPars + "/2500";
-                assetIncomeName = assetIncomeABBR = "RUB";
-                break;
             case (int) DepositExchange.TEST_ASSET:
                 urlPars = "ETH/" + urlPars + "/1";
                 assetIncomeName = "etheriums";
                 assetIncomeABBR = "ETH";
                 break;
             default:
-                urlPars = assetInput.getName() + "/" + urlPars + "/1";
+                urlPars = assetInput.getName() + "/" + urlPars + "/10";
                 assetIncomeName = assetIncomeABBR = assetInput.getName();
         }
 
