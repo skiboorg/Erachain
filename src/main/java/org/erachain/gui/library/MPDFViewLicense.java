@@ -298,14 +298,9 @@ public class MPDFViewLicense extends javax.swing.JPanel {
         file = new File(fileName);
 
         try {
-            if (false) {
-                return ByteBuffer.wrap(Files.readAllBytes(Paths.get(fileName)));
-            } else {
-                // rise ERROR java.nio.BufferUnderflowException
-                RandomAccessFile raf = new RandomAccessFile(file, "r");
-                FileChannel channel = raf.getChannel();
-                return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-            }
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            FileChannel channel = raf.getChannel();
+            return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
         } catch (Exception e) {
             logger.error(e.getMessage() + " - " + fileName, e);
             Controller.getInstance().stopAll(3);
