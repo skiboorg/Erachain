@@ -86,27 +86,24 @@ public class WithdrawExchange extends IconPanel {
 
             String urlGetDetails = "https://api.face2face.cash/apipay/get_uri_in.json/2/";
             assetIn = (AssetCls) cbxAssets.getSelectedItem();
+            String abbrevIN = assetIn.getName();
             switch ((int) assetIn.getKey()) {
                 case 12:
-                    urlGetDetails += "@BTC/BTC/" + address + "/0.1"; // eBTC -> BTC
+                    urlGetDetails += "fBTC/BTC/" + address + "/0.1"; // eBTC -> BTC
                     message += "BTC";
                     break;
-                case 95:
-                    urlGetDetails += "@USD/BTC/" + address + "/100"; // eUSD -> BTC
+                case 1840:
+                    urlGetDetails += "fUSD/BTC/" + address + "/100"; // eUSD -> BTC
                     message += "BTC";
                     break;
-                case 94:
-                    urlGetDetails += "@EUR/BTC/" + address + "/100"; // eEUR -> BTC
-                    message += "BTC";
-                    break;
-                case 1114:
+                case (int) DepositExchange.TEST_ASSET:
                     urlGetDetails = "http://185.195.26.197/7pay_in/apipay/get_uri_in.json/2/";
-                    urlGetDetails += "@ZEN/ZEN/" + address + "/30"; // eZEN -> ZEN
+                    urlGetDetails += "fZEN/ZEN/" + address + "/30"; // eZEN -> ZEN
                     message += "ZEN";
                     break;
                 default:
-                    urlGetDetails += "COMPU/BTC/" + address + "/1"; // COMPU -> BTC
-                    message += "BTC";
+                    urlGetDetails += "f" + abbrevIN + "/" + abbrevIN + "/" + address + "/1"; // COMPU -> BTC
+                    message += abbrevIN;
             }
 
             // CREATE CONNECTION
@@ -175,7 +172,7 @@ public class WithdrawExchange extends IconPanel {
                     incomeAssetName = "BTC";
                     formTitle = Lang.T("Withdraw %1 to").replace("%1", incomeAssetName) + " " + address;
                     break;
-                case 1114:
+                case (int) DepositExchange.TEST_ASSET:
                     incomeAssetName = "ZEN";
                     formTitle = Lang.T("Withdraw %1 to").replace("%1", incomeAssetName) + " " + address;
                     break;

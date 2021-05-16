@@ -37,6 +37,7 @@ public class FundTokensComboBoxModel extends DefaultComboBoxModel<AssetCls> {
             }
 
             for (Long key : new Long[]{
+                    //1840L, // USD
                     AssetCls.BTC_KEY, // BTC
                     18L, 20L, 22L
             }) {
@@ -46,10 +47,6 @@ public class FundTokensComboBoxModel extends DefaultComboBoxModel<AssetCls> {
 
                 this.addElement(asset);
             }
-
-            //this.addElement(Controller.getInstance().getAsset(14)); // ETH
-            //this.addElement(Controller.getInstance().getAsset(92)); // RUB
-            //this.addElement(Controller.getInstance().getAsset(95)); // USD
         }
 
     }
