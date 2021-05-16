@@ -117,12 +117,9 @@ public class DepositExchange extends IconPanel {
 
         switch ((int) assetBuy.getKey()) {
             case 1:
-                assetOutput = "FOIL/";
-                assetOutputName = "FOIL";
-                break;
             case 2:
-                assetOutput = "MVLT/";
-                assetOutputName = "MVOLT";
+                assetOutput = assetBuy.getName() + "/";
+                assetOutputName = assetBuy.getName();
                 break;
             case (int) DepositExchange.TEST_ASSET:
                 /// http://185.195.26.197/7pay_in/apipay/get_uri_in.json/2/ETH/@ETH/7KmL1nheVHYVmdaEB4rsRjiENUD3sTr7EE/1
@@ -144,21 +141,13 @@ public class DepositExchange extends IconPanel {
 
         switch ((int) assetInput.getKey()) {
             case 1:
-                urlPars = "FOIL/" + urlPars + "/500";
-                assetIncomeName = assetIncomeABBR = "FOIL";
                 urlPars = assetInput.getName() + "/" + urlPars + "/500";
                 assetIncomeName = assetIncomeABBR = assetInput.getName();
                 break;
             case 2:
-                urlPars = "MVLT/" + urlPars + "/1";
-                assetIncomeName = assetIncomeABBR = "MVOLT";
                 urlPars = assetInput.getName() + "/" + urlPars + "/1";
                 assetIncomeName = assetIncomeABBR = assetInput.getName();
                 break;
-            case 12:
-                urlPars = "BTC/" + urlPars + "/0.001";
-                assetIncomeName = "bitcoins";
-                assetIncomeABBR = "BTC";
             case 12:
                 urlPars = assetInput.getName() + "/" + urlPars + "/0.001";
                 assetIncomeName = "bitcoins";
