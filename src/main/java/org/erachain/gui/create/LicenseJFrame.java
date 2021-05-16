@@ -152,7 +152,7 @@ public class LicenseJFrame extends JDialog {
         gridBagConstraints.weighty = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 8);
     //    mainPanel.add(scrollPaneDescription, gridBagConstraints);
-        MPDFViewLicense pp = new MPDFViewLicense(null);
+        MPDFViewLicense pp = new MPDFViewLicense("Licence Agreement.pdf");
         
         mainPanel.add( pp, gridBagConstraints);
         pp.show();

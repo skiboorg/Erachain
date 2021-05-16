@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -47,7 +49,7 @@ public class MPDFViewLicense extends javax.swing.JPanel {
      * Creates new form MPDFViewLicense
      */
     private int pages;
-    ByteBuffer buf = null;
+    //ByteBuffer buf = null;
     private JPanel jPanelBottomTutton;
     private JButton jButtonZoomAdd;
     private JButton jButtonZoomDec;
@@ -213,6 +215,8 @@ public class MPDFViewLicense extends javax.swing.JPanel {
 
     private ByteBuffer readPDFLicenseOrExit() {
 
+        ByteBuffer buf = null;
+
         Long langRef = Controller.LICENSE_LANG_REFS.get(Settings.getInstance().getLang());
         if (langRef == null)
             langRef = Controller.LICENSE_LANG_REFS.get("en");
@@ -294,10 +298,15 @@ public class MPDFViewLicense extends javax.swing.JPanel {
         file = new File(fileName);
 
         try {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-            FileChannel channel = raf.getChannel();
-            return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-        } catch (IOException e) {
+            if (true) {
+                return ByteBuffer.wrap(Files.readAllBytes(Paths.get(fileName)));
+            } else {
+                // rise ERROR java.nio.BufferUnderflowException
+                RandomAccessFile raf = new RandomAccessFile(file, "r");
+                FileChannel channel = raf.getChannel();
+                return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+            }
+        } catch (Exception e) {
             logger.error(e.getMessage() + " - " + fileName, e);
             Controller.getInstance().stopAll(3);
         }

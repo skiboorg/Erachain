@@ -4111,17 +4111,18 @@ public class Controller extends Observable {
                 this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, info));
 
 
-                String licenseFile = "Licence Agreement (genesis).txt";
-                File f = new File(licenseFile);
-                if (!f.exists()) {
+                if (false) {
+                    String licenseFile = "Licence Agreement (genesis).txt";
+                    File f = new File(licenseFile);
+                    if (!f.exists()) {
 
-                    LOGGER.error("License file not found: " + licenseFile);
+                        LOGGER.error("License file not found: " + licenseFile);
 
-                    //FORCE SHUTDOWN
-                    System.exit(3);
+                        //FORCE SHUTDOWN
+                        System.exit(3);
 
+                    }
                 }
-
 
                 //STARTING NETWORK/BLOCKCHAIN/RPC
 

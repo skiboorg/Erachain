@@ -6,7 +6,7 @@
   // external Block Explorer
   "explorer": "http://explorer.foil.network:9077",
 
-  "sideLicense": "Chain Licence Agreement.pdf",
+  "cloneChain": "Chain Licence Agreement.pdf",
 
   "startKey": {
     //"assets": -1,
