@@ -78,7 +78,7 @@ public class MPDFViewLicense extends javax.swing.JPanel {
 
         try {
             pdffile = new PDFFile(readPDFLicenseOrExit(fileName));
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -298,7 +298,7 @@ public class MPDFViewLicense extends javax.swing.JPanel {
         file = new File(fileName);
 
         try {
-            if (true) {
+            if (false) {
                 return ByteBuffer.wrap(Files.readAllBytes(Paths.get(fileName)));
             } else {
                 // rise ERROR java.nio.BufferUnderflowException

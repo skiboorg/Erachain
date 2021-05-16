@@ -191,8 +191,6 @@ public class MenuFiles extends JMenu {
 
         // ERACHAIN LICENSE
         JMenuItem licenseItem = new JMenuItem(Lang.T("License"));
-        //    licenseItem.getAccessibleContext().setAccessibleDescription(Lang.T("Information about the application"));
-        //    licenseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
         licenseItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new LicenseJFrame();
@@ -200,17 +198,17 @@ public class MenuFiles extends JMenu {
         });
         add(licenseItem);
 
-        // CLONECHAIN LICENSE
-        //ABOUT
-        JMenuItem dataLicenseItem = new JMenuItem(Lang.T("Data License of Clonechain"));
-        //    licenseItem.getAccessibleContext().setAccessibleDescription(Lang.T("Information about the application"));
-        //    licenseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
-        dataLicenseItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new LicenseDataJFrame();
-            }
-        });
-        add(dataLicenseItem);
+        if (false) {
+            // CLONECHAIN LICENSE
+            //ABOUT
+            JMenuItem dataLicenseItem = new JMenuItem(Lang.T("Data License"));
+            dataLicenseItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    new LicenseDataJFrame();
+                }
+            });
+            add(dataLicenseItem);
+        }
 
 
         //SEPARATOR
