@@ -880,7 +880,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                                     BigDecimal forSale = creator.getForSale(dcSet, FEE_KEY, height, true);
 
                                     if ((flags & Transaction.NOT_VALIDATE_FLAG_FEE) == 0) {
-                                        amount = amount.add(fee);
+                                        forSale = forSale.subtract(fee);
                                         if (assetFee != null && assetFee.signum() != 0) {
                                             // учтем что еще процент с актива
                                             forSale = forSale.subtract(assetFee);
@@ -1197,7 +1197,8 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             return ITEM_PERSON_IS_DEAD;
         }
 
-        if (height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
+        if (false // комиссия у так уже = 0 - нельзя модифицировать флаг внутри
+                && height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
                 && getDataLength(Transaction.FOR_NETWORK, false) < BlockChain.FREE_FEE_LENGTH) {
             // не учитываем комиссию если размер блока маленький
             flags = flags | NOT_VALIDATE_FLAG_FEE;
