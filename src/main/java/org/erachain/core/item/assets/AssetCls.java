@@ -630,7 +630,7 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
-            case 12:
+            case (int) BTC_KEY:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/BTC.gif"));
                 } catch (Exception e) {
@@ -684,13 +684,13 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
-            case 1978:
+            case (int) EUR_KEY:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/EUR.png"));
                 } catch (Exception e) {
                 }
                 return icon;
-            case 1840:
+            case (int) USD_KEY:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/USD.png"));
                 } catch (Exception e) {
