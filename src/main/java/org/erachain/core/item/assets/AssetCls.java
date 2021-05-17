@@ -73,6 +73,7 @@ public abstract class AssetCls extends ItemCls {
     public static final String BAL_DESCR = "";
 
     public static final long BTC_KEY = 12L;
+    public static final long USD_KEY = 95L;
 
     public static final int UNIQUE = 1;
     public static final int VENTURE = 2;
@@ -595,7 +596,7 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
-            case 12:
+            case (int) BTC_KEY:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/BTC.gif"));
                 } catch (Exception e) {
@@ -643,7 +644,7 @@ public abstract class AssetCls extends ItemCls {
                 } catch (Exception e) {
                 }
                 return icon;
-            case 95:
+            case (int) USD_KEY:
                 try {
                     icon = Files.readAllBytes(Paths.get("images/icons/assets/USD.png"));
                 } catch (Exception e) {
