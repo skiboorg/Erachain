@@ -990,7 +990,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
             return Long.valueOf(this.settingsJSON.get("compuRateAsset").toString());
         }
 
-        return 95L;
+        return AssetCls.USD_KEY;
     }
 
     public boolean getCompuRateUseDEX() {

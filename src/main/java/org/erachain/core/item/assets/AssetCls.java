@@ -73,6 +73,8 @@ public abstract class AssetCls extends ItemCls {
     public static final String BAL_DESCR = "";
 
     public static final long BTC_KEY = 12L;
+    public static final long USD_KEY = 1840L;
+    public static final long EUR_KEY = 1978L;
 
     public static final int UNIQUE = 1;
     public static final int VENTURE = 2;
@@ -441,7 +443,7 @@ public abstract class AssetCls extends ItemCls {
     // https://unicode-table.com/ru/#23FC
     public static String charAssetType(long key, int assetType) {
 
-        if (key < 100) {
+        if (key < 10000) {
             return "";
         }
 

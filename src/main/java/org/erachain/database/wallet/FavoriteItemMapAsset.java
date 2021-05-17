@@ -17,10 +17,8 @@ public class FavoriteItemMapAsset extends FavoriteItemMap {
             add(1079L);
 
         } else {
-            add(12L);
-            add(95L);
-            add(94L);
-            add(92L);
+            add(3003L);
+            add(AssetCls.USD_KEY);
         }
     }
 

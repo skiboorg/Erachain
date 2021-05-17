@@ -90,7 +90,7 @@ public class WithdrawExchange extends IconPanel {
             assetIn = (AssetCls) cbxAssets.getSelectedItem();
             String abbrevIN = assetIn.getName();
             switch ((int) assetIn.getKey()) {
-                case 1840:
+                case (int) AssetCls.USD_KEY:
                     urlGetDetails += "fUSD/BTC/" + address + "/100"; // eUSD -> BTC
                     message += "BTC";
                     break;

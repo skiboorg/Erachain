@@ -651,7 +651,7 @@ public class DepositExchange extends IconPanel {
                 case 1:
                     urlGetDetails += "FOIL/";
                     break;
-                case 12:
+                case (int) AssetCls.BTC_KEY:
                     urlGetDetails += "fBTC/";
                     break;
                 case 14:
@@ -669,7 +669,7 @@ public class DepositExchange extends IconPanel {
                 case 1643:
                     urlGetDetails += "fRUB/";
                     break;
-                case 1840:
+                case (int) AssetCls.USD_KEY:
                     urlGetDetails += "fUSD/";
                     break;
                 case (int) DepositExchange.TEST_ASSET:
