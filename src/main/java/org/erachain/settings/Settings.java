@@ -871,7 +871,7 @@ public class Settings {
             return Long.valueOf(this.settingsJSON.get("compuRateAsset").toString());
         }
 
-        return 95L;
+        return AssetCls.USD_KEY;
     }
 
     public boolean getCompuRateUseDEX() {
