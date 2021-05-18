@@ -26,7 +26,7 @@ public class IssuePersonRecord extends IssueItemRecord {
     /**
      * Нельзя делать большой, так как вся комиссия будет эммитироваться - а значит слишком большой размер будет эммитрировать больше
      */
-    public static final int MAX_DESCRIPTION_LENGTH = 1 << 15;
+    public static final int MAX_DESCRIPTION_LENGTH = 1 << 17;
 
 
     public IssuePersonRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, PersonCls person, byte feePow, long timestamp, Long reference) {

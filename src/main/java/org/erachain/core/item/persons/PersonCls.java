@@ -32,8 +32,8 @@ public abstract class PersonCls extends ItemCls {
 
     public static final long MIN_START_KEY_OLD = 0L;
 
-    public static int MAX_IMAGE_LENGTH = BlockChain.MAIN_MODE ? 1 << 15 : 1 << 17;
-    private static int MIN_IMAGE_LENGTH = BlockChain.MAIN_MODE ? 10240 : 10240 >> 1;
+    public static int MAX_IMAGE_LENGTH = 1 << 17;
+    private static int MIN_IMAGE_LENGTH = 10240;
 
     public static final int HUMAN = 1;
     public static final int DOG = 2;
