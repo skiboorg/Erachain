@@ -229,7 +229,7 @@ public class BlockChain {
      * Если задан то это режим синхронизации со стрым протоколом - значит нам нельза генерить блоки и трнзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = 0; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static int ALL_VALID_BEFORE = 0; // 23424 for DEMO see BlockChain see in sidePROTOCOL.json as 'allValidBefore'
     public static final int CANCEL_ORDERS_ALL_VALID = 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
@@ -587,6 +587,11 @@ public class BlockChain {
                 GENESIS_SIGNATURE = Base58.decode(array.get(0).toString());
                 GENESIS_SIGNATURE_TRUE = Base58.decode(array.get(1).toString());
             }
+        }
+
+        if (DEMO_MODE) {
+            // TODO REMOVE after new DEMO
+            ALL_VALID_BEFORE = 31584;
         }
 
         if (CLONE_MODE || TEST_MODE) {
