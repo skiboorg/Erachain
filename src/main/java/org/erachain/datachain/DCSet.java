@@ -564,10 +564,9 @@ public class DCSet extends DBASet implements Closeable {
             databaseStruc.cacheDisable();
         } else {
             // USE CACHE
-            if (BLOCKS_MAP != DBS_MAP_DB) {
+            if (true || BLOCKS_MAP != DBS_MAP_DB) {
                 // если блоки не сохраняются в общей базе данных, а трнзакции мелкие по размеру
-                databaseStruc
-                        .cacheSize(1024 << (5 + Controller.HARD_WORK));
+                databaseStruc.cacheSize(32 + 32 << Controller.HARD_WORK);
             } else {
                 // если блоки в этой MapDB то уменьшим - так как размер блока может быть большой
                 databaseStruc.cacheSize(32 + 32 << Controller.HARD_WORK);
