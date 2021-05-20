@@ -141,7 +141,7 @@ public class BlockChain {
      */
     public static final boolean ANONIM_SERT_USE = TEST_MODE || BlockChain.ERA_COMPU_ALL_UP;
 
-    public static final int MAX_ORPHAN = 50; // max orphan blocks in chain for 30 sec
+    public static final int MAX_ORPHAN = CLONE_MODE? 300 : 999990; // max orphan blocks in chain for 30 sec
     public static final int SYNCHRONIZE_PACKET = 300; // when synchronize - get blocks packet by transactions
 
     /**
@@ -371,8 +371,8 @@ public class BlockChain {
     //
 
     public static final int FREE_FEE_LENGTH = 1 << 13;
-    public static final int FREE_FEE_TO_SEQNO = DEMO_MODE ? 1 : CLONE_MODE? 1 : -1;
-    public static final int FREE_FEE_FROM_HEIGHT = DEMO_MODE ? 1 : CLONE_MODE? 1 : Integer.MAX_VALUE;
+    public static final int FREE_FEE_TO_SEQNO = 1;
+    public static final int FREE_FEE_FROM_HEIGHT = 1;
 
 
     /**
@@ -935,7 +935,7 @@ public class BlockChain {
         if (height < BlockChain.REPEAT_WIN)
             // FOR not repeated WINS - not need check BASE_TARGET
             base = BlockChain.BASE_TARGET >> 4; // ONLY UP
-        else if (ERA_COMPU_ALL_UP || !CLONE_MODE)
+        else if (ERA_COMPU_ALL_UP || BlockChain.TEST_MODE)
             base = 1;
         else
             base = BlockChain.BASE_TARGET >> 1 + 100;

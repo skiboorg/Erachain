@@ -1741,7 +1741,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     }
 
                     //CHECK TIMESTAMP AND DEADLINE
-                    if ((BlockChain.TEST_MODE || BlockChain.CLONE_MODE || heightBlock > 278989) &&
+                    if ((true || BlockChain.TEST_MODE || BlockChain.CLONE_MODE || heightBlock > 278989) &&
                             transaction.getTimestamp() > timestampEnd + BlockChain.GENERATING_MIN_BLOCK_TIME_MS(heightBlock)
                     ) {
                         LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
