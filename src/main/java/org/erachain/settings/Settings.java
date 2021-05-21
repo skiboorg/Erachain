@@ -308,7 +308,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
     private InetAddress localAddress;
     private String[] defaultPeers = {};
 
-
     private String userPath = "";
 
     /**
@@ -322,6 +321,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
     private String dataTelePath = "";
     private String backUpPath = "";
     private String tempPath;
+    public String videoPM = "makeVPreview.bash"; // makeVPreview.bat
 
     private String telegramDefaultSender;
     private String telegramDefaultReciever;
@@ -639,6 +639,19 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 
     public String getGuiSettingPath() {
         return getUserPath() + "gui_settings.json";
+    }
+
+    /**
+     * for Windows use makeVPreview.bash
+     * for Unix use makeVPreview.bat
+     *
+     * @return
+     */
+    public String getVideoPreviewMaker() {
+        if (this.settingsJSON.containsKey("videoPreviewMaker")) {
+            videoPM = (String) this.settingsJSON.get("videoPreviewMaker");
+        }
+        return videoPM;
     }
 
     ////////////////

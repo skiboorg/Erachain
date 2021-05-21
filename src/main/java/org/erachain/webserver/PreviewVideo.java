@@ -2,6 +2,7 @@ package org.erachain.webserver;
 
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
+import org.erachain.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,29 +77,34 @@ public class PreviewVideo {
             parRV = "15";
         }
 
-        File fileIn = new File(pathIn + "_in.mp4");
-        fileIn.getParentFile().mkdirs();
-
-        try (FileOutputStream fos = new FileOutputStream(fileIn)) {
-            fos.write(image);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        ProcessBuilder builder = new ProcessBuilder("makeVPreview.bat",
-                fileIn.toPath().toString(), parQV, parRV, fileOut.toPath().toString());
-        // указываем перенаправление stderr в stdout, чтобы проще было отлаживать
-        builder.redirectErrorStream(true);
-
         String output = pathIn + ".txt";
-        builder.redirectOutput(new File(output));
-        try {
-            Process process = builder.start();
-            process.waitFor();
-            return fileOut;
-        } catch (IOException | InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
+        File outLog = new File(output);
+        outLog.getParentFile().mkdirs();
+
+        if (!outLog.exists()) {
+            File fileIn = new File(pathIn + "_in.mp4");
+            try (FileOutputStream fos = new FileOutputStream(fileIn)) {
+                fos.write(image);
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+
+            ProcessBuilder builder = new ProcessBuilder(Settings.getInstance().getVideoPreviewMaker(),
+                    fileIn.toPath().toString(), parQV, parRV, fileOut.toPath().toString());
+            // указываем перенаправление stderr в stdout, чтобы проще было отлаживать
+            builder.redirectErrorStream(true);
+
+            builder.redirectOutput(outLog);
+            try {
+                Process process = builder.start();
+                process.waitFor();
+                return fileOut;
+            } catch (IOException | InterruptedException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
 
+        // some errors was happen
         return null;
 
     }

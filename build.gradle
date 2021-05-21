@@ -161,6 +161,7 @@ task CopyResourse {
         include 'chain*'
         include 'peers*'
         include 'start*'
+        include 'makeVPreview*'
     }
 
     copy {
