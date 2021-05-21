@@ -189,7 +189,6 @@ public class Settings {
     private InetAddress localAddress;
     private String[] defaultPeers = {};
 
-
     private String userPath = "";
 
     /**
@@ -203,6 +202,7 @@ public class Settings {
     private String dataTelePath = "";
     private String backUpPath = "";
     private String tempPath;
+    public String videoPM = "makeVPreview.bash"; // makeVPreview.bat
 
     private String telegramDefaultSender;
     private String telegramDefaultReciever;
@@ -520,6 +520,19 @@ public class Settings {
 
     public String getGuiSettingPath() {
         return getUserPath() + "gui_settings.json";
+    }
+
+    /**
+     * for Windows use makeVPreview.bash
+     * for Unix use makeVPreview.bat
+     *
+     * @return
+     */
+    public String getVideoPreviewMaker() {
+        if (this.settingsJSON.containsKey("videoPreviewMaker")) {
+            videoPM = (String) this.settingsJSON.get("videoPreviewMaker");
+        }
+        return videoPM;
     }
 
     ////////////////
