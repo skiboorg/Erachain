@@ -202,7 +202,11 @@ public class Settings {
     private String dataTelePath = "";
     private String backUpPath = "";
     private String tempPath;
-    public String videoPM = "makeVPreview.bash"; // makeVPreview.bat
+    /**
+     * "bash makeVPreview.bash" - for UNIX
+     * "makeVPreview.bat" - for Windows
+     */
+    public String videoPM = null;
 
     private String telegramDefaultSender;
     private String telegramDefaultReciever;
