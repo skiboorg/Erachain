@@ -3981,11 +3981,6 @@ public class Controller extends Observable {
                 continue;
             }
 
-            if (arg.startsWith("-previewmaker=") && arg.length() > 14) {
-                Settings.getInstance().previewMakerCommand = arg.substring(14).toLowerCase();
-                continue;
-            }
-
             if (arg.startsWith("-dbschain=") && arg.length() > 10) {
                 try {
                     String dbsChain = arg.substring(10).toLowerCase();
