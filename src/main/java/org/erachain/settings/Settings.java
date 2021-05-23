@@ -321,11 +321,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
     private String dataTelePath = "";
     private String backUpPath = "";
     private String tempPath;
-    /**
-     * "bash makePreview.bash" - for UNIX
-     * "makePreview.bat" - for Windows
-     */
-    public String previewMakerCommand = null;
 
     private String telegramDefaultSender;
     private String telegramDefaultReciever;
@@ -643,21 +638,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 
     public String getGuiSettingPath() {
         return getUserPath() + "gui_settings.json";
-    }
-
-    /**
-     * for Windows use makePreview.bash
-     * for Unix use makePreview.bat
-     *
-     * @return
-     */
-    public String getPreviewMakerCommand() {
-        if (previewMakerCommand == null) {
-            if (this.settingsJSON.containsKey("previewMaker")) {
-                previewMakerCommand = (String) this.settingsJSON.get("previewMaker");
-            }
-        }
-        return previewMakerCommand;
     }
 
     ////////////////

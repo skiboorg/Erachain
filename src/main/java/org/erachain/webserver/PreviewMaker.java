@@ -2,7 +2,6 @@ package org.erachain.webserver;
 
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
-import org.erachain.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +43,6 @@ public class PreviewMaker {
     public File makePreview(ItemCls item, byte[] image) {
 
         if (image.length < VIDEO_USE_ORIG_LEN)
-            return null;
-
-        String command = Settings.getInstance().getPreviewMakerCommand();
-        if (command == null || command.isEmpty() || command.equals("-"))
             return null;
 
         if (item.getImageType() == AssetCls.MEDIA_TYPE_IMG) {
@@ -95,12 +90,23 @@ public class PreviewMaker {
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
                 errorMess = e.getMessage();
+                return null;
             }
 
-            ProcessBuilder builder = new ProcessBuilder(command,
-                    fileIn.toPath().toString(),
-                    parQV, parRV,
-                    fileOut.toPath().toString());
+            boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+            ProcessBuilder builder;
+            if (isWindows) {
+                builder = new ProcessBuilder("makePreview.bat",
+                        fileIn.toPath().toString(),
+                        parQV, parRV,
+                        fileOut.toPath().toString());
+            } else {
+                builder = new ProcessBuilder("bash",
+                        "makePreview.bash",
+                        fileIn.toPath().toString(),
+                        parQV, parRV,
+                        fileOut.toPath().toString());
+            }
             // указываем перенаправление stderr в stdout, чтобы проще было отлаживать
             builder.redirectErrorStream(true);
 
@@ -112,6 +118,7 @@ public class PreviewMaker {
             } catch (IOException | InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
                 errorMess = e.getMessage();
+                return null;
             }
         }
 
