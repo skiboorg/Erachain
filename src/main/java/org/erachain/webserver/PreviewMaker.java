@@ -95,12 +95,23 @@ public class PreviewMaker {
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
                 errorMess = e.getMessage();
+                return null;
             }
 
-            ProcessBuilder builder = new ProcessBuilder(command,
-                    fileIn.toPath().toString(),
-                    parQV, parRV,
-                    fileOut.toPath().toString());
+            boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+            ProcessBuilder builder;
+            if (isWindows) {
+                builder = new ProcessBuilder("makePreview.bat",
+                        fileIn.toPath().toString(),
+                        parQV, parRV,
+                        fileOut.toPath().toString());
+            } else {
+                builder = new ProcessBuilder("bash",
+                        "makePreview.bash",
+                        fileIn.toPath().toString(),
+                        parQV, parRV,
+                        fileOut.toPath().toString());
+            }
             // указываем перенаправление stderr в stdout, чтобы проще было отлаживать
             builder.redirectErrorStream(true);
 
@@ -112,6 +123,7 @@ public class PreviewMaker {
             } catch (IOException | InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
                 errorMess = e.getMessage();
+                return null;
             }
         }
 

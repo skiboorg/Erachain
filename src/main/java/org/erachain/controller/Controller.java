@@ -3981,7 +3981,8 @@ public class Controller extends Observable {
                 continue;
             }
 
-            if (arg.startsWith("-previewmaker=") && arg.length() > 14) {
+            // deprecated
+            if (false && arg.startsWith("-previewmaker=") && arg.length() > 14) {
                 Settings.getInstance().previewMakerCommand = arg.substring(14).toLowerCase();
                 continue;
             }
