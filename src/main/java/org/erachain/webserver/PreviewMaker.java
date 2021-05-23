@@ -40,6 +40,10 @@ public class PreviewMaker {
         return null;
     }
 
+    public static String getItemName(ItemCls item) {
+        return item.getItemTypeName() + item.getKey();
+    }
+
     public File makePreview(ItemCls item, byte[] image) {
 
         if (image.length < VIDEO_USE_ORIG_LEN)
@@ -49,7 +53,7 @@ public class PreviewMaker {
             return null;
         }
 
-        String outputName = item.getItemTypeName() + item.getKey();
+        String outputName = getItemName(item);
         String path = "dataPreviews" + File.separator + outputName;
         String pathIn = "dataPreviews" + File.separator + "orig" + File.separator + outputName;
         File fileOut = new File(path + ".mp4");
@@ -79,12 +83,12 @@ public class PreviewMaker {
             parRV = "15";
         }
 
-        String output = pathIn + ".txt";
+        String output = pathIn + ".log";
         File outLog = new File(output);
         outLog.getParentFile().mkdirs();
 
         if (!outLog.exists()) {
-            File fileIn = new File(pathIn + "_in.mp4");
+            File fileIn = new File(pathIn + ".mp4");
             try (FileOutputStream fos = new FileOutputStream(fileIn)) {
                 fos.write(image);
             } catch (IOException e) {
@@ -119,6 +123,10 @@ public class PreviewMaker {
                 LOGGER.error(e.getMessage(), e);
                 errorMess = e.getMessage();
                 return null;
+            } finally {
+                if (fileOut.exists()) {
+                    fileIn.delete();
+                }
             }
         }
 
