@@ -1136,7 +1136,7 @@ button.white-bgc[disabled]:focus,
                         } else {
                             output += '<td><font color="dimgray">' + data[i].block.generator + '</font></td>';
                         }
-                        output += '<td>' + addCommas(data[i].block.fee) + ' <font size="-2">COMPU</font>' + '</td>';
+                        output += '<td>' + addCommas(data[i].block.fee) + ' <font size="-2">MVOLT</font>' + '</td>';
 
                         if (data[i].hasOwnProperty('balance')) {
                             output += '<td>' + printBalance(data[i].balance) + '</td>';
@@ -1286,7 +1286,7 @@ button.white-bgc[disabled]:focus,
                         } else {
                             output += '<td rowspan=2><a href=?address=' + data[i].attransaction.creator + get_lang() + '>' + data[i].attransaction.creator + '</a></td>';
                         }
-                        output += '<td>' + addCommas(data[i].atTransaction.amount) + ' <font size="-2">ERA</font>';
+                        output += '<td>' + addCommas(data[i].atTransaction.amount) + ' <font size="-2">FOIL</font>';
 
                         if (data[i].atTransaction.recipient == data.address) {
                             output += '<td><font color="dimgray">' + data[i].atTransaction.recipient + '</font></td>';
@@ -1887,8 +1887,8 @@ button.white-bgc[disabled]:focus,
                       <div class="menu"><span class="glyphicon glyphicon-edit"></span><a href="/index/blog.html">Blog</a></div></a></div>
                   <div class="col-sm-4 col-xs-6"><a href="/index/namestorage.html">
                       <div class="menu"><span class="glyphicon glyphicon-file"></span><a href="/index/namestorage.html">NameStorage</a></div></a></div>
-					<div class="col-sm-4 col-xs-6"><a href="/index/hashtag.html?hashtag=ERA">
-                      <div class="menu"><span class="glyphicon glyphicon-fire"></span><a href="/index/hashtag.html?hashtag=ERA">Hashtag</a></div></a></div>
+					<div class="col-sm-4 col-xs-6"><a href="/index/hashtag.html?hashtag=FOIL">
+                      <div class="menu"><span class="glyphicon glyphicon-fire"></span><a href="/index/hashtag.html?hashtag=FOIL">Hashtag</a></div></a></div>
                 </div>
               </div>
             </div>

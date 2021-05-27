@@ -73,8 +73,8 @@ function transactionLite(urlstart, data, i, item) {
 
         output += '<td>Genesis</td>';
 
-        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">ERA</font>';
-        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">FOIL</font>';
+        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         if (item.transaction.recipient == data.address) {
             output += '<td><font color="dimgray">' + item.transaction.recipient + '</font></td>';
@@ -133,8 +133,8 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">ERA</font>';
-        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">FOIL</font>';
+        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         if (item.transaction.recipient == data.address) {
             output += '<td><font color="dimgray">' + item.transaction.recipient + '</font></td>';
@@ -185,7 +185,7 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.maker + get_lang() + '>' + item.transaction.maker + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font>';
 
         output += '<td colspan=2><b>';
         if (item.transaction.сompressed) {
@@ -241,7 +241,7 @@ function transactionLite(urlstart, data, i, item) {
         }
         output += '<br><font color="e5e5e5">' + item.transaction.maker + '</font>';
 
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font>';
 
         output += '<td colspan=2><b>New ';
         if (item.transaction.сompressed) {
@@ -292,9 +292,9 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.maker + get_lang() + '>' + item.transaction.maker + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
-        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><a href="?name=' + encodeURIComponent(item.transaction.name) + get_lang() + '">' + htmlFilter(item.transaction.name) + '</td>';
 
@@ -342,7 +342,7 @@ function transactionLite(urlstart, data, i, item) {
             output += '<td><a href=?address=' + item.transaction.maker + get_lang() + '>' + item.transaction.maker + '</a></td>';
         }
 
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><a href="?name=' + encodeURIComponent(item.transaction.name) + get_lang() + '">' + htmlFilter(item.transaction.name) + '</td>';
 
@@ -397,8 +397,8 @@ function transactionLite(urlstart, data, i, item) {
 
         output += '<td><a href="?name=' + encodeURIComponent(item.transaction.name) + get_lang() + '">' + htmlFilter(item.transaction.name) + '</a></td>';
 
-        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">ERA</font>';
-        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">FOIL</font>';
+        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         if (item.transaction.buyer == data.address) {
             output += '<td><font color="dimgray">' + item.transaction.buyer + '</font></td>';
@@ -449,7 +449,7 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td rowspan=2><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
-        output += '<td rowspan=2>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td rowspan=2>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><a href="?poll=' + encodeURIComponent(item.transaction.name) + get_lang() + '">' + htmlFilter(item.transaction.name) + '</a></td>';
 
@@ -506,7 +506,7 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><a href="?poll=' + encodeURIComponent(item.transaction.poll) + get_lang() + '">' + escapeHtml(item.transaction.poll) + '</a></td>';
 
@@ -539,7 +539,7 @@ function transactionLite(urlstart, data, i, item) {
         output += '<tr><td>';
         output += '<table width="100%" class="table table-striped"><tr><td width="70" align="center">';
 
-        output += '<b>Action</b></td><td width="290"><b>Creator</b></td><td width=150><b>Fee:</b> ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font>' + '</td>';
+        output += '<b>Action</b></td><td width="290"><b>Creator</b></td><td width=150><b>Fee:</b> ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font>' + '</td>';
         output += '<td><b>Data Base58</b></td>';
         if (item.hasOwnProperty('balance')) {
             output += '<td width=180><b>Balance</b></td>';
@@ -642,7 +642,7 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><b>Description:</b> ' + fformat(item.transaction.description) + '</td>';
 
@@ -856,7 +856,7 @@ function transactionLite(urlstart, data, i, item) {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
 
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td>' + ' <a href=?asset=' + item.transaction.order.have + get_lang() + '>' + getItemName('asset', 1000, item.transaction.order.have, item.transaction.haveName) + '</a>';
 
@@ -916,7 +916,7 @@ function transactionLite(urlstart, data, i, item) {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
 
-        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td>' + ' <a href=?asset=' + item.transaction.orderSource.have + get_lang() + '>' + getItemName('asset', 1000, item.transaction.orderSource.have, item.transaction.orderSource.haveName) + '</a>';
 
@@ -986,7 +986,7 @@ function transactionLite(urlstart, data, i, item) {
             output += addCommas(assetsAmounts[key].amount) + ' ' + getItemNameMini('asset', key, assetsAmounts[key].name) + '<br>';
         }
 
-        output += 'fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += 'fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td>';
         payments = item.transaction.payments;
@@ -1046,8 +1046,8 @@ function transactionLite(urlstart, data, i, item) {
         } else {
             output += '<td><a href=?address=' + item.transaction.creator + get_lang() + '>' + item.transaction.creator + '</a></td>';
         }
-        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">ERA</font>';
-        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">ERA</font></td>';
+        output += '<td>' + addCommas(item.transaction.amount) + ' <font size="-2">FOIL</font>';
+        output += '<br>fee: ' + addCommas(item.transaction.fee) + ' <font size="-2">FOIL</font></td>';
 
         output += '<td><b>Name: </b>' + item.transaction.name;
         if (item.transaction.atAddress == data.address) {
