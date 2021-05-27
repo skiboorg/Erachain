@@ -788,6 +788,14 @@ public class Account {
                 case (int) AssetCls.USD_KEY:
                     return new BigDecimal("100000.0");
             }
+
+            if (key < AssetCls.getStartKey(ItemCls.ASSET_TYPE, AssetCls.START_KEY_OLD, AssetCls.MIN_START_KEY_OLD)) {
+                for (Fun.Tuple3<Long, Long, byte[]> novaAsset : BlockChain.NOVA_ASSETS.values()) {
+                    if (novaAsset.a.equals(key)) {
+                        return new BigDecimal("1000.0");
+                    }
+                }
+            }
         }
 
         return BigDecimal.ZERO;
