@@ -520,7 +520,7 @@ button.white-bgc[disabled]:focus,
                 if (data.aTs[key].accountBalance != '0.00000000') {
                     output += '<b>';
                 }
-                output += addCommas(data.aTs[key].accountBalance) + ' ERA';
+                output += addCommas(data.aTs[key].accountBalance) + ' FOIL';
 
                 output += '</table>';
 
@@ -1055,7 +1055,7 @@ button.white-bgc[disabled]:focus,
                 output += '<br><br><b>AT Type:</b> ' + data.at.type;
                 output += '<br><br><b>Description:</b> ' + fformat(data.at.description);
                 output += '<br><br><b>Tags:</b> ' + fformat(data.at.tags);
-                output += '<br><br><b>Min Activation Amount:</b> ' + data.at.minActivation + ' ERA';
+                output += '<br><br><b>Min Activation Amount:</b> ' + data.at.minActivation + ' FOIL';
                 output += '<br><br><b>Dead:</b> ' + data.at.state.dead;
                 output += '<br><br><b>Frozen:</b> ' + data.at.state.frozen;
 
@@ -1073,7 +1073,7 @@ button.white-bgc[disabled]:focus,
                     output += '<b>No</b>';
                 }
                 output += '</table>';
-                output += '<br><br><font size="+1"><b>Balance:</b> ' + addCommas(data.at.accountBalance) + ' ERA</font>';
+                output += '<br><br><font size="+1"><b>Balance:</b> ' + addCommas(data.at.accountBalance) + ' FOIL</font>';
                 output += '<br><br>';
             }
 
