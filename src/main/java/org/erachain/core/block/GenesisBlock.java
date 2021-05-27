@@ -270,7 +270,7 @@ public class GenesisBlock extends Block {
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
 
-        if (false && BlockChain.TEST_MODE) {
+        if (BlockChain.NEW_NOVA_ASSETS && BlockChain.TEST_MODE) {
             for (String name : BlockChain.NOVA_ASSETS.keySet()) {
                 Fun.Tuple3<Long, Long, byte[]> nova = BlockChain.NOVA_ASSETS.get(name);
                 asset = new AssetVenture((byte) 0, itemAppData, creator, name,
