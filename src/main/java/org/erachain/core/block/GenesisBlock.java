@@ -18,6 +18,8 @@ import org.erachain.core.transaction.*;
 import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.json.simple.JSONArray;
+import org.mapdb.Fun;
+import org.mapdb.Fun.Tuple2;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -274,6 +276,16 @@ public class GenesisBlock extends Block {
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
+
+
+        if (BlockChain.TEST_MODE) {
+            for (String name : BlockChain.NOVA_ASSETS.keySet()) {
+                Fun.Tuple3<Long, Long, byte[]> nova = BlockChain.NOVA_ASSETS.get(name);
+                AssetVenture asset = new AssetVenture((byte) 0, itemAppData, creator, name,
+                        null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+                transactions.add(new GenesisIssueAssetTransaction(asset));
+            }
+        }
 
     }
 
