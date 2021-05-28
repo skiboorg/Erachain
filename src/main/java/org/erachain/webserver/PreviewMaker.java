@@ -108,9 +108,11 @@ public class PreviewMaker {
             } else {
                 // в Unix через bash makePreview.bash - вызывает ошибку "Unable to find a suitable output format for"
                 // - последний параметр как-то криво передается
+                // -vf scale=256:-2,setsar=1:1
                 builder = new ProcessBuilder("ffmpeg",
                         "-i", fileIn.toPath().toString(),
-                        "-y", "-fs", "512k", "-vcodec", "h264", "-s", "256x256",
+                        "-y", "-fs", "512k", "-vcodec", "h264",
+                        "-vf", "scale=256:-2,setsar=1:1", // "-s", "256x256",
                         "-q:v", parQV, "-r:v", parRV, fileOut.toPath().toString()
                 );
             }
