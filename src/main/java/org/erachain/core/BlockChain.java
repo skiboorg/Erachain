@@ -452,8 +452,6 @@ public class BlockChain {
     public static HashSet<String> FOUNDATION_ADDRESSES = new HashSet<String>();
     public static HashMap<String, int[][]> FREEZED_BALANCES = new HashMap<String, int[][]>();
 
-    // TODO убратьв се вставки при новой цепочке
-    public static boolean NEW_NOVA_ASSETS = true;
     public static HashMap<String, Tuple3<Long, Long, byte[]>> NOVA_ASSETS = new HashMap<String, Tuple3<Long, Long, byte[]>>();
     public static HashMap<String, Tuple3<Long, Long, byte[]>> NOVA_PERSONS = new HashMap<String, Tuple3<Long, Long, byte[]>>();
 
@@ -530,7 +528,7 @@ public class BlockChain {
                     JSONArray json = (JSONArray) item;
                     NOVA_ASSETS.put(json.get(1).toString(),
                             new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                    TEST_MODE? GenesisBlock.CREATOR.getShortAddressBytes()
+                                    ERA_COMPU_ALL_UP? GenesisBlock.CREATOR.getShortAddressBytes()
                                      : Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
                 }
             }
@@ -541,7 +539,7 @@ public class BlockChain {
                     JSONArray json = (JSONArray) item;
                     NOVA_PERSONS.put(json.get(1).toString(),
                             new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                    TEST_MODE? GenesisBlock.CREATOR.getShortAddressBytes()
+                                    ERA_COMPU_ALL_UP? GenesisBlock.CREATOR.getShortAddressBytes()
                                      : Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
                 }
             }

@@ -27,14 +27,6 @@ public class ItemAssetMap extends ItemMap {
         super(parent, dcSet);
     }
 
-    public boolean contains(Long key) {
-        if (BlockChain.TEST_MODE && key > 100 && key < 1000) {
-            return true;
-        } else {
-            return super.contains(key);
-        }
-    }
-
     // http://seo-mayak.com/sozdanie-bloga/wordpress-dlya-novichkov/simvoly-kotoryx-net-na-klaviature.html
     public AssetCls get(Long key) {
 

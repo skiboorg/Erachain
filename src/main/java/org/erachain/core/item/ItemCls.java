@@ -487,23 +487,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         if (this.reference == null || BlockChain.isWiped(this.reference))
             return 0L;
 
-        if (false && this.key == 0 // & this.reference != null
-        ) {
-            if (this.getDBIssueMap(db).contains(this.reference)) {
-                this.key = this.getDBIssueMap(db).get(this.reference);
-            } else if (BlockChain.CHECK_BUGS > 0
-                    && !BlockChain.CLONE_MODE && !BlockChain.TEST_MODE
-                    && Base58.encode(this.reference).equals("2Mm3MY2F19CgqebkpZycyT68WtovJbgBb9p5SJDhPDGFpLQq5QjAXsbUZcRFDpr8D4KT65qMV7qpYg4GStmRp4za")
-
-            ) {
-                LOGGER.error("Item [" + this.name + "] not found for REFERENCE: " + Base58.encode(this.reference));
-                if (BlockChain.CHECK_BUGS > 3) {
-                    Long error = null;
-                    error++;
-                }
-            }
-        }
-
         return this.key;
     }
 

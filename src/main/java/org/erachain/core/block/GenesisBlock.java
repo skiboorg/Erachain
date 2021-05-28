@@ -230,7 +230,7 @@ public class GenesisBlock extends Block {
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
 
-        if (BlockChain.NEW_NOVA_ASSETS && BlockChain.TEST_MODE) {
+        if (BlockChain.ERA_COMPU_ALL_UP) {
             for (String name : BlockChain.NOVA_ASSETS.keySet()) {
                 asset = new AssetVenture((byte) 0, itemAppData, creator, name,
                         null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);

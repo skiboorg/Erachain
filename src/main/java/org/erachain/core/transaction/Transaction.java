@@ -1140,7 +1140,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             if (Base58.isExtraSymbols(word)) {
                 // все слова сложим по длинне
                 length += word.length();
-                if (length > (BlockChain.TEST_MODE ? 100 : 100))
+                if (length > 100)
                     return true;
             }
         }

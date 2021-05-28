@@ -563,7 +563,7 @@ public class BlockExplorer {
 
         // time guery
         output.put("queryTimeMs", stopwatchAll.elapsedTime());
-        if (false && BlockChain.CLONE_MODE || BlockChain.TEST_MODE) {
+        if (BlockChain.TEST_MODE) {
             output.put("network", BlockChain.DEMO_MODE ? "DEMO Net"
                     : BlockChain.CLONE_MODE ? (Settings.CLONE_OR_SIDE.toLowerCase() + "Chain: " + Settings.APP_NAME) : "TEST Net");
         }
