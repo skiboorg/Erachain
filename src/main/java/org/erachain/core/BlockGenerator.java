@@ -404,6 +404,7 @@ public class BlockGenerator extends MonitoredThread implements Observer {
 
                     try {
 
+                        // здесь уже может быть ошибка если Ордер не найден например для Отмена ордера
                         transaction.setDC(newBlockDC, Transaction.FOR_NETWORK, blockHeight, counter + 1);
 
                         if (false // вообще-то все внутренние транзакции уже провверены на подпись!
