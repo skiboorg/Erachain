@@ -870,9 +870,10 @@ public abstract class AssetCls extends ItemCls {
     public boolean validPair(long pairAssetKey) {
         if (assetType == AssetCls.AS_NON_FUNGIBLE) {
             if (pairAssetKey != ERA_KEY
+                && pairAssetKey != FEE_KEY // instead USD
                 && pairAssetKey != BTC_KEY
                 && pairAssetKey != 18
-                && pairAssetKey != USD_KEY
+                //&& pairAssetKey != USD_KEY - FEE_KEY already use!
             ) {
                 return false;
             }
