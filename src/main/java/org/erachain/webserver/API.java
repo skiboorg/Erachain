@@ -1407,7 +1407,6 @@ public class API {
         // CHECK IF VALID ADDRESS
         if (PublicKeyAccount.isValidPublicKey(address)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
