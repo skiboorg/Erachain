@@ -592,8 +592,7 @@ public class BlockChain {
         }
 
         if (DEMO_MODE) {
-            // TODO REMOVE after new DEMO
-            //ALL_VALID_BEFORE = 31584;
+            // ALL_VALID_BEFORE = 31584;
         }
 
         if (CLONE_MODE || TEST_MODE) {
