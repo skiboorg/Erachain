@@ -229,45 +229,6 @@ public class GenesisBlock extends Block {
                 null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
         transactions.add(new GenesisIssueAssetTransaction(asset));
 
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "BTC",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "GOLD",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
-        if (false) {
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "TRY",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "SGD",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "AUD",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "CHF",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "GBP",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "JPY",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
-        }
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "CNY",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "EUR",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "USD",
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
 
         if (BlockChain.NEW_NOVA_ASSETS && BlockChain.TEST_MODE) {
             for (String name : BlockChain.NOVA_ASSETS.keySet()) {

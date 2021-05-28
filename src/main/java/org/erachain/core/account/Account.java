@@ -784,6 +784,7 @@ public class Account {
                     return new BigDecimal("100.0");
                 case 1643:
                     return new BigDecimal("700000.0");
+                case 18:
                 case (int) AssetCls.EUR_KEY:
                 case (int) AssetCls.USD_KEY:
                     return new BigDecimal("100000.0");

@@ -530,7 +530,8 @@ public class BlockChain {
                     JSONArray json = (JSONArray) item;
                     NOVA_ASSETS.put(json.get(1).toString(),
                             new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                    Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
+                                    TEST_MODE? GenesisBlock.CREATOR.getShortAddressBytes()
+                                     : Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
                 }
             }
 
@@ -540,7 +541,8 @@ public class BlockChain {
                     JSONArray json = (JSONArray) item;
                     NOVA_PERSONS.put(json.get(1).toString(),
                             new Tuple3<>((Long) json.get(0), (Long) json.get(2),
-                                    Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
+                                    TEST_MODE? GenesisBlock.CREATOR.getShortAddressBytes()
+                                     : Crypto.getInstance().getShortBytesFromAddress(json.get(3).toString())));
                 }
             }
 
