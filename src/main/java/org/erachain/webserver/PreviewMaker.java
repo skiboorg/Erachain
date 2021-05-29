@@ -14,16 +14,20 @@ public class PreviewMaker {
 
     public String errorMess;
 
-    static final int VIDEO_USE_ORIG_LEN = 1 << 19;
-    static final int IMAGE_USE_ORIG_LEN = 1 << 18;
+    static final int VIDEO_USE_ORIG_LEN = 1 << 18;
+    static final int IMAGE_USE_ORIG_LEN = 1 << 16;
 
     static Logger LOGGER = LoggerFactory.getLogger(PreviewMaker.class.getSimpleName());
 
+    public static boolean notNeedPreview(ItemCls item, byte[] image) {
+        return item.getImageType() == AssetCls.MEDIA_TYPE_VIDEO && image.length < VIDEO_USE_ORIG_LEN
+                || item.getImageType() == AssetCls.MEDIA_TYPE_IMG && image.length < IMAGE_USE_ORIG_LEN;
+
+    }
+
     public byte[] getPreview(ItemCls item, byte[] image) {
 
-        if (item.getImageType() == AssetCls.MEDIA_TYPE_VIDEO && image.length < VIDEO_USE_ORIG_LEN
-                || item.getImageType() == AssetCls.MEDIA_TYPE_IMG //&& image.length < IMAGE_USE_ORIG_LEN
-        )
+        if (notNeedPreview(item, image))
             return image;
 
         try {
@@ -44,14 +48,16 @@ public class PreviewMaker {
         return item.getItemTypeName() + item.getKey();
     }
 
+    /**
+     * Convert all media (JPG, GIF, aminated-GIF, MPEG etc. to MP4
+     * @param item
+     * @param image
+     * @return
+     */
     public File makePreview(ItemCls item, byte[] image) {
 
-        if (image.length < VIDEO_USE_ORIG_LEN)
+        if (notNeedPreview(item, image))
             return null;
-
-        if (item.getImageType() == AssetCls.MEDIA_TYPE_IMG) {
-            return null;
-        }
 
         String outputName = getItemName(item);
         String path = "dataPreviews" + File.separator + outputName;
@@ -88,7 +94,7 @@ public class PreviewMaker {
         outLog.getParentFile().mkdirs();
 
         if (!outLog.exists()) {
-            File fileIn = new File(pathIn + ".mp4");
+            File fileIn = new File(pathIn);
             try (FileOutputStream fos = new FileOutputStream(fileIn)) {
                 fos.write(image);
             } catch (IOException e) {
