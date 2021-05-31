@@ -71,8 +71,7 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
 
     public void process(Block block, int forDeal) {
 
-        if (false
-        //        && BlockChain.CLONE_MODE && BlockChain.NOVA_ASSETS.containsKey(asset.getName())
+        if (BlockChain.CLONE_MODE && dcSet.getItemAssetMap().size() > 1
         ) {
             // skip invalid Maker assets
             return;
