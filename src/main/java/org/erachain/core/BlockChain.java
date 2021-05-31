@@ -245,8 +245,6 @@ public class BlockChain {
 
     public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
-    public static final int SKIP_VALID_SIGN_BEFORE = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
-
     public static final int VERS_4_12 = VERS_4_11;
 
     public static final int VERS_30SEC = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
@@ -306,7 +304,12 @@ public class BlockChain {
     public static final byte[][] VALID_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{};
 
     public static final byte[][] DISCREDIR_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{};
-    public static final byte[][] VALID_SIGN = TEST_DB > 0? new byte[][]{} : new byte[][]{};
+
+    public static final int SKIP_VALID_SIGN_BEFORE = !CLONE_MODE ? 0 : 78500;
+    public static final byte[][] VALID_SIGN = !CLONE_MODE? new byte[][]{} : new byte[][]{
+            // MAIL with AMOUNT = 0
+            Base58.decode("3MDpK4MgZKafbaDegMDMgotdbL6eYjHuLRa3Si9oGdRvPiYiPBADbqBjQWcAMK9d4ZhUxobcEc8T5tVQ9raptix9")
+    };
 
     public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : CLONE_MODE || TEST_MODE ? new byte[][]{} :
             new byte[][]{};
