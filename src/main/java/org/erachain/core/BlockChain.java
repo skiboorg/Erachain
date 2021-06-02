@@ -595,7 +595,7 @@ public class BlockChain {
         }
 
         if (DEMO_MODE) {
-            ALL_VALID_BEFORE = 14800;
+            // ALL_VALID_BEFORE = 14800;
         }
 
         if (CLONE_MODE || TEST_MODE) {
