@@ -688,7 +688,7 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
         // изменяемые объекты нужно заново создавать
         Order order = makeOrder();
-        order.orphan(block);
+        order.orphan(block, false);
 
     }
 
