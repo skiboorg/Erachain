@@ -12,7 +12,6 @@ import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
 import org.erachain.core.item.assets.Trade;
-import org.erachain.datachain.DCSet;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 import org.slf4j.Logger;
@@ -76,22 +75,28 @@ public class CancelOrderTransaction extends Transaction {
 
     //GETTERS/SETTERS
 
-    public void setDC(DCSet dcSet, int forDeal, int blockHeight, int seqNo, boolean andUpdateFromState) {
-        super.setDC(dcSet, forDeal, blockHeight, seqNo, false);
-
-        Long createDBRef = this.dcSet.getTransactionFinalMapSigns().get(this.orderSignature);
-        if (createDBRef == null && blockHeight > BlockChain.CANCEL_ORDERS_ALL_VALID) {
-            LOGGER.error("ORDER transaction not found: " + Base58.encode(this.orderSignature));
-            if (BlockChain.CHECK_BUGS > 8) {
-                Long error = null;
-                error++;
-            }
+    /**
+     * нельзя вызывать для Форка и для isWIPED
+     */
+    public void updateFromStateDB() {
+        if (this.dbRef == 0) {
+            // неподтвержденная транзакция не может быть обновлена
+            return;
         }
-        this.orderID = createDBRef;
 
-        if (false && andUpdateFromState && !isWiped())
-            updateFromStateDB();
-
+        if (orderID == null || orderID == 0) {
+            // эта транзакция взята как скелет из набора блока
+            // найдем сохраненную транзакцию - в ней есь Номер Сути
+            Long createDBRef = this.dcSet.getTransactionFinalMapSigns().get(this.orderSignature);
+            if (createDBRef == null && height > BlockChain.CANCEL_ORDERS_ALL_VALID) {
+                LOGGER.error("ORDER transaction not found: " + Base58.encode(this.orderSignature));
+                if (BlockChain.CHECK_BUGS > 8) {
+                    Long error = null;
+                    error++;
+                }
+            }
+            this.orderID = createDBRef;
+        }
     }
 
     public byte[] getorderSignature() {
@@ -238,15 +243,19 @@ public class CancelOrderTransaction extends Transaction {
 
                 if (true) {
                     if (this.orderID == null) {
-                        LOGGER.debug("INVALID: this.orderID == null");
+                        errorValue = "orderID == null";
+                        LOGGER.debug("INVALID: " + errorValue);
                     } else {
+                        errorValue = "orderID: " + Transaction.viewDBRef(orderID);
                         // 3qUAUPdifyWYg7ABYa5TiWmyssHH1gJtKDatATS6UeKMnSzEwpuPJN5QFKCPHtUWpDYbK7fceFyDGhc51CuhiJ3
                         LOGGER.debug("INVALID: this.sign = " + Base58.encode(signature));
-                        LOGGER.debug("INVALID: this.orderID = " + Transaction.viewDBRef(orderID));
+                        LOGGER.debug("INVALID: " + errorValue);
                         LOGGER.debug("INVALID: this.orderSign == " + Base58.encode(orderSignature));
                         if (this.dcSet.getCompletedOrderMap().contains(this.orderID)) {
+                            errorValue += " already Completed";
                             LOGGER.debug("INVALID: already Completed");
                         } else {
+                            errorValue += " not exist in chain";
                             LOGGER.debug("INVALID: not exist in chain");
                         }
                     }
@@ -302,7 +311,7 @@ public class CancelOrderTransaction extends Transaction {
         super.process(block, forDeal);
 
         if (this.orderID == null) {
-            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID)
+            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID || height < BlockChain.ALL_VALID_BEFORE)
                 return;
             Long error = null;
             error++;
@@ -316,7 +325,7 @@ public class CancelOrderTransaction extends Transaction {
         Order order = this.dcSet.getOrderMap().get(this.orderID);
 
         if (order == null) {
-            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID)
+            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID || height < BlockChain.ALL_VALID_BEFORE)
                 return;
             Long error = null;
             error++;
@@ -341,7 +350,9 @@ public class CancelOrderTransaction extends Transaction {
         //UPDATE BALANCE OF CREATOR
         BigDecimal left = order.getAmountHaveLeft();
         order.getCreator().changeBalance(dcSet, false, false, order.getHaveAssetKey(), left,
-                false, false, false);
+                false, false, false,
+                // accounting on PLEDGE position
+                Account.BALANCE_POS_PLEDGE);
         this.addCalculated(block, this.creator, order.getHaveAssetKey(), left,
                 "Cancel Order @" + Transaction.viewDBRef(order.getId()));
     }
@@ -356,7 +367,7 @@ public class CancelOrderTransaction extends Transaction {
         super.orphan(block, forDeal);
 
         if (this.orderID == null) {
-            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID)
+            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID || height < BlockChain.ALL_VALID_BEFORE)
                 return;
             Long error = null;
             error++;
@@ -366,7 +377,7 @@ public class CancelOrderTransaction extends Transaction {
         Order order = this.dcSet.getCompletedOrderMap().get(this.orderID);
 
         if (order == null) {
-            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID)
+            if (height < BlockChain.CANCEL_ORDERS_ALL_VALID || height < BlockChain.ALL_VALID_BEFORE)
                 return;
             Long error = null;
             error++;
@@ -386,7 +397,9 @@ public class CancelOrderTransaction extends Transaction {
 
         //REMOVE BALANCE OF CREATOR
         order.getCreator().changeBalance(dcSet, true, false, order.getHaveAssetKey(),
-                order.getAmountHaveLeft(), false, false, false);
+                order.getAmountHaveLeft(), false, false, false,
+                // accounting on PLEDGE position
+                Account.BALANCE_POS_PLEDGE);
     }
 
     @Override

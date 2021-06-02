@@ -888,10 +888,12 @@ public class BlockExplorer {
 
         Order orderInitiator = null;
         Transaction cancelTX = null;
-        if (trade.isCancel()) {
+        if (trade.isTrade()) {
+            orderInitiator = Order.getOrder(dcSet, trade.getInitiator());
+        } else if (trade.isUpdate()) {
             cancelTX = dcSet.getTransactionFinalMap().get(trade.getInitiator());
         } else {
-            orderInitiator = Order.getOrder(dcSet, trade.getInitiator());
+            cancelTX = dcSet.getTransactionFinalMap().get(trade.getInitiator());
         }
 
         long pairHaveKey;
@@ -1142,7 +1144,7 @@ public class BlockExplorer {
                 if (trade == null) {
                     Long error = null;
                 }
-                if (trade.isCancel())
+                if (!trade.isTrade())
                     continue;
 
                 --count;
@@ -1244,23 +1246,24 @@ public class BlockExplorer {
             output.put("Label_Balance_4", Lang.T(Account.balanceCOMPUPositionName(4), langObj));
             output.put("Label_Balance_5", Lang.T(Account.balanceCOMPUPositionName(5), langObj));
 
-            if (position == TransactionAmount.ACTION_SPEND || position == TransactionAmount.ACTION_PLEDGE) {
+            if (position == TransactionAmount.ACTION_HOLD || position == TransactionAmount.ACTION_SEND) {
 
                 output.put("Label_Balance_Pos", Lang.T(Account.balanceCOMPUPositionName(position), langObj));
                 output.put("Label_Balance_Side", Lang.T(Account.balanceCOMPUSideName(side), langObj));
 
-                output.put("Label_TotalDebit", Lang.T(Account.balanceCOMPUSideName(Account.BALANCE_SIDE_DEBIT), langObj));
-                output.put("Label_Left", Lang.T(Account.balanceCOMPUSideName(Account.BALANCE_SIDE_LEFT), langObj));
-                output.put("Label_TotalCredit", Lang.T(Account.balanceCOMPUSideName(Account.BALANCE_SIDE_CREDIT), langObj));
-                output.put("Label_TotalForged", Lang.T(Account.balanceCOMPUSideName(Account.BALANCE_SIDE_FORGED), langObj));
+                output.put("Label_TotalReferal", Lang.T(Account.balanceCOMPUSideName(Account.FEE_BALANCE_SIDE_REFERAL), langObj));
+                output.put("Label_TotalEarned", Lang.T(Account.balanceCOMPUSideName(Account.FEE_BALANCE_SIDE_EARNED), langObj));
+                output.put("Label_TotalForged", Lang.T(Account.balanceCOMPUSideName(Account.FEE_BALANCE_SIDE_FORGED), langObj));
+                output.put("Label_TotalSpend", Lang.T(Account.balanceCOMPUSideName(Account.FEE_BALANCE_SIDE_SPEND), langObj));
+                output.put("Label_Difference", Lang.T(Account.balanceCOMPUSideName(Account.FEE_BALANCE_SIDE_DEFFER), langObj));
 
                 output.put("Side_Help", Lang.T("Side_Help_COMPU_BONUS", langObj));
 
-                if (side == Account.BALANCE_SIDE_FORGED) {
-                    // Это запрос на баланса Нафоржили - он в 5-й позиции на стороне 2
-                    position = TransactionAmount.ACTION_PLEDGE;
-                    side = Account.BALANCE_SIDE_LEFT;
-                }
+                //if (side == Account.FEE_BALANCE_SIDE_FORGED) {
+                //    // Это запрос на баланса Нафоржили - он в 5-й позиции на стороне 2
+                //    position = TransactionAmount.ACTION_PLEDGE;
+                //    side = Account.BALANCE_SIDE_LEFT;
+                //}
 
             }
 
@@ -1723,10 +1726,11 @@ public class BlockExplorer {
                             .replace("%assetName%", asset.viewName())).replace("%count%", String.valueOf(couter)));
         }
         output.put("Label_Table_Account", Lang.T("Account", langObj));
-        output.put("Label_Balance_1", Lang.T("OWN (1)", langObj));
-        output.put("Label_Balance_2", Lang.T("DEBT (2)", langObj));
-        output.put("Label_Balance_3", Lang.T("HOLD (3)", langObj));
-        output.put("Label_Balance_4", Lang.T("SPEND (4)", langObj));
+        output.put("Label_Balance_1", Lang.T(Account.balancePositionName(1), langObj));
+        output.put("Label_Balance_2", Lang.T(Account.balancePositionName(2), langObj));
+        output.put("Label_Balance_3", Lang.T(Account.balancePositionName(3), langObj));
+        output.put("Label_Balance_4", Lang.T(Account.balancePositionName(4), langObj));
+        output.put("Label_Balance_5", Lang.T(Account.balancePositionName(5), langObj));
         output.put("Label_Table_Prop", Lang.T("Prop.", langObj));
         output.put("Label_Table_person", Lang.T("Maker", langObj));
 
@@ -1784,10 +1788,11 @@ public class BlockExplorer {
         output.put("Label_asset_key", Lang.T("Key", langObj));
         output.put("Label_asset_name", Lang.T("Name", langObj));
 
-        output.put("Label_Balance_1", Lang.T("OWN (1)", langObj));
-        output.put("Label_Balance_2", Lang.T("DEBT (2)", langObj));
-        output.put("Label_Balance_3", Lang.T("HOLD (3)", langObj));
-        output.put("Label_Balance_4", Lang.T("SPEND (4)", langObj));
+        output.put("Label_Balance_1", Lang.T(Account.balancePositionName(1), langObj));
+        output.put("Label_Balance_2", Lang.T(Account.balancePositionName(2), langObj));
+        output.put("Label_Balance_3", Lang.T(Account.balancePositionName(3), langObj));
+        output.put("Label_Balance_4", Lang.T(Account.balancePositionName(4), langObj));
+        output.put("Label_Balance_5", Lang.T(Account.balancePositionName(5), langObj));
 
         ItemAssetMap assetsMap = DCSet.getInstance().getItemAssetMap();
         ItemAssetBalanceMap map = DCSet.getInstance().getAssetBalanceMap();
@@ -1831,6 +1836,7 @@ public class BlockExplorer {
                     bal.put("balance_2", Account.balanceInPositionAndSide(itemBals, 2, side).setScale(asset.getScale()).toPlainString());
                     bal.put("balance_3", Account.balanceInPositionAndSide(itemBals, 3, side).setScale(asset.getScale()).toPlainString());
                     bal.put("balance_4", Account.balanceInPositionAndSide(itemBals, 4, side).setScale(asset.getScale()).toPlainString());
+                    bal.put("balance_5", Account.balanceInPositionAndSide(itemBals, 5, side).setScale(asset.getScale()).toPlainString());
                     balAssets.put("" + assetKey, bal);
                 }
             }
@@ -2287,7 +2293,7 @@ public class BlockExplorer {
                 if (trade == null) {
                     Long error = null;
                 }
-                if (trade.isCancel())
+                if (!trade.isTrade())
                     continue;
 
                 --count;

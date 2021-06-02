@@ -692,7 +692,7 @@ public class BlockChain {
 
         }
 
-        FEE_ASSET = Controller.getInstance().getDCSet().getItemAssetMap().get(AssetCls.FEE_KEY);
+        FEE_ASSET = dcSet.getItemAssetMap().get(AssetCls.FEE_KEY);
 
     }
 
@@ -1065,8 +1065,8 @@ public class BlockChain {
 
         int base = BlockChain.getTargetedMin(height);
         int targetedWinValue = calcWinValueTargeted(win_value, target);
-        if (!ERA_COMPU_ALL_UP && !BlockChain.TEST_MODE
-                && height > VERS_4_11
+        if (height > ALL_VALID_BEFORE
+                && !ERA_COMPU_ALL_UP && !BlockChain.TEST_MODE
                 && base > targetedWinValue) {
             return -targetedWinValue;
         }
