@@ -3476,6 +3476,13 @@ public class Controller extends Observable {
         }
     }
 
+    public Transaction changeOrder(PrivateKeyAccount creator, int feePow, Order order, BigDecimal wantAmount) {
+        Transaction orderCreate = this.dcSet.getTransactionFinalMap().get(order.getId());
+        synchronized (this.transactionCreator) {
+            return this.transactionCreator.createChangeOrderTransaction(creator, feePow, orderCreate.getSignature(), wantAmount);
+        }
+    }
+
     public Pair<Transaction, Integer> deployAT(PrivateKeyAccount creator, String name, String description, String type,
                                                String tags, byte[] creationBytes, BigDecimal quantity, int feePow) {
 
