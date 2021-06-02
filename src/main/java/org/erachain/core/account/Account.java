@@ -1031,7 +1031,8 @@ public class Account {
                 balance5 = !subtract ? new Tuple2<BigDecimal, BigDecimal>(
                         updateIncomed ? balance5.a.subtract(amount)
                                 : balance5.a, balance5.b.subtract(amount))
-                        : new Tuple2<BigDecimal, BigDecimal>(updateIncomed ? balance5.a.add(amount)
+                        : new Tuple2<BigDecimal, BigDecimal>(updateIncomed ?
+                        balance5.a.add(amount)
                         : balance5.a, balance5.b.add(amount));
                 break;
 
