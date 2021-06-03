@@ -101,6 +101,7 @@ public class ChangeOrderTransaction extends Transaction {
 
         order = dcSet.getOrderMap().get(orderID);
         if (order == null) {
+            // for show in JSON and blockexplorer
             order = dcSet.getCompletedOrderMap().get(orderID);
         }
         order.setDC(dcSet);
@@ -112,8 +113,8 @@ public class ChangeOrderTransaction extends Transaction {
 
     public String getTitle() {
         return //TYPE_NAME + " " +
-                ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE,
-                        order.getHaveAssetKey()) + " " + ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE, order.getWantAssetKey());
+                ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE, order.getHaveAssetKey())
+                        + " " + ItemCls.getItemTypeAndKey(ItemCls.ASSET_TYPE, order.getWantAssetKey());
     }
 
     @Override
