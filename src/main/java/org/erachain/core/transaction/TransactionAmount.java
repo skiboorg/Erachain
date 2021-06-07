@@ -875,7 +875,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
                                 if (absKey == AssetCls.BAL_KEY && !creator.equals(asset.getMaker())
                                         && !recipient.equals(asset.getMaker())) {
-                                    return INVALID_TRANSFER_TYPE;
+                                    return  new Fun.Tuple2<>(INVALID_TRANSFER_TYPE, "Asset BAL is not transferable in that direction");
                                 }
 
                                 if (absKey == FEE_KEY) {
