@@ -228,13 +228,13 @@ public class BlockChain {
     public static final int HOLD_VALID_START = VERS_4_11;
 
     /**
-     * Если задан то это режим синхронизации со старым протоколом - значит нам нельза генерить блоки и транзакции
+     * Если задан то это режим синхронизации со старым протоколом - значит нам нельзя генерить блоки и транзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = TEST_DB > 0 || 0; // see in sidePROTOCOL.json as 'allValidBefore'
-    public static final int WIN_VAL_ALL_VALID = TEST_DB > 0 || 0;
-    public static final int ALL_BALANCES_OK_TO = TESTS_VERS > 0 || 0;
-    public static final int CANCEL_ORDERS_ALL_VALID = TEST_DB > 0 || 0;
+    public static int ALL_VALID_BEFORE = 0; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static final int WIN_VAL_ALL_VALID = 0;
+    public static final int ALL_BALANCES_OK_TO = 0;
+    public static final int CANCEL_ORDERS_ALL_VALID = 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
