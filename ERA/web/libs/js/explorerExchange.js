@@ -29,7 +29,7 @@ function exchange(data){
         output += '<td><a href="?asset=' + item.have.key
             + '&asset=' + item.want.key + get_lang() + '"><b>' + item.orders + '</b></a>';
         output += '<td><a href="?asset=' + item.have.key
-            + '&asset=' + item.want.key + get_lang() + '"><b>' + (item.last > 100? item.last.toPrecision(10) : item.last > 1? item.last.toPrecision(8) : item.last.toPrecision(6)) + '</b></a>';
+            + '&asset=' + item.want.key + get_lang() + '"><b>' + (item.last > 100? item.last.toPrecision(6) : item.last > 1? item.last.toPrecision(6) : item.last.toPrecision(6)) + '</b></a>';
         output += '<td><a href="?asset=' + item.have.key
             + '&asset=' + item.want.key + get_lang() + '"><b>' + item.volume24 + '</b></a>';
 
@@ -79,7 +79,7 @@ function exchange(data){
             else {
                 output += '<span class="glyphicon glyphicon-arrow-down" style="color:crimson; font-size:1.2em"></span>';
             }
-            output += '<span style="font-size:1.1em">' + addCommas(trade.realReversePrice.toPrecision(10)) + '</span>';
+            output += '<span style="font-size:1.1em">' + addCommas(trade.realReversePrice.toPrecision(6)) + '</span>';
 
         } else {
             output += '<td align=right>' + addCommas(trade.amountHave);
@@ -89,7 +89,7 @@ function exchange(data){
             else {
                 output += '<span class="glyphicon glyphicon-arrow-up" style="color:limegreen; font-size:1.2em"></span>';
             }
-            output += '<span style="font-size:1.1em">' + addCommas(trade.realPrice.toPrecision(10)) + '</span>';
+            output += '<span style="font-size:1.1em">' + addCommas(trade.realPrice.toPrecision(6)) + '</span>';
 
         }
 
@@ -177,7 +177,7 @@ function order(data){
         var trade = data.lastTrades[key];
         output += '<tr>';
 
-        if (trade.type == 'cancel') {
+        if (trade.type == 'cancel' || trade.type == 'change') {
             output += '<td align=center><a href=?tx=' + trade.initiatorTx + get_lang()
         } else {
             output += '<td align=center><a href=?trade=' + trade.initiatorTx + '/' + trade.targetTx + get_lang()
@@ -188,7 +188,7 @@ function order(data){
 
         output += '<td><a href=?address=' + trade.initiatorCreator_addr + '>' + cutBlank(trade.initiatorCreator, 20) + '</a>';
 
-        // отобрадает что это создатель актива действует
+        // отображает что это создатель актива действует
         if (trade.initiatorCreator_addr == data.assetWantMaker) {
             if (trade.type == 'buy') {
                 output += '<span class="glyphicon glyphicon-arrow-up" style="color:limegreen"></span>';
@@ -217,6 +217,11 @@ function order(data){
             }
             output += '<span style="font-size:1.1em">' + addCommas(trade.realPrice) + '</span>';
 
+        } else if (trade.type == 'change') {
+            output += '<td align=right><span class="glyphicon glyphicon-edit" style="color:blue; font-size:1.0em"></span>';
+
+            output += '<td align=right>';
+            output += '<span style="font-size:1.1em">' + addCommas(trade.realPrice) + '</span>';
         } else if (trade.type == 'cancel') {
             output += '<td align=right>' + addCommas(trade.amountHave);
 

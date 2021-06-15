@@ -86,6 +86,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
 
     // VALIDATION CODE
+    public static final int JSON_ERROR = -1;
     public static final int VALIDATE_OK = 1;
     public static final int FUTURE_ABILITY = 2;
     public static final int INVALID_WALLET_ADDRESS = 3;
@@ -153,7 +154,11 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     public static final int INVALID_CLAIM_DEBT_CREATOR = 61;
 
+    public static final int ORDER_ALREADY_COMPLETED = 65;
+
     public static final int INVALID_AWARD = 81;
+    public static final int INVALID_MAX_AWARD_COUNT = 82;
+
 
     public static final int NOT_ENOUGH_ERA_OWN = 101;
     public static final int NOT_ENOUGH_ERA_USE = 102;
@@ -449,7 +454,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     protected PersonCls creatorPerson;
 
     /**
-     * Для создания поисковых Меток - Тип сущности + номер ее. например @P12 - персона 12
+     * Для создания поисковых Меток - Тип сущности + номер ее (например @P12 - персона 12) + Метки (Tags) от самой Сущности
      */
     protected Object[][] itemsKeys;
 
@@ -873,6 +878,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     }
 
     public Object[][] getItemsKeys() {
+        if (itemsKeys == null)
+            makeItemsKeys();
+
         return itemsKeys;
     }
 
@@ -2092,6 +2100,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         return out;
     }
 
+    @Deprecated
     public void updateMapByError(int error, HashMap out) {
         out.put("error", error);
         out.put("message", OnDealClick.resultMess(error));
@@ -2100,6 +2109,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         }
     }
 
+    @Deprecated
     public void updateMapByError(int error, HashMap out, String lang) {
         out.put("error", error);
         if (lang == null) {
@@ -2114,6 +2124,24 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         }
     }
 
+    public void updateMapByError2(HashMap out, int error, String lang) {
+        JSONObject json = new JSONObject();
+        json.put("code", error);
+        json.put("message", OnDealClick.resultMess(error));
+        if (lang != null) {
+            JSONObject langObj = Lang.getInstance().getLangJson(lang);
+            if (langObj != null) {
+                json.put("lang", lang);
+                json.put("local", Lang.T(OnDealClick.resultMess(error), langObj));
+            }
+        }
+        if (errorValue != null) {
+            json.put("value", errorValue);
+        }
+        out.put("error", json);
+    }
+
+    @Deprecated
     public void updateMapByError(int error, String errorMess, HashMap out) {
         out.put("error", error);
         out.put("message", errorMess);
@@ -2122,6 +2150,17 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         }
     }
 
+    public void updateMapByError2(int error, String errorMess, HashMap out) {
+        JSONObject json = new JSONObject();
+        json.put("code", error);
+        json.put("message", errorMess);
+        if (errorValue != null) {
+            json.put("value", errorValue);
+        }
+        out.put("error", json);
+    }
+
+    @Deprecated
     public void updateMapByError(int error, String errorMess, HashMap out, String lang) {
         out.put("error", error);
         if (lang == null) {
@@ -2136,16 +2175,33 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         }
     }
 
+    @Deprecated
     public static void updateMapByErrorSimple(int error, String errorMess, HashMap out) {
         out.put("error", error);
         out.put("message", errorMess);
     }
 
+    public static void updateMapByErrorSimple2(HashMap out, int error, String errorMess, String lang) {
+        JSONObject json = new JSONObject();
+        json.put("code", error);
+        json.put("message", errorMess);
+        if (lang != null) {
+            JSONObject langObj = Lang.getInstance().getLangJson(lang);
+            if (langObj != null) {
+                json.put("lang", lang);
+                json.put("local", Lang.T(errorMess, langObj));
+            }
+        }
+        out.put("error", json);
+    }
+
+    @Deprecated
     public static void updateMapByErrorSimple(int error, HashMap out) {
         out.put("error", error);
         out.put("message", OnDealClick.resultMess(error));
     }
 
+    @Deprecated
     public static void updateMapByErrorValue(int error, String errorValue, HashMap out) {
         out.put("error", error);
         out.put("message", OnDealClick.resultMess(error));

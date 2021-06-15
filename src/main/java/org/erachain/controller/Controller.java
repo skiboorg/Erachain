@@ -764,7 +764,7 @@ public class Controller extends Observable {
         // CREATE WALLET
         this.setChanged();
         this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Try Open Wallet"));
-        this.wallet = new Wallet(this.dcSetWithObserver, this.dynamicGUI);
+        this.wallet = new Wallet(dcSet, this.dcSetWithObserver, this.dynamicGUI);
 
         boolean walletKeysRecovered = false;
         if (this.seedCommand != null && this.seedCommand.length > 1 && !Wallet.walletKeysExists()) {
@@ -893,7 +893,7 @@ public class Controller extends Observable {
         Settings.getInstance().setWalletKeysPath(selectedDir);
 
         // open wallet
-        Controller.getInstance().wallet = new Wallet(dcSetWithObserver, dynamicGUI);
+        Controller.getInstance().wallet = new Wallet(dcSet, dcSetWithObserver, dynamicGUI);
         // not wallet return 0;
         if (!Controller.getInstance().wallet.walletKeysExists()) {
             Settings.getInstance().setWalletKeysPath(pathOld);

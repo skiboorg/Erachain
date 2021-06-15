@@ -7,15 +7,9 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.block.Block;
 import org.erachain.core.transaction.Transaction;
-import org.erachain.datachain.CompletedOrderMap;
 import org.erachain.datachain.DCSet;
-import org.erachain.datachain.OrderMap;
-import org.erachain.datachain.TradeMap;
-import org.erachain.dbs.IteratorCloseable;
 import org.json.simple.JSONObject;
-import org.mapdb.Fun;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -26,6 +20,8 @@ import java.util.List;
 public class Order implements Comparable<Order> {
 
     //private static final MathContext rounding = new java.math.MathContext(12, RoundingMode.HALF_DOWN);
+
+    public static final int MAX_PRICE_ACCURACY = 6;
 
     public static final int ID_LENGTH = 8;
     private static final int CREATOR_LENGTH = 20; // as SHORT (old - 25)
@@ -40,29 +36,29 @@ public class Order implements Comparable<Order> {
             + STATUS_LENGTH;
 
     public static final int UNCONFIRMED = 0;
-    public static final int ACTIVE = 1;
-    public static final int FULFILLED = 2;
-    public static final int COMPLETED = 3;
-    public static final int CANCELED = 4;
-    public static final int ORPHANED = -1;
+    public static final int OPENED = 1; // открыт
+    public static final int FULFILLED = 2; // начат, почат
+    public static final int COMPLETED = 3; // закрыт, исполнен
+    public static final int CANCELED = 4; // отмене
+    public static final int ORPHANED = -1; // откачен, отброшен
 
     //protected DCSet dcSet;
 
     /**
      * height[int] + SeqNo[int]
      */
-    private Long id;
-    private Account creator;
-    private long haveAssetKey;
-    private BigDecimal amountHave;
-    private int haveAssetScale;
+    private final Long id;
+    private final Account creator;
+    private final long haveAssetKey;
+    private final BigDecimal amountHave;
+    private final int haveAssetScale;
     private BigDecimal fulfilledHave;
 
-    private long wantAssetKey;
-    private BigDecimal amountWant;
-    private int wantAssetScale;
+    private final long wantAssetKey;
+    private final BigDecimal amountWant;
+    private final int wantAssetScale;
 
-    private BigDecimal price;
+    private final BigDecimal price;
 
     DCSet dcSet;
 
@@ -109,9 +105,9 @@ public class Order implements Comparable<Order> {
 
     }
 
-    public Order(Order order, BigDecimal newWantAmount) {
+    public Order(Order order, long id, BigDecimal newWantAmount) {
 
-        this.id = order.id;
+        this.id = id;
         this.creator = order.creator;
         this.haveAssetKey = order.haveAssetKey;
         this.wantAssetKey = order.wantAssetKey;
@@ -166,12 +162,26 @@ public class Order implements Comparable<Order> {
         return this.status;
     }
 
+    /**
+     * Выдает степень 10 числа
+     *
+     * @param value
+     * @return
+     */
     public static int powerTen(BigDecimal value) {
         BigDecimal t = value;
         int i = 0;
-        while (t.compareTo(BigDecimal.ONE) > 0) {
-            t = t.movePointLeft(1);
-            i++;
+
+        if (value.compareTo(BigDecimal.TEN) > 0) {
+            while (t.compareTo(BigDecimal.TEN) > 0) {
+                t = t.movePointLeft(1);
+                i++;
+            }
+            return i;
+        }
+        while (t.compareTo(BigDecimal.ONE) < 0) {
+            t = t.movePointRight(1);
+            i--;
         }
         return i;
     }
@@ -206,7 +216,7 @@ public class Order implements Comparable<Order> {
 
         BigDecimal priceForLeft = calcPrice(willHave, willWant, wantAssetScale);
 
-        return isPricesClose(price, priceForLeft, forTarget);
+        return isPricesNotClose(price, priceForLeft, forTarget);
 
     }
 
@@ -230,19 +240,19 @@ public class Order implements Comparable<Order> {
             // уже не сошлось
             return true;
 
-        return isPricesClose(price, priceForLeft, false);
+        return isPricesNotClose(price, priceForLeft, false);
 
     }
 
     /**
-     * есди цены в погрешности
+     * если эти цены слишком далеки и не в допустимой погрешности
      *
      * @param price
      * @param priceForLeft
      * @param forTarget
      * @return
      */
-    public static boolean isPricesClose(BigDecimal price, BigDecimal priceForLeft, boolean forTarget) {
+    public static boolean isPricesNotClose(BigDecimal price, BigDecimal priceForLeft, boolean forTarget) {
 
         BigDecimal diff = price.subtract(priceForLeft);
         int signum = diff.signum();
@@ -260,7 +270,7 @@ public class Order implements Comparable<Order> {
 
     // BigDecimal.precision() - is WRONG calculating!!! Sometime = 0 for 100 or 10
     public static int precision(BigDecimal value) {
-        return powerTen(value) + value.scale();
+        return powerTen(value) + value.scale() + 1;
     }
 
     public static int calcPriceScale(int powerAmountHave, int wantScale, int addScale) {
@@ -272,16 +282,31 @@ public class Order implements Comparable<Order> {
     }
 
     public static BigDecimal calcPrice(BigDecimal amountHave, BigDecimal amountWant, int wantScale) {
-        // .precision() - WRONG calculating!!!! scalePrice = amountHave.setScale(0, RoundingMode.HALF_DOWN).precision() + scalePrice>0?scalePrice : 0;
-        int scalePrice = calcPriceScale(amountHave, wantScale, 3);
+
         if (amountHave.signum() == 0)
             return BigDecimal.ONE.negate();
 
-        BigDecimal result = amountWant.divide(amountHave, scalePrice, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        // .precision() - WRONG calculating!!!! scalePrice = amountHave.setScale(0, RoundingMode.HALF_DOWN).precision() + scalePrice>0?scalePrice : 0;
+        int scalePrice = calcPriceScale(amountHave, wantScale, 3);
+
+        BigDecimal result = amountWant.divide(amountHave, scalePrice, BigDecimal.ROUND_HALF_DOWN).stripTrailingZeros();
 
         // IF SCALE = -1..1 - make error in mapDB - org.mapdb.DataOutput2.packInt(DataOutput, int)
-        if (result.scale() < 0)
+        int scale = result.scale();
+        if (scale < 0)
             return result.setScale(0);
+        else if (scale > 0) {
+            int accuracy = powerTen(result) + scale + 1;
+            if (accuracy > MAX_PRICE_ACCURACY) {
+                // обрежем точность цены чтобы на бирже лишней точности не было
+                scale -= accuracy - MAX_PRICE_ACCURACY;
+                result = result.setScale(scale, BigDecimal.ROUND_HALF_DOWN).stripTrailingZeros();
+                scale = result.scale();
+                // IF SCALE = -1..1 - make error in mapDB - org.mapdb.DataOutput2.packInt(DataOutput, int)
+                if (scale < 0)
+                    return result.setScale(0);
+            }
+        }
         return result;
     }
 
@@ -343,10 +368,6 @@ public class Order implements Comparable<Order> {
 
     public Long getId() {
         return this.id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Account getCreator() {
@@ -439,6 +460,10 @@ public class Order implements Comparable<Order> {
         return dcSet.getOrderMap().contains(id);
     }
 
+    public boolean isActive() {
+        return status == OPENED || status == FULFILLED;
+    }
+
     public static BigDecimal getFulfilledWant(BigDecimal fulfilledHave, BigDecimal price, int wantAssetScale) {
         return fulfilledHave.multiply(price).setScale(wantAssetScale, RoundingMode.HALF_DOWN);
     }
@@ -449,8 +474,8 @@ public class Order implements Comparable<Order> {
 
     public String viewStatus() {
         switch (status) {
-            case ACTIVE:
-                return "Active";
+            case OPENED:
+                return "Open # Открыт";
             case FULFILLED:
                 return "Fulfilled";
             case COMPLETED:
@@ -476,10 +501,6 @@ public class Order implements Comparable<Order> {
 
     public String viewPrice() {
         return getPrice().toPlainString();
-    }
-
-    public List<Trade> getInitiatedTrades() {
-        return this.getInitiatedTrades(DCSet.getInstance());
     }
 
     public List<Trade> getInitiatedTrades(DCSet db) {
@@ -690,145 +711,6 @@ public class Order implements Comparable<Order> {
         transaction.addCalculated(block, this.creator, this.haveAssetKey, left,
                 "Outprice " + (forTarget ? "close" : "ended") + " Order @" + transaction.viewDBRef(this.id));
 
-    }
-
-    public void process(Block block, Transaction tx, boolean asChange) {
-        OrderProcess.process(this, block, tx, asChange);
-    }
-
-    /**
-     * @param block
-     * @param blockTime timestamp of block
-     * @param asChange
-     */
-    public void orphan(Block block, long blockTime, boolean asChange) {
-
-        // GET HEIGHT from ID
-        int height = (int) (this.id >> 32);
-
-        if (BlockChain.CHECK_BUGS > 1 &&
-                //Transaction.viewDBRef(id).equals("776446-1")
-                id == 3644468729217028L
-        ) {
-            boolean debug = false;
-        }
-
-        CompletedOrderMap completedMap = this.dcSet.getCompletedOrderMap();
-        OrderMap ordersMap = this.dcSet.getOrderMap();
-        TradeMap tradesMap = this.dcSet.getTradeMap();
-
-        //REMOVE FROM COMPLETED ORDERS - он может быть был отменен, поэтому нельзя проверять по Fulfilled
-        // - на всякий случай удалим его в любом случае
-        completedMap.delete(this);
-
-        BigDecimal thisAmountFulfilledWant = BigDecimal.ZERO;
-
-        BigDecimal thisAmountHaveLeftEnd = this.getAmountHaveLeft();
-
-        AssetCls assetHave = dcSet.getItemAssetMap().get(haveAssetKey);
-        AssetCls assetWant = dcSet.getItemAssetMap().get(wantAssetKey);
-
-        //ORPHAN TRADES
-        Trade trade;
-        try (IteratorCloseable<Fun.Tuple2<Long, Long>> iterator = tradesMap.getIteratorByInitiator(this.id)) {
-            while (iterator.hasNext()) {
-
-                trade = tradesMap.get(iterator.next());
-                Order target = trade.getTargetOrder(this.dcSet);
-
-                //REVERSE FUNDS
-                BigDecimal tradeAmountHave = trade.getAmountHave();
-                BigDecimal tradeAmountWant = trade.getAmountWant();
-
-                //DELETE FROM COMPLETED ORDERS- он может быть был отменен, поэтому нельзя проверять по Fulfilled
-                // - на всякий случай удалим его в любом случае
-                completedMap.delete(target);
-
-                //// Пока не изменились Остатки и цена по Остаткм не съехала, удалим из таблицы ордеров
-                /// иначе вторичный ключ останется так как он не будет найден из-за измененой "цены по остаткам"
-                ordersMap.delete(target);
-
-                //REVERSE FULFILLED
-                target.setFulfilledHave(target.getFulfilledHave().subtract(tradeAmountHave));
-                // accounting on PLEDGE position
-                target.creator.changeBalance(this.dcSet, false,
-                        true, target.haveAssetKey, tradeAmountHave, false, false,
-                        true
-                );
-
-
-                thisAmountFulfilledWant = thisAmountFulfilledWant.add(tradeAmountHave);
-
-                if (height > BlockChain.VERS_5_3) {
-                    AssetCls.processTrade(dcSet, block, target.getCreator(),
-                            false, assetWant, assetHave,
-                            true, tradeAmountWant,
-                            blockTime,
-                            0L);
-                } else {
-
-                    target.creator.changeBalance(this.dcSet, true, false, target.wantAssetKey,
-                            tradeAmountWant, false, false, false);
-                }
-                // Учтем что у стороны ордера обновилась форжинговая информация
-                if (target.wantAssetKey == Transaction.RIGHTS_KEY && block != null) {
-                    block.addForgingInfoUpdate(target.getCreator());
-                }
-
-                //UPDATE ORDERS
-                ordersMap.put(target);
-
-                //REMOVE TRADE FROM DATABASE
-                tradesMap.delete(trade);
-
-                if (BlockChain.CHECK_BUGS > 3) {
-                    if (tradesMap.contains(new Fun.Tuple2<>(trade.getInitiator(), trade.getTarget()))) {
-                        Long err = null;
-                        err++;
-                    }
-                }
-
-
-            }
-        } catch (IOException e) {
-        }
-
-        //// тут нужно получить остатки все из текущего состояния иначе индексы по измененой цене с остатков не удалятся
-        /// поэтому смотрим что есть в таблице и если есть то его грузим с ценой по остаткам той что в базе
-        Order thisOrder = ordersMap.get(id);
-        if (thisOrder != null) {
-            //REMOVE ORDER FROM DATABASE
-            ordersMap.delete(thisOrder);
-        }
-
-        if (!asChange) {
-
-            //REMOVE HAVE
-            // GET HAVE LEFT - if it CANCELWED by INCREMENT close
-            //   - если обработка остановлена по достижению порога Инкремента
-            this.creator.changeBalance(this.dcSet, false, false, this.haveAssetKey,
-                    this.getAmountHaveLeft(), false, false,
-                    // accounting on PLEDGE position
-                    true, Account.BALANCE_POS_PLEDGE);
-        }
-
-        // с ордера сколько было продано моего актива? на это число уменьшаем залог
-        thisAmountHaveLeftEnd = this.getAmountHaveLeft().subtract(thisAmountHaveLeftEnd);
-        if (thisAmountHaveLeftEnd.signum() > 0) {
-            // change PLEDGE
-            this.creator.changeBalance(this.dcSet, false, true, this.haveAssetKey,
-                    thisAmountHaveLeftEnd, false, false, true);
-        }
-
-        //REVERT WANT
-        if (height > BlockChain.VERS_5_3) {
-            AssetCls.processTrade(dcSet, block, this.creator,
-                    true, assetHave, assetWant,
-                    true, thisAmountFulfilledWant, blockTime, 0L);
-        } else {
-            this.creator.changeBalance(this.dcSet, true, false, this.wantAssetKey,
-                    thisAmountFulfilledWant, false, false, false);
-        }
     }
 
     @Override
