@@ -13,6 +13,7 @@ import org.erachain.core.item.templates.TemplateCls;
 import org.erachain.core.item.unions.UnionCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.database.DBASet;
+import org.erachain.datachain.DCSet;
 import org.erachain.settings.Settings;
 import org.erachain.utils.SimpleFileVisitorForRecursiveFolderDeletion;
 import org.json.simple.JSONObject;
@@ -32,11 +33,13 @@ public class DWSet extends DBASet {
     /**
      * New version will auto-rebase DCSet from empty db file
      */
-    final static int CURRENT_VERSION = 531; // vers 5.3.02 (trade.type)
+    final static int CURRENT_VERSION = 532; // vers 5.3.03
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DWSet.class);
 
     private static final String LAST_BLOCK = "lastBlock";
+
+    public final DCSet dcSet;
 
     private Var<Long> licenseKeyVar;
     private Long licenseKey;
@@ -68,8 +71,10 @@ public class DWSet extends DBASet {
 
     private TelegramsMap telegramsMap;
 
-    public DWSet(File dbFile, DB database, boolean withObserver, boolean dynamicGUI) {
-        super(dbFile, database, withObserver,  dynamicGUI);
+    public DWSet(DCSet dcSet, File dbFile, DB database, boolean withObserver, boolean dynamicGUI) {
+        super(dbFile, database, withObserver, dynamicGUI);
+
+        this.dcSet = dcSet;
 
         // LICENCE SIGNED
         licenseKeyVar = database.getAtomicVar("licenseKey");
@@ -160,7 +165,7 @@ public class DWSet extends DBASet {
 
     }
 
-    public synchronized static DWSet reCreateDB(boolean withObserver, boolean dynamicGUI) {
+    public synchronized static DWSet reCreateDB(DCSet dcSet, boolean withObserver, boolean dynamicGUI) {
 
         //OPEN DB
         File dbFile = new File(Settings.getInstance().getDataWalletPath(), "wallet.dat");
@@ -192,7 +197,7 @@ public class DWSet extends DBASet {
 
         }
 
-        return new DWSet(dbFile, database, withObserver, dynamicGUI);
+        return new DWSet(dcSet, dbFile, database, withObserver, dynamicGUI);
 
     }
 
