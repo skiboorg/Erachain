@@ -287,6 +287,9 @@ public class OnDealClick {
             case Transaction.INVALID_AWARD:
                 mess = "Invalid Award Item";
                 break;
+            case Transaction.INVALID_MAX_AWARD_COUNT:
+                mess = "MAX Award Count";
+                break;
 
             case Transaction.INVALID_QUANTITY:
                 mess = "Invalid quantity";
@@ -297,7 +300,7 @@ public class OnDealClick {
             case Transaction.INVALID_ECXHANGE_PAIR:
                 mess = "Invalid Ecxhange Pair";
                 break;
-                
+
             case Transaction.INVALID_RETURN:
                 mess = "Invalid return";
                 break;
@@ -307,6 +310,10 @@ public class OnDealClick {
             case Transaction.ORDER_DOES_NOT_EXIST:
                 mess = "Order does not exists";
                 break;
+            case Transaction.ORDER_ALREADY_COMPLETED:
+                mess = "Order already completed";
+                break;
+
             case Transaction.INVALID_ORDER_CREATOR:
                 mess = "Invalid order creator";
                 break;
@@ -528,6 +535,10 @@ public class OnDealClick {
 
             case Transaction.INVALID_TRANSACTION_TYPE:
                 mess = "Invalid transaction type";
+                break;
+
+            case Transaction.JSON_ERROR:
+                mess = "Invalid JSON";
                 break;
 
         }
