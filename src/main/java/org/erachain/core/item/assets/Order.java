@@ -12,7 +12,6 @@ import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
@@ -210,7 +209,7 @@ public class Order implements Comparable<Order> {
 
         // сколько нам надо будет еще купить если эту сделку обработаем
         //BigDecimal willWant = getFulfilledWant(willHave, this.price, this.wantAssetScale);
-        BigDecimal willWant = willHave.multiply(price).setScale(wantAssetScale, RoundingMode.HALF_DOWN);
+        BigDecimal willWant = willHave.multiply(price).setScale(wantAssetScale, BigDecimal.ROUND_HALF_UP);
         if (willWant.signum() == 0) {
             return true;
         }
@@ -267,21 +266,10 @@ public class Order implements Comparable<Order> {
             return false;
         }
 
-        if (true) {
-            diff = diff.abs().divide(price,
-                    BigDecimal.ROUND_HALF_UP, // для получения макс потолка
-                    MAX_PRICE_ACCURACY);
-            if (diff.compareTo(forTarget ? BlockChain.MAX_ORDER_DEVIATION : BlockChain.MAX_INIT_ORDER_DEVIATION) > 0)
-                return true;
-
-        } else {
-            diff = diff.divide(price.min(priceForLeft),
-                    (forTarget ? BlockChain.TARGET_PRICE_DIFF_LIMIT : BlockChain.INITIATOR_PRICE_DIFF_LIMIT).scale() + 1, RoundingMode.HALF_DOWN).abs();
-            if (signum > 0 && diff.compareTo(forTarget ? BlockChain.TARGET_PRICE_DIFF_LIMIT : BlockChain.INITIATOR_PRICE_DIFF_LIMIT) > 0
-                    || signum < 0 && diff.compareTo(forTarget ? BlockChain.TARGET_PRICE_DIFF_LIMIT_NEG : BlockChain.INITIATOR_PRICE_DIFF_LIMIT_NEG) > 0)
-                return true;
-        }
-        return false;
+        diff = diff.abs().divide(price,
+                BigDecimal.ROUND_HALF_UP, // для получения макс потолка
+                MAX_PRICE_ACCURACY);
+        return diff.compareTo(forTarget ? BlockChain.MAX_ORDER_DEVIATION : BlockChain.MAX_INIT_ORDER_DEVIATION) > 0;
 
     }
 
@@ -292,7 +280,7 @@ public class Order implements Comparable<Order> {
      * @return
      */
     public boolean isInitiatorLeftDeviationOut(BigDecimal tradeAmountHave) {
-        return getAmountHaveLeft().subtract(tradeAmountHave).abs().divide(tradeAmountHave, 6, RoundingMode.HALF_DOWN)
+        return getAmountHaveLeft().subtract(tradeAmountHave).abs().divide(tradeAmountHave, 6, BigDecimal.ROUND_HALF_UP)
                 .compareTo(BlockChain.MAX_INIT_ORDER_DEVIATION) > 0;
     }
 
@@ -303,7 +291,7 @@ public class Order implements Comparable<Order> {
      * @return
      */
     public boolean isTargetLeftDeviationOut(BigDecimal tradeAmountHave) {
-        return getAmountHaveLeft().subtract(tradeAmountHave).abs().divide(tradeAmountHave, 6, RoundingMode.HALF_DOWN)
+        return getAmountHaveLeft().subtract(tradeAmountHave).abs().divide(tradeAmountHave, 6, BigDecimal.ROUND_HALF_UP)
                 .compareTo(BlockChain.MAX_ORDER_DEVIATION) > 0;
     }
 
@@ -458,11 +446,11 @@ public class Order implements Comparable<Order> {
     }
 
     public BigDecimal getAmountWantLeft() {
-        // надо округлять до точности актива, иначе из-за более точной цены может точность лишу дать в isUnResolved
-        //return this.getAmountHaveLeft().multiply(this.price, rounding).setScale(this.wantAssetScale, RoundingMode.HALF_DOWN);
+        if (fulfilledHave.signum() == 0)
+            return amountWant;
+
         return this.getAmountHaveLeft().multiply(this.price).setScale(this.wantAssetScale,
-                //RoundingMode.DOWN); // DOWN - only!
-                RoundingMode.HALF_DOWN); // HALF_DOWN - only!
+                BigDecimal.ROUND_HALF_UP);
 
     }
 
@@ -509,7 +497,7 @@ public class Order implements Comparable<Order> {
     }
 
     public static BigDecimal getFulfilledWant(BigDecimal fulfilledHave, BigDecimal price, int wantAssetScale) {
-        return fulfilledHave.multiply(price).setScale(wantAssetScale, RoundingMode.HALF_DOWN);
+        return fulfilledHave.multiply(price).setScale(wantAssetScale, BigDecimal.ROUND_HALF_UP);
     }
 
     public BigDecimal getFulfilledWant() {
