@@ -15,7 +15,6 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Slf4j
@@ -74,10 +73,10 @@ public class OrderProcess {
                 //height == 255979 // 133236 //  - тут остаток неисполнимый и у ордера нехватка - поэтому иницалицирующий отменяется
                 //// 	255979-3	255992-1
                 //|| height == 255992
-                Transaction.viewDBRef(id).equals("255992-1")
+                Transaction.viewDBRef(id).equals("40046-1")
                 || Transaction.viewDBRef(id).equals("255979-3")
-                || Transaction.viewDBRef(id).equals("791319-1")
-                || transaction.viewHeightSeq().equals("695143-1")
+                || Transaction.viewDBRef(id).equals("262765-1")
+                || transaction.viewHeightSeq().equals("262722-1")
             //id == 3644468729217028L
 
 
@@ -196,9 +195,9 @@ public class OrderProcess {
 
             String orderREF = Transaction.viewDBRef(order.getId());
             if (debug ||
-                    orderREF.equals("255992-1")
+                    orderREF.equals("40046-1")
                     || orderREF.equals("255979-3")
-                    || orderREF.equals("695143-1")
+                    || orderREF.equals("262722-1")
                 //id == 1132136199356417L
             ) {
                 debug = true;
@@ -241,7 +240,7 @@ public class OrderProcess {
             if (order.getFulfilledHave().signum() == 0) {
                 orderAmountWantLeft = order.getAmountWant();
             } else {
-                orderAmountWantLeft = orderAmountHaveLeft.multiply(orderPrice).setScale(haveAssetScale, RoundingMode.HALF_DOWN);
+                orderAmountWantLeft = order.getAmountWantLeft();
             }
 
             compareThisLeft = orderAmountWantLeft.compareTo(thisAmountHaveLeft);
@@ -257,10 +256,9 @@ public class OrderProcess {
                 tradeAmountForHave = orderAmountHaveLeft;
 
                 // возможно что у нашего ордера уже ничего не остается почти и он станет неисполняемым
-                // и при этом остаток для енго незначительный
                 if (orderThis.willUnResolvedFor(orderAmountWantLeft, false)
-                        // и если цена не сильно у Нашего Заказа остаток большой
-                        && !orderThis.isInitiatorLeftDeviationOut(orderAmountWantLeft)) {
+                        // и отклонение будет небольшое для текущего Заказа
+                        && !order.isTargetLeftDeviationOut(thisAmountHaveLeft)) {
                     tradeAmountForWant = thisAmountHaveLeft;
                     completedThisOrder = true;
                 } else {
@@ -269,12 +267,7 @@ public class OrderProcess {
 
             } else {
                 // берем из нашего (OrderThis) заказа данные для сделки - он полностью будет исполнен
-
                 tradeAmountForWant = thisAmountHaveLeft;
-
-                if (debug) {
-                    debug = true;
-                }
 
                 if (compare == 0) {
                     // цена совпала (возможно с округлением) то без пересчета берем что раньше посчитали
@@ -284,7 +277,7 @@ public class OrderProcess {
                         tradeAmountForHave = orderAmountHaveLeft;
 
                     } else {
-                        // тут возможны округления и остатки неисполнимые
+                        // тут возможны округления и остатки неисполнимые уже у Текущего Заказа
                         // если текущий ордер станет не исполняемым, то попробуем его тут обработать особо
                         willOrderUnResolved = order.willUnResolvedFor(tradeAmountForHave, true);
                         if (willOrderUnResolved
@@ -295,18 +288,15 @@ public class OrderProcess {
                     }
 
                 } else {
+                    // цена нашего Заказ - "по рынку", значит пересчитаем Хочу по цене текущего Заказа
+                    tradeAmountForHave = tradeAmountForWant.multiply(orderReversePrice).setScale(wantAssetScale, BigDecimal.ROUND_HALF_UP);
 
-                    tradeAmountForHave = tradeAmountForWant.multiply(orderReversePrice).setScale(wantAssetScale, RoundingMode.HALF_DOWN);
                     if (tradeAmountForHave.compareTo(orderAmountHaveLeft) >= 0) {
                         // если вылазим после округления за предел то берем что есть
                         tradeAmountForHave = orderAmountHaveLeft;
 
                     } else {
 
-                        if (debug) {
-                            debug = true;
-                        }
-
                         // если текущий ордер станет не исполняемым, то попробуем его тут обработать особо
                         willOrderUnResolved = order.willUnResolvedFor(tradeAmountForHave, true);
                         if (willOrderUnResolved
@@ -314,25 +304,6 @@ public class OrderProcess {
                                 && !order.isTargetLeftDeviationOut(tradeAmountForHave)) {
                             tradeAmountForHave = orderAmountHaveLeft;
                         }
-                    }
-                }
-
-                // теперь обязательно пересчет обратно по цене ордера делаем
-                tradeAmountForWant = tradeAmountForHave.multiply(orderPrice).setScale(haveAssetScale, BigDecimal.ROUND_HALF_UP);
-                if (tradeAmountForWant.compareTo(thisAmountHaveLeft) >= 0) {
-                    // если вылазим после округления за предел то берем что есть
-                    tradeAmountForWant = thisAmountHaveLeft;
-
-                    //THIS is COMPLETED
-                    completedThisOrder = true;
-
-                } else {
-                    // возможно наш Заказ останется с маленьким остатком
-                    if (orderThis.willUnResolvedFor(tradeAmountForWant, false)
-                            // и если цена не сильно у Нашего Заказа остаток большой
-                            && !orderThis.isInitiatorLeftDeviationOut(tradeAmountForWant)) {
-                        tradeAmountForWant = thisAmountHaveLeft;
-                        completedThisOrder = true;
                     }
                 }
 
@@ -383,11 +354,11 @@ public class OrderProcess {
                     haveAssetScale, wantAssetScale, index);
 
             if (BlockChain.CHECK_BUGS > 1) {
-                boolean testDeviation = orderPrice.subtract(trade.calcPrice()).abs().divide(orderPrice, 6, RoundingMode.HALF_DOWN)
-                        .compareTo(new BigDecimal("0.001")) > 0;
+                boolean testDeviation = orderPrice.subtract(trade.calcPrice()).abs().divide(orderPrice, Order.MAX_PRICE_ACCURACY, BigDecimal.ROUND_HALF_UP)
+                        .compareTo(BlockChain.MAX_TRADE_DEVIATION) > 0;
                 if (testDeviation) {
                     logger.error("TRADE Deviation so big: " + orderPrice.subtract(trade.calcPrice()).abs()
-                            .divide(orderPrice, 6, RoundingMode.HALF_DOWN).toPlainString());
+                            .divide(orderPrice, Order.MAX_PRICE_ACCURACY, BigDecimal.ROUND_HALF_UP).toPlainString());
                     Long error = null;
                     error++;
                 }
@@ -467,6 +438,7 @@ public class OrderProcess {
             }
 
             // if can't trade by more good price than self - by orderOrice - then  auto cancel!
+            //////// если наш Заказ "ПО РЫНКУ"?
             if (orderThis.isInitiatorUnResolved()) {
 
                 if (debug) {
@@ -488,17 +460,6 @@ public class OrderProcess {
 
         if (debug) {
             debug = true;
-        }
-
-        if (BlockChain.CHECK_BUGS > 1) {
-            boolean testDeviation = price.subtract(orderThis.calcLeftPrice()).abs().divide(price, 6, RoundingMode.HALF_DOWN)
-                    .compareTo(new BigDecimal("0.001")) > 0;
-            if (testDeviation) {
-                logger.error("TRADE Deviation so big: " + price.subtract(orderThis.calcLeftPrice()).abs()
-                        .divide(price, 6, RoundingMode.HALF_DOWN));
-                Long error = null;
-                error++;
-            }
         }
 
         if (completedThisOrder) {
