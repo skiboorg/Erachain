@@ -73,7 +73,7 @@ public class OrderProcess {
                 //height == 255979 // 133236 //  - тут остаток неисполнимый и у ордера нехватка - поэтому иницалицирующий отменяется
                 //// 	255979-3	255992-1
                 //|| height == 255992
-                Transaction.viewDBRef(id).equals("40046-1")
+                Transaction.viewDBRef(id).equals("10523-1")
                 || Transaction.viewDBRef(id).equals("255979-3")
                 || Transaction.viewDBRef(id).equals("262765-1")
                 || transaction.viewHeightSeq().equals("262722-1")
@@ -195,7 +195,7 @@ public class OrderProcess {
 
             String orderREF = Transaction.viewDBRef(order.getId());
             if (debug ||
-                    orderREF.equals("40046-1")
+                    orderREF.equals("10523-1")
                     || orderREF.equals("255979-3")
                     || orderREF.equals("262722-1")
                 //id == 1132136199356417L
