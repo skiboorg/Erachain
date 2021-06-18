@@ -533,20 +533,35 @@ public class OrderProcess {
 
     }
 
+    /**
+     * @param dcSet
+     * @param id
+     * @param block
+     * @param blockTime
+     * @return Заказ перед откатом - чтоббы знать сколько у нго было исполнения
+     */
     public static Order orphan(DCSet dcSet, Long id, Block block, long blockTime) {
 
         CompletedOrderMap completedMap = dcSet.getCompletedOrderMap();
         OrderMap ordersMap = dcSet.getOrderMap();
         TradeMap tradesMap = dcSet.getTradeMap();
 
-
         //REMOVE FROM COMPLETED ORDERS - он может быть был отменен, поэтому нельзя проверять по Fulfilled
         // - на всякий случай удалим его в любом случае
         //// тут нужно получить остатки все из текущего состояния иначе индексы по измененной цене с остатков не удалятся
         /// поэтому смотрим что есть в таблице и если есть то его грузим с ценой по остаткам той что в базе
+        // Этот ордер передадим на верх БЕЗ ИЗМЕНЕНИЯ ТУТ - для восстановления остатков
         Order orderThis = completedMap.remove(id);
         if (orderThis == null) {
             orderThis = ordersMap.remove(id);
+        } else {
+            if (orderThis.isCanceled()) {
+                // это значит что ордер быо автоматически закрыт by Unresolved / outPrice
+                // назад вернем
+                orderThis.getCreator().changeBalance(dcSet, true, false, orderThis.getHaveAssetKey(),
+                        orderThis.getAmountHaveLeft(), false, false,
+                        true, Account.BALANCE_POS_PLEDGE);
+            }
         }
 
         long haveAssetKey = orderThis.getHaveAssetKey();
@@ -567,9 +582,6 @@ public class OrderProcess {
 
         BigDecimal thisAmountFulfilledWant = BigDecimal.ZERO;
 
-        BigDecimal thisAmountHaveLeft = orderThis.getAmountHaveLeft();
-        BigDecimal thisAmountHaveLeftEnd = thisAmountHaveLeft; //this.getAmountHaveLeft();
-
         AssetCls assetHave = dcSet.getItemAssetMap().get(haveAssetKey);
         AssetCls assetWant = dcSet.getItemAssetMap().get(wantAssetKey);
 
@@ -583,6 +595,13 @@ public class OrderProcess {
                     continue;
                 }
                 Order target = trade.getTargetOrder(dcSet);
+                if (target.isCanceled()) {
+                    // это значит что ордер быо автоматически закрыт by Unresolved / outPrice
+                    // назад вернем
+                    target.getCreator().changeBalance(dcSet, true, false, wantAssetKey,
+                            target.getAmountHaveLeft(), false, false,
+                            true, Account.BALANCE_POS_PLEDGE);
+                }
 
                 //REVERSE FUNDS
                 BigDecimal tradeAmountHave = trade.getAmountHave();
@@ -604,6 +623,7 @@ public class OrderProcess {
                         true
                 );
 
+                // REVERSE THIS ORDER
                 thisAmountFulfilledWant = thisAmountFulfilledWant.add(tradeAmountHave);
 
                 if (height > BlockChain.VERS_5_3) {
@@ -635,17 +655,14 @@ public class OrderProcess {
                     }
                 }
 
-
             }
         } catch (IOException e) {
         }
 
-        // с ордера сколько было продано моего актива? на это число уменьшаем залог
-        thisAmountHaveLeftEnd = orderThis.getAmountHaveLeft().subtract(thisAmountHaveLeftEnd);
-        if (thisAmountHaveLeftEnd.signum() > 0) {
+        if (orderThis.getFulfilledHave().signum() > 0) {
             // change PLEDGE
             creator.changeBalance(dcSet, false, true, haveAssetKey,
-                    thisAmountHaveLeftEnd, false, false, true);
+                    orderThis.getFulfilledHave(), false, false, true);
         }
 
         //REVERT WANT
