@@ -238,7 +238,7 @@ public class BlockChain {
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
      * см issue https://lab.erachain.org/erachain/Erachain/-/issues/1322
      */
-    public static final int LEFT_PRICE_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? 0 : 623904;
+    public static final int LEFT_PRICE_HEIGHT = 0;
     /**
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
