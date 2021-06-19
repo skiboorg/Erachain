@@ -56,6 +56,7 @@ public class OrderProcess {
         // нужно так как при сдвиге цены Заказ может быть уже початый и тут на ОстатокЦены проверку делаем
         BigDecimal price = id > BlockChain.LEFT_PRICE_HEIGHT_SEQ ? orderThis.calcLeftPrice() : orderThis.getPrice();
         BigDecimal thisPriceReverse = id > BlockChain.LEFT_PRICE_HEIGHT_SEQ ? orderThis.calcLeftPriceReverse() : orderThis.calcPriceReverse();
+        BigDecimal thisPriceReverseShifted = thisPriceReverse.multiply(BlockChain.COMPARE_TRADE_DEVIATION);
 
         Account creator = orderThis.getCreator();
 
@@ -66,29 +67,10 @@ public class OrderProcess {
 
         boolean debug = false;
 
-        if (BlockChain.CHECK_BUGS > 1 &&
-                //creator.equals("78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5") &&
-                //id.equals(Transaction.makeDBRef(12435, 1))
-                //c id == 1132136199356417L // 174358 ---- 	255979-3	255992-1
-                //height == 255979 // 133236 //  - тут остаток неисполнимый и у ордера нехватка - поэтому иницалицирующий отменяется
-                //// 	255979-3	255992-1
-                //|| height == 255992
-                Transaction.viewDBRef(id).equals("31734-6")
-                || Transaction.viewDBRef(id).equals("22452-1")
-                || Transaction.viewDBRef(id).equals("262765-1")
-                || transaction.viewHeightSeq().equals("262722-1")
-            //id == 3644468729217028L
-
-
-            //|| height == 133232 // - здесь хвостики какието у сделки с 1 в последнем знаке
-            //|| height == 253841 // сработал NEW_FLOR 2-й
-            //|| height == 255773 // тут мизерные остатки - // 70220 - 120.0000234 - обратный сработал
-            //|| (haveAssetKey == 12L && wantAssetKey == 95L)
-            //|| (wantAssetKey == 95L && haveAssetKey == 12L)
-            //Arrays.equals(Base58.decode("3PVq3fcMxEscaBLEYgmmJv9ABATPasYjxNMJBtzp4aKgDoqmLT9MASkhbpaP3RNPv8CECmUyH5sVQtEAux2W9quA"), transaction.getSignature())
-            //Arrays.equals(Base58.decode("2GnkzTNDJtMgDHmKKxkZSQP95S7DesENCR2HRQFQHcspFCmPStz6yn4XEnpdW4BmSYW5dkML6xYZm1xv7JXfbfNz"), transaction.getSignature()
-            //id.equals(new BigInteger(Base58.decode("4NxUYDifB8xuguu5gVkma4V1neseHXYXhFoougGDzq9m7VdZyn7hjWUYiN6M7vkj4R5uwnxauoxbrMaavRMThh7j")))
-            //&& !db.isFork()
+        if (BlockChain.CHECK_BUGS > 3
+            //&& creator.equals("78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5") &&
+            //|| height == 255992
+            //Transaction.viewDBRef(id).equals("40046-1")
         ) {
             debug = true;
         }
@@ -99,70 +81,6 @@ public class OrderProcess {
         //GET ALL ORDERS(WANT, HAVE) LOWEST PRICE FIRST
         //TRY AND COMPLETE ORDERS
         List<Order> orders = ordersMap.getOrdersForTradeWithFork(wantAssetKey, haveAssetKey, thisPriceReverse);
-
-        /// ЭТО ПРОВЕРКА на правильную сортировку - все пашет
-        if (false && id > BlockChain.LEFT_PRICE_HEIGHT_SEQ && (debug || BlockChain.CHECK_BUGS > 5) && !orders.isEmpty()) {
-            BigDecimal priceTst = orders.get(0).calcLeftPrice();
-            Long timestamp = orders.get(0).getId();
-            Long idTst = 0L;
-            for (Order item : orders) {
-                if (item.getId().equals(idTst)) {
-                    // RISE ERROR
-                    List<Order> orders_test = ordersMap.getOrdersForTradeWithFork(wantAssetKey, haveAssetKey, thisPriceReverse);
-                    timestamp = null;
-                    ++timestamp;
-                }
-                idTst = item.getId();
-
-                if (item.getHaveAssetKey() != wantAssetKey
-                        || item.getWantAssetKey() != haveAssetKey) {
-                    // RISE ERROR
-                    timestamp = null;
-                    ++timestamp;
-                }
-                // потому что сранивается потом обратная цена то тут должно быть возрастание
-                // и если не так то ошибка
-                int comp = priceTst.compareTo(item.calcLeftPrice());
-                if (comp > 0) {
-                    // RISE ERROR
-                    timestamp = null;
-                    ++timestamp;
-                } else if (comp == 0) {
-                    // здесь так же должно быть возрастание
-                    // если не так то ошибка
-                    if (timestamp.compareTo(item.getId()) > 0) {
-                        // RISE ERROR
-                        timestamp = null;
-                        ++timestamp;
-                    }
-                }
-
-                priceTst = item.calcLeftPrice();
-                timestamp = item.getId();
-            }
-
-            List<Order> ordersAll = ordersMap.getOrdersForTradeWithFork(wantAssetKey, haveAssetKey, null);
-            priceTst = orders.get(0).calcLeftPrice();
-            timestamp = orders.get(0).getId();
-            for (Order item : ordersAll) {
-                int comp = priceTst.compareTo(item.calcLeftPrice()); // по остаткам цены());
-                if (comp > 0) {
-                    // RISE ERROR
-                    timestamp = null;
-                    ++timestamp;
-                } else if (comp == 0) {
-                    // здесь так же должно быть возрастание
-                    // если не так то ошибка
-                    if (timestamp.compareTo(item.getId()) > 0) {
-                        // RISE ERROR
-                        timestamp = null;
-                        ++timestamp;
-                    }
-                }
-                priceTst = item.calcLeftPrice();
-                timestamp = item.getId();
-            }
-        }
 
         BigDecimal thisAmountHaveLeft = orderThis.getAmountHaveLeft();
         BigDecimal thisAmountHaveLeftStart = thisAmountHaveLeft;
@@ -194,11 +112,8 @@ public class OrderProcess {
             index++;
 
             String orderREF = Transaction.viewDBRef(order.getId());
-            if (debug ||
-                    orderREF.equals("31734-6")
-                    || orderREF.equals("22452-1")
-                    || orderREF.equals("262722-1")
-                //id == 1132136199356417L
+            if (debug
+                //|| orderREF.equals("40046-1")
             ) {
                 debug = true;
             }
@@ -223,7 +138,8 @@ public class OrderProcess {
             /////////////// - разность точности цены из-за того что у одного ордера значение больше на порядки и этот порядок в точность уходит
             //CHECK IF BUYING PRICE IS HIGHER OR EQUAL THEN OUR SELLING PRICE
             //////// old compare = thisPrice.compareTo(orderReversePrice);
-            compare = orderPrice.compareTo(thisPriceReverse);
+            //compare = orderPrice.compareTo(thisPriceReverse);
+            compare = orderPrice.compareTo(thisPriceReverseShifted);
             if (compare > 0) {
                 // Делаем просто проверку на обратную цену и все - без игр с округлением и проверки дополнительной
                 // и сравним так же по прямой цене со сниженной точностью у Заказа
@@ -444,17 +360,10 @@ public class OrderProcess {
             }
 
             //TRANSFER FUNDS
-            if (height > BlockChain.VERS_5_3) {
-                AssetCls.processTrade(dcSet, block, order.getCreator(),
-                        false, assetWant, assetHave,
-                        false, tradeAmountForWant, transaction.getTimestamp(), order.getId());
+            AssetCls.processTrade(dcSet, block, order.getCreator(),
+                    false, assetWant, assetHave,
+                    false, tradeAmountForWant, transaction.getTimestamp(), order.getId());
 
-            } else {
-                order.getCreator().changeBalance(dcSet, false, false, haveAssetKey,
-                        tradeAmountForWant, false, false, false);
-                transaction.addCalculated(block, order.getCreator(), order.getWantAssetKey(), tradeAmountForWant,
-                        "Trade Order @" + Transaction.viewDBRef(order.getId()));
-            }
 
             // Учтем что у стороны ордера обновилась форжинговая информация
             if (haveAssetKey == Transaction.RIGHTS_KEY && block != null) {
@@ -511,16 +420,9 @@ public class OrderProcess {
 
         //TRANSFER FUNDS
         if (processedAmountFulfilledWant.signum() > 0) {
-            if (height > BlockChain.VERS_5_3) {
-                AssetCls.processTrade(dcSet, block, creator,
-                        true, assetHave, assetWant,
-                        false, processedAmountFulfilledWant, transaction.getTimestamp(), id);
-            } else {
-                creator.changeBalance(dcSet, false, false, wantAssetKey,
-                        processedAmountFulfilledWant, false, false, false);
-                transaction.addCalculated(block, creator, wantAssetKey, processedAmountFulfilledWant,
-                        "Resolve Order @" + Transaction.viewDBRef(id));
-            }
+            AssetCls.processTrade(dcSet, block, creator,
+                    true, assetHave, assetWant,
+                    false, processedAmountFulfilledWant, transaction.getTimestamp(), id);
         }
 
         // с ордера сколько было продано моего актива? на это число уменьшаем залог
@@ -551,13 +453,17 @@ public class OrderProcess {
         //// тут нужно получить остатки все из текущего состояния иначе индексы по измененной цене с остатков не удалятся
         /// поэтому смотрим что есть в таблице и если есть то его грузим с ценой по остаткам той что в базе
         // Этот ордер передадим на верх БЕЗ ИЗМЕНЕНИЯ ТУТ - для восстановления остатков
-        Order orderThis = completedMap.remove(id);
-        if (orderThis == null) {
+        Order orderThis;
+        // сначала с малой базе быстрый поиск
+        if (ordersMap.contains(id)) {
             orderThis = ordersMap.remove(id);
         } else {
-            if (orderThis.isCanceled()) {
-                // это значит что ордер быо автоматически закрыт by Unresolved / outPrice
-                // назад вернем
+            orderThis = completedMap.remove(id);
+            if (orderThis.isCanceled()
+                    // возможно СТАТУС станет в будущем как Закрыт а не Отменен, тогда эта проверка сработает:
+                    || orderThis.getAmountHaveLeft().signum() > 0) {
+                // это значит что ордер был автоматически закрыт by Unresolved / outPrice
+                // назад вернем этот остаток
                 orderThis.getCreator().changeBalance(dcSet, true, false, orderThis.getHaveAssetKey(),
                         orderThis.getAmountHaveLeft(), false, false,
                         true, Account.BALANCE_POS_PLEDGE);
@@ -586,34 +492,37 @@ public class OrderProcess {
         AssetCls assetWant = dcSet.getItemAssetMap().get(wantAssetKey);
 
         //ORPHAN TRADES
-        Trade trade;
         try (IteratorCloseable<Fun.Tuple2<Long, Long>> iterator = tradesMap.getIteratorByInitiator(id)) {
             while (iterator.hasNext()) {
 
-                trade = tradesMap.get(iterator.next());
+                final Trade trade = tradesMap.get(iterator.next());
                 if (!trade.isTrade()) {
                     continue;
                 }
-                Order target = trade.getTargetOrder(dcSet);
-                if (target.isCanceled()) {
-                    // это значит что ордер быо автоматически закрыт by Unresolved / outPrice
-                    // назад вернем
-                    target.getCreator().changeBalance(dcSet, true, false, wantAssetKey,
-                            target.getAmountHaveLeft(), false, false,
-                            true, Account.BALANCE_POS_PLEDGE);
+                Order target;
+                // сначала с малой базе быстрый поиск
+                if (ordersMap.contains(trade.getTarget())) {
+                    //// Пока не изменились Остатки и цена по Остатки не съехала, удалим из таблицы ордеров
+                    /// иначе вторичный ключ останется так как он не будет найден из-за измененной "цены по остаткам"
+                    target = ordersMap.remove(trade.getTarget());
+                } else {
+                    //DELETE FROM COMPLETED ORDERS- он может быть был отменен, поэтому нельзя проверять по Fulfilled
+                    // - на всякий случай удалим его в любом случае
+                    target = completedMap.remove(trade.getTarget());
+                    if (target.isCanceled()
+                            // возможно СТАТУС станет в будущем как Закрыт а не Отменен, тогда эта проверка сработает:
+                            || target.getAmountHaveLeft().signum() > 0) {
+                        // это значит что ордер быо автоматически закрыт by Unresolved / outPrice
+                        // назад вернем
+                        target.getCreator().changeBalance(dcSet, true, false, wantAssetKey,
+                                target.getAmountHaveLeft(), false, false,
+                                true, Account.BALANCE_POS_PLEDGE);
+                    }
                 }
 
                 //REVERSE FUNDS
                 BigDecimal tradeAmountHave = trade.getAmountHave();
                 BigDecimal tradeAmountWant = trade.getAmountWant();
-
-                //DELETE FROM COMPLETED ORDERS- он может быть был отменен, поэтому нельзя проверять по Fulfilled
-                // - на всякий случай удалим его в любом случае
-                completedMap.delete(target);
-
-                //// Пока не изменились Остатки и цена по Остаткм не съехала, удалим из таблицы ордеров
-                /// иначе вторичный ключ останется так как он не будет найден из-за измененой "цены по остаткам"
-                ordersMap.delete(target);
 
                 //REVERSE FULFILLED
                 target.fulfill(tradeAmountHave.negate());
@@ -626,17 +535,12 @@ public class OrderProcess {
                 // REVERSE THIS ORDER
                 thisAmountFulfilledWant = thisAmountFulfilledWant.add(tradeAmountHave);
 
-                if (height > BlockChain.VERS_5_3) {
-                    AssetCls.processTrade(dcSet, block, target.getCreator(),
-                            false, assetWant, assetHave,
-                            true, tradeAmountWant,
-                            blockTime,
-                            0L);
-                } else {
+                AssetCls.processTrade(dcSet, block, target.getCreator(),
+                        false, assetWant, assetHave,
+                        true, tradeAmountWant,
+                        blockTime,
+                        0L);
 
-                    target.getCreator().changeBalance(dcSet, true, false, haveAssetKey,
-                            tradeAmountWant, false, false, false);
-                }
                 // Учтем что у стороны ордера обновилась форжинговая информация
                 if (haveAssetKey == Transaction.RIGHTS_KEY && block != null) {
                     block.addForgingInfoUpdate(target.getCreator());
@@ -666,14 +570,9 @@ public class OrderProcess {
         }
 
         //REVERT WANT
-        if (height > BlockChain.VERS_5_3) {
-            AssetCls.processTrade(dcSet, block, creator,
-                    true, assetHave, assetWant,
-                    true, thisAmountFulfilledWant, blockTime, 0L);
-        } else {
-            creator.changeBalance(dcSet, true, false, wantAssetKey,
-                    thisAmountFulfilledWant, false, false, false);
-        }
+        AssetCls.processTrade(dcSet, block, creator,
+                true, assetHave, assetWant,
+                true, thisAmountFulfilledWant, blockTime, 0L);
 
         return orderThis;
     }
