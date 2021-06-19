@@ -240,7 +240,7 @@ public class BlockChain {
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
      * см issue https://lab.erachain.org/erachain/Erachain/-/issues/1322
      */
-    public static final int LEFT_PRICE_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? 0 : 623904;
+    public static final int LEFT_PRICE_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
     /**
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
@@ -321,6 +321,7 @@ public class BlockChain {
     final public static BigDecimal MAX_TRADE_DEVIATION_HI = new BigDecimal("0.005");
     final public static BigDecimal MAX_ORDER_DEVIATION = new BigDecimal("0.002");
     final public static BigDecimal MAX_ORDER_DEVIATION_LOW = new BigDecimal("0.0005");
+    final public static BigDecimal MAX_TRADE_DEVIATION = new BigDecimal("1.00001");
 
 
     public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : !MAIN_MODE ? 0 : VERS_4_11;
