@@ -243,7 +243,7 @@ public class BlockChain {
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
 
-    public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
+    //public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
     public static final int VERS_4_12 = VERS_4_11;
 
