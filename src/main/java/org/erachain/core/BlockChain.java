@@ -231,8 +231,8 @@ public class BlockChain {
      */
     public static int ALL_VALID_BEFORE = 0; // see in sidePROTOCOL.json as 'allValidBefore'
     public static final int WIN_VAL_ALL_VALID = 0;
-    public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 132057 : 0;
-    public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 132057 : 0;
+    public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 55500 : 0;
+    public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 53495 : 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
