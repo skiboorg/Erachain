@@ -169,7 +169,7 @@ public class AssetUnique extends AssetCls {
         byte[] assetTypeBytes = Arrays.copyOfRange(data, position, position + ASSET_TYPE_LENGTH);
         position += ASSET_TYPE_LENGTH;
 
-        //RETURN
+        //RETURN // 75500
         AssetUnique unique = new AssetUnique(typeBytes, appData, maker, name, icon, image, description, Byte.toUnsignedInt(assetTypeBytes[0]));
         if (includeReference) {
             unique.setReference(reference, dbRef);
