@@ -1642,7 +1642,7 @@ public class Account {
     }
 
     public static Tuple3<String, String, String> getFromFavorites(String address) {
-        return Controller.getInstance().getWallet().database.getFavoriteAccountsMap().get(address);
+        return Controller.getInstance().getWallet().dwSet.getFavoriteAccountsMap().get(address);
 
     }
 
@@ -1651,7 +1651,7 @@ public class Account {
     }
 
     public Integer getAccountNo() {
-        return Controller.getInstance().getWallet().database.getAccountMap().getAccountNo(getAddress());
+        return Controller.getInstance().getWallet().dwSet.getAccountMap().getAccountNo(getAddress());
     }
 
 }

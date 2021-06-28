@@ -818,8 +818,9 @@ public class Controller extends Observable {
                 this.wallet.initiateItemsFavorites();
             }
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Wallet OK" + " " + Settings.getInstance().getDataWalletPath()));
-            LOGGER.info("Wallet OK" + " " + Settings.getInstance().getDataWalletPath());
+            String mess = "Wallet OK" + " " + Settings.getInstance().getDataWalletPath();
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, mess));
+            LOGGER.info(mess);
 
             // create telegtam
 
@@ -893,7 +894,10 @@ public class Controller extends Observable {
         Settings.getInstance().setWalletKeysPath(selectedDir);
 
         // open wallet
-        Controller.getInstance().wallet = new Wallet(dcSet, dcSetWithObserver, dynamicGUI);
+        if (Controller.getInstance().wallet == null) {
+            Controller.getInstance().wallet = new Wallet(dcSet, dcSetWithObserver, dynamicGUI);
+        }
+
         // not wallet return 0;
         if (!Controller.getInstance().wallet.walletKeysExists()) {
             Settings.getInstance().setWalletKeysPath(pathOld);
@@ -1723,8 +1727,8 @@ public class Controller extends Observable {
             // BROADCAST MESSAGE
             this.network.broadcast(telegram, false);
             // save DB
-            if (wallet != null && wallet.database != null) {
-                wallet.database.getTelegramsMap().add(transaction.viewSignature(), transaction);
+            if (wallet != null && wallet.dwSet != null) {
+                wallet.dwSet.getTelegramsMap().add(transaction.viewSignature(), transaction);
             }
         }
 
@@ -2377,8 +2381,14 @@ public class Controller extends Observable {
         return this.wallet.importAccountSeed(accountSeed);
     }
 
-    public String importPrivateKey(byte[] accountSeed) {
-        return this.wallet.importPrivateKey(accountSeed);
+    public Tuple3<String, Integer, String> importPrivateKey(byte[] privateKey) {
+        if (privateKey.length > 34) {
+            // 64 bytes - from mobile
+            return this.wallet.importPrivateKey(privateKey);
+        } else {
+            // as account pair SEED - 32 bytes
+            return new Tuple3<>(this.wallet.importAccountSeed(privateKey), null, null);
+        }
     }
 
     public byte[] exportAccountSeed(String address) {
@@ -2585,7 +2595,7 @@ public class Controller extends Observable {
     }
 
     public void addTelegramToWallet(Transaction transaction, String signatureKey) {
-        if (wallet == null || wallet.database == null) {
+        if (wallet == null || wallet.dwSet == null) {
             return;
         }
 
@@ -2595,8 +2605,8 @@ public class Controller extends Observable {
         String creatorPubKey58 = creator.getBase58();
         for (Account recipient : recipients) {
             if (wallet.accountExists(recipient)) {
-                wallet.database.getTelegramsMap().add(signatureKey, transaction);
-                if (!wallet.database.getFavoriteAccountsMap().contains(creator58)) {
+                wallet.dwSet.getTelegramsMap().add(signatureKey, transaction);
+                if (!wallet.dwSet.getFavoriteAccountsMap().contains(creator58)) {
                     String title = transaction.getTitle();
                     String description = "";
                     if (transaction instanceof RSend) {
@@ -3776,8 +3786,8 @@ public class Controller extends Observable {
             return null;
         }
 
-        if (wallet != null && wallet.database != null) {
-            Tuple3<String, String, String> favorite = wallet.database.getFavoriteAccountsMap().get(address);
+        if (wallet != null && wallet.dwSet != null) {
+            Tuple3<String, String, String> favorite = wallet.dwSet.getFavoriteAccountsMap().get(address);
             if (favorite != null && favorite.a != null) {
                 return Base58.decode(favorite.a);
             }
