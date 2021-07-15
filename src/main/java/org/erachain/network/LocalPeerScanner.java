@@ -53,9 +53,14 @@ public class LocalPeerScanner {
                     Socket scanSocket = new Socket();
                     try {
                         scanSocket.connect(new InetSocketAddress(host, port), 100);
-                        //network.startPeer(scanSocket);
                         scanSocket.close();
                         Peer peer = new Peer(host);
+                        if (Network.isMyself(peer.getAddress())) {
+                            continue;
+                        }
+
+                        logger.info("try connect to: " + peer);
+
                         if (peer.connect(null, network, " connect to local Peer")) {
                             result.add(host);
                             counter++;
