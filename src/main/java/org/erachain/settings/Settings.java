@@ -44,7 +44,7 @@ public class Settings {
 
     public static boolean ERA_COMPU_ALL_UP;
 
-    public static boolean EXCHANGE_IN_OUT = false;
+    public static boolean EXCHANGE_IN_OUT;
 
     // FOR TEST by default
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
@@ -211,7 +211,7 @@ public class Settings {
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
-        EXCHANGE_IN_OUT = isMainNet() || true;
+        EXCHANGE_IN_OUT = isMainNet();
 
         File file = new File("");
         //TRY READ PEERS.JSON
