@@ -330,7 +330,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
-        EXCHANGE_IN_OUT = isMainNet();
+        EXCHANGE_IN_OUT = isCloneNet();
 
         File file = new File("");
         //TRY READ PEERS.JSON
