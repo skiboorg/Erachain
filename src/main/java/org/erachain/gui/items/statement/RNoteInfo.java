@@ -14,6 +14,8 @@ import org.erachain.datachain.DCSet;
 import org.erachain.gui.PasswordPane;
 import org.erachain.gui.library.FileChooser;
 import org.erachain.gui.library.Library;
+import org.erachain.gui.library.MAttachedFilesPanel;
+import org.erachain.gui.library.SignLibraryPanel;
 import org.erachain.gui.transaction.RecDetailsFrame;
 import org.erachain.lang.Lang;
 import org.erachain.utils.MenuPopupUtil;
@@ -31,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -50,9 +53,10 @@ import java.util.zip.DataFormatException;
 public class RNoteInfo extends RecDetailsFrame {
 
     RSignNote statement;
+    ExData exData;
     RSignNote statementEncrypted;
-    //private MAttachedFilesPanel file_Panel;
-    //private SignLibraryPanel voush_Library_Panel;
+    private MAttachedFilesPanel file_Panel;
+    private SignLibraryPanel voush_Library_Panel;
     private javax.swing.JLabel jLabel_Title;
     private JTextPane jTextArea_Body;
 
@@ -75,12 +79,6 @@ public class RNoteInfo extends RecDetailsFrame {
 
     private void initComponents() {
 
-
-        jTextArea_Body = new JTextPane();
-        jTextArea_Body.setContentType("text/html");
-        jTextArea_Body.setEditable(false);
-        MenuPopupUtil.installContextMenu(jTextArea_Body);
-
         ++labelGBC.gridy;
         jLabel_Title = new JLabel(Lang.T("Title") + ":");
         add(jLabel_Title, labelGBC);
@@ -88,25 +86,10 @@ public class RNoteInfo extends RecDetailsFrame {
         fieldGBC.gridy = labelGBC.gridy;
         add(new JLabel(statement.getTitle()), fieldGBC);
 
-        JScrollPane jScrollPane_Message_TextPane = new JScrollPane();
-        jScrollPane_Message_TextPane.setViewportView(jTextArea_Body);
-        jScrollPane_Message_TextPane.setPreferredSize(new Dimension(0, 500));
-
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.fill = GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = ++labelGBC.gridy;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 0.1;
-        gridBagConstraints.gridwidth = 3;
-        add(jScrollPane_Message_TextPane, gridBagConstraints);
-
-
         if (statement.isEncrypted()) {
             JCheckBox encrypted = new JCheckBox(Lang.T("Encrypted"));
             encrypted.setSelected(true);
-            ++fieldGBC.gridy;
+            fieldGBC.gridy = ++labelGBC.gridy;
             add(encrypted, fieldGBC);
 
             encrypted.addActionListener(new ActionListener() {
@@ -158,21 +141,27 @@ public class RNoteInfo extends RecDetailsFrame {
                     }
                 }
             });
-
         }
 
-        //++fieldGBC.gridy;
-        //add(file_Panel, fieldGBC);
+        /////////////
+        JScrollPane jScrollPane_Message_TextPane = new JScrollPane();
+        jTextArea_Body = new JTextPane();
+        jTextArea_Body.setContentType("text/html");
+        jTextArea_Body.setEditable(false);
+        MenuPopupUtil.installContextMenu(jTextArea_Body);
+        jScrollPane_Message_TextPane.setViewportView(jTextArea_Body);
+        jScrollPane_Message_TextPane.setPreferredSize(new Dimension(0, 500));
 
-        //jSplitPane1.setLeftComponent(jPanel1);
-
-        //voush_Library_Panel = new SignLibraryPanel(transaction);
-        //++fieldGBC.gridy;
-        //add(voush_Library_Panel, fieldGBC);
-        //
-
-        //++fieldGBC.gridy;
-        //add(jSplitPane1, fieldGBC);
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = ++labelGBC.gridy;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.gridwidth = 3;
+        add(jScrollPane_Message_TextPane, gridBagConstraints);
+        ///////////////////
 
         jTextArea_Body.addHyperlinkListener(new HyperlinkListener() {
 
@@ -182,6 +171,50 @@ public class RNoteInfo extends RecDetailsFrame {
                 if (arg0.getEventType() != HyperlinkEvent.EventType.ACTIVATED) return;
 
                 String fileName = arg0.getDescription();
+                if (fileName.startsWith("#T#")) {
+                    // TEMPLATE
+                    fileName = "doc" + statement.viewHeightSeq();
+                    String valuedText = exData.getValuedText();
+                    valuedText = Library.to_HTML(valuedText);
+                    fileName += Library.will_HTML(valuedText) ? ".html" : ".html";
+
+                    FileChooser chooser = new FileChooser();
+                    chooser.setDialogTitle(Lang.T("Save File") + ": " + fileName);
+                    //chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                    chooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+                    chooser.setMultiSelectionEnabled(false);
+                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    //chooser.setAcceptAllFileFilterUsed(false);
+
+                    if (chooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
+
+                        String pp = chooser.getSelectedFile().getPath() + File.separatorChar + fileName;
+
+                        File ff = new File(pp);
+                        // if file
+                        if (ff.exists() && ff.isFile()) {
+                            int aaa = JOptionPane.showConfirmDialog(chooser,
+                                    Lang.T("File") + " " + fileName
+                                            + " " + Lang.T("Exists") + "! "
+                                            + Lang.T("Overwrite") + "?", Lang.T("Message"),
+                                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                            if (aaa != 0) {
+                                return;
+                            }
+                            ff.delete();
+
+                        }
+
+                        try (FileOutputStream fos = new FileOutputStream(pp)) {
+                            byte[] buffer = valuedText.getBytes(StandardCharsets.UTF_8);
+                            fos.write(buffer, 0, buffer.length);
+                        } catch (IOException ex) {
+                            System.out.println(ex.getMessage());
+                        }
+
+                        return;
+                    }
+                }
 
                 FileChooser chooser = new FileChooser();
                 chooser.setDialogTitle(Lang.T("Save File") + ": " + fileName);
@@ -229,27 +262,31 @@ public class RNoteInfo extends RecDetailsFrame {
                         }
 
                     } catch (IOException ex) {
-
                         System.out.println(ex.getMessage());
                     }
 
                 }
 
-
             }
         });
 
-    }// </editor-fold>
+        if (false) {
+            // старая версия - теперь все в HTML поле скопом со ссылками
+            ++fieldGBC.gridy;
+            file_Panel = new MAttachedFilesPanel();
+            add(file_Panel, fieldGBC);
 
-    //public void delay_on_Close() {
-    //    voush_Library_Panel.delay_on_close();
-    //}
+            voush_Library_Panel = new SignLibraryPanel(transaction);
+            ++fieldGBC.gridy;
+            add(voush_Library_Panel, fieldGBC);
+        }
+
+    }
 
     @SuppressWarnings("unchecked")
     private void viewInfo() {
 
         String resultStr = "";
-        ExData exData;
 
         exData = statement.getExData();
         exData.setDC(DCSet.getInstance());
@@ -306,7 +343,8 @@ public class RNoteInfo extends RecDetailsFrame {
         long templateKey = exData.getTemplateKey();
         if (templateKey > 0) {
             TemplateCls template = exData.getTemplate();
-            resultStr += "<h2>" + template.toString(DCSet.getInstance()) + "</h2>";
+            resultStr += "<a href=#T#" + template.getKey() + "><h2>" + template.toString(DCSet.getInstance()) + "</h2></a>";
+
             String valuedText = exData.getValuedText();
             if (valuedText != null) {
                 resultStr += Library.to_HTML(valuedText);
@@ -361,7 +399,7 @@ public class RNoteInfo extends RecDetailsFrame {
                     boolean zip = new Boolean(file.getValue().b);
                     String name_File = file.getKey();
                     byte[] file_byte = file.getValue().c;
-                    //file_Panel.addRow(name_File, zip, file_byte);
+                    file_Panel.addRow(name_File, zip, file_byte);
                 }
                 //file_Panel.fireTableDataChanged();
             }
@@ -390,7 +428,7 @@ public class RNoteInfo extends RecDetailsFrame {
             resultStr += "<br>";
         }
 
-        if (exData.getTags() != null) {
+        if (exData.hasTags()) {
             resultStr += "<h4>" + Lang.T("Tags") + "</h4>";
             resultStr += statement.getExTags();
 
