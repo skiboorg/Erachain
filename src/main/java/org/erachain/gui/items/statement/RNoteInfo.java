@@ -2,6 +2,7 @@ package org.erachain.gui.items.statement;
 
 import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
+import org.erachain.core.blockexplorer.WebTransactionsHTML;
 import org.erachain.core.exdata.ExData;
 import org.erachain.core.exdata.exActions.ExAction;
 import org.erachain.core.exdata.exLink.ExLinkAuthor;
@@ -12,12 +13,10 @@ import org.erachain.core.transaction.RSignNote;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.gui.PasswordPane;
-import org.erachain.gui.library.FileChooser;
-import org.erachain.gui.library.Library;
-import org.erachain.gui.library.MAttachedFilesPanel;
-import org.erachain.gui.library.SignLibraryPanel;
+import org.erachain.gui.library.*;
 import org.erachain.gui.transaction.RecDetailsFrame;
 import org.erachain.lang.Lang;
+import org.erachain.settings.Settings;
 import org.erachain.utils.MenuPopupUtil;
 import org.erachain.utils.ZipBytes;
 import org.json.simple.JSONObject;
@@ -87,10 +86,13 @@ public class RNoteInfo extends RecDetailsFrame {
         add(new JLabel(statement.getTitle()), fieldGBC);
 
         if (statement.isEncrypted()) {
+            statementEncrypted = statement;
+
+            JPanel cryptPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+
             JCheckBox encrypted = new JCheckBox(Lang.T("Encrypted"));
             encrypted.setSelected(true);
-            fieldGBC.gridy = ++labelGBC.gridy;
-            add(encrypted, fieldGBC);
+            cryptPanel.add(encrypted);
 
             encrypted.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -108,11 +110,9 @@ public class RNoteInfo extends RecDetailsFrame {
                             }
                         }
 
-                        statementEncrypted = statement;
-
                         Account account = cntr.getInvolvedAccount(statement);
                         Fun.Tuple3<Integer, String, RSignNote> result = statement.decrypt(account);
-                        if (result.a < 0) {
+                        if (result.a != null && result.a < 0) {
                             JOptionPane.showMessageDialog(null,
                                     Lang.T(result.b == null ? "Not exists Account access" : result.b),
                                     Lang.T("Not decrypted"), JOptionPane.ERROR_MESSAGE);
@@ -141,6 +141,47 @@ public class RNoteInfo extends RecDetailsFrame {
                     }
                 }
             });
+
+            JButton decryptByPassword = new JButton(Lang.T("Decrypt by Password"));
+            decryptByPassword.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    // TODO Auto-generated method stub
+                    if (encrypted.isSelected()) {
+                        String password = GetPasswordPane.showDialog(decryptByPassword, "Decrypt by Password");
+                        if (password == null) {
+                            return;
+                        } else if (password.length() < 10) {
+                            JOptionPane.showMessageDialog(null,
+                                    Lang.T("Password so short"),
+                                    Lang.T("Error"), JOptionPane.ERROR_MESSAGE);
+
+                            return;
+
+                        }
+                        Fun.Tuple2<String, RSignNote> result = statement.decryptByPassword(password);
+                        if (result.b == null) {
+                            JOptionPane.showMessageDialog(null,
+                                    Lang.T(result.a),
+                                    Lang.T("Not decrypted"), JOptionPane.ERROR_MESSAGE);
+
+                            return;
+
+                        }
+
+                        encrypted.setSelected(!encrypted.isSelected());
+
+                        statement = result.b;
+                        statement.parseDataFull();
+                        viewInfo();
+                    }
+                }
+            });
+
+            cryptPanel.add(decryptByPassword);
+
+            fieldGBC.gridy = ++labelGBC.gridy;
+            add(cryptPanel, fieldGBC);
         }
 
         /////////////
@@ -176,7 +217,19 @@ public class RNoteInfo extends RecDetailsFrame {
                     fileName = "doc" + statement.viewHeightSeq();
                     String valuedText = exData.getValuedText();
                     valuedText = Library.to_HTML(valuedText);
-                    fileName += Library.will_HTML(valuedText) ? ".html" : ".html";
+                    //fileName += Library.will_HTML(valuedText) ? ".html" : ".txt";
+                    fileName += ".html";
+
+                    String message = exData.getMessage();
+                    if (message != null && !message.isEmpty()) {
+                        valuedText += "<br>";
+                        valuedText += Library.to_HTML(message);
+                    }
+
+                    valuedText += "<br><h2>" + Lang.T("Signs") + "</h2>";
+                    valuedText += WebTransactionsHTML.getSigns(transaction, Lang.getInstance().getLangJson(
+                            Settings.getInstance().getLang()));
+
 
                     FileChooser chooser = new FileChooser();
                     chooser.setDialogTitle(Lang.T("Save File") + ": " + fileName);
@@ -362,8 +415,8 @@ public class RNoteInfo extends RecDetailsFrame {
         }
 
         String message = exData.getMessage();
-        if (message != null) {
-            resultStr += Library.to_HTML(message) + "<br><br>";
+        if (message != null && !message.isEmpty()) {
+            resultStr += "<br>" + Library.to_HTML(message) + "<hr><br>";
         }
 
         if (exData.hasHashes()) {
