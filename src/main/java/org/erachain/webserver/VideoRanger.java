@@ -1,16 +1,21 @@
 package org.erachain.webserver;
 
 import org.erachain.controller.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.util.Enumeration;
 import java.util.Objects;
 
 /**
  * for issue https://lab.erachain.org/erachain/Erachain/-/issues/1721
  */
 public class VideoRanger {
+
+    static Logger LOGGER = LoggerFactory.getLogger(VideoRanger.class.getSimpleName());
 
     /**
      * for CACHE
@@ -33,56 +38,99 @@ public class VideoRanger {
         return url.equals(that.url);
     }
 
+    /**
+     * Первый запрос - выдаем что это тип Видео и размер
+     * - дальше ждем запросы на кусочки и keep alive в запросе чтобы Jetty не рвал соединение.
+     *
+     * @return
+     */
     @Override
     public int hashCode() {
         return Objects.hash(url);
     }
 
-    public static Response getRange(HttpServletRequest request, byte[] data) {
-        int rangeStart = -1;
-        int rangeEnd = -1;
-        String rangeStr = request.getHeader("Range");
-        if (rangeStr == null)
-            rangeStr = request.getHeader("range");
+    // Jetty does not need to be configured to use keep alive.
+    // If the client offers a request that can be kept alive (HTTP/2, HTTP/1.1 or HTTP/1.0 with a keep-alive header),
+    // then jetty will respond automatically to keep the connection alive
+    // - unless there is an error or a filter/servlet/handler explicitly sets Connection:close on the response.
 
-        if (rangeStr != null) {
+    static int RANGE_LEN = 100000;
+
+    public static Response getRange(HttpServletRequest request, byte[] data) {
+
+        long lastUpdated = cnt.blockChain.getGenesisTimestamp();
+        String headerSince = request.getHeader("If-Modified-Since");
+        // сервер шлет запрос мол поменялись данные? мы отвечаем - НЕТ
+        if (false && headerSince != null && !headerSince.isEmpty()) {
+            LOGGER.debug(headerSince + " OK!!!");
+            return Response.status(304) // not modified
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Timing-Allow-Origin", "*")
+                    .header("Last-Modified", lastUpdated)
+                    .build();
+        }
+
+
+        int maxEND = data.length - 1;
+        int rangeStart;
+        int rangeEnd;
+        String rangeStr = request.getHeader("Range");
+        LOGGER.debug("Range: [" + (rangeStr == null ? "null" : rangeStr) + "]");
+        Enumeration<String> headersKeys = request.getHeaderNames();
+        while (headersKeys.hasMoreElements()) {
+            String key = headersKeys.nextElement();
+            LOGGER.debug(key + ": " + request.getHeader(key));
+        }
+
+        if (rangeStr == null || rangeStr.isEmpty() || !rangeStr.startsWith("bytes=")) {
+            // это первый запрос - ответим что тут Видео + его размер
+            return Response.status(206) // range
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Timing-Allow-Origin", "*")
+                    .header("Last-Modified", lastUpdated)
+                    .header("Content-Length", data.length)
+                    .header("Content-Type", "video/mp4")
+                    .header("Accept-Range", "bytes")
+                    .build();
+        } else {
             // Range: bytes=0-1000  // bytes=301867-
-            if (rangeStr.startsWith("bytes=")) {
-                String[] tmp = rangeStr.substring(6).split("-");
+            String[] tmp = rangeStr.substring(6).split("-");
+            rangeStart = Integer.parseInt(tmp[0]);
+            if (tmp.length == 1) {
+                rangeEnd = rangeStart + RANGE_LEN - 1;
+            } else {
                 try {
-                    rangeStart = Integer.parseInt(tmp[0]);
                     rangeEnd = Integer.parseInt(tmp[1]);
                 } catch (Exception e) {
+                    rangeEnd = rangeStart + RANGE_LEN - 1;
                 }
             }
         }
 
-        if (rangeEnd < 0) {
-            return Response.status(200)
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header("Content-length", data.length)
-                    .header("Last-Modified", cnt.blockChain.getGenesisTimestamp())
-                    .header("Content-Type", "video/mp4")
-                    .header("Timing-Allow-Origin", "*")
-                    .entity(new ByteArrayInputStream(data))
-                    .build();
+        if (rangeEnd > maxEND)
+            rangeEnd = maxEND;
 
-        }
-
-        if (rangeEnd > data.length)
-            rangeEnd = data.length;
-
-        byte[] rangeBytes = new byte[rangeEnd - rangeStart];
+        byte[] rangeBytes = new byte[rangeEnd - rangeStart + 1];
         System.arraycopy(data, rangeStart, rangeBytes, 0, rangeBytes.length);
 
-        return Response.status(rangeEnd == data.length ? 200 : 206)
+        int status = rangeEnd == maxEND ? 200 : 206;
+        rangeStr = "bytes " + rangeStart + "-" + rangeEnd + "/" + data.length;
+        LOGGER.debug(status + ": " + rangeStr);
+
+        Response.ResponseBuilder response = Response.status(status)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Timing-Allow-Origin", "*")
-                .header("Last-Modified", cnt.blockChain.getGenesisTimestamp())
-                .header("Content-Type", "video/mp4")
-                .header("Accept-Range", "bytes")
-                .header("Content-Length", rangeBytes.length)
-                .header("Content-Range", "bytes " + rangeStart + "-" + rangeEnd + "/" + data.length)
+                .header("Last-Modified", lastUpdated)
+                .header("Content-Type", "video/mp4");
+
+        if (status == 200) {
+        } else {
+            response.header("Accept-Range", "bytes")
+                    //.header("Content-Length", rangeBytes.length)
+                    .header("Content-Range", rangeStr);
+        }
+
+        return response
                 .entity(new ByteArrayInputStream(rangeBytes))
                 .build();
     }
