@@ -53,83 +53,106 @@ public class VideoRanger {
     // then jetty will respond automatically to keep the connection alive
     // - unless there is an error or a filter/servlet/handler explicitly sets Connection:close on the response.
 
-    static int RANGE_LEN = 25000;
+    /**
+     * Размер буфера для выдачи ответа - сейчас сети очень быстрые - задержка на запрос 42мс,
+     * а ответ в 1МБ с загрузкой - задержка всего 200-300мс. То есть нет смысла бить на маленькие пакеты - тогда время на запросы съедается почем зря
+     * Оптимально 250 к и выше. 250к - это 68мс задержка загрузки - т о есть полностью запрос обрабатывается за 120мс
+     * Но зато если бить мельче то одновременная загрузка большого числа видео будет меньше грузить сервер
+     */
+    static int RANGE_LEN = 1 << 18;
 
-    public static Response getRange(HttpServletRequest request, byte[] data) {
+    public static Response getRange(HttpServletRequest request, byte[] data, boolean asPreview) {
 
         long lastUpdated = cnt.blockChain.getGenesisTimestamp();
         String headerSince = request.getHeader("If-Modified-Since");
         // сервер шлет запрос мол поменялись данные? мы отвечаем - НЕТ
-        if (headerSince != null && !headerSince.isEmpty()) {
-            LOGGER.debug(headerSince + " OK!!!");
+        if (false && headerSince != null && !headerSince.isEmpty()) {
+            //LOGGER.debug(headerSince + " OK!!!");
             return Response.status(304) // not modified
                     .header("Access-Control-Allow-Origin", "*")
-                    .header("Last-Modified", lastUpdated)
+                    .header("Connection", "keep-alive")
+                    .header("Content-Type", "video/mp4")
+                    .header("Accept-Range", "bytes")
                     .build();
         }
 
-
         int maxEND = data.length - 1;
+        int rangeLen = asPreview ? RANGE_LEN >> 2 : RANGE_LEN;
         int rangeStart;
         int rangeEnd;
         String rangeStr = request.getHeader("Range");
 
-        if (rangeStr == null || rangeStr.isEmpty() || !rangeStr.startsWith("bytes=")) {
+        // Sec-Fetch-Dest: document
+        if (rangeStr == null || rangeStr.isEmpty()) {
             // это первый запрос - ответим что тут Видео + его размер
-            return Response.status(206) // set range
+            return Response.status(200) // set as first response
                     .header("Access-Control-Allow-Origin", "*")
-                    .header("Last-Modified", lastUpdated)
+                    .header("Connection", "keep-alive")
+                    //.header("Cache-Control", "public, max-age=31536000")
+                    .header("Content-Transfer-Encoding", "binary")
                     .header("Content-Type", "video/mp4")
                     .header("Accept-Range", "bytes")
+                    //.header("Content-Length", data.length)
+                    //.header("Content-Range", "bytes 0-" + maxEND + "/" + data.length)
+                    // тут походе передача идет пакетами внутри коннекта и не выходит на уровень GET HTTP
+                    // а можно и не слать данные тут - не напрягать сеть?!?!
+                    // - да проверена - это лишь лишняя задержка для сети!
+                    //.entity(new ByteArrayInputStream(data))
                     .build();
         } else {
             // Range: bytes=0-1000  // bytes=301867-
             String[] tmp = rangeStr.substring(6).split("-");
             rangeStart = Integer.parseInt(tmp[0]);
             if (tmp.length == 1) {
-                rangeEnd = rangeStart + RANGE_LEN - 1;
+                rangeEnd = rangeStart + rangeLen - 1;
                 if (rangeEnd > maxEND)
                     rangeEnd = maxEND;
             } else {
                 try {
                     rangeEnd = Integer.parseInt(tmp[1]);
+                    if (rangeEnd <= rangeStart) {
+                        rangeEnd = rangeStart + rangeLen - 1;
+                        if (rangeEnd > maxEND)
+                            rangeEnd = maxEND;
+                    }
                 } catch (Exception e) {
-                    rangeEnd = rangeStart + RANGE_LEN - 1;
+                    rangeEnd = rangeStart + rangeLen - 1;
                     if (rangeEnd > maxEND)
                         rangeEnd = maxEND;
                 }
             }
         }
 
-        if (rangeStart > maxEND || rangeEnd > maxEND) {
+        if (rangeStart < 0 || rangeStart > maxEND || rangeEnd > maxEND) {
             return Response.status(416) // out of range
                     .header("Access-Control-Allow-Origin", "*")
-                    .header("Last-Modified", lastUpdated)
+                    .header("Connection", "keep-alive")
+                    .header("Content-Transfer-Encoding", "binary")
                     .header("Content-Type", "video/mp4")
                     .header("Accept-Range", "bytes")
+                    .header("Content-Length", 0)
+                    .header("Content-Range", "bytes 0-0/" + data.length)
                     .build();
         }
 
         byte[] rangeBytes = new byte[rangeEnd - rangeStart + 1];
         System.arraycopy(data, rangeStart, rangeBytes, 0, rangeBytes.length);
 
-        rangeStr = "bytes " + rangeStart + "-" + rangeEnd + "/" + data.length;
-
-        Response.ResponseBuilder response = Response.status(206)
+        return Response.status(206)
                 .header("Access-Control-Allow-Origin", "*")
-                .header("Last-Modified", lastUpdated)
-                .header("Content-Length", rangeBytes.length)
-                .header("Accept-Range", "bytes")
+                .header("Connection", "keep-alive")
                 .header("Content-Type", "video/mp4")
-                .header("Content-Range", rangeStr);
-
-        return response
+                //.header("Cache-Control", "public, max-age=31536000")
+                .header("Content-Transfer-Encoding", "binary")
+                .header("Accept-Range", "bytes")
+                .header("Content-Length", rangeBytes.length)
+                .header("Content-Range", "bytes " + rangeStart + "-" + rangeEnd + "/" + data.length)
                 .entity(new ByteArrayInputStream(rangeBytes))
                 .build();
     }
 
-    public Response getRange(HttpServletRequest request) {
-        return getRange(request, data);
+    public Response getRange(HttpServletRequest request, boolean asPreview) {
+        return getRange(request, data, asPreview);
     }
 
 }
