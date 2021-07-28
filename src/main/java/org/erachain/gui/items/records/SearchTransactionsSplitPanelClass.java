@@ -8,7 +8,6 @@ import org.erachain.datachain.DCSet;
 import org.erachain.gui.SplitPanel;
 import org.erachain.gui.WalletTableRenderer;
 import org.erachain.gui.items.statement.IssueDocumentPanel;
-import org.erachain.gui.items.statement.SearchStatementsTableModel;
 import org.erachain.gui.library.ASMakeHashMenuItem;
 import org.erachain.gui.library.Library;
 import org.erachain.gui.library.MTable;
@@ -49,13 +48,14 @@ public abstract class SearchTransactionsSplitPanelClass<T> extends SplitPanel {
     public SearchTableModelCls transactionsTableModel;
     public Transaction selectedTransaction;
     private JTextField searchString;
-    private boolean forDocuments;
+    // MENU
+    protected JPopupMenu mainMenu = new JPopupMenu();
+
 
     public SearchTransactionsSplitPanelClass(String name, String title, SearchTableModelCls tableModel) {
         super(name, title);
 
         transactionsTableModel = tableModel;
-        forDocuments = tableModel instanceof SearchStatementsTableModel;
 
         this.searchToolBar_LeftPanel.setVisible(true);
 
@@ -133,9 +133,6 @@ public abstract class SearchTransactionsSplitPanelClass<T> extends SplitPanel {
         jTableJScrollPanelLeftPanel.setDefaultRenderer(Boolean.class, new WalletTableRenderer());
 
         this.jTableJScrollPanelLeftPanel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // MENU
-        JPopupMenu mainMenu = new JPopupMenu();
 
         JMenuItem vouch_menu = new JMenuItem(Lang.T("Sign / Vouch"));
         vouch_menu.addActionListener(new ActionListener() {
@@ -344,6 +341,9 @@ public abstract class SearchTransactionsSplitPanelClass<T> extends SplitPanel {
             jTableJScrollPanelLeftPanel.addRowSelectionInterval(0, 0);
     }
 
+    protected void updateMenu() {
+    }
+
     // listener select row
     class search_listener implements ListSelectionListener {
         @Override
@@ -353,6 +353,8 @@ public abstract class SearchTransactionsSplitPanelClass<T> extends SplitPanel {
                 selectedTransaction = transactionsTableModel
                         .getItem(jTableJScrollPanelLeftPanel.convertRowIndexToModel(jTableJScrollPanelLeftPanel.getSelectedRow()));
 
+
+                updateMenu();
 
                 info_Panel = new JPanel();
                 info_Panel.setLayout(new GridBagLayout());
