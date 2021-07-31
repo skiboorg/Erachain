@@ -220,7 +220,7 @@ public class BlockChain {
             : new String[]{"78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5",
             "7B3gTXXKB226bxTxEHi8cJNfnjSbuuDoMC"};
 
-    public static final int VERS_4_11 = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int VERS_4_11 = 0;
 
     //public static final int ORDER_FEE_DOWN = VERS_4_11;
     public static final int HOLD_VALID_START = VERS_4_11;
@@ -248,7 +248,7 @@ public class BlockChain {
 
     public static final int VERS_4_12 = VERS_4_11;
 
-    public static final int VERS_30SEC = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int VERS_30SEC = 0;
 
     // TODO поидее отрицательное тоже работать будет как надо
     public static final long VERS_30SEC_TIME = 0L;
@@ -329,9 +329,9 @@ public class BlockChain {
 
     public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : !MAIN_MODE ? 0 : VERS_4_11;
 
-    public static final int AMOUNT_SCALE_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int AMOUNT_SCALE_FROM = 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
-    public static final int FREEZE_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : 0;
+    public static final int FREEZE_FROM = 0;
 
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
     public static final String[] TRUE_ADDRESSES = TEST_DB > 0 || TEST_MODE? new String[]{} :
@@ -409,7 +409,7 @@ public class BlockChain {
     /**
      * Включает реферальную систему
      */
-    public static int REFERRAL_BONUS_FOR_PERSON = TEST_DB > 0 || !MAIN_MODE ? 0 : VERS_5_01_01;
+    public static int REFERRAL_BONUS_FOR_PERSON = 0;
 
     /**
      * Multi-level Referral System. Levels for deep
