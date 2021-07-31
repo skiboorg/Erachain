@@ -222,7 +222,7 @@ public class BlockChain {
             : new String[]{"78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5",
             "7B3gTXXKB226bxTxEHi8cJNfnjSbuuDoMC"};
 
-    public static final int VERS_4_11 = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int VERS_4_11 = 0;
 
     //public static final int ORDER_FEE_DOWN = VERS_4_11;
     public static final int HOLD_VALID_START = VERS_4_11;
@@ -235,24 +235,24 @@ public class BlockChain {
     public static final int WIN_VAL_ALL_VALID = 0;
     public static final int ALL_BALANCES_OK_TO = 0;
     public static final int CANCEL_ORDERS_ALL_VALID = 0;
-    public static final int AUTO_CANCEL_ORDERS_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 2135000; //260120;
+    public static final int AUTO_CANCEL_ORDERS_FROM = 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
      * см issue https://lab.erachain.org/erachain/Erachain/-/issues/1322
      */
-    public static final int LEFT_PRICE_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int LEFT_PRICE_HEIGHT = 0;
     /**
      * {@link LEFT_PRICE_HEIGHT} as SeqNo
      */
 
     //public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
-    public static final int SKIP_VALID_SIGN_BEFORE = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int SKIP_VALID_SIGN_BEFORE = 0;
 
     public static final int VERS_4_12 = VERS_4_11;
 
-    public static final int VERS_30SEC = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int VERS_30SEC = 0;
 
     // TODO поидее отрицательное тоже работать будет как надо
     public static final long VERS_30SEC_TIME =
@@ -269,10 +269,10 @@ public class BlockChain {
     /**
      * Новый уровень начальных номеров для всех сущностей
      */
-    public static int START_KEY_UP = MAIN_MODE ? 1650000 : DEMO_MODE ? 0 : Integer.MAX_VALUE;
+    public static int START_KEY_UP = 0;
     public static int START_KEY_UP_ITEMS = 1 << 20;
 
-    public static final int USE_NEW_ISSUE_FEE = MAIN_MODE ? 1777777 : 0;
+    public static final int USE_NEW_ISSUE_FEE = 0;
     public static final int MINIMAL_ISSUE_FEE = 200 * 500;
     public static final int MINIMAL_ISSUE_FEE_ACCOUNTING_ASSET = BlockChain.MINIMAL_ISSUE_FEE / 5;
     public static final int MINIMAL_ISSUE_FEE_IMPRINT = BlockChain.MINIMAL_ISSUE_FEE / 20;
@@ -327,9 +327,9 @@ public class BlockChain {
 
     public static final int ITEM_POLL_FROM = TEST_DB > 0 ? 0 : !MAIN_MODE ? 0 : VERS_4_11;
 
-    public static final int AMOUNT_SCALE_FROM = TEST_DB > 0 || !MAIN_MODE ? 0 : 0;
+    public static final int AMOUNT_SCALE_FROM = 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
-    public static final int FREEZE_FROM = TEST_DB > 0 ? 0 : CLONE_MODE || TEST_MODE ? 0 : 0;
+    public static final int FREEZE_FROM = 0;
 
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
     public static final String[] TRUE_ADDRESSES = TEST_DB > 0 || TEST_MODE? new String[]{} :
@@ -406,7 +406,7 @@ public class BlockChain {
     /**
      * Включает реферальную систему
      */
-    public static int REFERRAL_BONUS_FOR_PERSON = TEST_DB > 0 || !MAIN_MODE ? 0 : VERS_5_01_01;
+    public static int REFERRAL_BONUS_FOR_PERSON = 0;
 
     /**
      * Multi-level Referral System. Levels for deep
