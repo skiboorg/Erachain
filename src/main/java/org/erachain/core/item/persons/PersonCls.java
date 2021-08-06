@@ -7,7 +7,10 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.transaction.Transaction;
-import org.erachain.datachain.*;
+import org.erachain.datachain.DCSet;
+import org.erachain.datachain.ItemAssetBalanceMap;
+import org.erachain.datachain.ItemMap;
+import org.erachain.datachain.TransactionFinalMap;
 import org.erachain.lang.Lang;
 import org.erachain.settings.Settings;
 import org.erachain.utils.ByteArrayUtils;
@@ -220,7 +223,7 @@ public abstract class PersonCls extends ItemCls {
     }
 
     public Set<String> getPubKeys(DCSet dcSet) {
-        return dcSet.getPersonAddressMap().getItems(this.getKey(dcSet)).keySet();
+        return dcSet.getPersonAddressMap().getItems(this.getKey()).keySet();
     }
 
     public static BigDecimal getBalance(long personKey, long assetKey, int pos, int side) {
@@ -323,10 +326,6 @@ public abstract class PersonCls extends ItemCls {
         return db.getItemPersonMap();
     }
 
-    public IssueItemMap getDBIssueMap(DCSet db) {
-        return db.getIssuePersonMap();
-    }
-
     public int isValid() {
         if (hasIconURL()) {
             // нельзя делать ссылку на иконку у Персон
@@ -424,7 +423,7 @@ public abstract class PersonCls extends ItemCls {
 
     @Override
     public String toString(DCSet db) {
-        long key = this.getKey(db);
+        long key = this.getKey();
         return "[" + (key < 1 ? "?" : key) + (this.typeBytes[0] == HUMAN ? "" : "U") + "]"
                 + this.name // + "♥"
                 ///+ DateTimeFormat.timestamptoString(birthday, "dd-MM-YY", "UTC")
@@ -453,7 +452,7 @@ public abstract class PersonCls extends ItemCls {
 
     @Override
     public String getShort(DCSet db) {
-        long key = this.getKey(db);
+        long key = this.getKey();
         return "[" + (key < 1 ? "?" : key) + (this.typeBytes[0] == HUMAN ? "" : "U") + "]"
                 + this.name.substring(0, Math.min(this.name.length(), 20)) //"♥"
                 //+ DateTimeFormat.timestamptoString(birthday, "dd-MM-YY", "UTC")
