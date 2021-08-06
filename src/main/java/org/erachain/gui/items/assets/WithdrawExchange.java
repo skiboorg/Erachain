@@ -62,7 +62,7 @@ public class WithdrawExchange extends IconPanel {
         cbxInAssets = new JComboBox<>(new FundTokensComboBoxModel(false));
 
         cbxOutAssets = new JComboBox<>(new String[]{"BTC",
-                //, "DOGE", "LTC", "DASH"
+                "DOGE", "LTC", "DASH"
         });
 
         initComponents(assetIn, account);

@@ -84,14 +84,15 @@ public class DepositExchange extends IconPanel {
 
         cbxAssetsInput = new JComboBox<>(new String[]{
                 "BTC",
-                //"DOGE", "LTC",
-                //"DASH"
+                "DOGE", "LTC",
+                "DASH"
         });
 
         cbxAssetsBuy = new JComboBox<>(new String[]{
-                //AssetCls.ERA_ABBREV, AssetCls.FEE_NAME,
+                AssetCls.ERA_ABBREV, AssetCls.FEE_NAME,
                 "BTC",
-                //"USD" //, "DOGE", "LTC", "DASH"
+                "DOGE", "LTC", "DASH",
+                "USD"
         });
 
         this.amount = amount;
