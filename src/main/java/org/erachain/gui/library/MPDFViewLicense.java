@@ -303,7 +303,7 @@ public class MPDFViewLicense extends javax.swing.JPanel {
             return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
         } catch (Exception e) {
             logger.error(e.getMessage() + " - " + fileName, e);
-            Controller.getInstance().stopAll(3);
+            Controller.getInstance().stopAndExit(3);
         }
 
         return null;
