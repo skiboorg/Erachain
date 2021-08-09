@@ -540,7 +540,7 @@ public class Controller extends Observable {
                     LOGGER.error("Error during backup, tru recreate " + name);
                     LOGGER.error(e2.getMessage(), e2);
                     // не смогли пересоздать выход!
-                    stopAll(-3);
+                    stopAndExit(-3);
                 }
 
             }
@@ -659,7 +659,7 @@ public class Controller extends Observable {
                 reCreateDC(inMemoryDC);
             } catch (Throwable e1) {
                 LOGGER.error(e1.getMessage(), e1);
-                stopAll(5);
+                stopAndExit(5);
             }
         }
 
@@ -694,7 +694,7 @@ public class Controller extends Observable {
                 reCreateDC(inMemoryDC);
             } catch (Throwable e) {
                 LOGGER.error(e.getMessage(), e);
-                stopAll(6);
+                stopAndExit(6);
             }
         }
 
@@ -849,7 +849,7 @@ public class Controller extends Observable {
             @Override
             public void run() {
                 // -999999 - not use System.exit() - if freeze exit
-                stopAll(-999999);
+                stopAndExit(-999999);
                 //Runtime.getRuntime().removeShutdownHook(currentThread());
             }
         });
@@ -1057,7 +1057,7 @@ public class Controller extends Observable {
         return this.isStopping;
     }
 
-    public void stopAll(int par) {
+    public void stopAndExit(int par) {
         // PREVENT MULTIPLE CALLS
         if (this.isStopping)
             return;
