@@ -4,10 +4,8 @@ import com.toedter.calendar.JDateChooser;
 import org.erachain.controller.Controller;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.item.persons.PersonsUnion;
-import org.erachain.core.transaction.IssuePersonRecord;
 import org.erachain.gui.items.IssueItemPanel;
 import org.erachain.gui.items.utils.GUIConstants;
-import org.erachain.gui.library.Library;
 import org.erachain.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +44,16 @@ public class IssuePersonsUnionPanel extends IssueItemPanel {
     }
 
     public IssuePersonsUnionPanel(String name, String title) {
-        super(name, title, "Person issue has been sent!", false, GUIConstants.WIDTH_IMAGE, GUIConstants.HEIGHT_IMAGE, false, false);
+        super(name, title, null, null,
+                false, GUIConstants.WIDTH_IMAGE, GUIConstants.HEIGHT_IMAGE, false, false);
         initComponents(true);
         initLabels();
 
     }
 
     public IssuePersonsUnionPanel(String name, String title, String issueMess) {
-        super(name, title, issueMess, false, GUIConstants.WIDTH_IMAGE, GUIConstants.HEIGHT_IMAGE, false, false);
+        super(name, title, "IssuePersonsUnionPanel.titleDescription", issueMess, false,
+                GUIConstants.WIDTH_IMAGE, GUIConstants.HEIGHT_IMAGE, false, false);
     }
 
     protected void initLabels() {
@@ -259,25 +259,14 @@ public class IssuePersonsUnionPanel extends IssueItemPanel {
     }
 
 
+    @Override
     protected void makeTransaction() {
 
         PersonsUnion union = new PersonsUnion(itemAppData, creator, nameField.getText(),
                 addIconLabel.getMediaBytes(), addImageLabel.getMediaBytes(), textAreaDescription.getText(), (byte) 0);
 
-        transaction = (IssuePersonRecord) Controller.getInstance().issuePerson(creator, exLink, feePow,
+        transaction = Controller.getInstance().issuePerson(creator, exLink, feePow,
                 union);
-    }
-
-    @Override
-    protected String makeTransactionView() {
-        String text = "<HTML><body>";
-        text += Lang.T("Confirmation Transaction") + ":&nbsp;"
-                + Lang.T("Issue Union") + "<br><br><br>"
-                + makeHeadView("Name");
-        text += "<br>" + Lang.T("Description") + ":<br>"
-                + Library.to_HTML(this.textAreaDescription.getText()) + "<br>";
-
-        return text;
     }
 
 }

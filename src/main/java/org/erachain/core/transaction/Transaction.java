@@ -74,11 +74,12 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     public static final int FOR_DB_RECORD = 4; // use all + calcalated fields (FEE, BlockNo + SeqNo)
 
     // FLAGS for VALIDATING
-    public static final long NOT_VALIDATE_FLAG_FEE = 1l;
-    public static final long NOT_VALIDATE_FLAG_PERSONAL = 2l;
-    public static final long NOT_VALIDATE_FLAG_PUBLIC_TEXT = 4l;
-    public static final long NOT_VALIDATE_FLAG_BALANCE = 8l;
-    public static final long NOT_VALIDATE_KEY_COLLISION = 16l;
+    public static final long NOT_VALIDATE_FLAG_FEE = 1L;
+    public static final long NOT_VALIDATE_FLAG_PERSONAL = 2L;
+    public static final long NOT_VALIDATE_FLAG_PUBLIC_TEXT = 4L;
+    public static final long NOT_VALIDATE_FLAG_BALANCE = 8L;
+    public static final long NOT_VALIDATE_KEY_COLLISION = 16L;
+    public static final long NOT_VALIDATE_ITEM = 32L;
 
     //
     public static final int MAX_TITLE_BYTES_LENGTH = (1 << 8) - 2;
@@ -161,6 +162,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     public static final int INVALID_MAX_ITEMS_COUNT = 85;
 
+    public static final int INVALID_MAX_COUNT = 87;
+    public static final int INVALID_ITEM_INDEX = 88;
+
     public static final int NOT_ENOUGH_ERA_OWN = 101;
     public static final int NOT_ENOUGH_ERA_USE = 102;
     public static final int NOT_ENOUGH_ERA_OWN_10 = 103;
@@ -189,6 +193,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     public static final int INVALID_TITLE_LENGTH_MAX = 162;
     public static final int INVALID_TAGS_LENGTH_MAX = 163;
     public static final int INVALID_ICON_TYPE = 164;
+    public static final int INVALID_IMAGE_TYPE = 165;
 
     public static final int NOT_DEBTABLE_ASSET = 171;
     public static final int NOT_HOLDABLE_ASSET = 172;
@@ -252,6 +257,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     public static final int NAME_NOT_LOWER_CASE = 5065;
     public static final int NAME_WITH_SPACE = 5066;
 
+    public static final int CREATOR_NOT_MAKER = 366;
     public static final int CREATOR_NOT_OWNER = 367;
     public static final int NAME_KEY_ALREADY_EXISTS = 368;
     public static final int NAME_KEY_NOT_EXISTS = 369;
@@ -326,6 +332,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     public static final int SIGN_TRANSACTION = 40;
     // HASHES
     public static final int HASHES_RECORD = 41;
+
+    public static final int ISSUE_ASSET_SERIES_TRANSACTION = 42;
+
     // exchange of assets
     public static final int CREATE_ORDER_TRANSACTION = 50;
     public static final int CANCEL_ORDER_TRANSACTION = 51;
@@ -414,8 +423,6 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     protected static final int BASE_LENGTH = BASE_LENGTH_AS_PACK + FEE_POWER_LENGTH + REFERENCE_LENGTH;
     protected static final int BASE_LENGTH_AS_DBRECORD = BASE_LENGTH + TIMESTAMP_LENGTH + FEE_LENGTH;
 
-    public static final byte HAS_EXLINK_MASK = 32;
-
     /**
      * Используется для разделения строки поисковых слов для всех трнзакций.<br>
      * % @ # - пусть они будут служебные и по ним не делать разделения
@@ -432,6 +439,12 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     protected DCSet dcSet;
     protected String TYPE_NAME = "unknown";
     // protected int type;
+
+    /////////   MASKS amd PARS
+    public static final byte HAS_EXLINK_MASK = 32;
+    /**
+     * typeBytes[2] = HAS_EXLINK_MASK
+     */
     protected byte[] typeBytes;
 
     protected int height;
@@ -766,6 +779,8 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
                 CANCEL_ORDER_TRANSACTION,
                 CHANGE_ORDER_TRANSACTION,
 
+                ISSUE_ASSET_SERIES_TRANSACTION,
+
                 // voting
                 VOTE_ON_ITEM_POLL_TRANSACTION
 
@@ -834,6 +849,8 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
                 return CancelOrderTransaction.TYPE_NAME;
             case CHANGE_ORDER_TRANSACTION:
                 return ChangeOrderTransaction.TYPE_NAME;
+            case ISSUE_ASSET_SERIES_TRANSACTION:
+                return IssueAssetSeriesTransaction.TYPE_NAME;
 
             // voting
             case VOTE_ON_ITEM_POLL_TRANSACTION:
