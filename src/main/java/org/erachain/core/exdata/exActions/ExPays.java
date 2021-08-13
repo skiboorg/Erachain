@@ -161,8 +161,7 @@ public class ExPays extends ExAction<List<Fun.Tuple4<Account, BigDecimal, BigDec
             }
         }
 
-        if (true || // запретить без фильтрации по активу - так как это не письма явно - письма отдельно!
-                filterAssetKey != null && filterAssetKey != 0L) {
+        if (filterAssetKey != null && filterAssetKey != 0L) {
             this.flags |= BALANCE_FLAG_MASK;
             this.filterAssetKey = filterAssetKey;
             this.filterBalancePos = filterBalancePos;
@@ -1114,7 +1113,10 @@ public class ExPays extends ExAction<List<Fun.Tuple4<Account, BigDecimal, BigDec
 
     public int isValid(RSignNote rNote) {
 
-        if (hasAmount()) {
+        if (!hasAmount()) {
+            errorValue = "Accruals: assetKey == null or ZERO";
+            return Transaction.INVALID_ITEM_KEY;
+        } else {
             if (this.assetKey == 0L) {
                 errorValue = "Accruals: assetKey == null or ZERO";
                 return Transaction.INVALID_ITEM_KEY;
@@ -1250,7 +1252,7 @@ public class ExPays extends ExAction<List<Fun.Tuple4<Account, BigDecimal, BigDec
     public void processBody(Transaction rNote, boolean asOrphan, Block block) {
         PublicKeyAccount creator = rNote.getCreator();
 
-        if (hasAssetFilter()) {
+        if (hasAmount()) {
             long absKey = assetKey;
 
             // возьмем знаки (минус) для создания позиции баланса такой
@@ -1261,6 +1263,8 @@ public class ExPays extends ExAction<List<Fun.Tuple4<Account, BigDecimal, BigDec
             boolean incomeReverse = balancePos == Account.BALANCE_POS_HOLD;
             boolean reversedBalancesInPosition = asset.isReverseBalancePos(balancePos);
             boolean backwardAction;
+
+            List<Fun.Tuple3<Account, BigDecimal, Boolean>> saveResults = new ArrayList();
 
             Account recipient;
             for (Fun.Tuple4 item : results) {
@@ -1292,6 +1296,8 @@ public class ExPays extends ExAction<List<Fun.Tuple4<Account, BigDecimal, BigDec
                         asset, actionPayKey, actionPayAmount, backwardAction,
                         incomeReverse);
 
+                // creator, actionPayKey, incomeReverse - is same
+                saveResults.add(new Fun.Tuple3<Account, BigDecimal, Boolean>(recipient, actionPayAmount, backwardAction));
 
             }
         }

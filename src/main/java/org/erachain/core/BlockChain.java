@@ -716,7 +716,7 @@ public class BlockChain {
         }
 
         if (TEST_MODE && !DEMO_MODE)
-            return 5;
+            return 7;
 
         return 30;
     }

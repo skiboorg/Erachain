@@ -58,7 +58,7 @@ public class ExAirDropPanel extends IconPanel implements ExActionPanelInt {
         this.parent = parent;
         initComponents();
 
-        assetsModel = new ComboBoxAssetsModel();
+        assetsModel = new ComboBoxAssetsModel(AssetCls.FEE_KEY);
         this.jComboBoxAccrualAsset.setModel(assetsModel);
         jComboBoxFilterBalancePosition.setModel(new DefaultComboBoxModel(new Integer[]{
                 TransactionAmount.ACTION_SEND,
@@ -408,7 +408,7 @@ public class ExAirDropPanel extends IconPanel implements ExActionPanelInt {
 
         jPanel3.setLayout(jPanelLayout);
 
-        jButtonLoad.setText(Lang.T("Load List"));
+        jButtonLoad.setText(Lang.T("Upload List"));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.insets = new Insets(10, 10, 10, 10);
