@@ -24,6 +24,7 @@ import org.erachain.lang.Lang;
 import org.erachain.settings.Settings;
 import org.erachain.utils.DateTimeFormat;
 import org.erachain.utils.Pair;
+import org.erachain.webserver.PreviewMaker;
 import org.erachain.webserver.WebResource;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -584,8 +585,8 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return iconType;
     }
 
-    public static String viewMediaType(int iconType) {
-        switch (iconType) {
+    public static String viewMediaType(int mediaType) {
+        switch (mediaType) {
             case MEDIA_TYPE_IMG:
                 return "img";
             case MEDIA_TYPE_VIDEO:
@@ -601,20 +602,19 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
     public static MediaType getMediaType(int mediaType, byte[] media) {
         if (mediaType == ItemCls.MEDIA_TYPE_IMG) {
-            if (media.length > 20) {
+            if (media != null && media.length > 20) {
                 byte[] header = new byte[20];
                 System.arraycopy(media, 0, header, 0, 20);
                 String typeName = new String(header).trim();
                 if (typeName.contains("PNG")) {
-                    typeName = "png";
+                    return WebResource.TYPE_PNH;
                 } else if (typeName.contains("GIF")) {
-                    typeName = "gif";
+                    return WebResource.TYPE_GIF;
                 } else {
-                    typeName = "jpeg";
+                    return WebResource.TYPE_JPEG;
                 }
-                return new MediaType("image", typeName);
             } else {
-                return WebResource.TYPE_JPEG;
+                return WebResource.TYPE_IMAGE;
             }
 
         } else if (mediaType == ItemCls.MEDIA_TYPE_VIDEO) {
@@ -625,12 +625,31 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return null;
     }
 
+    public String getImageTypeExt() {
+        if (imageType == ItemCls.MEDIA_TYPE_VIDEO) {
+            return "mp4";
+        } else if (imageType == ItemCls.MEDIA_TYPE_AUDIO) {
+            return "mp3";
+        }
+        if (image.length > 20) {
+            byte[] header = new byte[20];
+            System.arraycopy(image, 0, header, 0, 20);
+            String typeName = new String(header).trim();
+            if (typeName.contains("PNG")) {
+                return "png";
+            } else if (typeName.contains("GIF")) {
+                return "gif";
+            }
+        }
+        return "jpg";
+    }
+
     public MediaType getImageMediaType() {
-        return getMediaType(imageType, image);
+        return getMediaType(imageType, hasImageURL() ? null : image);
     }
 
     public MediaType getIconMediaType() {
-        return getMediaType(iconType, icon);
+        return getMediaType(iconType, hasIconURL() ? null : icon);
     }
 
     public boolean hasIconURL() {
@@ -656,9 +675,13 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return imageType;
     }
 
-    public String getImageTypeName() {
-        return viewMediaType(imageType);
-    }
+    //public String getIconTypeName() {
+    //    return viewMediaType(iconType);
+    //}
+
+    //public String getImageTypeName() {
+    //    return viewMediaType(imageType);
+    //}
 
     public boolean hasImageURL() {
         return imageAsURL;
@@ -1091,22 +1114,12 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         if (tags != null && !tags.isEmpty())
             itemJSON.put("tags", this.tags);
 
-        itemJSON.put("iconType", getIconType());
-        itemJSON.put("iconTypeName", viewMediaType(iconType));
-
-        if (true) {
-            String iconURL = getIconURL();
-            if (iconURL != null)
-                itemJSON.put("iconURL", iconURL);
-
-        } else {
-            // OLD version
-            if (hasIconURL()) {
-                itemJSON.put("iconURL", getIconURL());
-            } else {
-                if (withIcon && getIconType() == ItemCls.MEDIA_TYPE_IMG && this.getIcon() != null && this.getIcon().length > 0)
-                    itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
-            }
+        String iconURL = getIconURL();
+        if (iconURL != null) {
+            itemJSON.put("iconURL", getIconURL());
+            itemJSON.put("iconType", getIconType());
+            //itemJSON.put("iconTypeName", getIconTypeName());
+            itemJSON.put("iconMediaType", getIconMediaType().toString());
         }
 
         itemJSON.put("maker", this.maker.getAddress());
@@ -1167,19 +1180,14 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
             }
         }
 
-        itemJSON.put("iconType", getIconType());
-        itemJSON.put("iconTypeName", viewMediaType(iconType));
-
-        String iconURL = getIconURL();
-        if (iconURL != null)
-            itemJSON.put("iconURL", getIconURL());
-
-        itemJSON.put("imageType", getImageType());
-        itemJSON.put("imageTypeName", viewMediaType(imageType));
-
         String imageURL = getImageURL();
-        if (imageURL != null)
+        if (imageURL != null) {
             itemJSON.put("imageURL", imageURL);
+            itemJSON.put("imageType", getImageType());
+            //itemJSON.put("imageTypeName", getImageTypeName());
+            itemJSON.put("imageMediaType", getImageMediaType().toString());
+            itemJSON.put("imagePreviewMediaType", PreviewMaker.getPreviewType(this).toString());
+        }
 
         if (startDate != null)
             itemJSON.put("startDate", startDate);
@@ -1194,25 +1202,19 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
         JSONObject itemJSON = new JSONObject();
 
-        itemJSON.put("iconType", getIconType());
-        itemJSON.put("iconTypeName", viewMediaType(iconType));
+        //itemJSON.put("iconTypeName", viewMediaType(iconType));
 
         // ADD DATA
         if (hasIconURL()) {
             itemJSON.put("iconURL", getIconURL());
-        } else {
-            if (getIcon() != null && getIcon().length > 0)
-                itemJSON.put("icon", java.util.Base64.getEncoder().encodeToString(this.getIcon()));
+            itemJSON.put("iconType", getIconType());
+            itemJSON.put("iconMediaType", getIconMediaType().toString());
         }
-
-        itemJSON.put("imageType", getImageType());
-        itemJSON.put("imageTypeName", viewMediaType(imageType));
 
         if (hasImageURL()) {
             itemJSON.put("imageURL", getImageURL());
-        } else {
-            if (getImage() != null && getImage().length > 0)
-                itemJSON.put("image", java.util.Base64.getEncoder().encodeToString(this.getImage()));
+            itemJSON.put("imageType", getImageType());
+            itemJSON.put("imageMediaType", getImageMediaType().toString());
         }
 
         return itemJSON;
@@ -1258,13 +1260,11 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
             itemJSON.put("person_key", person.b.getKey());
         }
 
-
-        itemJSON.put("iconType", getIconType());
-        itemJSON.put("iconTypeName", viewMediaType(iconType));
-
         String iconURL = getIconURL();
-        if (iconURL != null)
+        if (iconURL != null) {
             itemJSON.put("iconURL", iconURL);
+            itemJSON.put("iconMediaType", getIconMediaType().toString());
+        }
 
         return itemJSON;
     }
@@ -1332,7 +1332,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
             itemJson.put("maker_person", person.b.getName());
             itemJson.put("maker_person_key", person.b.getKey());
             itemJson.put("maker_person_image_url", person.b.getImageURL());
-            itemJson.put("maker_person_image_type", person.b.getImageTypeName());
             itemJson.put("maker_person_image_media_type", person.b.getImageMediaType().toString());
 
         }
