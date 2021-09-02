@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
@@ -29,7 +30,7 @@ public class DCSetTest {
             new int[]{DCSet.DBS_ROCK_DB};
 
     ExLink exLink = null;
-
+    SmartContract smartContract = null;
 
     String testsPath = Settings.getInstance().getDataTempDir();
     DCSet dcSet;
@@ -95,7 +96,7 @@ public class DCSetTest {
                 BigDecimal amount = new BigDecimal(counter + "." + counter);
 
                 String address = creator.getAddress();
-                Transaction messageTx = new RSend(creator, exLink, (byte) 0, recipient, 1L, amount,
+                Transaction messageTx = new RSend(creator, exLink, smartContract, (byte) 0, recipient, 1L, amount,
                         "title test", null, new byte[]{(byte) 1},
                         new byte[]{(byte) 0}, timestamp + random.nextInt(10000), 0l);
                 messageTx.sign(creator, Transaction.FOR_NETWORK);
