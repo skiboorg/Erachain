@@ -16,7 +16,8 @@ public class EpochSmartContract {
      */
     static public SmartContract make(Transaction transaction) {
 
-        if (BlockChain.TEST_MODE && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
+        if (BlockChain.TEST_MODE && transaction.getBlockHeight() > 278841
+                && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
             RSend txSend = (RSend) transaction;
             if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND
                     && txSend.hasAmount() && txSend.getAmount().signum() < 0
