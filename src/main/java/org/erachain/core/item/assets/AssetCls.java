@@ -970,7 +970,7 @@ public abstract class AssetCls extends ItemCls {
 
 
     /**
-     * в обычном сотоянии тут отрицательные балансы или нет?
+     * в обычном состоянии тут отрицательные балансы или нет?
      *
      * @param balPos
      * @return
@@ -980,8 +980,8 @@ public abstract class AssetCls extends ItemCls {
         switch (balPos) {
             case Account.BALANCE_POS_OWN:
                 return isReverseSend(assetType);
-            case Account.BALANCE_POS_SPEND:
-                return true;
+            //case Account.BALANCE_POS_SPEND:
+            //    return true;
         }
         return false;
     }
@@ -1532,14 +1532,6 @@ public abstract class AssetCls extends ItemCls {
                     default:
                         return null;
                 }
-            case AS_NON_FUNGIBLE: {
-                if (actionType == Account.BALANCE_POS_OWN) {
-                    return backward ? null : isCreatorMaker ? "AS_NON_FUNGIBLE_Issue" : null;
-                }
-                return null;
-            }
-            case AS_INDEX:
-                break;
             case AS_INSIDE_OTHER_CLAIM:
                 switch (actionType) {
                     case Account.BALANCE_POS_OWN:
@@ -1552,8 +1544,6 @@ public abstract class AssetCls extends ItemCls {
                     default:
                         return null;
                 }
-            case AS_ACCOUNTING:
-                break;
             case AS_SELF_MANAGED_ACCOUNTING:
                 switch (actionType) {
                     case Account.BALANCE_POS_OWN:
@@ -1625,6 +1615,11 @@ public abstract class AssetCls extends ItemCls {
                     default:
                         return null;
                 }
+
+            case AS_NON_FUNGIBLE:
+            case AS_INDEX:
+            case AS_ACCOUNTING:
+                // as default below
 
         }
 
@@ -1826,9 +1821,8 @@ public abstract class AssetCls extends ItemCls {
                         return "Spender";
                 }
             case AS_NON_FUNGIBLE:
-                switch (actionType) {
-                    case Account.BALANCE_POS_OWN:
-                        return backward ? null : isCreatorMaker ? "Author" : null;
+                if (actionType == Account.BALANCE_POS_OWN && !backward && isCreatorMaker) {
+                    return "Author";
                 }
             case AS_SELF_MANAGED_ACCOUNTING:
             case AS_SELF_MANAGED_DIRECT_SEND:
@@ -1927,11 +1921,6 @@ public abstract class AssetCls extends ItemCls {
                     case Account.BALANCE_POS_SPEND:
                         return "Spender";
                 }
-            case AS_NON_FUNGIBLE:
-                switch (actionType) {
-                    case Account.BALANCE_POS_OWN:
-                        return backward ? null : "Recipient";
-                }
             case AS_SELF_MANAGED_ACCOUNTING:
             case AS_SELF_MANAGED_DIRECT_SEND:
             case AS_SELF_MANAGED_SHARE:
@@ -1976,9 +1965,11 @@ public abstract class AssetCls extends ItemCls {
             case AS_INSIDE_BONUS:
             case AS_INSIDE_ACCESS:
             case AS_INSIDE_VOTE:
+            case AS_NON_FUNGIBLE:
             case AS_INDEX:
             case AS_INSIDE_OTHER_CLAIM:
             case AS_ACCOUNTING:
+                /// by default below
         }
 
         switch (actionType) {

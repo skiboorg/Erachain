@@ -49,7 +49,7 @@ public class CancelOrderTransaction extends Transaction {
 
 
     public CancelOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, byte[] orderSignature, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, TYPE_NAME, creator, null, feePow, timestamp, reference);
+        super(typeBytes, TYPE_NAME, creator, null, null, feePow, timestamp, reference);
         this.orderSignature = orderSignature;
     }
 

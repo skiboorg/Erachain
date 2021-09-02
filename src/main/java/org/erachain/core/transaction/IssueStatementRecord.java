@@ -42,7 +42,7 @@ public class IssueStatementRecord extends Transaction {
 
     public IssueStatementRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data, byte[] isText, byte[] encrypted, long timestamp, Long reference) {
 
-        super(typeBytes, TYPE_NAME, creator, null, feePow, timestamp, reference);
+        super(typeBytes, TYPE_NAME, creator, null, null, feePow, timestamp, reference);
 
         this.key = templateKey;
         this.data = data;
@@ -72,6 +72,7 @@ public class IssueStatementRecord extends Transaction {
         // not need this.calcFee();
     }
 
+    /*
     public IssueStatementRecord(PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data, byte[] isText, byte[] encrypted, long timestamp, Long reference, byte[] signature) {
         this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference, signature);
         // set props
@@ -84,6 +85,7 @@ public class IssueStatementRecord extends Transaction {
         this.setTypeBytes();
     }
 
+
     public IssueStatementRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data,
                                 byte[] isText, byte[] encrypted, PublicKeyAccount[] signers, byte[][] signatures, long timestamp, Long reference, byte[] signature) {
         this(typeBytes, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference, signature);
@@ -91,6 +93,7 @@ public class IssueStatementRecord extends Transaction {
         this.signatures = signatures;
         this.setTypeBytes();
     }
+     */
 
     public IssueStatementRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data,
                                 byte[] isText, byte[] encrypted, PublicKeyAccount[] signers, byte[][] signatures,
@@ -98,7 +101,6 @@ public class IssueStatementRecord extends Transaction {
         this(typeBytes, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference, signature);
         this.signers = signers;
         this.signatures = signatures;
-        this.setTypeBytes();
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
         if (seqNo > 0)
             this.setHeightSeq(seqNo);
@@ -110,11 +112,6 @@ public class IssueStatementRecord extends Transaction {
         this(typeBytes, creator, linkTo, templateKey, data, isText, encrypted, reference, signature);
         this.signers = signers;
         this.signatures = signatures;
-        this.setTypeBytes();
-    }
-
-    public IssueStatementRecord(byte prop1, byte prop2, byte prop3, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data, byte[] isText, byte[] encrypted, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, prop1, prop2, prop3}, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference);
     }
 
     public static boolean hasTemplate(byte[] typeBytes) {
@@ -122,6 +119,7 @@ public class IssueStatementRecord extends Transaction {
         return false;
     }
 
+    // TODO конфликт со всеми Флагами из Транзакции!!
     public static int getSignersLength(byte[] typeBytes) {
         byte mask = ~HAS_TEMPLATE_MASK;
         return typeBytes[2] & mask;
@@ -289,7 +287,7 @@ public class IssueStatementRecord extends Transaction {
 
     //public static String getName() { return "Statement"; }
 
-    protected void setTypeBytes() {
+    protected void setTypeBytes_old() {
 
         byte vers = 0;
 
