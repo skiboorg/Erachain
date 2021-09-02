@@ -8,6 +8,8 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.epoch.EpochSmartContract;
+import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
@@ -69,7 +71,7 @@ typeBytes[3].4-0 = point accuracy: -16..16 = BYTE - 16
  */
 public abstract class TransactionAmount extends Transaction implements Itemable{
     public static final byte[][] VALID_REC = new byte[][]{
-        //Base58.decode("2PLy4qTVeYnwAiESvaeaSUTWuGcERQr14bpGj3qo83c4vTP8RRMjnmRXnd6USsbvbLwWUNtjErcdvs5KtZMpyREC"),
+            //Base58.decode("2PLy4qTVeYnwAiESvaeaSUTWuGcERQr14bpGj3qo83c4vTP8RRMjnmRXnd6USsbvbLwWUNtjErcdvs5KtZMpyREC"),
     };
 
     static Logger LOGGER = LoggerFactory.getLogger(TransactionAmount.class.getName());
@@ -79,6 +81,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     public static final int maxSCALE = TransactionAmount.SCALE_MASK_HALF + BlockChain.AMOUNT_DEDAULT_SCALE - 1;
     public static final int minSCALE = BlockChain.AMOUNT_DEDAULT_SCALE - TransactionAmount.SCALE_MASK_HALF;
 
+    /**
+     * used over typeBytes[2]
+     */
     public static final byte BACKWARD_MASK = 64;
 
     // BALANCES types and ACTION with IT
@@ -134,9 +139,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     protected AssetCls asset;
 
     // need for calculate fee by feePow into GUI
-    protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, ExLink exLink, byte feePow, Account recipient,
+    protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, ExLink exLink, SmartContract smartContract, byte feePow, Account recipient,
                                 BigDecimal amount, long key, long timestamp, Long reference) {
-        super(typeBytes, name, creator, exLink, feePow, timestamp, reference);
+        super(typeBytes, name, creator, exLink, smartContract, feePow, timestamp, reference);
         this.recipient = recipient;
 
         if (amount == null || amount.signum() == 0) {
@@ -151,14 +156,18 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         }
     }
 
+    /*
     // need for calculate fee
-    protected TransactionAmount(byte[] typeBytes, String name, PublicKeyAccount creator, byte feePow, Account recipient,
+    protected TransactionAmount(byte[] typeBytes, SmartContract smartContract, String name, PublicKeyAccount creator, byte feePow, Account recipient,
                                 BigDecimal amount, long key, long timestamp, Long reference, byte[] signature) {
-        this(typeBytes, name, creator, null, feePow, recipient, amount, key, timestamp, reference);
+        this(typeBytes, name, creator, null, smartContract, feePow, recipient, amount, key, timestamp, reference);
         this.signature = signature;
     }
 
+     */
+
     // GETTERS/SETTERS
+
     @Override
     public void setDC(DCSet dcSet, boolean andUpdateFromState) {
         super.setDC(dcSet, false);
@@ -193,7 +202,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     }
 
     // public static String getName() { return "unknown subclass Amount"; }
-    
+
     public Account getRecipient() {
         return this.recipient;
     }
@@ -562,6 +571,12 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         if (exLink != null)
             base_len += exLink.length();
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
@@ -633,11 +648,6 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                     return new Fun.Tuple2<>(ITEM_ASSET_NOT_EXIST, "key: " + key);
                 }
 
-                // самому себе нельзя пересылать
-                if (height > BlockChain.VERS_4_11 && creator.equals(recipient)) {
-                    return new Fun.Tuple2<>(INVALID_ADDRESS, "Equal recipient");
-                }
-
                 // for PARSE and toBYTES need only AMOUNT_LENGTH bytes
                 if (absKey > BlockChain.AMOUNT_SCALE_FROM) {
                     byte[] amountBytes = amount.unscaledValue().toByteArray();
@@ -703,7 +713,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                             return new Fun.Tuple2<>(CREATOR_NOT_MAKER, "creator != asset maker");
                         }
                         if (creator.equals(recipient)) {
-                            return new Fun.Tuple2<>(INVALID_ADDRESS, "creator == recipient");
+                            return new Fun.Tuple2<>(INVALID_ADDRESS, "Creator equal recipient");
                         }
 
                         // TRY FEE
@@ -714,6 +724,12 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         }
 
                     } else {
+
+                        // самому себе нельзя пересылать
+                        if (height > BlockChain.VERS_4_11 && creator.equals(recipient)
+                                && actionType != ACTION_SPEND) {
+                            return new Fun.Tuple2<>(INVALID_ADDRESS, "Creator equal recipient");
+                        }
 
                         // VALIDATE by ASSET TYPE
                         switch (assetType) {
@@ -1371,6 +1387,17 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         this.assetFee.negate(), "Asset Fee", this.dbRef);
             }
         }
+
+        ///////// SMART CONTRACTS SESSION
+        if (smartContract == null) {
+            // если у транзакции нет изначально контракта то попробуем сделать эпохальныый
+            // потом он будет записан в базу данных и его можно найти загрузив эту трнзакцию
+            smartContract = EpochSmartContract.make(this);
+        }
+
+        if (smartContract != null)
+            smartContract.process(dcSet, block, this);
+
     }
 
     @Override

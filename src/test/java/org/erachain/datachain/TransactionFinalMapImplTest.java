@@ -6,6 +6,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PrivateKeyAccount;
 import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.IssueAssetTransaction;
@@ -38,6 +39,7 @@ public class TransactionFinalMapImplTest {
     };
 
     ExLink exLink = null;
+    SmartContract smartContract = null;
 
     byte[] isText = new byte[]{1};
     byte[] enCrypted = new byte[]{0};
@@ -274,19 +276,19 @@ public class TransactionFinalMapImplTest {
 
                 RSend assetTransfer;
                 for (int i = 0; i < 100; i++) {
-                    assetTransfer = new RSend(accountA, exLink, FEE_POWER, recipientAcc, 1L, amount_asset, title + i,
+                    assetTransfer = new RSend(accountA, exLink, smartContract, FEE_POWER, recipientAcc, 1L, amount_asset, title + i,
                             null, isText, enCrypted, timestamp++, 0L);
                     assetTransfer.sign(accountA, Transaction.FOR_NETWORK);
                     assetTransfer.setDC(dcSet, Transaction.FOR_NETWORK, 1, seqNo++, true);
                     map.put(assetTransfer);
 
-                    assetTransfer = new RSend(accountA, exLink, FEE_POWER, recipientAcc, 1L, amount_asset, "for",
+                    assetTransfer = new RSend(accountA, exLink, smartContract, FEE_POWER, recipientAcc, 1L, amount_asset, "for",
                             null, isText, enCrypted, timestamp++, 0L);
                     assetTransfer.sign(accountA, Transaction.FOR_NETWORK);
                     assetTransfer.setDC(dcSet, Transaction.FOR_NETWORK, 1, seqNo++, true);
                     map.put(assetTransfer);
 
-                    assetTransfer = new RSend(accountA, exLink, FEE_POWER, recipientAcc, 1L, amount_asset, "forgen",
+                    assetTransfer = new RSend(accountA, exLink, smartContract, FEE_POWER, recipientAcc, 1L, amount_asset, "forgen",
                             null, isText, enCrypted, timestamp++, 0L);
                     assetTransfer.sign(accountA, Transaction.FOR_NETWORK);
                     assetTransfer.setDC(dcSet, Transaction.FOR_NETWORK, 1, seqNo++, true);

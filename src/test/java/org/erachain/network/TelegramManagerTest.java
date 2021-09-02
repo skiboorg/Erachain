@@ -10,6 +10,7 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.GenesisBlock;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.RSend;
@@ -45,6 +46,7 @@ public class TelegramManagerTest {
 
     DCSet dcSet;
     ExLink exLink = null;
+    SmartContract smartContract = null;
 
 
     long flags = 0l;
@@ -93,7 +95,7 @@ public class TelegramManagerTest {
             //transaction = cntr.r_Send(
             //        sender, FEE_POWER, recipient1, 0l, amount,
             //        title + i, isText, data, encrypted);
-            transaction = new RSend(sender, exLink, FEE_POWER, recipient1, 0l, amount, title + i, message, isText, encrypted, timestamp, 0l);
+            transaction = new RSend(sender, exLink, smartContract, FEE_POWER, recipient1, 0l, amount, title + i, message, isText, encrypted, timestamp, 0l);
             transaction.sign(sender, Transaction.FOR_NETWORK);
 
 
@@ -195,7 +197,7 @@ public class TelegramManagerTest {
 
             String message = user + ":" + randomPrice;
 
-            Transaction transaction = new RSend(creator, exLink, (byte) 0, recipient, 0, amount, phone,
+            Transaction transaction = new RSend(creator, exLink, smartContract, (byte) 0, recipient, 0, amount, phone,
                     message.getBytes(), new byte[1], new byte[1],
                     System.currentTimeMillis(), 0l);
             transaction.sign(creator, Transaction.FOR_NETWORK);
@@ -260,7 +262,7 @@ public class TelegramManagerTest {
 
         String message = "{\"info\":\"sldkf jslkfd jsldfk\"}";
 
-        transaction = new RSend(sender, exLink, (byte) 0, recipient1, 0, amount, "---",
+        transaction = new RSend(sender, exLink, smartContract, (byte) 0, recipient1, 0, amount, "---",
                 message.getBytes(), new byte[1], new byte[1],
                 System.currentTimeMillis(), 0l);
         transaction.sign(sender, Transaction.FOR_NETWORK);
@@ -275,7 +277,7 @@ public class TelegramManagerTest {
         message = "{\"info\":\"sldkf jslkfd jsldfk\",\"__DELETE\":{\"list\":[\""
                 + transaction.viewSignature() + "\"]}}";
 
-        transaction = new RSend(sender, exLink, (byte) 0, recipient1, 0, amount, "---",
+        transaction = new RSend(sender, exLink, smartContract, (byte) 0, recipient1, 0, amount, "---",
                 message.getBytes(), new byte[]{1}, new byte[1],
                 System.currentTimeMillis(), 0l);
         transaction.sign(sender, Transaction.FOR_NETWORK);

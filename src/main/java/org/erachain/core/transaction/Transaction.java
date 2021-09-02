@@ -16,6 +16,7 @@ import org.erachain.core.blockexplorer.ExplorerJsonLine;
 import org.erachain.core.blockexplorer.WebTransactionsHTML;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.crypto.Crypto;
+import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.ExData;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.exdata.exLink.ExLinkAppendix;
@@ -285,6 +286,8 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     public static final int INVALID_EX_LINK_REF = 402;
     public static final int INVALID_RECEIVERS_LIST = 403;
 
+    public static final int INVALID_EPOCH_SMART_CONTRCT = 451;
+
     public static final int INVALID_BLOCK_TRANS_SEQ_ERROR = 501;
     public static final int ACCOUNT_ACCSES_DENIED = 520;
 
@@ -442,8 +445,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     /////////   MASKS amd PARS
     public static final byte HAS_EXLINK_MASK = 32;
+    public static final byte HAS_SMART_CONTRACT_MASK = 16;
     /**
-     * typeBytes[2] = HAS_EXLINK_MASK
+     * typeBytes[2] | HAS_EXLINK_MASK | HAS_SMART_CONTRACT_MASK
      */
     protected byte[] typeBytes;
 
@@ -478,6 +482,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     protected Object[][] itemsKeys;
 
     protected ExLink exLink;
+    protected SmartContract smartContract;
 
     /**
      * если да то значит взята из Пула трнзакций и на двойную трату проверялась
@@ -492,7 +497,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         this.TYPE_NAME = type_name;
     }
 
-    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, ExLink exLink, byte feePow, long timestamp,
+    protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, ExLink exLink, SmartContract smartContract, byte feePow, long timestamp,
                           Long reference) {
         this.typeBytes = typeBytes;
         this.TYPE_NAME = type_name;
@@ -501,6 +506,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             typeBytes[2] = (byte) (typeBytes[2] | HAS_EXLINK_MASK);
             this.exLink = exLink;
         }
+
+        this.smartContract = smartContract;
+
         // this.props = props;
         this.timestamp = timestamp;
         this.reference = reference;
@@ -513,7 +521,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     protected Transaction(byte[] typeBytes, String type_name, PublicKeyAccount creator, ExLink exLink, byte feePow, long timestamp,
                           Long reference, byte[] signature) {
-        this(typeBytes, type_name, creator, exLink, feePow, timestamp, reference);
+        this(typeBytes, type_name, creator, exLink, null, feePow, timestamp, reference);
         this.signature = signature;
     }
 
@@ -722,7 +730,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     }
 
     /**
-     * Нарастить мясо на скелет из базы состояния - нужно для записи в FinalMap b созданим вторичных ключей и Номер Сущности
+     * Нарастить мясо на скелет из базы состояния - нужно для:<br>
+     * - записи в FinalMap b созданим вторичных ключей и Номер Сущности<br>
+     * - для внесения в кошелек когда блок прилетел и из него сырые транзакции берем
      */
     public void updateFromStateDB() {
     }
@@ -963,6 +973,10 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     public ExLink getExLink() {
         return exLink;
+    }
+
+    public SmartContract getSmartContract() {
+        return smartContract;
     }
 
     public void makeItemsKeys() {
@@ -1887,6 +1901,15 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             data = Bytes.concat(data, exLink.toBytes());
         }
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                typeBytes[2] = (byte) (typeBytes[2] | HAS_SMART_CONTRACT_MASK);
+                data = Bytes.concat(data, smartContract.toBytes(forDeal));
+            } else {
+                typeBytes[2] &= ~HAS_SMART_CONTRACT_MASK;
+            }
+        }
+
         if (forDeal > FOR_PACK) {
             // WRITE FEE POWER
             byte[] feePowBytes = new byte[1];
@@ -1943,6 +1966,12 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
         if (exLink != null)
             base_len += exLink.length();
+
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
 
         return base_len;
 
@@ -2628,6 +2657,9 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             int error = 0;
             error++;
         }
+
+        if (smartContract != null)
+            smartContract.orphan(dcSet, this);
 
         if (forDeal > Transaction.FOR_PACK) {
             if (this.fee != null && this.fee.compareTo(BigDecimal.ZERO) != 0) {
