@@ -640,7 +640,7 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
         return getUserPath() + "gui_settings.json";
     }
 
-    ////////////////
+    ////////////////notify_incoming_confirmations
 
     // http://127.0.0.1:8000/ipay3_free/tools/block_proc/ERA
     public String getNotifyIncomingURL() {
