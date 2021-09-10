@@ -15,6 +15,7 @@ import org.erachain.core.item.assets.OrderProcess;
 import org.erachain.core.item.assets.TradePair;
 import org.erachain.database.PairMapImpl;
 import org.erachain.datachain.DCSet;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple3;
@@ -26,7 +27,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/*
+/**
 
 #### PROPERTY 1
 typeBytes[2].3-7 = point accuracy for HAVE amount: -16..16 = BYTE - 16
@@ -41,6 +42,9 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
     };
     public static final byte TYPE_ID = (byte) Transaction.CREATE_ORDER_TRANSACTION;
     public static final String TYPE_NAME = "Create Order";
+
+    // < 32 used for acuracy
+    public static final byte HAS_SMART_CONTRACT_MASK = 64;
 
     public static final int AMOUNT_LENGTH = TransactionAmount.AMOUNT_LENGTH;
     private static final int HAVE_LENGTH = 8;
@@ -61,9 +65,9 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
     private BigDecimal amountHave;
     private BigDecimal amountWant;
 
-    public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, long haveKey, long wantKey,
+    public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink exLink, SmartContract smartContract, long haveKey, long wantKey,
                                   BigDecimal amountHave, BigDecimal amountWant, byte feePow, long timestamp, Long reference) {
-        super(typeBytes, TYPE_NAME, creator, null, null, feePow, timestamp, reference);
+        super(typeBytes, TYPE_NAME, creator, exLink, smartContract, feePow, timestamp, reference);
         this.haveKey = haveKey;
         this.wantKey = wantKey;
 
@@ -75,15 +79,15 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
     public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, long haveKey, long wantKey,
                                   BigDecimal amountHave, BigDecimal amountWant, byte feePow, long timestamp, Long reference,
                                   byte[] signature) {
-        this(typeBytes, creator, haveKey, wantKey, amountHave, amountWant, feePow, timestamp, reference);
+        this(typeBytes, creator, null, null, haveKey, wantKey, amountHave, amountWant, feePow, timestamp, reference);
         this.signature = signature;
 
     }
 
-    public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, long haveKey, long wantKey,
+    public CreateOrderTransaction(byte[] typeBytes, PublicKeyAccount creator, ExLink exLink, SmartContract smartContract, long haveKey, long wantKey,
                                   BigDecimal amountHave, BigDecimal amountWant, byte feePow, long timestamp, Long reference,
                                   byte[] signature, long seqNo, long feeLong) {
-        this(typeBytes, creator, haveKey, wantKey, amountHave, amountWant, feePow, timestamp, reference);
+        this(typeBytes, creator, exLink, smartContract, haveKey, wantKey, amountHave, amountWant, feePow, timestamp, reference);
         this.signature = signature;
         this.fee = BigDecimal.valueOf(feeLong, BlockChain.FEE_SCALE);
         if (seqNo > 0)
@@ -99,7 +103,7 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
     public CreateOrderTransaction(PublicKeyAccount creator, long have, long want, BigDecimal amountHave,
                                   BigDecimal amountWant, byte feePow, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, have, want, amountHave, amountWant, feePow, timestamp,
+        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, null, null, have, want, amountHave, amountWant, feePow, timestamp,
                 reference);
     }
 
@@ -117,8 +121,6 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             updateFromStateDB();
 
     }
-
-    // public static String getName() { return "Create Order"; }
 
     @Override
     public String getTitle() {
@@ -148,6 +150,91 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         } else {
             return long_fee;
         }
+    }
+
+    public Long getOrderId() {
+        //return this.signature;
+        return Transaction.makeDBRef(this.height, this.seqNo);
+    }
+
+    @Override
+    public BigDecimal getAmount() {
+        return this.amountHave;
+    }
+
+    @Override
+    public long getKey() {
+        return this.haveKey;
+    }
+
+    @Override
+    public long getAssetKey() {
+        return this.haveKey;
+    }
+
+    @Override
+    public ItemCls getItem() {
+        return this.haveAsset;
+    }
+
+    public long getHaveKey() {
+        return this.haveKey;
+    }
+
+    public AssetCls getHaveAsset() {
+        return this.haveAsset;
+    }
+
+    public BigDecimal getAmountHave() {
+        return this.amountHave;
+    }
+
+    public long getWantKey() {
+        return this.wantKey;
+    }
+
+    public AssetCls getWantAsset() {
+        return this.wantAsset;
+    }
+
+    public BigDecimal getAmountWant() {
+        return this.amountWant;
+    }
+
+    public BigDecimal getPriceCalc() {
+        return makeOrder().calcPrice();
+    }
+
+    public BigDecimal getPriceCalcReverse() {
+        return makeOrder().calcPriceReverse();
+    }
+
+    @Override
+    public boolean hasPublicText() {
+        return false;
+    }
+
+    // PARSE CONVERT
+
+    public Order makeOrder() {
+        return new Order(dcSet, Transaction.makeDBRef(this.height, this.seqNo), this.creator,
+                this.haveKey, this.amountHave, this.haveAsset.getScale(),
+                this.wantKey, this.amountWant, this.wantAsset.getScale()
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public JSONObject toJson() {
+        // GET BASE
+        JSONObject transaction = this.getJsonBase();
+
+        transaction.put("haveKey", this.haveKey);
+        transaction.put("wantKey", this.wantKey);
+        transaction.put("amountHave", this.amountHave.toPlainString());
+        transaction.put("amountWant", this.amountWant.toPlainString());
+
+        return transaction;
     }
 
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
@@ -197,6 +284,14 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             position += exLink.length();
         } else {
             exLink = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
@@ -265,99 +360,8 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             amountWant = amountWant.scaleByPowerOfTen(-accuracy);
         }
 
-        return new CreateOrderTransaction(typeBytes, creator, have, want, amountHave, amountWant, feePow, timestamp,
+        return new CreateOrderTransaction(typeBytes, creator, exLink, smartContract, have, want, amountHave, amountWant, feePow, timestamp,
                 reference, signatureBytes, seqNo, feeLong);
-    }
-
-    public Long getOrderId() {
-        //return this.signature;
-        return Transaction.makeDBRef(this.height, this.seqNo);
-    }
-
-    @Override
-    public BigDecimal getAmount() {
-        return this.amountHave;
-    }
-
-    @Override
-    public long getKey() {
-        return this.haveKey;
-    }
-
-    @Override
-    public long getAssetKey() {
-        return this.haveKey;
-    }
-
-    @Override
-    public ItemCls getItem() {
-        return this.haveAsset;
-    }
-
-    public long getHaveKey() {
-        return this.haveKey;
-    }
-
-    public AssetCls getHaveAsset() {
-        return this.haveAsset;
-    }
-
-    public BigDecimal getAmountHave() {
-        return this.amountHave;
-    }
-
-    public long getWantKey() {
-        return this.wantKey;
-    }
-
-    public AssetCls getWantAsset() {
-        return this.wantAsset;
-    }
-
-    public BigDecimal getAmountWant() {
-        return this.amountWant;
-    }
-
-    public BigDecimal getPriceCalc() {
-        // precision bad return Order.calcPrice(this.amountHave, this.amountWant);
-        return makeOrder().calcPrice();
-    }
-
-    public BigDecimal getPriceCalcReverse() {
-        //return Order.calcPrice(this.amountWant, this.amountHave);
-        return makeOrder().calcPriceReverse();
-    }
-
-    @Override
-    public boolean hasPublicText() {
-        return false;
-    }
-
-    // PARSE CONVERT
-
-    public Order makeOrder() {
-        return new Order(dcSet, Transaction.makeDBRef(this.height, this.seqNo), this.creator,
-                this.haveKey, this.amountHave, this.haveAsset.getScale(),
-                this.wantKey, this.amountWant, this.wantAsset.getScale()
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public JSONObject toJson() {
-        // GET BASE
-        JSONObject transaction = this.getJsonBase();
-
-        transaction.put("haveKey", this.haveKey);
-        transaction.put("wantKey", this.wantKey);
-        transaction.put("amountHave", this.amountHave.toPlainString());
-        transaction.put("amountWant", this.amountWant.toPlainString());
-
-        //if (this.order != null) {
-        //	transaction.put("order", this.order.toJson());
-        //}
-
-        return transaction;
     }
 
     // @Override
@@ -415,8 +419,6 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         return data;
     }
 
-    // VALIDATE
-
     @Override
     public int getDataLength(int forDeal, boolean withSignature)
     {
@@ -433,12 +435,20 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
         if (exLink != null)
             base_len += exLink.length();
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
         return base_len;
     }
 
+
+    // VALIDATE
     @Override
     public int isValid(int forDeal, long flags) {
 
@@ -553,11 +563,6 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
             }
 
 
-            ///// CHECK IF SENDER HAS ENOUGH FEE BALANCE
-            ///if (this.creator.getBalance(this.dcSet, FEE_KEY).a.b.compareTo(this.fee) == -1) {
-            ///    return NOT_ENOUGH_FEE;
-            ///}
-
             // if asset is unlimited and me is creator of this asset
             boolean unLimited = haveAsset.isUnlimited(this.creator, false);
 
@@ -656,18 +661,12 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
     // @Override
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
         // UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         // PROCESS ORDER
-        // изменяемые объекты нужно заново создавать
-        //this.order.copy().process(this);
-        //this.order.process(this);
-
-        // изменяемые объекты нужно заново создавать
-        //.copy() // тут надо что-то сделать новым - а то значения в памяти по ссылке меняются
-        Order order = makeOrder(); //.copy();
+        Order order = makeOrder();
 
         // MOVE HAVE from OWN to PLEDGE
         creator.changeBalance(dcSet, true, false, haveKey, amountHave,
@@ -695,9 +694,9 @@ public class CreateOrderTransaction extends Transaction implements Itemable {
 
     // @Override
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
         // UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         // ORPHAN ORDER
 

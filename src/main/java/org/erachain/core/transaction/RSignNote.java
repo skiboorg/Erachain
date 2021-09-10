@@ -29,10 +29,13 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-//import java.math.BigDecimal;
-//import java.math.BigInteger;
-
-
+/**
+ * PROPERTIES:
+ * [0] - type
+ * [1] - version
+ * [2] bits[0] - =1 - has Template (OLD)
+ * [3] - < 0 - has DATA
+ */
 public class RSignNote extends Transaction implements Itemable {
 
     protected static final byte HAS_TEMPLATE_MASK = (byte) (1 << 7);
@@ -41,13 +44,6 @@ public class RSignNote extends Transaction implements Itemable {
 
     public static final byte TYPE_ID = (byte) SIGN_NOTE_TRANSACTION;
     public static final String TYPE_NAME = "Note";
-    /*
-    PROPERTIES:
-    [0] - type
-    [1] - version
-    [2] bits[0] - =1 - has Template (OLD)
-    [3] - < 0 - has DATA
-     */
     protected long key; // key for Template
     protected byte[] data;
     /**
@@ -612,6 +608,12 @@ public class RSignNote extends Transaction implements Itemable {
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
+
         int add_len = 0;
         if (this.data != null && this.data.length > 0)
             add_len += DATA_SIZE_LENGTH + this.data.length;
@@ -635,9 +637,9 @@ public class RSignNote extends Transaction implements Itemable {
     //PROCESS/ORPHAN
 
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         parseDataFull(); // need for take HASHES from FILES
         extendedData.process(this, block);
@@ -653,7 +655,7 @@ public class RSignNote extends Transaction implements Itemable {
     }
 
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
 
         parseDataFull(); // also need for take HASHES from FILES
         extendedData.orphan(this);
@@ -665,7 +667,7 @@ public class RSignNote extends Transaction implements Itemable {
             }
         }
 
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
     }
 
@@ -686,6 +688,10 @@ public class RSignNote extends Transaction implements Itemable {
             return INVALID_DATA_LENGTH;
         }
 
+        // parse with files
+        // need for test PUBLIC by files
+        parseDataFull();
+
         int result;
         if (false // комиссия у так уже = 0 - нельзя модифицировать флаг внутри
                 && height > BlockChain.FREE_FEE_FROM_HEIGHT && seqNo <= BlockChain.FREE_FEE_TO_SEQNO
@@ -702,10 +708,6 @@ public class RSignNote extends Transaction implements Itemable {
         if (this.key > 0 && !this.dcSet.getItemTemplateMap().contains(this.key))
             return Transaction.ITEM_DOES_NOT_EXIST;
 
-        if (extendedData == null) {
-            parseDataV2WithoutFiles();
-        }
-
         result = extendedData.isValid(this);
         if (result != Transaction.VALIDATE_OK) {
             // errorValue updated in extendedData
@@ -715,7 +717,6 @@ public class RSignNote extends Transaction implements Itemable {
 
         if (height > BlockChain.VERS_5_01_01) {
             // только уникальные - так как иначе каждый новый перезатрет поиск старого
-            parseDataFull(); // need for take HASHES from FILES
             byte[][] allHashes = extendedData.getAllHashesAsBytes(true);
             if (allHashes != null && allHashes.length > 0) {
                 TransactionFinalMapSigns map = dcSet.getTransactionFinalMapSigns();

@@ -13,6 +13,7 @@ import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.datachain.HashesSignsMap;
 import org.erachain.datachain.TransactionFinalMapSigns;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun.Tuple2;
@@ -103,8 +104,6 @@ public class RHashes extends Transaction {
 
     }
 
-    //public static String getName() { return "Statement"; }
-
     // releaserReference = null - not a pack
     // releaserReference = reference for releaser account - it is as pack
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
@@ -156,6 +155,14 @@ public class RHashes extends Transaction {
             exLink = null;
         }
 
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -185,9 +192,6 @@ public class RHashes extends Transaction {
         //////// local parameters
 
         //READ NAME
-        //byte[] nameLengthBytes = Arrays.copyOfRange(data, position, position + NAME_SIZE_LENGTH);
-        //int nameLength = Ints.fromByteArray(nameLengthBytes);
-        //position += NAME_SIZE_LENGTH;
         int urlLength = Byte.toUnsignedInt(data[position]);
         position++;
 
@@ -206,13 +210,6 @@ public class RHashes extends Transaction {
         //READ DATA
         byte[] arbitraryData = Arrays.copyOfRange(data, position, position + dataSize);
         position += dataSize;
-		/*
-		encryptedByte = Arrays.copyOfRange(data, position, position + ENCRYPTED_LENGTH);
-		position += ENCRYPTED_LENGTH;
-
-		isTextByte = Arrays.copyOfRange(data, position, position + IS_TEXT_LENGTH);
-		position += IS_TEXT_LENGTH;
-		*/
 
         //READ HASHES SIZE
         int hashesLen;
@@ -269,9 +266,6 @@ public class RHashes extends Transaction {
         if (true || data == null || data.length == 0)
             return false;
 
-        //if (Arrays.equals(this.encrypted,new byte[0]))
-        //	return false;
-
         return true;
 
     }
@@ -289,9 +283,7 @@ public class RHashes extends Transaction {
             //transaction.put("data", Base58.encode(this.data));
         }
         if (url != null && url.length > 0) {
-            //transaction.put("url", new String(this.url, StandardCharsets.UTF_8));
             transaction.put("url", new String(this.url, StandardCharsets.UTF_8));
-            //transaction.put("data", Base58.encode(this.data));
         }
 
         JSONArray hashesArray = new JSONArray();
@@ -350,6 +342,12 @@ public class RHashes extends Transaction {
 
         if (exLink != null)
             base_len += exLink.length();
+
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
 
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
@@ -410,10 +408,10 @@ public class RHashes extends Transaction {
 
     //PROCESS/ORPHAN
 
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         int height = this.getBlockHeightByParentOrLast(dcSet);
 
@@ -441,10 +439,10 @@ public class RHashes extends Transaction {
 
     }
 
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         HashesSignsMap map = dcSet.getHashesSignsMap();
         for (byte[] hash : hashes) {

@@ -183,9 +183,6 @@ public class BlockChain {
     public static final int MIN_REGISTERING_BALANCE_1000 = 1000;
     public static final BigDecimal MIN_REGISTERING_BALANCE_1000_BD = new BigDecimal(MIN_REGISTERING_BALANCE_1000);
 
-    //public static final int GENERATING_RETARGET = 10;
-    //public static final int GENERATING_MIN_BLOCK_TIME = DEVELOP_USE ? 120 : 288; // 300 PER DAY
-    //public static final int GENERATING_MIN_BLOCK_TIME_MS = GENERATING_MIN_BLOCK_TIME * 1000;
     public static final int WIN_BLOCK_BROADCAST_WAIT_MS = 10000; //
     // задержка на включение в блок для хорошей сортировки
 
@@ -702,10 +699,7 @@ public class BlockChain {
 
     //
     public static int getHeight(DCSet dcSet) {
-
         //GET LAST BLOCK
-        ///byte[] lastBlockSignature = dcSet.getBlocksHeadMap().getLastBlockSignature();
-        ///return dcSet.getBlockSignsMap().getHeight(lastBlockSignature);
         return dcSet.getBlockSignsMap().size();
     }
 
@@ -976,7 +970,6 @@ public class BlockChain {
             winValue = cut1;
         }
 
-        //return targetPrevios - (targetPrevios>>TARGET_COUNT_SHIFT) + (winValue>>TARGET_COUNT_SHIFT);
         // better accuracy
         long target = (((targetPrevious << TARGET_COUNT_SHIFT) - targetPrevious) + winValue) >> TARGET_COUNT_SHIFT;
         if (target < 1000 && (ERA_COMPU_ALL_UP))
@@ -1074,10 +1067,6 @@ public class BlockChain {
 
         int difference = height - previousForgingHeight;
 
-        if (CHECK_BUGS > 1 && difference < REPEAT_WIN) {
-            boolean debug = true;
-        }
-
         int repeatsMin;
 
         if (height <= BlockChain.REPEAT_WIN) {
@@ -1144,44 +1133,6 @@ public class BlockChain {
     public GenesisBlock getGenesisBlock() {
         return this.genesisBlock;
     }
-
-    //public long getGenesisTimestamp() {
-    //    return this.genesisTimestamp;
-    //}
-
-	/*
-	//public synchronized Tuple2<Integer, Long> getHWeight(DCSet dcSet, boolean withWinBuffer) {
-	public Tuple2<Integer, Long> getHWeight(DCSet dcSet, boolean withWinBuffer) {
-
-		if (dcSet.isStoped())
-			return null;
-
-		//GET LAST BLOCK
-		byte[] lastBlockSignature = dcSet.getBlocksHeadMap().getLastBlockSignature();
-		// test String b58 = Base58.encode(lastBlockSignature);
-
-		int height;
-		long weight;
-		if (withWinBuffer && this.waitWinBuffer != null) {
-			// with WIN BUFFER BLOCK
-			height = 1;
-			weight = this.waitWinBuffer.calcWinValueTargeted(dcSet);
-		} else {
-			height = 0;
-			weight = 0l;
-		}
-
-		if (lastBlockSignature == null) {
-			height++;
-		} else {
-			height += dcSet.getBlockSignsMap().getHeight(lastBlockSignature);
-			weight += dcSet.getBlockSignsMap().getFullWeight();
-		}
-
-		return  new Tuple2<Integer, Long>(height, weight);
-
-	}
-	 */
 
     public long getGenesisTimestamp() {
         return this.genesisTimestamp;
@@ -1251,9 +1202,11 @@ public class BlockChain {
         }
     }
 
-    // SOLVE WON BLOCK
-    // 0 - unchanged;
-    // 1 - changed, need broadcasting;
+    /**
+     * SOLVE WON BLOCK
+     * 0 - unchanged;
+     * 1 - changed, need broadcasting;
+     */
     public synchronized boolean setWaitWinBuffer(DCSet dcSet, Block block, Peer peer) {
 
         LOGGER.info("try set new winBlock: " + block.toString());
@@ -1366,8 +1319,6 @@ public class BlockChain {
 
     public List<byte[]> getSignatures(DCSet dcSet, byte[] parentSignature) {
 
-        //logger.debug("getSignatures for ->" + Base58.encode(parent));
-
         List<byte[]> headers = new ArrayList<byte[]>();
 
         //CHECK IF BLOCK EXISTS
@@ -1381,8 +1332,6 @@ public class BlockChain {
             } else {
                 packet = SYNCHRONIZE_PACKET;
             }
-            //BlocksHeads_2Map childsMap = dcSet.getBlockHeightsMap();
-            //BlocksHeads_2Map map = dcSet.getBlockHeightsMap();
             BlocksHeadsMap map = dcSet.getBlocksHeadsMap();
             int counter = 0;
             do {
@@ -1392,11 +1341,8 @@ public class BlockChain {
                 else
                     break;
             } while (parentSignature != null && counter++ < packet);
-            //logger.debug("get size " + counter);
         } else if (Arrays.equals(parentSignature, this.CHECKPOINT.b)) {
             headers.add(parentSignature);
-        } else {
-            //logger.debug("*** getSignatures NOT FOUND !");
         }
 
         return headers;
@@ -1544,13 +1490,6 @@ public class BlockChain {
     public List<Block> getLastBlocksForTarget_old(DCSet dcSet) {
 
         Block last = dcSet.getBlockMap().last();
-
-		/*
-		if (this.lastBlocksForTarget != null
-				&& Arrays.equals(this.lastBlocksForTarget.get(0).getSignature(), last.getSignature())) {
-			return this.lastBlocksForTarget;
-		}
-		 */
 
         List<Block> list = new ArrayList<Block>();
 

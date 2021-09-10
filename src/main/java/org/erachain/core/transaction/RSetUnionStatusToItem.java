@@ -11,6 +11,7 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.item.unions.UnionCls;
 import org.erachain.datachain.DCSet;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun.Tuple5;
 
@@ -18,7 +19,9 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 
-// this.end_date == null -> MAX
+/**
+ * this.end_date == null -> MAX
+ */
 public class RSetUnionStatusToItem extends Transaction {
 
     public static final byte TYPE_ID = (byte) Transaction.SET_UNION_STATUS_TO_ITEM_TRANSACTION;
@@ -121,8 +124,6 @@ public class RSetUnionStatusToItem extends Transaction {
 
     }
 
-    //public static String getName() { return "Send"; }
-
     public StatusCls getStatus() {
         if (statusKey == null) {
             status = (StatusCls) ItemCls.getItem(dcSet, ItemCls.STATUS_TYPE, this.key);
@@ -184,6 +185,14 @@ public class RSetUnionStatusToItem extends Transaction {
             position += exLink.length();
         } else {
             exLink = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
@@ -336,6 +345,12 @@ public class RSetUnionStatusToItem extends Transaction {
         if (exLink != null)
             base_len += exLink.length();
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
@@ -406,17 +421,13 @@ public class RSetUnionStatusToItem extends Transaction {
     //PROCESS/ORPHAN
 
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         // pack additional data
-        byte[] a_data = new byte[0];//this.value1;
-
-        //Block block = db.getBlocksHeadMap().getLastBlock();
-        //int blockIndex = block.getHeight(db);
-        //int transactionIndex = block.getTransactionIndex(signature);
+        byte[] a_data = new byte[0];
 
         Tuple5<Long, Long, byte[], Integer, Integer> itemP = new Tuple5<Long, Long, byte[], Integer, Integer>
                 (
@@ -436,10 +447,10 @@ public class RSetUnionStatusToItem extends Transaction {
     }
 
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
 
         //UPDATE SENDER
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         // UNDO ALIVE PERSON for DURATION
         if (this.itemType == ItemCls.PERSON_TYPE)

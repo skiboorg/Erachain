@@ -7,12 +7,11 @@ import org.mapdb.SerializerBase;
 import java.util.HashMap;
 
 /**
- * Общая сумма переданных средств в кредит на другой счет
- * Используется для проверки сумм которые отдаются или забираются у заемщика<br><br>
+ * Use only for unlinked values
  *
- * <b>Ключ:</b> account.address Creditor + asset key + account.address Debtor<br>
+ * <b>Ключ:</b> smartContract.id + var.name<br>
  *
- * <b>Значение:</b> сумма средств
+ * <b>Значение:</b> Value
  */
 
 public class SmartContractValues extends DCUMap<Tuple2<Integer, String>, Object> {
@@ -37,5 +36,4 @@ public class SmartContractValues extends DCUMap<Tuple2<Integer, String>, Object>
     protected void getMemoryMap() {
         map = new HashMap<Tuple2<Integer, String>, Object>();
     }
-
 }

@@ -10,6 +10,7 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.item.persons.PersonFactory;
 import org.erachain.core.item.persons.PersonHuman;
+import org.erachain.smartcontracts.SmartContract;
 import org.mapdb.Fun;
 
 import java.math.BigDecimal;
@@ -68,8 +69,6 @@ public class IssuePersonRecord extends IssueItemRecord {
 
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
 
-        //boolean asPack = releaserReference != null;
-
         //CHECK IF WE MATCH BLOCK LENGTH
         int test_len;
         if (forDeal == Transaction.FOR_MYPACK) {
@@ -114,6 +113,14 @@ public class IssuePersonRecord extends IssueItemRecord {
             position += linkTo.length();
         } else {
             linkTo = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
@@ -229,8 +236,6 @@ public class IssuePersonRecord extends IssueItemRecord {
             return Transaction.ITEM_PERSON_HAIR_COLOR_ERROR;
         }
 
-        //int ii = Math.abs(person.getHeight());
-        //if (Math.abs(person.getHeight()) < 1) return Transaction.ITEM_PERSON_HEIGHT_ERROR;
         if (person.getHeight() > 255) {
             return Transaction.ITEM_PERSON_HEIGHT_ERROR;
         }
@@ -335,9 +340,9 @@ public class IssuePersonRecord extends IssueItemRecord {
     //PROCESS/ORPHAN
 
     //@Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         PersonHuman person = (PersonHuman) this.item;
         PublicKeyAccount maker = person.getMaker();
@@ -362,9 +367,9 @@ public class IssuePersonRecord extends IssueItemRecord {
     }
 
     //@Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         PersonHuman person = (PersonHuman) this.item;
         PublicKeyAccount maker = person.getMaker();

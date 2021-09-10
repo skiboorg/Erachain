@@ -40,9 +40,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-//import java.math.BigDecimal;
-//import com.google.common.primitives.Longs;
-
 public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
     static Logger LOGGER = LoggerFactory.getLogger(ItemCls.class.getName());
@@ -514,6 +511,10 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return this.maker;
     }
 
+    public void setMaker(PublicKeyAccount newOwner) {
+        this.maker = newOwner;
+    }
+
     public String getName() {
         return this.name;
     }
@@ -670,14 +671,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
     public int getImageType() {
         return imageType;
     }
-
-    //public String getIconTypeName() {
-    //    return viewMediaType(iconType);
-    //}
-
-    //public String getImageTypeName() {
-    //    return viewMediaType(imageType);
-    //}
 
     public boolean hasImageURL() {
         return imageAsURL;
@@ -1204,8 +1197,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
 
         JSONObject itemJSON = new JSONObject();
 
-        //itemJSON.put("iconTypeName", viewMediaType(iconType));
-
         // ADD DATA
         if (hasIconURL()) {
             itemJSON.put("iconURL", getIconURL());
@@ -1229,7 +1220,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
      * @return
      */
     public JSONObject jsonForExplorerPage(JSONObject langObj, Object[] args) {
-        //DCSet dcSet = DCSet.getInstance();
 
         JSONObject itemJSON = new JSONObject();
         itemJSON.put("key", this.getKey());
@@ -1465,9 +1455,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
             }
 
         } else {
-            if (false && BlockChain.CHECK_BUGS > 3 && thisKey == 0) {
-                thisKey = this.getKey();
-            }
             map.delete(thisKey);
         }
 

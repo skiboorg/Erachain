@@ -55,8 +55,6 @@ public class MultiPaymentTransaction extends Transaction {
 
     //GETTERS/SETTERS
 
-    //public static String getName() { return "Multi Send"; }
-
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
 
         int test_len = BASE_LENGTH;
@@ -252,9 +250,9 @@ public class MultiPaymentTransaction extends Transaction {
 
     //@Override
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         //PROCESS PAYMENTS
         for (Payment payment : this.payments) {
@@ -269,9 +267,9 @@ public class MultiPaymentTransaction extends Transaction {
 
     //@Override
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         //ORPHAN PAYMENTS
         for (Payment payment : this.payments) {
