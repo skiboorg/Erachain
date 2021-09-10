@@ -76,8 +76,6 @@ public class VoteOnPollTransaction extends Transaction {
 
     //GETTERS/SETTERS
 
-    //public static String getName() { return "Vote on Poll"; }
-
     @Override
     public boolean isWiped() {
         return true;
@@ -260,20 +258,20 @@ public class VoteOnPollTransaction extends Transaction {
 
     //@Override
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
     }
 
 
     //@Override
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
     }
 

@@ -6,12 +6,10 @@ import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.statuses.StatusCls;
 import org.erachain.core.item.statuses.StatusFactory;
+import org.erachain.smartcontracts.SmartContract;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-
-//import java.util.Map;
-// import org.slf4j.LoggerFactory;
 
 
 public class IssueStatusRecord extends IssueItemRecord {
@@ -95,6 +93,14 @@ public class IssueStatusRecord extends IssueItemRecord {
             linkTo = null;
         }
 
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
+        }
+
         byte feePow = 0;
         if (forDeal > Transaction.FOR_PACK) {
             //READ FEE POWER
@@ -154,14 +160,6 @@ public class IssueStatusRecord extends IssueItemRecord {
 
         int result = super.isValid(forDeal, flags);
         if (result != Transaction.VALIDATE_OK) return result;
-
-		/*
-		BigDecimal balERA = this.creator.getBalanceUSE(RIGHTS_KEY, db);
-		if ( balERA.compareTo(BlockChain.MAJOR_ERA_BALANCE_BD)<0 )
-		{
-			return Transaction.NOT_ENOUGH_RIGHTS;
-		}
-		*/
 
         return Transaction.VALIDATE_OK;
     }

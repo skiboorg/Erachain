@@ -117,15 +117,12 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void delete(Integer height) {
 
-        if (BlockChain.CHECK_BUGS > 2 && height == 652627) {
-            int tt = 1;
-        }
-
         // TODO сделать удаление по фильтру разом - как у RocksDB - deleteRange(final byte[] beginKey, final byte[] endKey)
         if (map instanceof TransactionFinalSuit) {
             ((TransactionFinalSuit) map).deleteForBlock(height);
         } else if (map instanceof NativeMapTreeMapFork) {
-            Iterator<Long> iterator = map.getIterator();
+            // Descending for correct remove tags see issue #1766
+            Iterator<Long> iterator = map.getDescendingIterator();
             while (iterator.hasNext()) {
                 Long key = iterator.next();
                 if (Transaction.parseDBRef(key).a.equals(height)) {
@@ -191,8 +188,8 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
     }
 
     @Override
-    public IteratorCloseable<Long> getIteratorByBlock(Integer block) {
-        return ((TransactionFinalSuit) map).getBlockIterator(block);
+    public IteratorCloseable<Long> getIteratorByBlock(Integer block, boolean descending) {
+        return ((TransactionFinalSuit) map).getBlockIterator(block, descending);
     }
 
     @Override
@@ -208,7 +205,7 @@ public class TransactionFinalMapImpl extends DBTabImpl<Long, Transaction> implem
             return null;
         }
 
-        try (IteratorCloseable<Long> iterator = ((TransactionFinalSuit) map).getBlockIterator(block)) {
+        try (IteratorCloseable<Long> iterator = ((TransactionFinalSuit) map).getBlockIterator(block, false)) {
 
             if (offset > 0)
                 Iterators.advance(iterator, offset);

@@ -8,6 +8,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.exdata.exLink.ExLink;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun.Tuple2;
 import org.slf4j.Logger;
@@ -19,10 +20,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-
-// TODO
-// ver =1 - vouching incommed transfers - assets etc.
-//   ++ FEE = 0, no TIMESTAMP??, max importance for including in block
+/**
+ * TODO
+ * ver =1 - vouching incommed transfers - assets etc.
+ * ++ FEE = 0, no TIMESTAMP??, max importance for including in block
+ */
 public class RVouch extends Transaction {
 
     protected static final int LOAD_LENGTH = HEIGHT_LENGTH + SEQ_LENGTH;
@@ -81,8 +83,6 @@ public class RVouch extends Transaction {
 
     //GETTERS/SETTERS
 
-    //public static String getName() { return "Send"; }
-
     public int getRefHeight() {
         return this.refHeight;
     }
@@ -100,8 +100,6 @@ public class RVouch extends Transaction {
 
 
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
-
-        //boolean asPack = releaserReference != null;
 
         //CHECK IF WE MATCH BLOCK LENGTH
         int test_len;
@@ -147,6 +145,14 @@ public class RVouch extends Transaction {
             position += exLink.length();
         } else {
             exLink = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
@@ -239,6 +245,12 @@ public class RVouch extends Transaction {
         if (exLink != null)
             base_len += exLink.length();
 
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
+
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;
 
@@ -295,9 +307,9 @@ public class RVouch extends Transaction {
 
 
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         if (block == null)
             return;
@@ -330,9 +342,9 @@ public class RVouch extends Transaction {
     }
 
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
 
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         // make key for vouching record
         Long recordKey = Transaction.makeDBRef(this.refHeight, this.refSeqNo);

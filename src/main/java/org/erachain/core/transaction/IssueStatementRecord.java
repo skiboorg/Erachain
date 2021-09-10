@@ -1,8 +1,5 @@
 package org.erachain.core.transaction;
 
-//import java.math.BigDecimal;
-//import java.math.BigInteger;
-
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -11,6 +8,7 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.crypto.Base58;
 import org.erachain.core.exdata.exLink.ExLink;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
@@ -19,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 
-// issue statement
 public class IssueStatementRecord extends Transaction {
 
     protected static final byte HAS_TEMPLATE_MASK = (byte) (1 << 7);
@@ -71,29 +68,6 @@ public class IssueStatementRecord extends Transaction {
         this.signature = signature;
         // not need this.calcFee();
     }
-
-    /*
-    public IssueStatementRecord(PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data, byte[] isText, byte[] encrypted, long timestamp, Long reference, byte[] signature) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference, signature);
-        // set props
-        this.setTypeBytes();
-    }
-
-    public IssueStatementRecord(PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data, byte[] isText, byte[] encrypted, long timestamp, Long reference) {
-        this(new byte[]{TYPE_ID, 0, 0, 0}, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference);
-        // set props
-        this.setTypeBytes();
-    }
-
-
-    public IssueStatementRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data,
-                                byte[] isText, byte[] encrypted, PublicKeyAccount[] signers, byte[][] signatures, long timestamp, Long reference, byte[] signature) {
-        this(typeBytes, creator, linkTo, feePow, templateKey, data, isText, encrypted, timestamp, reference, signature);
-        this.signers = signers;
-        this.signatures = signatures;
-        this.setTypeBytes();
-    }
-     */
 
     public IssueStatementRecord(byte[] typeBytes, PublicKeyAccount creator, ExLink linkTo, byte feePow, long templateKey, byte[] data,
                                 byte[] isText, byte[] encrypted, PublicKeyAccount[] signers, byte[][] signatures,
@@ -172,6 +146,14 @@ public class IssueStatementRecord extends Transaction {
             position += linkTo.length();
         } else {
             linkTo = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
@@ -449,6 +431,12 @@ public class IssueStatementRecord extends Transaction {
 
         if (exLink != null)
             base_len += exLink.length();
+
+        if (smartContract != null) {
+            if (forDeal == FOR_DB_RECORD || !smartContract.isEpoch()) {
+                base_len += smartContract.length(forDeal);
+            }
+        }
 
         if (!withSignature)
             base_len -= SIGNATURE_LENGTH;

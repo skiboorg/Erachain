@@ -1,7 +1,5 @@
 package org.erachain.core.item.assets;
 
-//import java.math.BigDecimal;
-
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -10,9 +8,9 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Crypto;
-import org.erachain.core.epoch.DogePlanet;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
+import org.erachain.smartcontracts.epoch.DogePlanet;
 import org.erachain.webserver.WebResource;
 import org.mapdb.Fun;
 
@@ -137,9 +135,6 @@ public class AssetUnique extends AssetCls {
         position += MAKER_LENGTH;
 
         //READ NAME
-        //byte[] nameLengthBytes = Arrays.copyOfRange(data, position, position + NAME_SIZE_LENGTH);
-        //int nameLength = Ints.fromByteArray(nameLengthBytes);
-        //position += NAME_SIZE_LENGTH;
         int nameLength = Byte.toUnsignedInt(data[position]);
         position++;
 

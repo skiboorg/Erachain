@@ -7,8 +7,8 @@ import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.crypto.Base58;
-import org.erachain.core.epoch.SmartContract;
 import org.erachain.core.exdata.exLink.ExLink;
+import org.erachain.smartcontracts.SmartContract;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 
-/*
+/**
 
 ## typeBytes
 0 - record type
@@ -61,7 +61,6 @@ public class RSend extends TransactionAmount {
 
     public static final int NO_DATA_MASK = 128; // 0x10000000
     public static final int MAX_DATA_VIEW = 64;
-    //private static int position;
 
     static Logger LOGGER = LoggerFactory.getLogger(RSend.class.getName());
 
@@ -191,8 +190,6 @@ public class RSend extends TransactionAmount {
 
     // GETTERS/SETTERS
 
-    // public static String getName() { return "Send"; }
-
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
 
         // READ TYPE
@@ -321,8 +318,7 @@ public class RSend extends TransactionAmount {
         }
 
         // HEAD LEN
-        int titleLen = Byte.toUnsignedInt(data[position]);
-        position++;
+        int titleLen = Byte.toUnsignedInt(data[position++]);
         // HEAD
         byte[] titleBytes = Arrays.copyOfRange(data, position, position + titleLen);
         String title = new String(titleBytes, StandardCharsets.UTF_8);

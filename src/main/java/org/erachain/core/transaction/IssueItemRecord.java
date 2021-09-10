@@ -19,8 +19,6 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
 
     static Logger LOGGER = LoggerFactory.getLogger(IssueItemRecord.class.getName());
 
-    //private static final int BASE_LENGTH = Transaction.BASE_LENGTH;
-
     protected ItemCls item;
     protected Long key = 0L;
 
@@ -44,7 +42,6 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
     }
 
     //GETTERS/SETTERS
-    //public static String getName() { return "Issue Item"; }
 
     @Override
     public ItemCls getItem() {
@@ -198,27 +195,9 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
 
         int base_len;
 
-        if (true) {
-            base_len = super.getDataLength(forDeal, withSignature);
-            if (forDeal == FOR_DB_RECORD)
-                base_len += KEY_LENGTH;
-        } else {
-            if (forDeal == FOR_MYPACK)
-                base_len = BASE_LENGTH_AS_MYPACK;
-            else if (forDeal == FOR_PACK)
-                base_len = BASE_LENGTH_AS_PACK;
-            else if (forDeal == FOR_DB_RECORD)
-                base_len = BASE_LENGTH_AS_DBRECORD + KEY_LENGTH;
-            else
-                base_len = BASE_LENGTH;
-
-            if (exLink != null)
-                base_len += exLink.length();
-
-            if (!withSignature)
-                base_len -= SIGNATURE_LENGTH;
-
-        }
+        base_len = super.getDataLength(forDeal, withSignature);
+        if (forDeal == FOR_DB_RECORD)
+            base_len += KEY_LENGTH;
 
         // not include item reference
         return base_len + this.item.getDataLength(false);
@@ -276,10 +255,10 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
     }
 
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
 
         //UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         processItem();
 
@@ -291,9 +270,9 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
     }
 
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         orphanItem();
 
