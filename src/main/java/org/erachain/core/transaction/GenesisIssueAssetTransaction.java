@@ -74,7 +74,7 @@ public class GenesisIssueAssetTransaction extends GenesisIssueItemRecord {
             return;
         }
 
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         AssetCls asset = (AssetCls) item;
         long quantity = asset.getQuantity();

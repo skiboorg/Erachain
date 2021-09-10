@@ -92,6 +92,10 @@ public abstract class SmartContract {
      */
     static public SmartContract make(Transaction transaction) {
 
+        if (true)
+            return null;
+
+
         if (BlockChain.TEST_MODE
                 && transaction.getBlockHeight() > 115740
                 && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
