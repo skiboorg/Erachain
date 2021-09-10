@@ -23,16 +23,6 @@ public abstract class AddressItemRefs extends Transaction {
         this.item = item;
     }
 
-    /*
-    public AddressItemRefs(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte feePow, long timestamp, Long reference, byte[] signature)
-    {
-        this(typeBytes, NAME_ID, creator, item, feePow, timestamp, reference);
-        this.signature = signature;
-        if (item.getReference() == null) item.setReference(signature); // set reference
-        //item.resolveKey(DLSet.getInstance());
-        ///// if (timestamp > 1000 ) setDB; // not asPaack
-    }
-     */
     public AddressItemRefs(byte[] typeBytes, String NAME_ID, PublicKeyAccount creator, ItemCls item, byte[] signature, long dbRef) {
         this(typeBytes, NAME_ID, creator, item, (byte) 0, 0L, null);
         this.signature = signature;
@@ -123,9 +113,9 @@ public abstract class AddressItemRefs extends Transaction {
 
     //@Override
     @Override
-    public void process(Block block, int forDeal) {
+    public void processBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.process(block, forDeal);
+        super.processBody(block, forDeal);
 
         this.item.setReference(this.signature, dbRef);
 
@@ -136,9 +126,9 @@ public abstract class AddressItemRefs extends Transaction {
 
     //@Override
     @Override
-    public void orphan(Block block, int forDeal) {
+    public void orphanBody(Block block, int forDeal) {
         //UPDATE CREATOR
-        super.orphan(block, forDeal);
+        super.orphanBody(block, forDeal);
 
         //DELETE FROM DATABASE
         long key = this.item.deleteFromMap(this.dcSet, START_KEY);

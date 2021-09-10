@@ -438,28 +438,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 
     }
 
-    /*
-    public String getTempDir() {
-        String path = "";
-        try {
-
-            if (this.tempPath.isEmpty()) {
-                path = this.userPath + DEFAULT_TEMP_DIR;
-            } else path = this.tempPath;
-        } catch (Exception e) {
-            // TODO Auto-generated catch blockx
-            path = this.userPath + DEFAULT_TEMP_DIR;
-        }
-        // if temp dir not exist make dir
-        File tempDir = new File(path);
-        if (!tempDir.exists()) {
-            tempDir.mkdir();
-        }
-
-        return path;
-    }
-     */
-
     public String getPeersPath() {
         return this.userPath + (isDemoNet() ? "peers-demo.json" : isTestNet() ? "peers-test.json" :
                 isCloneNet() ? Settings.CLONE_OR_SIDE.toLowerCase() + "PEERS.json" : "peers.json");
@@ -1199,18 +1177,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
         return DEFAULT_TRAY_EVENT;
     }
 
-	/*
-	public int getMaxBytePerFee() 
-	{
-		if(this.settingsJSON.containsKey("maxbyteperfee"))
-		{
-			return ((Long) this.settingsJSON.get("maxbyteperfee")).intValue();
-		}
-		
-		return DEFAULT_MAX_BYTE_PER_FEE;
-	}
-	*/
-
     public boolean isAllowFeeLessRequired() {
         if (this.settingsJSON.containsKey("allowfeelessrequired")) {
             return ((Boolean) this.settingsJSON.get("allowfeelessrequired")).booleanValue();
@@ -1218,13 +1184,6 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
 
         return ALLOW_FEE_LESS_REQUIRED;
     }
-
-	/*
-	public BigDecimal getBigFee() 
-	{
-		return DEFAULT_BIG_FEE;
-	}
-	*/
 
     public boolean isGuiEnabled() {
 

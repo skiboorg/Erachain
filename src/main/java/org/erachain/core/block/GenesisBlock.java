@@ -24,14 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// import org.slf4j.LoggerFactory;
-
-//import org.erachain.core.item.assets.AssetCls;
-
 public class GenesisBlock extends Block {
 
-    //AssetVenture asset0;
-    //AssetVenture asset1;
     public static final PublicKeyAccount CREATOR = new PublicKeyAccount(new byte[PublicKeyAccount.PUBLIC_KEY_LENGTH]);
     private static int genesisVersion = 0;
     private static byte[] genesisReference = Bytes.ensureCapacity(new byte[]{19, 66, 8, 21, 0, 0, 0, 0}, Crypto.SIGNATURE_LENGTH, 0);
@@ -52,9 +46,6 @@ public class GenesisBlock extends Block {
         Account recipient;
         BigDecimal bdAmount0;
         BigDecimal bdAmount1;
-
-        //PublicKeyAccount issuer = new PublicKeyAccount(new byte[Crypto.HASH_LENGTH]);
-        //PersonCls user;
 
         // ISSUE ITEMS
         this.initItems();
@@ -293,20 +284,9 @@ public class GenesisBlock extends Block {
         return this.genesisTimestamp;
     }
 
-    public long getGenesisBlockTimestamp() {
-        return this.genesisTimestamp;
-    }
-
     public String getTestNetInfo() {
         return this.testnetInfo;
     }
-	/*
-	@Override
-	public int getGeneratingBalance()
-	{
-		return 0;
-	}
-	 */
 
     @Override
     public Block getParent(DCSet db) {
@@ -343,8 +323,7 @@ public class GenesisBlock extends Block {
         //DIGEST [32]
         byte[] digest = Crypto.getInstance().digest(data);
 
-        //DIGEST + transactionsHash
-        // = byte[64]
+        //DIGEST + transactionsHash = byte[64]
         digest = Bytes.concat(digest, transactionsHash);
 
         return digest;

@@ -7,7 +7,6 @@ import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Base58;
-import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.transaction.RSignNote;
@@ -49,9 +48,10 @@ public class ExAirDrop extends ExAction<List<Fun.Tuple2<Account, Fun.Tuple2<Inte
     private final BigDecimal amount;
     private final int balancePos;
     final boolean backward;
+    /**
+     * Short form of address = [20]
+     */
     private final byte[][] addresses;
-
-    /////////////////
 
     public String errorValue;
 
@@ -86,7 +86,6 @@ public class ExAirDrop extends ExAction<List<Fun.Tuple2<Account, Fun.Tuple2<Inte
 
     @Override
     public String viewResults(Transaction transactionParent) {
-        Crypto crypto = Crypto.getInstance();
         String amountStr = " " + amount.toPlainString();
         String results = "";
         int i = 0;
@@ -273,9 +272,6 @@ public class ExAirDrop extends ExAction<List<Fun.Tuple2<Account, Fun.Tuple2<Inte
         int steep = 0;
         BigDecimal amount;
 
-        //Controller cntr = Controller.getInstance();
-        //BlockChain chain = cntr.getBlockChain();
-
         try {
             amount = amountStr == null || amountStr.isEmpty() ? null : new BigDecimal(amountStr);
         } catch (Exception e) {
@@ -313,7 +309,7 @@ public class ExAirDrop extends ExAction<List<Fun.Tuple2<Account, Fun.Tuple2<Inte
 
     public static Fun.Tuple2<ExAction, String> parseJSON_local(JSONObject jsonObject) throws Exception {
         long assetKey = Long.valueOf(jsonObject.getOrDefault("assetKey", 0L).toString());
-        int position = Integer.valueOf(jsonObject.getOrDefault("position", 1).toString());
+        int position = Integer.valueOf(jsonObject.getOrDefault("balancePosition", 1).toString());
         boolean backward = Boolean.valueOf((boolean) jsonObject.getOrDefault("backward", false));
 
         String value = (String) jsonObject.get("amount");
@@ -346,13 +342,14 @@ public class ExAirDrop extends ExAction<List<Fun.Tuple2<Account, Fun.Tuple2<Inte
 
         toJson.put("flags", flags);
         toJson.put("assetKey", assetKey);
-        toJson.put("amount", amount);
+        toJson.put("amount", amount.toPlainString());
         toJson.put("balancePosition", balancePos);
         toJson.put("backward", backward);
 
         JSONArray array = new JSONArray();
         for (byte[] address : addresses) {
-            array.add(Base58.encode(address));
+            array.add(Base58.encode(crypto.getAddressFromShortBytes(address)));
+
         }
         toJson.put("addresses", array);
 

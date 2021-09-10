@@ -8,8 +8,6 @@ import org.erachain.core.item.assets.AssetVenture;
 import org.erachain.utils.ObserverMessage;
 import org.mapdb.DB;
 
-//import database.serializer.AssetSerializer;
-
 /**
  * Хранение активов.<br>
  * Ключ: номер (автоинкремент)<br>

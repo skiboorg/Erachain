@@ -7,6 +7,7 @@ import org.erachain.core.exdata.exLink.ExLink;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.imprints.Imprint;
 import org.erachain.core.item.imprints.ImprintCls;
+import org.erachain.smartcontracts.SmartContract;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -14,7 +15,6 @@ import java.util.Arrays;
 // reference - as item.name
 // TODO - reference NOT NEED - because it is unique record! - make it as new version protocol
 public class IssueImprintRecord extends IssueItemRecord {
-    //protected static final int BASE_LENGTH_AS_PACK = Transaction.BASE_LENGTH_AS_PACK;
 
     protected static final int BASE_LENGTH_AS_MYPACK = Transaction.BASE_LENGTH_AS_MYPACK - REFERENCE_LENGTH;
     protected static final int BASE_LENGTH_AS_PACK = Transaction.BASE_LENGTH_AS_PACK - REFERENCE_LENGTH;
@@ -55,7 +55,6 @@ public class IssueImprintRecord extends IssueItemRecord {
     }
 
     //GETTERS/SETTERS
-    //public static String getName() { return "Issue Imprint"; }
 
     @Override
     public long calcBaseFee(boolean withFreeProtocol) {
@@ -71,8 +70,6 @@ public class IssueImprintRecord extends IssueItemRecord {
     }
 
     public static Transaction Parse(byte[] data, int forDeal) throws Exception {
-
-        //boolean asPack = releaserReference != null;
 
         //CHECK IF WE MATCH BLOCK LENGTH
         int test_len;
@@ -102,11 +99,6 @@ public class IssueImprintRecord extends IssueItemRecord {
             position += TIMESTAMP_LENGTH;
         }
 
-        //READ REFERENCE
-        //byte[] referenceBytes = Arrays.copyOfRange(data, position, position + REFERENCE_LENGTH);
-        //Long reference = Longs.fromByteArray(referenceBytes);
-        //position += REFERENCE_LENGTH;
-
         //READ CREATOR
         byte[] creatorBytes = Arrays.copyOfRange(data, position, position + CREATOR_LENGTH);
         PublicKeyAccount creator = new PublicKeyAccount(creatorBytes);
@@ -118,6 +110,14 @@ public class IssueImprintRecord extends IssueItemRecord {
             position += linkTo.length();
         } else {
             linkTo = null;
+        }
+
+        SmartContract smartContract;
+        if ((typeBytes[2] & HAS_SMART_CONTRACT_MASK) > 0) {
+            smartContract = SmartContract.Parses(data, position, forDeal);
+            position += smartContract.length(forDeal);
+        } else {
+            smartContract = null;
         }
 
         byte feePow = 0;
