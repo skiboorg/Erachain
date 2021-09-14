@@ -53,6 +53,7 @@ public class BlocksTableModel extends TimerTableModelCls<Block.BlockHead> {
                 case COLUMN_TIMESTAMP:
                     return DateTimeFormat.timestamptoString(block.getTimestamp());
                 case COLUMN_GENERATOR:
+                    // if orphaned - hide error
                     try {
                         return block.creator.getPersonAsString();
                     } catch (Exception ee) {
