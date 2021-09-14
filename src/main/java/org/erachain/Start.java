@@ -5,8 +5,8 @@ import com.google.common.io.Files;
 import org.erachain.controller.Controller;
 import org.erachain.core.account.Account;
 import org.erachain.settings.Settings;
+import org.erachain.utils.FileUtils;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
 import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,29 +132,11 @@ public class Start {
             if (false) {
 
                 LOGGER.info(Settings.CLONE_OR_SIDE.toLowerCase() + "GENESIS.json USED");
-                String jsonString = "";
-                try {
-                    List<String> lines = Files.readLines(file, Charsets.UTF_8);
-
-                    for (String line : lines) {
-                        if (line.trim().startsWith("//")) {
-                            // пропускаем //
-                            continue;
-                        }
-                        jsonString += line;
-                    }
-                } catch (Exception e) {
-                    LOGGER.info("Error while reading " + file.getAbsolutePath());
-                    LOGGER.error(e.getMessage(), e);
-                    System.exit(3);
+                Settings.genesisJSON = FileUtils.readCommentedJSONArray(file.getPath());
+                if (Settings.genesisJSON == null) {
+                    LOGGER.error("Wrong JSON or not UTF-8 encode in " + file.getName());
+                    throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
                 }
-
-            //CREATE JSON OBJECT
-            Settings.genesisJSON = (JSONArray) JSONValue.parse(jsonString);
-            if (Settings.genesisJSON == null) {
-                LOGGER.error("Wrong JSON or not UTF-8 encode in " + file.getName());
-                throw new Exception("Wrong JSON or not UTF-8 encode in " + file.getName());
-            }
 
                 JSONArray appArray = (JSONArray) Settings.genesisJSON.get(0);
                 Settings.APP_NAME = appArray.get(0).toString();

@@ -1,7 +1,5 @@
 package org.erachain.settings;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.erachain.controller.Controller;
@@ -11,6 +9,7 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.lang.Lang;
 import org.erachain.network.Peer;
 import org.erachain.ntp.NTP;
+import org.erachain.utils.FileUtils;
 import org.erachain.utils.SaveStrToFile;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -86,6 +85,7 @@ public class Settings {
     public static final String DEFAULT_DATA_CHAIN_DIR = "datachain";
 
     private static final String DEFAULT_DATA_LOCAL_DIR = "datalocal";
+    private static final String DEFAULT_DATA_FPOOR_DIR = "dataFPool";
     private static final String DEFAULT_DATA_TEMP_DIR = "datatemp";
     private static final String DEFAULT_DATA_WALLET_DIR = "dataWallet";
     public static final String DEFAULT_WALLET_KEYS_DIR = "walletKeys";
@@ -213,33 +213,11 @@ public class Settings {
 
         EXCHANGE_IN_OUT = isMainNet();
 
-        File file = new File("");
         //TRY READ PEERS.JSON
         try {
-            //OPEN FILE
-            file = new File(this.getPeersPath());
-
-            //CREATE FILE IF IT DOESNT EXIST
-            if (file.exists()) {
-                //READ PEERS FILE
-                List<String> lines = Files.readLines(file, Charsets.UTF_8);
-
-                String jsonString = "";
-                for (String line : lines) {
-                    if (line.trim().startsWith("//")) {
-                        // пропускаем //
-                        continue;
-                    }
-                    jsonString += line;
-                }
-
-                //CREATE JSON OBJECT
-                this.peersJSON = (JSONObject) JSONValue.parse(jsonString);
-            } else {
-                this.peersJSON = new JSONObject();
-            }
-
+            this.peersJSON = FileUtils.readCommentedJSONObject(this.getPeersPath());
         } catch (Exception e) {
+            File file = new File("");
             LOGGER.info("Error while reading PEERS " + file.getAbsolutePath() + ", using default!");
             LOGGER.error(e.getMessage(), e);
             this.peersJSON = new JSONObject();
@@ -477,6 +455,10 @@ public class Settings {
         return this.getUserPath() + DEFAULT_DATA_LOCAL_DIR;
     }
 
+    public String getFPoolDir() {
+        return this.getUserPath() + DEFAULT_DATA_FPOOR_DIR;
+    }
+
     public String getDataTempDir() {
         String path = this.getUserPath() + DEFAULT_DATA_TEMP_DIR;
         File tempDir = new File(path);
@@ -537,27 +519,9 @@ public class Settings {
     public List<String> getTrustedPeers() {
 
         try {
-
             File file = new File(this.userPath
                     + (BlockChain.TEST_MODE ? "peers-trusted-test.json" : "peers-trusted.json"));
-
-            //CREATE FILE IF IT DOESNT EXIST
-            if (file.exists()) {
-                //READ PEERS FILE
-                List<String> lines = Files.readLines(file, Charsets.UTF_8);
-
-                String jsonString = "";
-                for (String line : lines) {
-                    if (line.trim().startsWith("//")) {
-                        // пропускаем //
-                        continue;
-                    }
-                    jsonString += line;
-                }
-
-                //CREATE JSON OBJECT
-                return new ArrayList<String>((JSONArray) JSONValue.parse(jsonString));
-            }
+            return new ArrayList<String>(FileUtils.readCommentedJSONArray(file.getPath()));
         } catch (Exception e) {
             LOGGER.debug(e.getMessage(), e);
         }
@@ -1311,25 +1275,13 @@ public class Settings {
                 e.printStackTrace();
             }
         }
+
         try {
             // тут можно здать путь и чтение 2-й раз будет с того пути использовано как новый Settings по тому пути
             while (alreadyPassed < 2) {
                 //OPEN FILE
-                //READ SETTINS JSON FILE
-                List<String> lines = Files.readLines(file, Charsets.UTF_8);
 
-                String jsonString = "";
-                for (String line : lines) {
-                    if (line.trim().startsWith("//")) {
-                        // пропускаем //
-                        continue;
-                    }
-                    jsonString += line;
-                }
-
-                //CREATE JSON OBJECT
-                this.settingsJSON = (JSONObject) JSONValue.parse(jsonString);
-                settingsJSON = settingsJSON == null ? new JSONObject() : settingsJSON;
+                settingsJSON = FileUtils.readCommentedJSONObject(file.getPath());
 
                 alreadyPassed++;
 
