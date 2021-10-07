@@ -101,7 +101,7 @@ import java.util.jar.Manifest;
  */
 public class Controller extends Observable {
 
-    public static String version = "2021.09 fpool.02 beta";
+    public static String version = "2021.10 01";
     public static String buildTime = "2021-13-08 12:00:00 UTC";
 
     public static final char DECIMAL_SEPARATOR = '.';
