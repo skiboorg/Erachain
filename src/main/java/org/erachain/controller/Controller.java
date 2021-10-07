@@ -1064,11 +1064,15 @@ public class Controller extends Observable {
         if (this.connectTimer != null)
             this.connectTimer.cancel();
 
-        this.setChanged();
-        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Closing")));
-        // STOP MESSAGE PROCESSOR
-        this.setChanged();
-        this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Stopping message processor")));
+        try {
+            this.setChanged();
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Closing")));
+            // STOP MESSAGE PROCESSOR
+            this.setChanged();
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Stopping message processor")));
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
 
         if (this.network != null) {
             LOGGER.info("Stopping message processor");
@@ -3303,6 +3307,11 @@ public class Controller extends Observable {
             image = java.util.Base64.getDecoder().decode(image64);
         }
 
+        // and certify public key of maker
+        Boolean andCertify = (Boolean) jsonObject.get("certify");
+        if (andCertify == null)
+            andCertify = false;
+
         long birthday = 0;
         long deathday = 0;
         byte gender = 2;
@@ -3376,21 +3385,21 @@ public class Controller extends Observable {
                 skinColor, eyeColor, hairСolor, height, icon, image, description,
                 ownerSignature);
 
-        return issuePersonHuman(creatorPrivate, linkTo, feePow, person);
+        return issuePersonHuman(creatorPrivate, linkTo, feePow, person, andCertify);
 
     }
 
-    public Pair<Transaction, Integer> issuePersonHuman(PrivateKeyAccount creator, ExLink linkTo, int feePow, PersonCls person) {
+    public Pair<Transaction, Integer> issuePersonHuman(PrivateKeyAccount creator, ExLink linkTo, int feePow, PersonCls person, boolean andCertify) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePersonHumanTransaction(creator, linkTo, feePow, person);
+            return this.transactionCreator.createIssuePersonHumanTransaction(creator, linkTo, feePow, person, andCertify);
         }
     }
 
-    public Transaction issuePerson(PrivateKeyAccount creator, ExLink linkTo, int feePow, PersonCls person) {
+    public Transaction issuePerson(PrivateKeyAccount creator, ExLink linkTo, int feePow, PersonCls person, boolean andCertify) {
         // CREATE ONLY ONE TRANSACTION AT A TIME
         synchronized (this.transactionCreator) {
-            return this.transactionCreator.createIssuePersonTransaction(creator, linkTo, feePow, person);
+            return this.transactionCreator.createIssuePersonTransaction(creator, linkTo, feePow, person, andCertify);
         }
     }
 
