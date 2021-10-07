@@ -452,7 +452,6 @@ public class DepositExchange extends IconPanel {
         payToAddressDetails.setVisible(false);
         jButton_copyDetails.setVisible(false);
 
-
         jLabel_DetailsCheck.setText(Lang.T("Status") + ":");
         labelGBC.gridy = ++gridy;
         jPanelMain.add(jLabel_DetailsCheck, labelGBC);
