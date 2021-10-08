@@ -1660,7 +1660,7 @@ public class DCSet extends DBASet implements Closeable {
 
     @Override
     public void commit() {
-        this.actions += 100;
+        this.commitSize += 5000;
     }
 
     public void rollback() {
@@ -1695,12 +1695,13 @@ public class DCSet extends DBASet implements Closeable {
     private boolean clearGC = false;
 
     /**
-     * Освобождает память которая вне кучи приложения но у системы память забирается.
-     * Причем размер занимаемой памяти примерно равен файлу data.t - в котором транзакция СУБД хранится.
+     * Освобождает память, которая вне кучи приложения но у системы эта память забирается
+     * - ее само приложение и сборщик мусора не смогут освободить.
+     * Причем размер занимаемой памяти примерно равен файлу chain.dat.t - в котором транзакция СУБД MapDB хранится.
      * При коммитре этот файл очищается. Размер файла получается больше чем размер блока,
      * так как данные дублиуются в таблице трнзакций и еще активы (сущности - для картинок и описний).
      * <p>
-     * TODO нужно сделать по размеру этого файла - если большой - то коммит закрыть
+     * TODO нужно сделать по размеру этого файла - если большой - то коммит закрыть - так как не все данные могут в MApDB сохраняться - часть в RocksDB - а там другой файл и другая память
      *
      * @param size
      * @param hardFlush
@@ -1737,8 +1738,18 @@ public class DCSet extends DBASet implements Closeable {
 
         this.commitSize += size;
 
-        if (hardFlush) {
-            boolean debug = true;
+        /**
+         * if by Commit Size: 91 MB - chain.dat.t = 2 GB !!
+         * по размеру файла смотрим - если уже большой то сольем
+         */
+        if (commitSize > 20123123) {
+            File dbFileT = new File(Settings.getInstance().getDataChainPath(), "chain.dat.t");
+            if (dbFileT.exists()) {
+                long sizeT = dbFileT.length();
+                if (sizeT > 750000123) {
+                    commitSize = sizeT;
+                }
+            }
         }
 
         if (hardFlush
