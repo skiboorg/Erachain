@@ -108,17 +108,22 @@ public abstract class SmartContract {
             }
 
         } else if (BlockChain.TEST_MODE
-                && transaction.getBlockHeight() > 132464
+                && transaction.getBlockHeight() > 385366
                 && transaction.getType() == Transaction.CREATE_ORDER_TRANSACTION) {
             CreateOrderTransaction createOrder = (CreateOrderTransaction) transaction;
-            if (createOrder.getHaveKey() == AssetCls.ERA_KEY
+            if (true || createOrder.getHaveKey() == AssetCls.ERA_KEY
                     && createOrder.getAmountHave().compareTo(new BigDecimal(100)) >= 0 //  && createOrder.getWantKey() == AssetCls.USD_KEY
                     || createOrder.getWantKey() == AssetCls.ERA_KEY
                     && createOrder.getAmountWant().compareTo(new BigDecimal(100)) >= 0 // && createOrder.getHaveKey() == AssetCls.USD_KEY
             ) {
                 Order order = createOrder.getDCSet().getCompletedOrderMap().get(createOrder.getOrderId());
-                if (order != null)
-                    return new LeafFall();
+                if (order != null) {
+                    if (true) {
+                        return new DogePlanet(1);
+                    } else {
+                        return new LeafFall();
+                    }
+                }
             }
 
         }
