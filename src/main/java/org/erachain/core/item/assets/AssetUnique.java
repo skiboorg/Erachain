@@ -3,6 +3,7 @@ package org.erachain.core.item.assets;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import org.erachain.api.ApiErrorFactory;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
@@ -12,6 +13,9 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
 import org.erachain.smartcontracts.epoch.DogePlanet;
 import org.erachain.webserver.WebResource;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.mapdb.Fun;
 
 import javax.ws.rs.core.MediaType;
@@ -36,15 +40,68 @@ public class AssetUnique extends AssetCls {
     }
 
     //GETTERS/SETTERS
+    private static JSONObject imgs;
+
+    {
+        imgs = (JSONObject) JSONValue.parse("[[[\"1050868\", \"img\"]],[],[],[],[],[],[],[]]");
+    }
+
+    private static String[][][] imgsStr;
+    {
+        imgsStr = new String[][][]{
+                new String[][]{
+                        new String[]{"1050868", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050867", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050864", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050863", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050862", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050860", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050866", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050859", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050858", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050857", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050856", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050855", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050854", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050866", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050860", WebResource.TYPE_IMAGE.toString()},
+                },
+                new String[][]{
+                        new String[]{"1050852", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050851", WebResource.TYPE_IMAGE.toString()},
+                },
+        };
+    }
+
     @Override
     public String getImageURL() {
         if (!maker.equals(DogePlanet.MAKER))
             return super.getImageURL();
 
+        JSONArray arrayJson = new JSONArray();
+
         int height = Transaction.parseHeightDBRef(dbRef);
         Block.BlockHead blockHead = DCSet.getInstance().getBlocksHeadsMap().get(height + 10);
-        if (blockHead == null)
-            return "<img width=350 style='position:absolute;'src=/smartcontract/epoch/000001/01/000.png>";
+        if (blockHead == null) {
+            JSONObject item = new JSONObject();
+            item.put("url", "/apiasset/image/1050869");
+            item.put("type", WebResource.TYPE_IMAGE);
+            arrayJson.add(item);
+            return arrayJson.toJSONString();
+            //return "<img width=350 style='position:absolute;'src=/smartcontract/epoch/000001/01/000.png>";
+        }
 
         byte[] hash = blockHead.signature;
         byte[] hash2 = Ints.toByteArray((int) key);
@@ -53,34 +110,47 @@ public class AssetUnique extends AssetCls {
         hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
         int slot = 0;
         int slotRare;
+        int slotRareLvl;
         String html = "";
+
         do {
-            html += String.format("<img style='position:absolute; height:inherit' src=/smartcontract/epoch/000001/%02d/", slot);
             slotRare = Ints.fromBytes((byte) 0, (byte) 0, hash[slot << 1], hash[(slot << 1) + 1]);
             if ((slotRare >> 11) == 0) {
-                html += "5.png>";
+                slotRareLvl = 5;
             } else if ((slotRare >> 12) == 0) {
-                html += "4.png>";
+                slotRareLvl = 4;
             } else if ((slotRare >> 13) == 0) {
-                html += "3.png>";
+                slotRareLvl = 3;
             } else if ((slotRare >> 14) == 0) {
-                html += "2.png>";
+                slotRareLvl = 2;
             } else if ((slotRare >> 15) == 0) {
-                html += "1.png>";
+                slotRareLvl = 1;
             } else {
-                html += "0.png>";
+                slotRareLvl = 0;
             }
+
+            String[][] slotArray = imgsStr[slot];
+            if (slotArray.length <= slotRareLvl) {
+                slotRareLvl = slotArray.length -1;
+            }
+
+            String[] itemArray = slotArray[slotRareLvl];
+
+            JSONObject item = new JSONObject();
+            item.put("url", "/apiasset/image/" + itemArray[0]);
+            item.put("type", itemArray[1]);
+            arrayJson.add(item);
 
         } while (slot++ < 7);
 
-        return html;
+        return arrayJson.toJSONString();
 
     }
 
     @Override
     public MediaType getImageMediaType() {
         if (maker.equals(DogePlanet.MAKER))
-            return WebResource.TYPE_HTML;
+            return WebResource.TYPE_ARRAY;
 
         return super.getImageMediaType();
     }

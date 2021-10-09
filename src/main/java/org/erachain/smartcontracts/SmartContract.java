@@ -97,32 +97,28 @@ public abstract class SmartContract {
 
 
         if (BlockChain.TEST_MODE
-                && transaction.getBlockHeight() > 115740
+                && transaction.getBlockHeight() > 386298
                 && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
             RSend txSend = (RSend) transaction;
             if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND
                     && txSend.hasAmount() && txSend.getAmount().signum() < 0
-                // && txSend.getAbsKey() == 10234L
+                    && txSend.getAbsKey() == 1050869L
             ) {
                 return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
             }
 
-        } else if (BlockChain.TEST_MODE
-                && transaction.getBlockHeight() > 385366
+        } else if (false && BlockChain.TEST_MODE
+                && transaction.getBlockHeight() > 9385366
                 && transaction.getType() == Transaction.CREATE_ORDER_TRANSACTION) {
             CreateOrderTransaction createOrder = (CreateOrderTransaction) transaction;
-            if (true || createOrder.getHaveKey() == AssetCls.ERA_KEY
+            if (createOrder.getHaveKey() == AssetCls.ERA_KEY
                     && createOrder.getAmountHave().compareTo(new BigDecimal(100)) >= 0 //  && createOrder.getWantKey() == AssetCls.USD_KEY
                     || createOrder.getWantKey() == AssetCls.ERA_KEY
                     && createOrder.getAmountWant().compareTo(new BigDecimal(100)) >= 0 // && createOrder.getHaveKey() == AssetCls.USD_KEY
             ) {
                 Order order = createOrder.getDCSet().getCompletedOrderMap().get(createOrder.getOrderId());
                 if (order != null) {
-                    if (true) {
-                        return new DogePlanet(1);
-                    } else {
-                        return new LeafFall();
-                    }
+                    return new LeafFall();
                 }
             }
 
