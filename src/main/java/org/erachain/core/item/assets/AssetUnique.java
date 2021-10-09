@@ -15,7 +15,6 @@ import org.erachain.smartcontracts.epoch.DogePlanet;
 import org.erachain.webserver.WebResource;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.mapdb.Fun;
 
 import javax.ws.rs.core.MediaType;
