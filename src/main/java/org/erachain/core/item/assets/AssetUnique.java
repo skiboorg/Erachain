@@ -70,8 +70,8 @@ public class AssetUnique extends AssetCls {
                         new String[]{"1050854", WebResource.TYPE_IMAGE.toString()},
                 },
                 new String[][]{
-                        new String[]{"1050866", WebResource.TYPE_IMAGE.toString()},
-                        new String[]{"1050860", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050865", WebResource.TYPE_IMAGE.toString()},
+                        new String[]{"1050853", WebResource.TYPE_IMAGE.toString()},
                 },
                 new String[][]{
                         new String[]{"1050852", WebResource.TYPE_IMAGE.toString()},

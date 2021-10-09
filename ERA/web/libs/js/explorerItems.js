@@ -68,7 +68,7 @@ function itemHead(item, forPrint, imageFaceURL, imageFaceType) {
         } else if (!origSource && item.imageMediaType.startsWith('array')) {
             var tagArray = '';
             var val
-            for (val of source) {
+            for (val of JSON.parse(source)) {
                 tagArray += '<img style="position:absolute; height:inherit" src=' + val.url + '>'
             }
             output += '<a id="image-holder" href="#" style="height:1200px;" onclick="style.display=\'none\'">' + tagArray + '</a>';
