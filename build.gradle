@@ -175,10 +175,6 @@ task CopyResourse {
         into 'build/libs/FOILchain/web'
     }
     copy {
-        from 'ERA/smartcontracts'
-        into 'build/libs/FOILchain/smartcontracts'
-    }
-    copy {
         from 'ERA/languages'
         into 'build/libs/FOILchain/languages'
     }
