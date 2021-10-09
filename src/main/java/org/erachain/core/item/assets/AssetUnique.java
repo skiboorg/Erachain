@@ -57,6 +57,7 @@ public class AssetUnique extends AssetCls {
                         new String[]{"1050860", WebResource.TYPE_IMAGE.toString()},
                 },
                 new String[][]{
+                        null,
                         new String[]{"1050866", WebResource.TYPE_IMAGE.toString()},
                 },
                 new String[][]{
@@ -69,12 +70,11 @@ public class AssetUnique extends AssetCls {
                         new String[]{"1050855", WebResource.TYPE_IMAGE.toString()},
                         new String[]{"1050854", WebResource.TYPE_IMAGE.toString()},
                 },
+                null,
                 new String[][]{
-                        new String[]{"1050865", WebResource.TYPE_IMAGE.toString()},
-                        new String[]{"1050853", WebResource.TYPE_IMAGE.toString()},
-                },
-                new String[][]{
+                        null,
                         new String[]{"1050852", WebResource.TYPE_IMAGE.toString()},
+                        null,
                         new String[]{"1050851", WebResource.TYPE_IMAGE.toString()},
                 },
         };
@@ -101,7 +101,9 @@ public class AssetUnique extends AssetCls {
         byte[] hash = blockHead.signature;
         byte[] hash2 = Ints.toByteArray((int) key);
         System.arraycopy(hash2, 0, hash, 0, hash2.length);
-        hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
+        //hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
+        hash = Crypto.getInstance().digest(hash);
+
         int slot = 0;
         int slotRare;
         int slotRareLvl;
@@ -124,11 +126,20 @@ public class AssetUnique extends AssetCls {
             }
 
             slotArray = imgsStr[slot];
+            if (slotArray == null)
+                continue;
+
             if (slotArray.length <= slotRareLvl) {
                 slotRareLvl = slotArray.length -1;
             }
 
-            String[] itemArray = slotArray[slotRareLvl];
+            String[] itemArray;
+            do {
+                itemArray = slotArray[slotRareLvl];
+            } while (itemArray == null && slotRareLvl-- > 0);
+
+            if (itemArray == null)
+                continue;
 
             item = new JSONObject();
             item.put("url", "/apiasset/image/" + itemArray[0]);
@@ -136,6 +147,15 @@ public class AssetUnique extends AssetCls {
             arrayJson.add(item);
 
         } while (slot++ < 7);
+
+        item = new JSONObject();
+        item.put("url", "/apiasset/image/1050853");
+        item.put("type", WebResource.TYPE_IMAGE.toString());
+        arrayJson.add(item);
+        item = new JSONObject();
+        item.put("url", "/apiasset/image/1050865");
+        item.put("type", WebResource.TYPE_IMAGE.toString());
+        arrayJson.add(item);
 
         return arrayJson.toJSONString();
 
