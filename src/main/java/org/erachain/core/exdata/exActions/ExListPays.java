@@ -13,7 +13,6 @@ import org.erachain.core.transaction.RSignNote;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.datachain.DCSet;
-import org.erachain.lang.Lang;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.mapdb.Fun;
@@ -43,12 +42,10 @@ public class ExListPays extends ExAction<List<Tuple3<Account, BigDecimal, Fun.Tu
     private static final Logger LOGGER = LoggerFactory.getLogger(ExListPays.class);
 
     /**
+     * flags:
      * 0 - version; 1 - flags;
      */
-    private final int flags; // byte[2]
 
-    private final int balancePos;
-    final boolean backward;
     private final Tuple3<byte[], BigDecimal, String>[] addresses;
 
     /////////////////
@@ -56,11 +53,8 @@ public class ExListPays extends ExAction<List<Tuple3<Account, BigDecimal, Fun.Tu
     public String errorValue;
 
     public ExListPays(int flags, long assetKey, int balancePos, boolean backward, Tuple3<byte[], BigDecimal, String>[] addresses) {
-        super(LIST_PAYOUTS_TYPE);
-        this.flags = flags;
+        super(LIST_PAYOUTS_TYPE, flags, balancePos, backward);
         this.assetKey = assetKey;
-        this.balancePos = balancePos;
-        this.backward = backward;
         this.addresses = addresses;
 
     }
@@ -73,8 +67,18 @@ public class ExListPays extends ExAction<List<Tuple3<Account, BigDecimal, Fun.Tu
         return addresses.length;
     }
 
+    @Override
+    public String viewType() {
+        return "List";
+    }
+
     public long getTotalFeeBytes() {
         return addresses.length * 25;
+    }
+
+    @Override
+    public int getCount() {
+        return addresses.length;
     }
 
     @Override
@@ -334,30 +338,9 @@ public class ExListPays extends ExAction<List<Tuple3<Account, BigDecimal, Fun.Tu
         return make(assetKey, position, backward, addressesJson);
     }
 
-    /**
-     * Version 2 maker for BlockExplorer
-     */
-    public JSONObject makeJSONforHTML(JSONObject langObj) {
-        JSONObject json = toJson();
-
-        json.put("asset", asset.getName());
-
-        json.put("Label_Counter", Lang.T("Counter", langObj));
-        json.put("Label_Total_Amount", Lang.T("Total Amount", langObj));
-        json.put("Label_Additional_Fee", Lang.T("Additional Fee", langObj));
-
-        return json;
-
-    }
-
     public JSONObject toJson() {
 
-        JSONObject toJson = new JSONObject();
-
-        toJson.put("flags", flags);
-        toJson.put("assetKey", assetKey);
-        toJson.put("balancePosition", balancePos);
-        toJson.put("backward", backward);
+        JSONObject toJson = super.toJson();
 
         JSONArray array = new JSONArray();
         for (Tuple3<byte[], BigDecimal, String> item : addresses) {
@@ -370,16 +353,25 @@ public class ExListPays extends ExAction<List<Tuple3<Account, BigDecimal, Fun.Tu
         }
         toJson.put("list", array);
 
+        toJson.put("totalFeeBytes", getTotalFeeBytes());
+        toJson.put("totalFee", BlockChain.feeBG(getTotalFeeBytes()).toPlainString());
+
         return toJson;
     }
 
     @Override
-    public String getInfoHTML() {
-        String out = "<h3>" + Lang.T("Accruals") + "</h3>";
-        out += Lang.T("Asset") + ": <b>" + asset.getName() + "<br>";
-        out += Lang.T("Count # кол-во") + ": <b>" + addresses.length
-                + "</b>, " + Lang.T("Additional Fee") + ": <b>" + BlockChain.feeBG(getTotalFeeBytes())
-                + "</b>, " + Lang.T("Total") + ": <b>" + totalPay;
+    public String getInfoHTML(boolean onlyTotal, JSONObject langObj) {
+
+        String out = super.getInfoHTML(onlyTotal, langObj);
+
+        if (onlyTotal)
+            return out;
+
+        for (Tuple3<byte[], BigDecimal, String> item : addresses) {
+            out += "<br>" + item.b.toPlainString() + " " + crypto.getAddressFromShort(item.a)
+                    + (item.c == null || item.c.isEmpty() ? "" : " - " + item.c);
+        }
+
         return out;
     }
 
