@@ -128,7 +128,7 @@ public class DogePlanet extends EpochSmartContract {
 
             totalIssued++;
 
-            planet = new AssetUnique(null, maker, "Shiba Planet #" + totalIssued, null, null,
+            planet = new AssetUnique(null, maker, "Shiba Comet #" + totalIssued, null, null,
                     null, AssetCls.AS_NON_FUNGIBLE);
             planet.setReference(transaction.getSignature(), transaction.getDBRef());
 
@@ -228,8 +228,8 @@ public class DogePlanet extends EpochSmartContract {
         byte[] hash = blockHead.signature;
         byte[] hash2 = Ints.toByteArray((int) asset.getKey());
         System.arraycopy(hash2, 0, hash, 0, hash2.length);
-        //hash = Crypto.getInstance().digest(hash);
-        hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
+        hash = Crypto.getInstance().digest(hash);
+        //hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
         int slot = 0;
         int slotRare;
         int slotRareLvl;
