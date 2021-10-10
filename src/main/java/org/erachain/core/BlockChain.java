@@ -256,7 +256,7 @@ public class BlockChain {
 
     public static final int VERS_5_3 = 0;
 
-    public static final int CLEAR_OLD_ORDERS_HEIGHT = TEST_DB > 0 || !CLONE_MODE ? DEMO_MODE ? 9224733 : Integer.MAX_VALUE : 461000;
+    public static final int CLEAR_OLD_ORDERS_HEIGHT = TEST_DB > 0 || !CLONE_MODE ? DEMO_MODE ? 9224733 : Integer.MAX_VALUE : 465000;
     public static final int CLEAR_OLD_ORDERS_PERIOD = 10 * 24 * 60 * 2;
 
     /**
