@@ -263,7 +263,7 @@ public class BlockChain {
 
     public static final int VERS_5_3 = TEST_DB > 0 || !MAIN_MODE ? 0 : 1870000;
 
-    public static final int CLEAR_OLD_ORDERS_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? DEMO_MODE ? 224733 : 0 : 1870000;
+    public static final int CLEAR_OLD_ORDERS_HEIGHT = TEST_DB > 0 || !MAIN_MODE ? DEMO_MODE ? 9224733 : 0 : 9870000;
     public static final int CLEAR_OLD_ORDERS_PERIOD = DEMO_MODE ? 10 : 30 * 24 * 60 * 2;
 
     /**
@@ -439,6 +439,7 @@ public class BlockChain {
     public static HashSet<String> ANONYMASERS = new HashSet<String>();
     public static HashSet<String> FOUNDATION_ADDRESSES = new HashSet<String>();
     public static HashMap<String, int[][]> FREEZED_BALANCES = new HashMap<String, int[][]>();
+    public static HashSet<String> FREEZED_FORGING = new HashSet<String>();
 
     public static HashMap<String, Tuple3<Long, Long, byte[]>> NOVA_ASSETS = new HashMap<String, Tuple3<Long, Long, byte[]>>();
     public static HashMap<String, Tuple3<Long, Long, byte[]>> NOVA_PERSONS = new HashMap<String, Tuple3<Long, Long, byte[]>>();
