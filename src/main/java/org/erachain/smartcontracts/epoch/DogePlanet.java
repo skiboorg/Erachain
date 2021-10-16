@@ -246,8 +246,7 @@ public class DogePlanet extends EpochSmartContract {
         byte[] hash2 = Ints.toByteArray((int) asset.getKey());
         System.arraycopy(hash2, 0, hash, 0, hash2.length);
 
-        hash = Crypto.getInstance().digest(hash);
-        //hash = Crypto.getInstance().digest(Longs.toByteArray(System.currentTimeMillis()));
+        hash = crypto.digest(hash);
         int slot = 0;
         int slotRare;
         int slotRareLvl;

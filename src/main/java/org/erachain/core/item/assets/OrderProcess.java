@@ -649,7 +649,8 @@ public class OrderProcess {
     public static void clearOldOrders(DCSet dcSet, Block block, boolean asOrphan) {
 
         int height = block.getHeight();
-        if (BlockChain.CLEAR_OLD_ORDERS_HEIGHT < 0 || height < BlockChain.CLEAR_OLD_ORDERS_HEIGHT || height % 100 != 0)
+        if (height > 478181 // new style
+                || BlockChain.CLEAR_OLD_ORDERS_HEIGHT < 0 || height < BlockChain.CLEAR_OLD_ORDERS_HEIGHT || height % 100 != 0)
             return;
 
         long blockTx_id = Transaction.makeDBRef(height, 0);
