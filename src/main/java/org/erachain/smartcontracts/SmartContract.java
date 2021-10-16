@@ -13,6 +13,7 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.datachain.DCSet;
 import org.erachain.smartcontracts.epoch.DogePlanet;
 import org.erachain.smartcontracts.epoch.LeafFall;
+import org.erachain.smartcontracts.epoch.shibaverse.ShibaVerseSC;
 
 import java.math.BigDecimal;
 
@@ -71,6 +72,8 @@ public abstract class SmartContract {
                 return LeafFall.Parse(data, position, forDeal);
             case DogePlanet.ID:
                 return DogePlanet.Parse(data, position, forDeal);
+            case ShibaVerseSC.ID:
+                return new ShibaVerseSC();
         }
 
         throw new Exception("wrong smart-contract id:" + id);
@@ -80,8 +83,21 @@ public abstract class SmartContract {
         return null;
     }
 
+    /**
+     *
+     * @param dcSet
+     * @param block
+     * @param transaction
+     * @return TRUE - not processed
+     */
     abstract public boolean process(DCSet dcSet, Block block, Transaction transaction);
 
+    /**
+     *
+     * @param dcSet
+     * @param transaction
+     * @return TRUE - not orphaned
+     */
     abstract public boolean orphan(DCSet dcSet, Transaction transaction);
 
     /**
@@ -101,6 +117,8 @@ public abstract class SmartContract {
                     && txSend.getAbsKey() == 1050869L
             ) {
                 return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+            } else if (txSend.getRecipient().equals(ShibaVerseSC.MAKER)) {
+                return new ShibaVerseSC();
             }
 
         } else if (false && BlockChain.TEST_MODE

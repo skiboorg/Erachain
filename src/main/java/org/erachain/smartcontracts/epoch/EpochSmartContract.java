@@ -9,8 +9,12 @@ import org.erachain.smartcontracts.SmartContract;
 public abstract class EpochSmartContract extends SmartContract {
 
 
-    EpochSmartContract(int id) {
+    protected EpochSmartContract(int id) {
         super(id, new PublicKeyAccount(Base58.encode(Longs.toByteArray(id))));
+    }
+
+    protected EpochSmartContract(int id, PublicKeyAccount maker) {
+        super(id, maker);
     }
 
     /**
