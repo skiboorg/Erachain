@@ -73,7 +73,6 @@ public class API {
         help.put("see /apitelegrams", "Help for telegrams API");
         help.put("see /apiexchange", "Help for exchange API");
         help.put("see /api/tx", "Help for transactions API");
-        //help.put("see /apirecords", "Help for transactions API"); // @Deprecated
         help.put("see /apidocuments", "Help for documents API");
         help.put("see /apifpool", "Help for forging pool API");
 
@@ -117,10 +116,7 @@ public class API {
         help.put("GET Exchange Orders", "exchangeorders/{have}/{want}");
 
         help.put("*** PERSON ***", "");
-        //help.put("GET Person Height", "personheight");
         help.put("GET Person Key by PubKey of Owner", "personkeybyownerpublickey/{publickey}");
-        //help.put("GET Person", "person/{key}");
-        //help.put("GET Person Data", "persondata/{key}");
         help.put("GET Person Key by Address", "personkeybyaddress/{address}");
         help.put("GET Person by Address", "personbyaddress/{address}");
         help.put("GET Person Key by Public Key", "personkeybypublickey/{publickey}");
@@ -1153,7 +1149,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
         }
 
@@ -1177,76 +1172,16 @@ public class API {
 
     }
 
+    @Deprecated
     @GET
     @Path("addressunconfirmedlastreference/{address}/{from}/{count}")
     public Response getUnconfirmedLastReferenceUnconfirmed(@PathParam("address") String address,
                                                            @PathParam("from") int from, @PathParam("count") int count) {
 
-        // сейчас этот поиск делается по другому и он не нужен вообще для создания транзакций а следовательно закроем его
-        /*
-        // CHECK IF VALID ADDRESS
-        Tuple2<Account, String> result = Account.tryMakeAccount(address);
-        if (result.a == null) {
-            throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
-                    Transaction.INVALID_ADDRESS);
-        }
-
-        // GET ACCOUNT
-        Account account = result.a;
-
-        HashSet<byte[]> isSomeoneReference = new HashSet<byte[]>();
-
-        Controller cntrl = Controller.getInstance();
-
-        List<Transaction> transactions = Controller.getInstance().getUnconfirmedTransactions(from, count, true);
-
-        DCSet db = DCSet.getInstance();
-        Long lastTimestamp = account.getLastTimestamp();
-        byte[] signature;
-        if (!(lastTimestamp == null)) {
-            signature = cntrl.getSignatureByAddrTime(db, address, lastTimestamp);
-            transactions.add(cntrl.get(signature));
-        }
-
-        for (Transaction item : transactions) {
-            if (item.getCreator().equals(account)) {
-                for (Transaction item2 : transactions) {
-                    if (item.getTimestamp() == item2.getTimestamp()
-                            & item.getCreator().getAddress().equals(item2.getCreator().getAddress())) {
-                        // if same address and parent timestamp
-                        isSomeoneReference.add(item.getSignature());
-                        break;
-                    }
-                }
-            }
-        }
-
-        String out = "-";
-        if (isSomeoneReference.isEmpty()) {
-            return getAddressLastReference(address);
-        }
-
-        for (Transaction item : cntrl.getUnconfirmedTransactions(from, count, true)) {
-            if (item.getCreator().equals(account)) {
-                if (!isSomeoneReference.contains(item.getSignature())) {
-                    //return Base58.encode(tx.getSignature());
-                    out = "" + item.getTimestamp();
-                    break;
-                }
-            }
-        }
-
         return Response.status(200)
                 .header("Content-Type", "application/json; charset=utf-8")
                 .header("Access-Control-Allow-Origin", "*")
-                .entity(out)
-                .build();
-        */
-        return Response.status(200)
-                .header("Content-Type", "application/json; charset=utf-8")
-                .header("Access-Control-Allow-Origin", "*")
-                .entity("---nope")
+                .entity("Deprecated")
                 .build();
 
     }
@@ -1271,7 +1206,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1295,7 +1229,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1307,14 +1240,12 @@ public class API {
             assetAsLong = Long.valueOf(assetid);
         } catch (NumberFormatException e) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
 
         // DOES ASSETID EXIST
         if (!DCSet.getInstance().getItemAssetMap().contains(assetAsLong)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
 
@@ -1343,7 +1274,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1373,7 +1303,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1507,7 +1436,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1516,7 +1444,6 @@ public class API {
 
         if (personItem == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.CREATOR_NOT_PERSONALIZED);
         } else {
             return Response.status(200)
@@ -1535,7 +1462,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1567,7 +1493,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1706,52 +1631,12 @@ public class API {
         // DOES ASSETID EXIST
         if (!map.contains(have)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
         if (!map.contains(want)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
-
-        /* OLD
-        SortableList<BigInteger, Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>>> ordersA = this.dcSet.getOrderMap().getOrdersSortableList(have, want, true);
-
-        JSONArray arrayA = new JSONArray();
-
-        if (!ordersA.isEmpty()) {
-            for (Pair<BigInteger, Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                    Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>>> pair : ordersA) {
-                Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                        Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>> order = pair.getB();
-                JSONArray itemJson = new JSONArray();
-                itemJson.add(order.b.b.subtract(order.b.c)); // getAmountHaveLeft());
-                itemJson.add(Order.calcPrice(order.b.b, order.c.b));
-
-                arrayA.add(itemJson);
-            }
-        }
-
-        SortableList<BigInteger, Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>>> ordersB = this.dcSet.getOrderMap().getOrdersSortableList(want, have, true);
-
-        JSONArray arrayB = new JSONArray();
-
-        if (!ordersA.isEmpty()) {
-            for (Pair<BigInteger, Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                    Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>>> pair : ordersB) {
-                Tuple3<Tuple5<BigInteger, String, Long, Boolean, BigDecimal>,
-                        Tuple3<Long, BigDecimal, BigDecimal>, Tuple2<Long, BigDecimal>> order = pair.getB();
-                JSONArray itemJson = new JSONArray();
-                itemJson.add(order.b.b.subtract(order.b.c)); // getAmountHaveLeft());
-                itemJson.add(Order.calcPrice(order.b.b, order.c.b));
-
-                arrayB.add(itemJson);
-            }
-        }
-        */
 
         JSONArray arraySell = new JSONArray();
         List<Order> orders = this.dcSet.getOrderMap().getOrdersForTrade(have, want, false);
@@ -1818,7 +1703,6 @@ public class API {
         // DOES EXIST
         if (!map.contains(key)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_PERSON_NOT_EXIST);
         }
 
@@ -1840,7 +1724,6 @@ public class API {
         int weight = 0;
         if (key <= 0) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     "Error key");
         }
 
@@ -1848,16 +1731,12 @@ public class API {
         // DOES EXIST
         if (!map.contains(key)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
 
         AssetCls asset = (AssetCls) map.get(key);
 
         if (asset.getImage() != null) {
-            // image to byte[] hot scale (param2 =0)
-            //	byte[] b = ImagesTools.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-            ///return Response.ok(new ByteArrayInputStream(asset.getImage())).build();
             return Response.status(200)
                     .header("Access-Control-Allow-Origin", "*")
                     .entity(new ByteArrayInputStream(asset.getImage()))
@@ -1878,7 +1757,6 @@ public class API {
 
         if (key <= 0) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     "Error key");
         }
 
@@ -1886,16 +1764,12 @@ public class API {
         // DOES EXIST
         if (!map.contains(key)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_ASSET_NOT_EXIST);
         }
 
         AssetCls asset = (AssetCls) map.get(key);
 
         if (asset.getIcon() != null) {
-            // image to byte[] hot scale (param2 =0)
-            //	byte[] b = ImagesTools.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-            //return Response.ok(new ByteArrayInputStream(asset.getIcon())).build();
             return Response.status(200)
                     .header("Access-Control-Allow-Origin", "*")
                     .entity(new ByteArrayInputStream(asset.getIcon()))
@@ -1916,7 +1790,6 @@ public class API {
         int weight = 0;
         if (key <= 0) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     "Error key");
         }
 
@@ -1924,15 +1797,11 @@ public class API {
         // DOES EXIST
         if (!map.contains(key)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_PERSON_NOT_EXIST);
         }
 
         PersonCls person = (PersonCls) map.get(key);
 
-        // image to byte[] hot scale (param2 =0)
-        //	byte[] b = ImagesTools.ImageToByte(new ImageIcon(person.getImage()).getImage(), 0);
-        //return Response.ok(new ByteArrayInputStream(person.getImage())).build();
         return Response.status(200)
                 .header("Access-Control-Allow-Origin", "*")
                 .entity(new ByteArrayInputStream(person.getImage()))
@@ -1949,7 +1818,6 @@ public class API {
         // DOES ASSETID EXIST
         if (!map.contains(key)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.ITEM_PERSON_NOT_EXIST);
         }
 
@@ -1971,7 +1839,6 @@ public class API {
         Tuple2<Account, String> result = Account.tryMakeAccount(address);
         if (result.a == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_ADDRESS);
 
         }
@@ -1980,7 +1847,6 @@ public class API {
 
         if (personItem == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.CREATOR_NOT_PERSONALIZED);
         } else {
             return Response.status(200)
@@ -1998,7 +1864,6 @@ public class API {
         // CHECK IF VALID ADDRESS
         if (!PublicKeyAccount.isValidPublicKey(publicKey)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_PUBLIC_KEY);
 
         }
@@ -2009,7 +1874,6 @@ public class API {
 
         if (personItem == null) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ASSET_ID);
                     Transaction.CREATOR_NOT_PERSONALIZED);
         } else {
             return Response.status(200)
@@ -2151,7 +2015,6 @@ public class API {
         // CHECK IF VALID ADDRESS
         if (!PublicKeyAccount.isValidPublicKey(publicKey)) {
             throw ApiErrorFactory.getInstance().createError(
-                    //ApiErrorFactory.ERROR_INVALID_ADDRESS);
                     Transaction.INVALID_PUBLIC_KEY);
 
         }
@@ -2290,7 +2153,6 @@ public class API {
                 publicKeyBytes = Base58.decode(publicKey);
             } catch (Exception e) {
                 throw ApiErrorFactory.getInstance().createError(
-                        //ApiErrorFactory.ERROR_INVALID_PUBLIC_KEY);
                         Transaction.INVALID_PUBLIC_KEY);
 
             }

@@ -68,17 +68,10 @@ public class MenuFiles extends JMenu {
                     lockItem.setText(Lang.T("Unlock Wallet"));
                     lockItem.setIcon(unlockedIcon);
                 }
-                //		Dimension d = fileMenu.getPreferredSize();
-                //		d.width = Math.max(d.width, 300);
-                //		fileMenu.setPreferredSize(d);
-                //		fileMenu.show(this_component, 0, this_component.getHeight());
             }
         });
 
-
         //LOAD IMAGES
-
-
         BufferedImage lockedImage;
         try {
             lockedImage = ImageIO.read(new File("images/wallet/locked.png"));
@@ -227,33 +220,6 @@ public class MenuFiles extends JMenu {
         });
 
         add(quitItem);
-/*        
-        fileMenu.addMenuListener(new MenuListener()
-        {
-			@Override
-			public void menuSelected(MenuEvent arg0) {
-        		if(Controller.getInstance().isWalletUnlocked()) {
-        			lockItem.setText(Lang.T("Lock Wallet"));
-        			lockItem.setIcon(lockedIcon);
-        		} else {
-        			lockItem.setText(Lang.T("Unlock Wallet"));
-        			lockItem.setIcon(unlockedIcon);
-        		}
-			}
-
-			@Override
-			public void menuCanceled(MenuEvent e) {
-				
-			}
-
-			@Override
-			public void menuDeselected(MenuEvent e) {
-				
-			}
-        });
-        	*/
-
-
     }
 
 }
