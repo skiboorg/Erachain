@@ -92,13 +92,11 @@ public abstract class SmartContract {
      */
     abstract public boolean process(DCSet dcSet, Block block, Transaction transaction);
 
-    /**
-     *
-     * @param dcSet
-     * @param transaction
-     * @return TRUE - not orphaned
-     */
+    abstract public boolean processByTime(DCSet dcSet, Block block, Transaction transaction);
+
     abstract public boolean orphan(DCSet dcSet, Transaction transaction);
+
+    abstract public boolean orphanByTime(DCSet dcSet, Transaction transaction);
 
     /**
      * Делает смотр-контракт протокольный (на эпоху).
