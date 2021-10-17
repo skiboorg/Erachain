@@ -2598,6 +2598,16 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         processTail(block, forDeal);
     }
 
+    /**
+     * delayed
+     *
+     * @param block
+     */
+    public void processByTime(Block block) {
+        if (smartContract != null)
+            smartContract.processByTime(dcSet, block, this);
+    }
+
     //////////////////////////////////// ORPHAN
 
     public void orphanHead(Block block, int forDeal) {
@@ -2665,6 +2675,11 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         orphanHead(block, forDeal);
         orphanBody(block, forDeal);
         orphanTail(block, forDeal);
+    }
+
+    public void orphanByTime(Block block) {
+        if (smartContract != null)
+            smartContract.orphanByTime(dcSet, this);
     }
 
     public Transaction copy() {
