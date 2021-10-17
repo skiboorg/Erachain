@@ -28,15 +28,16 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 public class ShibaVerseSC extends EpochSmartContract {
-    static public final int ID = 1001;
+
     static Controller contr = Controller.getInstance();
     static Crypto crypto = Crypto.getInstance();
 
+    static public final int ID = 1001;
     public static PublicKeyAccount MAKER = new PublicKeyAccount(Base58.encode(Longs.toByteArray(ID)));
+
     static public Account adminAddress = new Account("");
 
     static final Fun.Tuple2 INIT_KEY = new Fun.Tuple2(ID, "i");
-    static final Fun.Tuple2 COUNT_KEY = new Fun.Tuple2(ID, "c");
 
     public ShibaVerseSC() {
         super(ID, MAKER);
@@ -95,9 +96,84 @@ public class ShibaVerseSC extends EpochSmartContract {
             RSend rsend = (RSend) transaction;
             if (rsend.getCreator().equals(adminAddress)) {
                 return processAdminCommands(dcSet, block, rsend, adminAddress);
+            } else {
+                if (rsend.hasAmount()) {
+                    Long gravitaKey = (Long) dcSet.getSmartContractValues().get(INIT_KEY);
+                    if (rsend.getAssetKey() == gravitaKey) {
+                        String command = new String(rsend.getData(), StandardCharsets.UTF_8);
+                        if (command.isEmpty() || "use".equals(command)) {
+                            // рождение комет
+                            SmartContractValues valuesMap = dcSet.getSmartContractValues();
+                            PublicKeyAccount creator = transaction.getCreator();
+                            int count = 4;
+                            AssetVenture comet;
+                            do {
+
+                                comet = new AssetUnique(null, maker, "Shiba Comet #" + totalIssued, null, null,
+                                        null, AssetCls.AS_NON_FUNGIBLE);
+                                planet.setReference(transaction.getSignature(), transaction.getDBRef());
+
+                                //INSERT INTO DATABASE
+                                keyEnd = dcSet.getItemAssetMap().incrementPut(planet);
+                                creator.changeBalance(dcSet, false, false, keyEnd,
+                                        BigDecimal.ONE, false, false, false);
+
+                                if (block != null) {
+                                    // add remark for action
+                                    block.addCalculated(creator, keyEnd, BigDecimal.ONE,
+                                            "Produce: " + planet.getName(), transaction.getDBRef());
+                                }
+
+                            } while (count-- > 0);
+                        }
+                    }
+                }
             }
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean processByTime(DCSet dcSet, Block block, Transaction transaction) {
+        if (transaction instanceof RSend) {
+            RSend rsend = (RSend) transaction;
+            if (rsend.getCreator().equals(adminAddress)) {
+                return processAdminCommands(dcSet, block, rsend, adminAddress);
+            } else {
+                if (rsend.hasAmount()) {
+                    Long gravitaKey = (Long) dcSet.getSmartContractValues().get(INIT_KEY);
+                    if (rsend.getAssetKey() == gravitaKey) {
+                        String command = new String(rsend.getData(), StandardCharsets.UTF_8);
+                        if (command.isEmpty() || "use".equals(command)) {
+                            // рождение комет
+                            SmartContractValues valuesMap = dcSet.getSmartContractValues();
+                            PublicKeyAccount creator = transaction.getCreator();
+                            int count = 4;
+                            AssetVenture comet;
+                            do {
+
+                                comet = new AssetUnique(null, maker, "Shiba Comet #" + totalIssued, null, null,
+                                        null, AssetCls.AS_NON_FUNGIBLE);
+                                planet.setReference(transaction.getSignature(), transaction.getDBRef());
+
+                                //INSERT INTO DATABASE
+                                keyEnd = dcSet.getItemAssetMap().incrementPut(planet);
+                                creator.changeBalance(dcSet, false, false, keyEnd,
+                                        BigDecimal.ONE, false, false, false);
+
+                                if (block != null) {
+                                    // add remark for action
+                                    block.addCalculated(creator, keyEnd, BigDecimal.ONE,
+                                            "Produce: " + planet.getName(), transaction.getDBRef());
+                                }
+
+                            } while (count-- > 0);
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -115,6 +191,11 @@ public class ShibaVerseSC extends EpochSmartContract {
             }
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean orphanByTime(DCSet dcSet, Transaction transaction) {
         return false;
     }
 
