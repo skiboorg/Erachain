@@ -629,6 +629,7 @@ public class BlockChain {
             ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
         } else {
+            // MAIN MODE
 
             // ERROR - MAIN MODE DENIED
             new Account("--");
