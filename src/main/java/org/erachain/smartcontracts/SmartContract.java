@@ -111,8 +111,6 @@ public abstract class SmartContract {
      */
     static public SmartContract make(Transaction transaction) {
 
-        String addr = ShibaVerseSC.MAKER.getAddress();
-
         if (BlockChain.TEST_MODE
                 && transaction.getBlockHeight() > 386460
                 && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
@@ -127,8 +125,6 @@ public abstract class SmartContract {
                     && txSend.getAbsKey() == 1050869L
             ) {
                 return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
-            } else if (txSend.getRecipient().equals(ShibaVerseSC.MAKER)) {
-                return new ShibaVerseSC();
             }
 
         } else if (false && BlockChain.TEST_MODE
