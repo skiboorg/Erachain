@@ -3,20 +3,15 @@ package org.erachain.smartcontracts.epoch.shibaverse;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import org.erachain.controller.Controller;
+import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
-import org.erachain.core.crypto.Base58;
-import org.erachain.core.crypto.Crypto;
-import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
-import org.erachain.core.item.assets.AssetUnique;
 import org.erachain.core.item.assets.AssetVenture;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.datachain.DCSet;
-import org.erachain.datachain.ItemAssetMap;
 import org.erachain.datachain.SmartContractValues;
 import org.erachain.smartcontracts.epoch.EpochSmartContract;
 import org.erachain.webserver.WebResource;
@@ -26,37 +21,146 @@ import org.mapdb.Fun;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class ShibaVerseSC extends EpochSmartContract {
 
-    static Controller contr = Controller.getInstance();
-    static Crypto crypto = Crypto.getInstance();
+    int WAIT_RAND = 5;
 
     static public final int ID = 1001;
-    public static PublicKeyAccount MAKER = new PublicKeyAccount(Base58.encode(Longs.toByteArray(ID)));
 
-    static public Account adminAddress = new Account("");
+    // 7G6sJRb7vf8ABEr3ENvV1fo1hwt197r35e
+    final public static PublicKeyAccount MAKER = new PublicKeyAccount(crypto.digest(Longs.toByteArray(ID)));
 
+    final static public Account adminAddress = new Account("7G6sJRb7vf8ABEr3ENvV1fo1hwt197r35e");
+
+    /**
+     * GRAVUTA KEY
+     */
     static final Fun.Tuple2 INIT_KEY = new Fun.Tuple2(ID, "i");
 
-    public ShibaVerseSC() {
+    private String command;
+    private String status;
+
+    public ShibaVerseSC(String command, String status) {
         super(ID, MAKER);
+
+        this.command = command;
+        this.status = status;
     }
 
-    private void init(DCSet dcSet, RSend commandTX, Account admin) {
+    private boolean isAdminCommand(Transaction transaction) {
+        return BlockChain.TEST_MODE || transaction.getCreator().equals(adminAddress);
+    }
+
+    @Override
+    public boolean isValid(DCSet dcSet, Transaction transaction) {
+        if (isAdminCommand(transaction)) {
+            if (command.equals("init") && dcSet.getSmartContractValues().contains(INIT_KEY)) {
+                status = "error: already initated";
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    /// PARSE / TOBYTES
+    @Override
+    public int length(int forDeal) {
+
+        int len = 4;
+        if (forDeal == Transaction.FOR_DB_RECORD) {
+            len += 8;
+            if (status != null)
+                len += status.length();
+            if (command != null)
+                len += command.length();
+        }
+
+        return len;
+    }
+
+    @Override
+    public byte[] toBytes(int forDeal) {
+
+        byte[] data = Ints.toByteArray(id);
+
+        if (forDeal == Transaction.FOR_DB_RECORD) {
+            byte[] commandBytes;
+            byte[] statusBytes;
+
+            if (command != null) {
+                commandBytes = command.getBytes(StandardCharsets.UTF_8);
+            } else {
+                commandBytes = new byte[0];
+            }
+            if (status != null) {
+                statusBytes = status.getBytes(StandardCharsets.UTF_8);
+            } else {
+                statusBytes = new byte[0];
+            }
+            data = Bytes.concat(data, Ints.toByteArray(commandBytes.length));
+            data = Bytes.concat(data, commandBytes);
+
+            data = Bytes.concat(data, Ints.toByteArray(statusBytes.length));
+            data = Bytes.concat(data, statusBytes);
+        }
+
+        return data;
+
+    }
+
+    public static ShibaVerseSC Parse(byte[] data, int pos, int forDeal) {
+
+        // skip ID
+        pos += 4;
+
+        String command;
+        String status;
+        if (forDeal == Transaction.FOR_DB_RECORD) {
+            byte[] commandSizeBytes = Arrays.copyOfRange(data, pos, pos + 4);
+            int commandSize = Ints.fromByteArray(commandSizeBytes);
+            pos += 4;
+            byte[] commandBytes = Arrays.copyOfRange(data, pos, pos + commandSize);
+            pos += commandSize;
+            command = new String(commandBytes, StandardCharsets.UTF_8);
+
+            byte[] statusSizeBytes = Arrays.copyOfRange(data, pos, pos + 4);
+            int statusLen = Ints.fromByteArray(statusSizeBytes);
+            byte[] statusBytes = Arrays.copyOfRange(data, pos, pos + statusLen);
+            pos += statusLen;
+            status = new String(statusBytes, StandardCharsets.UTF_8);
+
+        } else {
+            command = "-";
+            status = "-";
+        }
+
+        return new ShibaVerseSC(command, status);
+    }
+
+
+    // PROCESSES
+    private void init(DCSet dcSet, RSend commandTX, Account admin, boolean asOrphan) {
 
         /**
-         * main currency
+         * issue main currency
          */
-        AssetVenture gravita = new AssetVenture(null, maker, "GR", null, null,
-                null, AssetCls.AS_INSIDE_ASSETS, 6, 0);
-        gravita.setReference(commandTX.getSignature(), commandTX.getDBRef());
+        long gravitaKey;
+        if (asOrphan) {
+            gravitaKey = (Long) dcSet.getSmartContractValues().get(INIT_KEY);
+        } else {
+            AssetVenture gravita = new AssetVenture(null, maker, "GR", null, null,
+                    null, AssetCls.AS_INSIDE_ASSETS, 6, 0);
+            gravita.setReference(commandTX.getSignature(), commandTX.getDBRef());
 
-        //INSERT INTO DATABASE
-        long gravitaKey = dcSet.getItemAssetMap().incrementPut(gravita);
-        dcSet.getSmartContractValues().put(INIT_KEY, gravitaKey);
+            //INSERT INTO DATABASE
+            gravitaKey = dcSet.getItemAssetMap().incrementPut(gravita);
+            dcSet.getSmartContractValues().put(INIT_KEY, gravitaKey);
+        }
 
-        boolean asOrphan = false;
         // TRANSFER GRAVITA to ADMIN
         admin.changeBalance(dcSet, asOrphan, false, gravitaKey,
                 new BigDecimal("10000"), false, false, false);
@@ -67,6 +171,7 @@ public class ShibaVerseSC extends EpochSmartContract {
 
     /**
      * admin commands
+     *
      * @param dcSet
      * @param block
      * @param commandTX
@@ -74,17 +179,9 @@ public class ShibaVerseSC extends EpochSmartContract {
      * @return
      */
     public boolean processAdminCommands(DCSet dcSet, Block block, RSend commandTX, Account admin) {
-        byte[] data = commandTX.getData();
-        if (data == null || data.length == 0) {
-            SmartContractValues valuesMap = dcSet.getSmartContractValues();
-            // CHECK if INITIALIZED
-            if (!valuesMap.contains(INIT_KEY)) {
-                init(dcSet, commandTX, admin);
-            }
-            return false;
+        if ("init".equals(command)) {
+            init(dcSet, commandTX, admin, false);
         }
-
-        String command = new String(data, StandardCharsets.UTF_8);
 
         return false;
     }
@@ -92,24 +189,25 @@ public class ShibaVerseSC extends EpochSmartContract {
     @Override
     public boolean process(DCSet dcSet, Block block, Transaction transaction) {
 
+        if (!isValid(dcSet, transaction))
+            return true;
+
         if (transaction instanceof RSend) {
             RSend rsend = (RSend) transaction;
-            if (rsend.getCreator().equals(adminAddress)) {
-                return processAdminCommands(dcSet, block, rsend, adminAddress);
+            if (isAdminCommand(transaction)) {
+                return processAdminCommands(dcSet, block, rsend,
+                        rsend.getCreator() // need for TEST - not adminAddress
+                );
             } else {
                 if (rsend.hasAmount()) {
                     Long gravitaKey = (Long) dcSet.getSmartContractValues().get(INIT_KEY);
                     if (rsend.getAssetKey() == gravitaKey) {
-                        String command = new String(rsend.getData(), StandardCharsets.UTF_8);
-                        if (command.isEmpty() || "use".equals(command)) {
+                        byte[] data = rsend.getData();
+                        String command = new String(data, StandardCharsets.UTF_8).toLowerCase();
+                        if ("catch comets".equals(command)) {
                             // рождение комет
-                            SmartContractValues valuesMap = dcSet.getSmartContractValues();
-                            PublicKeyAccount creator = transaction.getCreator();
-                            int count = 4;
-                            AssetVenture comet;
-                            do {
-
-                            } while (count-- > 0);
+                            dcSet.getTimeTXWaitMap().put(transaction.getDBRef(), block.heightBlock + WAIT_RAND);
+                            return false;
                         }
                     }
                 }
@@ -147,18 +245,26 @@ public class ShibaVerseSC extends EpochSmartContract {
         return false;
     }
 
-    public boolean orphanAdminCommands(DCSet dcSet, RSend transaction, Account admin) {
+    public boolean orphanAdminCommands(DCSet dcSet, RSend commandTX, Account admin) {
+        if ("init".equals(command)) {
+            init(dcSet, commandTX, admin, true);
+        }
+
         return false;
     }
 
     @Override
     public boolean orphan(DCSet dcSet, Transaction transaction) {
 
-        if (transaction instanceof RSend) {
-            RSend rsend = (RSend) transaction;
-            if (rsend.getCreator().equals(adminAddress)) {
-                return orphanAdminCommands(dcSet, rsend, adminAddress);
-            }
+        if (status.startsWith("error")) {
+            // not processed
+            return true;
+        }
+
+        if (isAdminCommand(transaction)) {
+            return orphanAdminCommands(dcSet, (RSend) transaction,
+                    transaction.getCreator() // need for TEST - not adminAddress
+            );
         }
 
         return false;

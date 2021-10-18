@@ -1,9 +1,12 @@
 package org.erachain.smartcontracts;
 
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
+import org.erachain.controller.Controller;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
+import org.erachain.core.crypto.Crypto;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.Order;
 import org.erachain.core.transaction.CreateOrderTransaction;
@@ -16,8 +19,12 @@ import org.erachain.smartcontracts.epoch.LeafFall;
 import org.erachain.smartcontracts.epoch.shibaverse.ShibaVerseSC;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 
 public abstract class SmartContract {
+
+    static protected Controller contr = Controller.getInstance();
+    static protected Crypto crypto = Crypto.getInstance();
 
     protected final int id;
     protected final PublicKeyAccount maker;
@@ -25,6 +32,11 @@ public abstract class SmartContract {
     protected SmartContract(int id, PublicKeyAccount maker) {
         this.id = id;
         this.maker = maker;
+    }
+
+    protected SmartContract(int id) {
+        this.id = id;
+        this.maker = new PublicKeyAccount(crypto.digest(Longs.toByteArray(id)));
     }
 
     public int getID() {
@@ -36,7 +48,7 @@ public abstract class SmartContract {
     }
 
     public Object[][] getItemsKeys() {
-        return null;
+        return new Object[0][0];
     }
 
     /**
@@ -73,23 +85,16 @@ public abstract class SmartContract {
             case DogePlanet.ID:
                 return DogePlanet.Parse(data, position, forDeal);
             case ShibaVerseSC.ID:
-                return new ShibaVerseSC();
+                return ShibaVerseSC.Parse(data, position, forDeal);
         }
 
         throw new Exception("wrong smart-contract id:" + id);
     }
 
-    public String isValid(Transaction transaction) {
-        return null;
+    public boolean isValid(DCSet dcset, Transaction transaction) {
+        return true;
     }
 
-    /**
-     *
-     * @param dcSet
-     * @param block
-     * @param transaction
-     * @return TRUE - not processed
-     */
     abstract public boolean process(DCSet dcSet, Block block, Transaction transaction);
 
     abstract public boolean processByTime(DCSet dcSet, Block block, Transaction transaction);
@@ -106,10 +111,17 @@ public abstract class SmartContract {
      */
     static public SmartContract make(Transaction transaction) {
 
+        String addr = ShibaVerseSC.MAKER.getAddress();
+
         if (BlockChain.TEST_MODE
                 && transaction.getBlockHeight() > 386460
                 && transaction.getType() == Transaction.SEND_ASSET_TRANSACTION) {
             RSend txSend = (RSend) transaction;
+
+            if (txSend.getRecipient().equals(ShibaVerseSC.MAKER) && txSend.isText() && !txSend.isEncrypted()) {
+                return new ShibaVerseSC(new String(txSend.getData(), StandardCharsets.UTF_8).toLowerCase(), "");
+            }
+
             if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND
                     && txSend.hasAmount() && txSend.getAmount().signum() < 0
                     && txSend.getAbsKey() == 1050869L
@@ -133,7 +145,6 @@ public abstract class SmartContract {
                     return new LeafFall();
                 }
             }
-
         }
 
         return null;
