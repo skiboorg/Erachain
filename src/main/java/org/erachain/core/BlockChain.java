@@ -616,6 +616,7 @@ public class BlockChain {
             //ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
         } else {
+            // MAIN MODE
 
         }
 

@@ -1401,6 +1401,8 @@ Evgenii Evgenii Kuzin, [18.04.21 19:33]
                 //OPEN FILE
 
                 settingsJSON = FileUtils.readCommentedJSONObject(file.getPath());
+                if (settingsJSON == null)
+                    settingsJSON = new JSONObject();
 
                 alreadyPassed++;
 
