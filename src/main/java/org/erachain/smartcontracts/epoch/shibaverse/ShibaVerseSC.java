@@ -109,21 +109,6 @@ public class ShibaVerseSC extends EpochSmartContract {
                             AssetVenture comet;
                             do {
 
-                                comet = new AssetUnique(null, maker, "Shiba Comet #" + totalIssued, null, null,
-                                        null, AssetCls.AS_NON_FUNGIBLE);
-                                planet.setReference(transaction.getSignature(), transaction.getDBRef());
-
-                                //INSERT INTO DATABASE
-                                keyEnd = dcSet.getItemAssetMap().incrementPut(planet);
-                                creator.changeBalance(dcSet, false, false, keyEnd,
-                                        BigDecimal.ONE, false, false, false);
-
-                                if (block != null) {
-                                    // add remark for action
-                                    block.addCalculated(creator, keyEnd, BigDecimal.ONE,
-                                            "Produce: " + planet.getName(), transaction.getDBRef());
-                                }
-
                             } while (count-- > 0);
                         }
                     }
@@ -152,21 +137,6 @@ public class ShibaVerseSC extends EpochSmartContract {
                             int count = 4;
                             AssetVenture comet;
                             do {
-
-                                comet = new AssetUnique(null, maker, "Shiba Comet #" + totalIssued, null, null,
-                                        null, AssetCls.AS_NON_FUNGIBLE);
-                                planet.setReference(transaction.getSignature(), transaction.getDBRef());
-
-                                //INSERT INTO DATABASE
-                                keyEnd = dcSet.getItemAssetMap().incrementPut(planet);
-                                creator.changeBalance(dcSet, false, false, keyEnd,
-                                        BigDecimal.ONE, false, false, false);
-
-                                if (block != null) {
-                                    // add remark for action
-                                    block.addCalculated(creator, keyEnd, BigDecimal.ONE,
-                                            "Produce: " + planet.getName(), transaction.getDBRef());
-                                }
 
                             } while (count-- > 0);
                         }
