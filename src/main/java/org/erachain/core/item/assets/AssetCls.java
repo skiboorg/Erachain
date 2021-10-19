@@ -16,6 +16,7 @@ import org.erachain.database.PairMap;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.ItemMap;
 import org.erachain.lang.Lang;
+import org.erachain.smartcontracts.epoch.shibaverse.ShibaVerseSC;
 import org.erachain.utils.NumberAsString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -588,6 +589,9 @@ public abstract class AssetCls extends ItemCls {
             case 1:
                 return "" + AssetCls.ERA_NAME + " ++";
         }
+
+        if (maker.equals(ShibaVerseSC.MAKER))
+            return ShibaVerseSC.viewDescription(this, description);
 
         return this.description;
     }
