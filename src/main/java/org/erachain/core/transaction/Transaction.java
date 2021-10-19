@@ -2605,8 +2605,11 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
      * @param block
      */
     public void processByTime(Block block) {
-        if (smartContract != null)
+        if (smartContract != null) {
             smartContract.processByTime(dcSet, block, this);
+            // update status in DB
+
+        }
     }
 
     //////////////////////////////////// ORPHAN
