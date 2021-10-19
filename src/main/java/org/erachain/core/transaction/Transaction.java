@@ -2576,6 +2576,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
     }
 
     public void processTail(Block block, int forDeal) {
+
         ///////// SMART CONTRACTS SESSION
         if (smartContract == null && (block == null || block.heightBlock > 1)) {
             // если у транзакции нет изначально контракта то попробуем сделать эпохальныый
@@ -2679,7 +2680,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
 
     public void orphanByTime(Block block) {
         if (smartContract != null)
-            smartContract.orphanByTime(dcSet, this);
+            smartContract.orphanByTime(dcSet, block, this);
     }
 
     public Transaction copy() {
