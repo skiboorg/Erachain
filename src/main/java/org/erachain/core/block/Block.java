@@ -25,6 +25,7 @@ import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.ntp.NTP;
+import org.erachain.smartcontracts.SmartContract;
 import org.erachain.utils.NumberAsString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -248,8 +249,8 @@ public class Block implements Closeable, ExplorerJsonLine {
             pos += VERSION_LENGTH;
 
             //WRITE REFERENCE
-            byte[] referenceBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
-            System.arraycopy(referenceBytes, 0, data, pos, REFERENCE_LENGTH);
+            byte[] flagsBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
+            System.arraycopy(flagsBytes, 0, data, pos, REFERENCE_LENGTH);
             pos += REFERENCE_LENGTH;
 
             //WRITE GENERATOR
@@ -884,6 +885,7 @@ public class Block implements Closeable, ExplorerJsonLine {
 
     public synchronized List<Transaction> getTransactions() {
         if (this.transactions == null) {
+
             //LOAD TRANSACTIONS
             this.transactions = new ArrayList<Transaction>();
 
@@ -1080,8 +1082,8 @@ public class Block implements Closeable, ExplorerJsonLine {
         pos += VERSION_LENGTH;
 
         //WRITE REFERENCE
-        byte[] referenceBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
-        System.arraycopy(referenceBytes, 0, data, pos, REFERENCE_LENGTH);
+        byte[] flagsBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
+        System.arraycopy(flagsBytes, 0, data, pos, REFERENCE_LENGTH);
         pos += REFERENCE_LENGTH;
 
         //WRITE GENERATOR
@@ -1157,8 +1159,8 @@ public class Block implements Closeable, ExplorerJsonLine {
         pos += VERSION_LENGTH;
 
         //WRITE REFERENCE
-        byte[] referenceBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
-        System.arraycopy(referenceBytes, 0, data, pos, REFERENCE_LENGTH);
+        byte[] flagsBytes = Bytes.ensureCapacity(this.reference, REFERENCE_LENGTH, 0);
+        System.arraycopy(flagsBytes, 0, data, pos, REFERENCE_LENGTH);
         pos += REFERENCE_LENGTH;
 
         System.arraycopy(transactionsHash, 0, data, pos, TRANSACTIONS_HASH_LENGTH);
@@ -1480,6 +1482,7 @@ public class Block implements Closeable, ExplorerJsonLine {
             }
 
             makeHoldRoyalty(dcSetPlace, false);
+            SmartContract.processByBlock(dcSetPlace, this, false);
 
             this.getTransactions();
 
@@ -1510,7 +1513,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                         // ALL GENESIS transaction
                         LOGGER.debug("*** Block[" + this.heightBlock
                                 + "].Tx[" + seqNo + " : " ///this.getTransactionSeq(transaction.getSignature()) + " : "
-                                + transaction.viewFullTypeName() + "]"
+                                + transaction + "]"
                                 + "creator is Null!"
                         );
                         return INVALID_BLOCK_VERSION;
@@ -1533,13 +1536,13 @@ public class Block implements Closeable, ExplorerJsonLine {
                     }
 
                     if (!isSignatureValid) {
+                        // for check SIGN need HEIGHT
+                        transaction.setHeightSeq(heightBlock, seqNo);
                         if (!transaction.isSignatureValid(dcSetPlace)
                                 && BlockChain.ALL_VALID_BEFORE < heightBlock) {
                             //
-                            LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
-                                    + ":" + transaction.viewFullTypeName()
-                                    + " signature  invalid!"
-                                    + " " + Base58.encode(transaction.getSignature()));
+                            LOGGER.debug("*** signature invalid!!! " + this.heightBlock + "-" + seqNo
+                                    + ": " + transaction);
                             return INVALID_BLOCK_VERSION;
                         }
                     }
@@ -1548,11 +1551,9 @@ public class Block implements Closeable, ExplorerJsonLine {
                     if ((BlockChain.TEST_MODE || BlockChain.CLONE_MODE || heightBlock > 278989) &&
                             transaction.getTimestamp() > timestampEnd + BlockChain.GENERATING_MIN_BLOCK_TIME_MS(heightBlock)
                     ) {
-                        LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
-                                + ":" + transaction.viewFullTypeName()
-                                + " timestamp Overhead"
+                        LOGGER.debug("*** timestamp Overhead!!! " + this.heightBlock + "-" + seqNo
+                                + ":" + transaction
                                 + " for diff: " + (transaction.getTimestamp() - timestampEnd)
-                                + " " + Base58.encode(transaction.getSignature())
                         );
                         return INVALID_BLOCK_VERSION;
                     }
@@ -1567,10 +1568,9 @@ public class Block implements Closeable, ExplorerJsonLine {
                             && BlockChain.ALL_VALID_BEFORE < heightBlock) {
                         int error = transaction.isValid(Transaction.FOR_NETWORK, Transaction.NOT_VALIDATE_KEY_COLLISION);
                         LOGGER.debug("*** " + this.heightBlock + "-" + seqNo
-                                + ":" + transaction.viewFullTypeName()
                                 + " invalid code: " + OnDealClick.resultMess(error) + "[" + error + "]"
                                 + (transaction.errorValue == null ? "" : " {" + transaction.errorValue + "}")
-                                + " " + Base58.encode(transaction.getSignature()));
+                                + ": " + transaction);
                         return INVALID_BLOCK_VERSION;
                     }
 
@@ -1581,8 +1581,8 @@ public class Block implements Closeable, ExplorerJsonLine {
                         if (cnt.isOnStopping())
                             return INVALID_BRANCH;
 
-                        LOGGER.error("*** " + this.heightBlock + "-" + seqNo
-                                + ": " + transaction.viewFullTypeName() + " - " + e.getMessage(), e);
+                        LOGGER.error("*** " + e.getMessage() + "!!! " + this.heightBlock + "-" + seqNo
+                                + ": " + transaction, e);
                         throw e;
                     }
 
@@ -1792,7 +1792,7 @@ public class Block implements Closeable, ExplorerJsonLine {
             boolean hasValidatedForkDB = validatedForkDB != null;
             close();
             if (hasValidatedForkDB && BlockChain.CHECK_BUGS > 9) {
-                LOGGER.debug("validatedForkDB is FINALIZED: " + this.toString());
+                LOGGER.debug("validatedForkDB is FINALIZED: " + this);
             }
         }
 
@@ -1928,13 +1928,14 @@ public class Block implements Closeable, ExplorerJsonLine {
      */
     public void assetsFeeProcess(DCSet dcSet, boolean asOrphan) {
 
-        if (BlockChain.TEST_MODE && heightBlock > 150000) {
+        if (BlockChain.TEST_MODE) {
             // EMITTE
             if (earnedAllAssets == null)
                 earnedAllAssets = new HashMap<>();
 
             BigDecimal emite = BigDecimal.ONE;
             addAssetFee(BlockChain.ERA_ASSET, emite, null);
+
             BlockChain.ERA_ASSET.getMaker().changeBalance(dcSet, !asOrphan, false,
                     AssetCls.ERA_KEY, emite, false, false, false);
 
@@ -1943,12 +1944,16 @@ public class Block implements Closeable, ExplorerJsonLine {
         if (transactionCount > 0) {
             // подсчет наград с ПЕРЕВОДОВ
             for (Transaction transaction : getTransactions()) {
-                if (transaction.assetFee == null)
-                    continue;
+                if (transaction.assetFEE != null)
+                    addAssetFee(transaction.getAsset(), transaction.assetFEE.a, transaction.assetFEE.b);
 
-                AssetCls asset = transaction.getAsset();
-                addAssetFee(asset, transaction.assetFee, transaction.assetFeeBurn);
-
+                if (transaction.assetsPacketFEE != null && !transaction.assetsPacketFEE.isEmpty()) {
+                    Tuple2<BigDecimal, BigDecimal> rowTAX;
+                    for (AssetCls asset : transaction.assetsPacketFEE.keySet()) {
+                        rowTAX = transaction.assetsPacketFEE.get(asset);
+                        addAssetFee(asset, rowTAX.a, rowTAX.b);
+                    }
+                }
             }
         }
 
@@ -2200,10 +2205,6 @@ public class Block implements Closeable, ExplorerJsonLine {
         // clear old orders
         OrderProcess.clearOldOrders(dcSet, this, false);
 
-        if (BlockChain.CHECK_BUGS > 0 && heightBlock == 2745 + 3) {
-            boolean debug = true;
-        }
-
         // time wait process
         TimeTXWaitMap timeWaitMap = dcSet.getTimeTXWaitMap();
         TimeTXDoneMap timewDoneMap = dcSet.getTimeTXDoneMap();
@@ -2246,11 +2247,6 @@ public class Block implements Closeable, ExplorerJsonLine {
             compareCOMPUbals(dcSet, this.heightBlock - 1, "before PROCESS");
         }
 
-        // for DEBUG
-        if (this.heightBlock == 97815) {
-            boolean debug = true;
-        }
-
         //PROCESS TRANSACTIONS
         byte[] transactionSignature;
 
@@ -2266,6 +2262,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         }
 
         makeHoldRoyalty(dcSet, false);
+        SmartContract.processByBlock(dcSet, this, false);
 
         this.getTransactions();
 
@@ -2378,10 +2375,6 @@ public class Block implements Closeable, ExplorerJsonLine {
      */
     private void orphanHead(DCSet dcSet) {
 
-        if (BlockChain.CHECK_BUGS > 0 && heightBlock == 2745 + 3) {
-            boolean debug = true;
-        }
-
         // time wait process
         TimeTXWaitMap timeWaitMap = dcSet.getTimeTXWaitMap();
         TimeTXDoneMap timewDoneMap = dcSet.getTimeTXDoneMap();
@@ -2445,6 +2438,7 @@ public class Block implements Closeable, ExplorerJsonLine {
         //PROCESS ASSETS FEE - after orphanTransactions!
         assetsFeeProcess(dcSet, true);
 
+        SmartContract.processByBlock(dcSet, this, true);
         makeHoldRoyalty(dcSet, true);
 
         if (this.forgingInfoUpdate != null) {
