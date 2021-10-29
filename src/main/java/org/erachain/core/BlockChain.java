@@ -243,6 +243,8 @@ public class BlockChain {
 
     //public static final long LEFT_PRICE_HEIGHT_SEQ = Transaction.makeDBRef(LEFT_PRICE_HEIGHT, 0);
 
+    public static final int SKIP_INVALID_SIGN_BEFORE = 0;
+
     public static final int VERS_4_12 = VERS_4_11;
 
     public static final int VERS_30SEC = 0;
