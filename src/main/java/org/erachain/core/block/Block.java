@@ -1923,11 +1923,11 @@ public class Block implements Closeable, ExplorerJsonLine {
     public void assetsFeeProcess(DCSet dcSet, boolean asOrphan) {
 
         if (BlockChain.TEST_MODE) {
-            // EMITTE
+            // EMIT
             if (earnedAllAssets == null)
                 earnedAllAssets = new HashMap<>();
 
-            BigDecimal emitted = BigDecimal.TEN;
+            BigDecimal emitted = new BigDecimal(25);
             addAssetFee(BlockChain.ERA_ASSET, emitted, null);
 
             BlockChain.ERA_ASSET.getMaker().changeBalance(dcSet, !asOrphan, false,

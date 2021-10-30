@@ -566,8 +566,12 @@ public class BlockChain {
             }
         }
 
-        if (DEMO_MODE) {
-            // ALL_VALID_BEFORE = 14800;
+        if (TEST_MODE) {
+            // это как пример для отладки
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.05")));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+
+
         }
 
         if (CLONE_MODE || TEST_MODE) {
@@ -578,7 +582,15 @@ public class BlockChain {
             //ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
 
             // BTC
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000005")));
+            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000002")));
+            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+
+            ASSET_TRANSFER_PERCENTAGE.put(18L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.5")));
+            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(20L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+            ASSET_BURN_PERCENTAGE.put(20L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+            ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
 
             // GOLD
             ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.00015")));
@@ -611,7 +623,7 @@ public class BlockChain {
             // EUR
             ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
             // USD
-            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
+            ASSET_TRANSFER_PERCENTAGE.put(1840L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.25")));
 
             // процент сжигания - если тут не задано то берется 1/2
             //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
