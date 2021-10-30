@@ -566,36 +566,28 @@ public class BlockChain {
             }
         }
 
-        if (TEST_MODE) {
-            // это как пример для отладки
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.05")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-
-
-        }
-
         if (CLONE_MODE || TEST_MODE) {
 
-            // Процент за перевод и Минимальная комиссия
-            //ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            //ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            //ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            if (false // for TEST_MODE see below
+            ) {
+                // лишком большая волатильность - и минимально граница - будет постоянно меняться?
+                // BTC
+                ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000002")));
+                ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
 
-            // BTC
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000002")));
-            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+                ASSET_TRANSFER_PERCENTAGE.put(18L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.5")));
+                ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+                ASSET_TRANSFER_PERCENTAGE.put(20L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+                ASSET_BURN_PERCENTAGE.put(20L, new BigDecimal("0.5"));
+                ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+                ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
 
-            ASSET_TRANSFER_PERCENTAGE.put(18L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.5")));
-            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
-            ASSET_TRANSFER_PERCENTAGE.put(20L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
-            ASSET_BURN_PERCENTAGE.put(20L, new BigDecimal("0.5"));
-            ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
-            ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
+                // GOLD
+                ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.00015")));
 
-            // GOLD
-            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.00015")));
+            }
 
-            // CURRENCIES
+            // FIAT CURRENCIES
             // UAH
             ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
             // KZT
@@ -631,6 +623,27 @@ public class BlockChain {
 
         } else {
             // MAIN MODE
+
+        }
+
+        if (TEST_MODE) {
+            // это как пример для отладки
+            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.05")));
+            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
+
+            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000002")));
+            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+
+            ASSET_TRANSFER_PERCENTAGE.put(18L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.5")));
+            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(20L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+            ASSET_BURN_PERCENTAGE.put(20L, new BigDecimal("0.5"));
+            ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
+            ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
+
+            // USD
+            ASSET_TRANSFER_PERCENTAGE.put(1840L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.25")));
+            ASSET_BURN_PERCENTAGE.put(1840L, new BigDecimal("0.5"));
 
         }
 
