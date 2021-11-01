@@ -12,11 +12,11 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
+import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.database.PairMap;
 import org.erachain.datachain.DCSet;
 import org.erachain.datachain.ItemMap;
 import org.erachain.lang.Lang;
-import org.erachain.smartcontracts.epoch.shibaverse.ShibaVerseSC;
 import org.erachain.utils.NumberAsString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -590,8 +590,8 @@ public abstract class AssetCls extends ItemCls {
                 return "" + AssetCls.ERA_NAME + " ++";
         }
 
-        if (maker.equals(ShibaVerseSC.MAKER))
-            return ShibaVerseSC.viewDescription(this, description);
+        if (maker.equals(ShibaVerseDAPP.MAKER))
+            return ShibaVerseDAPP.viewDescription(this, description);
 
         return this.description;
     }
