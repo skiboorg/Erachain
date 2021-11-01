@@ -109,14 +109,16 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             // ACTION_RESERVED_6
     };
 
-    public static final String NAME_ACTION_TYPE_PROPERTY = "SEND";
-    public static final String NAME_ACTION_TYPE_PROPERTY_WAS = "Send # was";
-    public static final String NAME_ACTION_TYPE_HOLD = "HOLD";
-    public static final String NAME_ACTION_TYPE_HOLD_WAS = "Hold # was";
-    public static final String NAME_CREDIT = "CREDIT";
-    public static final String NAME_CREDIT_WAS = "Credit # was";
-    public static final String NAME_SPEND = "SPEND";
-    public static final String NAME_SPEND_WAS = "Spend # was";
+    public static final String NAME_ACTION_SEND = "SEND";
+    public static final String NAME_ACTION_SEND_WAS = "Send # was";
+    public static final String NAME_ACTION_DEBT = "CREDIT";
+    public static final String NAME_ACTION_DEBT_WAS = "Credit # was";
+    public static final String NAME_ACTION_HOLD = "HOLD";
+    public static final String NAME_ACTION_HOLD_WAS = "Hold # was";
+    public static final String NAME_ACTION_SPEND = "SPEND";
+    public static final String NAME_ACTION_SPEND_WAS = "Spend # was";
+    public static final String NAME_ACTION_PLEDGE = "PLEDGE";
+    public static final String NAME_ACTION_PLEDGE_WAS = "Pledge # was";
     public static final int AMOUNT_LENGTH = 8;
     public static final int RECIPIENT_LENGTH = Account.ADDRESS_LENGTH;
 
@@ -377,7 +379,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
      */
     public static Tuple2<BigDecimal, BigDecimal> calcSendTAX(Long key, AssetCls asset, BigDecimal amount) {
 
-        if (!BlockChain.ASSET_TRANSFER_PERCENTAGE.containsKey(key))
+        if (key == null || !BlockChain.ASSET_TRANSFER_PERCENTAGE.containsKey(key) || asset == null || amount == null)
             return null;
 
         BigDecimal assetFee;
@@ -417,8 +419,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
         // ПРОЦЕНТЫ в любом случае посчитаем - даже если халявная транзакция
         // только для передачи в собственность!
-        if (balancePosition() == ACTION_SEND && !creator.equals(asset.getMaker()) && !recipient.equals(asset.getMaker())
-                && !BlockChain.ASSET_TRANSFER_PERCENTAGE.isEmpty()) {
+        if (balancePosition() == ACTION_SEND && !BlockChain.ASSET_TRANSFER_PERCENTAGE.isEmpty()) {
             if (packet != null) {
                 assetsPacketFEE = new HashMap<>();
                 Tuple2<BigDecimal, BigDecimal> assetFee;
@@ -428,7 +429,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                         assetsPacketFEE.put((AssetCls) row[7], assetFee);
                 }
 
-            } else if (hasAmount()) {
+            } else if (hasAmount() && !creator.equals(asset.getMaker()) && !recipient.equals(asset.getMaker())) {
                 assetFEE = calcSendTAX(key, asset, amount);
                 if (assetFEE != null) {
                     long_fee -= 256L;
@@ -487,13 +488,15 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
         switch (actionType) {
             case ACTION_SEND:
-                return NAME_ACTION_TYPE_PROPERTY;
+                return NAME_ACTION_SEND;
             case ACTION_DEBT:
-                return NAME_CREDIT;
+                return NAME_ACTION_DEBT;
             case ACTION_HOLD:
-                return NAME_ACTION_TYPE_HOLD;
+                return NAME_ACTION_HOLD;
             case ACTION_SPEND:
-                return NAME_SPEND;
+                return NAME_ACTION_SPEND;
+            case ACTION_PLEDGE:
+                return NAME_ACTION_PLEDGE;
         }
 
         return "???";
@@ -525,6 +528,10 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
 
     @Override
     public String viewAmount() {
+
+        if (hasPacket())
+            return "package";
+
         if (amount == null || amount.signum() == 0)
             return "";
 
@@ -541,10 +548,16 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     }
 
     public String viewActionType() {
-        if (amount == null || amount.signum() == 0)
+        if (hasAmount()) {
+            if (hasPacket()) {
+                return Account.balancePositionName(balancePosition())
+                        + (isBackward() ? " backward" : "");
+            }
+
+            return asset.viewAssetTypeAction(isBackward(), balancePosition(), creator == null ? false : asset.getMaker().equals(creator));
+        } else
             return "Mail";
 
-        return asset.viewAssetTypeAction(isBackward(), balancePosition(), creator == null ? false : asset.getMaker().equals(creator));
     }
 
     // PARSE/CONVERT
@@ -685,7 +698,7 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             asset.toJsonInfo(transaction, "priceAsset");
 
             transaction.put("balancePos", Math.abs(balancePos));
-            transaction.put("actionName", viewActionType());
+            transaction.put("actionName", viewSubTypeName(balancePos));
             if (this.isBackward())
                 transaction.put("backward", this.isBackward());
 
@@ -1497,17 +1510,19 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
             HashSet<Long> keys = new HashSet<>();
             for (Object[] row : packet) {
                 rowAssetKey = (Long) row[0];
-
-                if (row[7] == null) {
-                    errorValue = "[" + count + "] = " + rowAssetKey;
+                if (rowAssetKey == null) {
+                    errorValue = "[" + count + "] = null";
+                    return INVALID_ITEM_KEY;
+                } else if (row[7] == null) {
+                    errorValue = "[" + count + "] : " + rowAssetKey;
                     return ITEM_ASSET_NOT_EXIST;
-                } else if (((BigDecimal) row[1]).signum() <= 0) {
+                } else if (row[1] == null || ((BigDecimal) row[1]).signum() <= 0) {
                     errorValue = "Amount[" + count + "] = " + row[1];
                     return INVALID_AMOUNT;
-                } else if (((BigDecimal) row[2]).signum() < 0) {
+                } else if (row[2] != null && ((BigDecimal) row[2]).signum() < 0) {
                     errorValue = "Price[" + count + "] = " + row[2];
                     return INVALID_AMOUNT;
-                } else if (((BigDecimal) row[3]).signum() < 0) {
+                } else if (row[3] != null && ((BigDecimal) row[3]).signum() < 0) {
                     errorValue = "DiscontedPrice[" + count + "] = " + row[3];
                     return INVALID_AMOUNT;
                 } else if (row[PACKET_ROW_MEMO_NO] != null && ((String) row[PACKET_ROW_MEMO_NO]).length() > 0) {
@@ -1519,21 +1534,24 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                 }
 
                 if (keys.contains(rowAssetKey)) {
-                    errorValue = "[" + count + "] = " + rowAssetKey;
+                    errorValue = "[" + count + "] : " + rowAssetKey;
                     return ITEM_DUPLICATE_KEY;
                 } else {
                     keys.add(rowAssetKey);
                 }
 
                 // GET ROW ASSET FEE
-                rowAssetFEE = assetsPacketFEE.get(rowAssetKey);
+                if (assetsPacketFEE == null)
+                    rowAssetFEE = null;
+                else
+                    rowAssetFEE = assetsPacketFEE.get(rowAssetKey);
 
                 Fun.Tuple2<Integer, String> result = isValidAction(dcSet, height, creator, signature, rowAssetKey,
                         (AssetCls) row[7], (BigDecimal) row[1], recipient,
                         isBackward(), fee, rowAssetFEE == null ? null : rowAssetFEE.a, isPerson, checkFlags, timestamp);
 
                 if (result.a != VALIDATE_OK) {
-                    errorValue = result.b;
+                    errorValue = "[" + count + "] : " + result.b;
                     return result.a;
                 }
 
