@@ -626,7 +626,7 @@ public class BlockChain {
 
         }
 
-        if (TEST_MODE) {
+        if (false && TEST_MODE) {
             // это как пример для отладки
             ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.05")));
             ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
