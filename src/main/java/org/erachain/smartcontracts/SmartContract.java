@@ -164,7 +164,11 @@ public abstract class SmartContract {
                     && txSend.hasAmount() && txSend.getAmount().signum() < 0
                     && txSend.getAbsKey() == 1050869L
             ) {
-                return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+                if (txSend.hasPacket()) {
+
+                } else if (txSend.getAmount().signum() < 0) {
+                    return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+                }
             }
 
         } else if (false && BlockChain.TEST_MODE
