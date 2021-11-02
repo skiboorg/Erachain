@@ -615,7 +615,7 @@ public class BlockChain {
             // EUR
             ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
             // USD
-            ASSET_TRANSFER_PERCENTAGE.put(1840L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.25")));
+            ASSET_TRANSFER_PERCENTAGE.put(85L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
 
             // процент сжигания - если тут не задано то берется 1/2
             //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
@@ -623,27 +623,6 @@ public class BlockChain {
 
         } else {
             // MAIN MODE
-
-        }
-
-        if (false && TEST_MODE) {
-            // это как пример для отладки
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.05")));
-            ASSET_BURN_PERCENTAGE.put(1L, new BigDecimal("0.5"));
-
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.000002")));
-            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
-
-            ASSET_TRANSFER_PERCENTAGE.put(18L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.5")));
-            ASSET_BURN_PERCENTAGE.put(18L, new BigDecimal("0.5"));
-            ASSET_TRANSFER_PERCENTAGE.put(20L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
-            ASSET_BURN_PERCENTAGE.put(20L, new BigDecimal("0.5"));
-            ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
-            ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
-
-            // USD
-            ASSET_TRANSFER_PERCENTAGE.put(1840L, new Tuple2<>(new BigDecimal("0.005"), new BigDecimal("0.25")));
-            ASSET_BURN_PERCENTAGE.put(1840L, new BigDecimal("0.5"));
 
         }
 
