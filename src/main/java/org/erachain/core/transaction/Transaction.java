@@ -701,7 +701,7 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         this.seqNo = seqNo;
         this.dbRef = Transaction.makeDBRef(height, seqNo);
         if (forDeal > Transaction.FOR_PACK && (this.fee == null || this.fee.signum() == 0))
-            calcFee(false);
+            calcFee(true);
 
         if (andUpdateFromState && !isWiped())
             updateFromStateDB();
@@ -1660,10 +1660,11 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         // getSignature - make in GENEIS
         transaction.put("signature", this.getSignature() == null ? "null" : Base58.encode(this.signature));
 
-        int height;
-        if (this.creator == null) {
+        //int height;
+        if (height == 1) {
             transaction.put("creator", "genesis");
-            height = 1;
+        } else if (this.creator == null) {
+            transaction.put("creator", "genesis");
         } else {
             transaction.put("feePow", getFeePow());
             transaction.put("forgedFee", getForgedFee());
@@ -1673,7 +1674,8 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             transaction.put("deadLine", getDeadline());
             transaction.put("publickey", Base58.encode(this.creator.getPublicKey()));
             creator.toJsonPersonInfo(transaction, "creator");
-            transaction.put("fee", this.fee.toPlainString());
+            if (fee != null && fee.signum() != 0)
+                transaction.put("fee", this.fee.stripTrailingZeros().toPlainString());
             transaction.put("timestamp", this.timestamp < 1000 ? "null" : this.timestamp);
         }
 
@@ -1684,6 +1686,29 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             if (isWiped()) {
                 transaction.put("wiped", true);
             }
+        }
+
+        if (assetFEE != null) {
+            JSONObject jsonFee = new JSONObject();
+            jsonFee.put("fee", assetFEE.a.stripTrailingZeros().toPlainString());
+            if (assetFEE.b != null)
+                jsonFee.put("burn", assetFEE.b.stripTrailingZeros().toPlainString());
+            transaction.put("assetFEE", jsonFee);
+        }
+
+        if (assetsPacketFEE != null && !assetsPacketFEE.isEmpty()) {
+            Tuple2<BigDecimal, BigDecimal> rowTAX;
+            JSONObject jsonFee = new JSONObject();
+            for (AssetCls asset : assetsPacketFEE.keySet()) {
+                rowTAX = assetsPacketFEE.get(asset);
+                JSONObject assetFee = new JSONObject();
+                assetFee.put("fee", rowTAX.a.stripTrailingZeros().toPlainString());
+                if (rowTAX.b != null)
+                    assetFee.put("burn", rowTAX.b.stripTrailingZeros().toPlainString());
+                jsonFee.put(asset.getKey(), assetFee);
+            }
+            transaction.put("assetPackageFEE", jsonFee);
+
         }
 
         transaction.put("size", this.viewSize(Transaction.FOR_NETWORK));
