@@ -333,7 +333,7 @@ public class BlockChain {
 
     public static final int AMOUNT_SCALE_FROM = 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
-    public static final int FREEZE_FROM = 0;
+    public static final int FREEZE_FROM = CLONE_MODE? 547392 : 0;
 
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
     public static final String[] TRUE_ADDRESSES = TEST_DB > 0 || TEST_MODE? new String[]{} :
@@ -621,6 +621,27 @@ public class BlockChain {
             //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
             //ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
+            if (CLONE_MODE) {
+                // FREEZED_FORGING.add("");
+                FOUNDATION_ADDRESSES.add("7JdaW3v6Jt89XibGpCB2q3zm4d7njvSBBM");
+
+                FOUNDATION_ADDRESSES.add("7PP46kVHwqkQCqEUhBjSVevQsjT7XgrbLj");
+                FOUNDATION_ADDRESSES.add("76uM1bjTqAV6SrZN5HMMKGrRCEognHWEWo");
+                FOUNDATION_ADDRESSES.add("7GAhKrTv7k65TEbGHnVFN8ypgGJKhGg6fn");
+                FOUNDATION_ADDRESSES.add("7KZy6rg87JyUCixGxeZs6obYkrn58bCMcV");
+                FOUNDATION_ADDRESSES.add("7H7zPwte3qL5CkdnkvsfKjDeH9UJFHeutF");
+                FOUNDATION_ADDRESSES.add("738s3y3M5QsdvhvVbGaY8jfzSoYyi2c25Q");
+                FOUNDATION_ADDRESSES.add("7CP4eso63ZTG9uUeutBFs1N7Q8bP3RG1bq");
+                FOUNDATION_ADDRESSES.add("7NmCBXnKGpb5ha5gBPmRAi8pUtVCFNhmSc");
+                FOUNDATION_ADDRESSES.add("7EMYCpwS183oMDrTbekf2zD74N2AW4KoMy");
+                FOUNDATION_ADDRESSES.add("7AATKxfZrFdT7Ksidvrvq6rJYP3LRizpzE");
+                FOUNDATION_ADDRESSES.add("7Eh6raYUhwGKdV3BntvJZiSB5dvYGNNUqC");
+                FOUNDATION_ADDRESSES.add("74zaQ65ZuDyP1HRzqbd1PVog3WbCLeVMN2");
+                FOUNDATION_ADDRESSES.add("7CmtTjwgwUJk5wgyKfJXhaddQkXyh2UJA2");
+                FOUNDATION_ADDRESSES.add("7NrwisgWgccbHJ7vdWyGq7ss4mKLDRpSQT");
+                FOUNDATION_ADDRESSES.add("7BYWr39hcXtpfM3HgzvfQXW3mVwfCnoNNT");
+
+            }
         } else {
             // MAIN MODE
 
