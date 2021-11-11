@@ -830,6 +830,7 @@ public abstract class AccountAssetActionPanelCls extends IconPanel implements Re
         add(jCheckBox_isText, fieldGBC);
 
         fieldGBC.gridy = ++gridy;
+        jCheckBox_AssetsPackage.setVisible(BlockChain.DEMO_MODE);
         add(jCheckBox_AssetsPackage, fieldGBC);
 
         labelGBC.gridy = ++gridy;
