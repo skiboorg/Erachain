@@ -32,7 +32,7 @@ public class ItemAssetBalanceSuitMapDB extends DBMapSuit<byte[], Tuple5<
 
 
     @SuppressWarnings("rawtypes")
-    protected NavigableSet assetKeySet;
+    protected NavigableSet<Tuple2<Tuple2<Long, BigDecimal>, byte[]>> assetKeySet;
     protected NavigableSet addressKeySet;
 
     public ItemAssetBalanceSuitMapDB(DBASet databaseSet, DB database, DBTab cover) {
@@ -103,7 +103,7 @@ public class ItemAssetBalanceSuitMapDB extends DBMapSuit<byte[], Tuple5<
                     byte[] assetKeyBytes = new byte[8];
                     System.arraycopy(key, 20, assetKeyBytes, 0, 8);
 
-                    return new Tuple2<Long, BigDecimal>(Longs.fromByteArray(assetKeyBytes), value.a.b.negate());
+                    return new Tuple2<Long, BigDecimal>(Longs.fromByteArray(assetKeyBytes), value.a.b);
                 }
             });
 
@@ -141,7 +141,20 @@ public class ItemAssetBalanceSuitMapDB extends DBMapSuit<byte[], Tuple5<
     @Override
     public IteratorCloseable<byte[]> getIteratorByAsset(long assetKey) {
         return new IndexIterator((NavigableSet) this.assetKeySet.subSet(
-                Fun.t2(Fun.t2(assetKey, null), ADDR_KEY2_MIN), Fun.t2(Fun.t2(assetKey, Fun.HI), ADDR_KEY2_MAX)));
+                Fun.t2(Fun.t2(assetKey, null), ADDR_KEY2_MIN), Fun.t2(Fun.t2(assetKey, Fun.HI()), ADDR_KEY2_MAX)));
+    }
+
+    @Override
+    public IteratorCloseable<byte[]> getIteratorByAsset(long assetKey, BigDecimal fromOwnAmount, byte[] addressShort, boolean descending) {
+        if (descending) {
+            return new IndexIterator((NavigableSet) this.assetKeySet.descendingSet().subSet(
+                    Fun.t2(Fun.t2(fromOwnAmount == null ? assetKey + 1 : assetKey, fromOwnAmount), addressShort == null ? ADDR_KEY2_MAX : addressShort),
+                    Fun.t2(Fun.t2(assetKey, null), ADDR_KEY2_MIN)));
+        }
+
+        return new IndexIterator((NavigableSet) this.assetKeySet.subSet(
+                Fun.t2(Fun.t2(assetKey, fromOwnAmount), addressShort),
+                Fun.t2(Fun.t2(assetKey, Fun.HI()), ADDR_KEY2_MAX)));
     }
 
     @Override
@@ -153,6 +166,5 @@ public class ItemAssetBalanceSuitMapDB extends DBMapSuit<byte[], Tuple5<
         return new IndexIterator((NavigableSet) this.addressKeySet.subSet(
                 Fun.t2(secondary, ADDR_KEY2_MIN), Fun.t2(secondary, ADDR_KEY2_MAX)));
     }
-
 
 }
