@@ -93,7 +93,7 @@ public class BlockChain {
     /**
      * Защита от платежей с удостоверенного на анонима
      */
-    public static boolean PERSON_SEND_PROTECT = true;
+    public static boolean PERSON_SEND_PROTECT = false;
 
     /**
      * Подмена реального на чужой - для синхронизации из старой ветки
