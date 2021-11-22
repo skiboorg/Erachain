@@ -654,63 +654,6 @@ public class Account {
         return ownVol.add(inDebt);
     }
 
-
-    // Добавляем величины для тестовых режимов
-    public static BigDecimal addDEVAmount(long key, byte[] shortAddressBytes) {
-        if (BlockChain.ERA_COMPU_ALL_UP) {
-            switch ((int) key) {
-                case 1:
-                    return BigDecimal.valueOf(BlockChain.GENESIS_ERA_TOTAL / 1000 * (7000 + shortAddressBytes[10]) / 5000);
-                case 2:
-                    return new BigDecimal("1000.0");
-                case 12:
-                case 14:
-                    return new BigDecimal("10.0");
-                case 3003:
-                    return new BigDecimal("100.0");
-                case 1643:
-                    return new BigDecimal("700000.0");
-                case 18:
-                case (int) AssetCls.EUR_KEY:
-                case (int) AssetCls.USD_KEY:
-                    return new BigDecimal("100000.0");
-            }
-
-            if (BlockChain.isNovaAsset(key)) {
-                return new BigDecimal("1000.0");
-            }
-        }
-
-        return BigDecimal.ZERO;
-
-    }
-
-    public BigDecimal addDEVAmount(long key) {
-        return addDEVAmount(key, shortBytes);
-
-    }
-
-    public Tuple2<BigDecimal, BigDecimal> balAaddDEVAmount(long key, Tuple2<BigDecimal, BigDecimal> balA) {
-        BigDecimal addAmount = addDEVAmount(key, shortBytes);
-        if (addAmount.signum() == 0)
-            return balA;
-
-        return new Tuple2<>(balA.a, balA.b.add(addAmount));
-
-    }
-
-    public Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>
-        balanceAddDEVAmount(long key, Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>
-                            balance) {
-        BigDecimal addAmount = addDEVAmount(key, this.getShortAddressBytes());
-        if (addAmount.signum() == 0)
-            return balance;
-
-        return new Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>(
-                    new Tuple2<BigDecimal, BigDecimal>(balance.a.a, balance.a.b.add(addAmount)),
-                    balance.b, balance.c, balance.d, balance.e);
-    }
-
     public Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>> getBalance(
             DCSet db, long key) {
         if (key < 0)
@@ -718,9 +661,6 @@ public class Account {
 
         Tuple5<Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>, Tuple2<BigDecimal, BigDecimal>>
                 balance = db.getAssetBalanceMap().get(getShortAddressBytes(), key);
-        if (BlockChain.ERA_COMPU_ALL_UP) {
-            return balanceAddDEVAmount(key, balance);
-        }
         return balance;
 
     }
@@ -733,12 +673,7 @@ public class Account {
                 .getAssetBalanceMap().get(getShortAddressBytes(), key);
 
         if (actionType == BALANCE_POS_OWN) {
-            if (BlockChain.ERA_COMPU_ALL_UP) {
-                return new Tuple2<BigDecimal, BigDecimal>(balance.a.a, balance.a.b.add(addDEVAmount(key, this.getShortAddressBytes())));
-            }
-
             return balance.a;
-
         } else if (actionType == BALANCE_POS_DEBT)
             return balance.b;
         else if (actionType == BALANCE_POS_HOLD)
