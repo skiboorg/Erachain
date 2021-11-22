@@ -105,14 +105,35 @@ public class ItemAssetBalanceMapImpl extends DBTabImpl<byte[], Tuple5<
 
         BigDecimal initialAmount = BigDecimal.ZERO;
         if (BlockChain.ERA_COMPU_ALL_UP) {
-            long assetKey = ItemAssetBalanceMap.getAssetKeyFromKey(key);
-            if (assetKey == AssetCls.ERA_KEY)
-                initialAmount = BigDecimal.valueOf(BlockChain.GENESIS_ERA_TOTAL / 1000 * (5000 + key[10]) / 5000);
-            else if (assetKey == AssetCls.FEE_KEY)
-                initialAmount = new BigDecimal("100.0");
 
-            if (BlockChain.isNovaAsset(assetKey)) {
-                initialAmount = new BigDecimal("1000.0");
+            long assetKey = ItemAssetBalanceMap.getAssetKeyFromKey(key);
+
+            switch ((int) assetKey) {
+                case 1:
+                    initialAmount = BigDecimal.valueOf(BlockChain.GENESIS_ERA_TOTAL / 1000 * (7000 + key[10]) / 5000);
+                    break;
+                case 2:
+                    initialAmount = new BigDecimal("1000.0");
+                    break;
+                case 12:
+                case 14:
+                    initialAmount = new BigDecimal("10.0");
+                    break;
+                case 3003:
+                    initialAmount = new BigDecimal("100.0");
+                    break;
+                case 1643:
+                    initialAmount = new BigDecimal("700000.0");
+                    break;
+                case 18:
+                case (int) AssetCls.EUR_KEY:
+                case (int) AssetCls.USD_KEY:
+                    initialAmount = new BigDecimal("100000.0");
+                    break;
+                default:
+                    if (BlockChain.isNovaAsset(assetKey)) {
+                        initialAmount = new BigDecimal("1000.0");
+                    }
             }
         }
 
