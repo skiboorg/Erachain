@@ -15,6 +15,7 @@ import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.dapp.DAPP;
 import org.erachain.datachain.DCSet;
+import org.erachain.lang.Lang;
 import org.erachain.utils.BigDecimalUtil;
 import org.erachain.utils.DateTimeFormat;
 import org.json.simple.JSONArray;
@@ -527,6 +528,18 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     }
 
     @Override
+    public String viewSubTypeName(JSONObject langObj) {
+        if (packet == null && (amount == null || amount.signum() == 0))
+            return "";
+
+        if (packet == null) {
+            return Lang.T(viewSubTypeName(key, amount, isBackward(), asset.isDirectBalances()), langObj);
+        } else {
+            return Lang.T(viewSubTypeName(balancePos), langObj);
+        }
+    }
+
+    @Override
     public String viewAmount() {
 
         if (hasPacket())
@@ -800,9 +813,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
     public static boolean isValidPersonProtect(DCSet dcSet, int height, Account recipient,
                                                boolean creatorIsPerson, long absKey, int actionType,
                                                AssetCls asset) {
-        if (BlockChain.PERSON_SEND_PROTECT && creatorIsPerson && absKey != FEE_KEY
+        if ((BlockChain.PERSON_SEND_PROTECT && creatorIsPerson && absKey != FEE_KEY && asset.isSendPersonProtected()
+                || asset.isAnonimDenied())
                 && actionType != ACTION_DEBT && actionType != ACTION_HOLD && actionType != ACTION_SPEND
-                && asset.isSendPersonProtected()
         ) {
             if (!recipient.isPerson(dcSet, height)
                     && !BlockChain.ANONYMASERS.contains(recipient.getAddress())) {
