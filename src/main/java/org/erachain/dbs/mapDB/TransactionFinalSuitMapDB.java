@@ -2,6 +2,7 @@ package org.erachain.dbs.mapDB;
 
 //04/01 +- 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.SignedBytes;
 import lombok.extern.slf4j.Slf4j;
 import org.erachain.controller.Controller;
@@ -15,7 +16,7 @@ import org.erachain.datachain.TransactionFinalMap;
 import org.erachain.datachain.TransactionFinalSuit;
 import org.erachain.dbs.IteratorCloseable;
 import org.erachain.dbs.IteratorCloseableImpl;
-import org.erachain.utils.ReverseComparator;
+import org.erachain.dbs.MergedOR_IteratorsNoDuplicates;
 import org.mapdb.BTreeKeySerializer.BasicKeySerializer;
 import org.mapdb.BTreeMap;
 import org.mapdb.Bind;
@@ -26,7 +27,10 @@ import org.mapdb.Fun.Tuple3;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NavigableSet;
 
 //import java.math.BigDecimal;
 
@@ -50,7 +54,6 @@ import java.util.*;
 @Slf4j
 public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> implements TransactionFinalSuit {
 
-    public static final int BIDIRECTION_ADDRESS_INDEX = 1;
     private static int CUT_NAME_INDEX = 12;
 
     @SuppressWarnings("rawtypes")
@@ -211,40 +214,6 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
                         String[] keys2 = new String[count];
                         System.arraycopy(keys, 0, keys2, 0, keys2.length);
                         return keys2;
-                    }
-                });
-
-        // BI-DIrectional INDEX - for blockexplorer
-        NavigableSet<Integer> addressBiIndex = database.createTreeSet("address_txs")
-                .comparator(comparatorAddressT2)
-                .counterEnable()
-                .makeOrGet();
-
-        NavigableSet<Integer> descendingaddressBiIndex = database.createTreeSet("address_txs_descending")
-                .comparator(new ReverseComparator(comparatorAddressT2))
-                .makeOrGet();
-
-        createIndexes(BIDIRECTION_ADDRESS_INDEX, addressBiIndex, descendingaddressBiIndex,
-                new Fun.Function2<byte[][],
-                        Long, Transaction>() {
-                    @Override
-                    public byte[][] run(Long key, Transaction transaction) {
-                        // NEED set DCSet for calculate getRecipientAccounts in RVouch for example
-                        if (transaction.noDCSet()) {
-                            transaction.setDC((DCSet) databaseSet, true);
-                        }
-                        HashSet<Account> accounts = transaction.getInvolvedAccounts();
-                        int size = accounts.size();
-                        byte[][] result = new byte[size][];
-                        int count = 0;
-                        for (Account account : accounts) {
-                            byte[] addressKey = new byte[TransactionFinalMap.ADDRESS_KEY_LEN];
-                            System.arraycopy(account.getShortAddressBytes(), 0, addressKey, 0, TransactionFinalMap.ADDRESS_KEY_LEN);
-
-                            result[count++] = addressKey;
-                        }
-
-                        return result;
                     }
                 });
 
@@ -433,31 +402,6 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
     }
 
     @Override
-    public IteratorCloseable<Long> getBiDirectionIterator_old(Long fromSeqNo, boolean descending) {
-
-        if (descending) {
-            IteratorCloseable result =
-                    // делаем закрываемый Итератор
-                    IteratorCloseableImpl.make(
-                            // берем индекс с обратным отсчетом
-                            ((NavigableMap) this.map).descendingMap()
-                                    // задаем границы, так как он обратный границы меняем местами
-                                    .subMap(fromSeqNo == null || fromSeqNo.equals(0L) ? Long.MAX_VALUE : fromSeqNo, 0L).keySet().iterator());
-            return result;
-        }
-
-        IteratorCloseable result =
-                // делаем закрываемый Итератор
-                IteratorCloseableImpl.make(
-                        ((NavigableMap) this.map)
-                                // задаем границы, так как он обратный границы меняем местами
-                                .subMap(fromSeqNo == null || fromSeqNo.equals(0L) ? 0L : fromSeqNo,
-                                        Long.MAX_VALUE).keySet().iterator());
-
-        return result;
-    }
-
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public IteratorCloseable<Long> getIteratorByTitle(String filter, boolean asFilter, String fromWord, Long fromSeqNo, boolean descending) {
 
@@ -489,51 +433,22 @@ public class TransactionFinalSuitMapDB extends DBMapSuit<Long, Transaction> impl
     }
 
     /**
-     * Нужно для пролистывания по адресу в обоих направлениях - для блокэксплорера
-     * TODO: тут ключ по адресу обрезан до 8-ми байт и возможны совпадения - поидее нужно увеличить длинну
-     *
      * @param addressShort
      * @param fromSeqNo
      * @param descending
      * @return
      */
     @Override
-    public IteratorCloseable<Long> getBiDirectionAddressIterator(byte[] addressShort, Long fromSeqNo, boolean descending) {
+    public IteratorCloseable<Long> getAddressesIterator(byte[] addressShort, Long fromSeqNo, boolean descending) {
 
         if (addressShort == null)
-            if (true)
-                return getIterator(fromSeqNo, descending);
-            else
-                return getBiDirectionIterator_old(fromSeqNo, descending);
+            return getIterator(fromSeqNo, descending);
 
-        byte[] addressKey = new byte[TransactionFinalMap.ADDRESS_KEY_LEN];
-        System.arraycopy(addressShort, 0, addressKey, 0, TransactionFinalMap.ADDRESS_KEY_LEN);
+        IteratorCloseable<Long> creatorsIterator = getIteratorByCreator(addressShort, fromSeqNo, descending);
+        IteratorCloseable<Long> recipientsIterator = getIteratorByRecipient(addressShort, fromSeqNo, descending);
 
-        if (descending) {
-            IteratorCloseable result =
-                    // делаем закрываемый Итератор
-                    IteratorCloseableImpl.make(
-                            // только ключи берем из Tuple2
-                            new IndexIterator<>(
-                                    // берем индекс с обратным отсчетом
-                                    getIndex(BIDIRECTION_ADDRESS_INDEX, descending)
-                                            // задаем границы, так как он обратный границы меняем местами
-                                            .subSet(Fun.t2(addressKey, fromSeqNo == null || fromSeqNo.equals(0L) ? Long.MAX_VALUE : fromSeqNo),
-                                                    Fun.t2(addressKey, 0L)).iterator()));
-            return result;
-        }
-
-        IteratorCloseable result =
-                // делаем закрываемый Итератор
-                IteratorCloseableImpl.make(
-                        // только ключи берем из Tuple2
-                        new IndexIterator<>(
-                                getIndex(BIDIRECTION_ADDRESS_INDEX, descending)
-                                        // задаем границы, так как он обратный границы меняем местами
-                                        .subSet(Fun.t2(addressKey, fromSeqNo == null ? 0L : fromSeqNo),
-                                                Fun.t2(addressKey, Long.MAX_VALUE)).iterator()));
-
-        return result;
+        return new MergedOR_IteratorsNoDuplicates((Iterable) ImmutableList.of(creatorsIterator, recipientsIterator),
+                descending ? Fun.REVERSE_COMPARATOR : Fun.COMPARATOR);
     }
 
     @Override
