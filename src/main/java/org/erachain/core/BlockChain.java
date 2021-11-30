@@ -648,6 +648,9 @@ public class BlockChain {
                 FOUNDATION_ADDRESSES.add("7NrwisgWgccbHJ7vdWyGq7ss4mKLDRpSQT");
                 FOUNDATION_ADDRESSES.add("7BYWr39hcXtpfM3HgzvfQXW3mVwfCnoNNT");
 
+                FOUNDATION_ADDRESSES.add("7EZ2wbj3Tbv7DQy6vmdvqno2Z5h97vwc4b");
+                FOUNDATION_ADDRESSES.add("7GSCayNRM7PP1sqzZrsS7VePodTpdeVE1Q");
+
             }
         } else {
             // MAIN MODE
