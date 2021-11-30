@@ -33,8 +33,10 @@ import org.mapdb.Fun.Tuple6;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -574,14 +576,6 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return flags;
     }
 
-    public byte[] getIcon() {
-        return this.icon;
-    }
-
-    public int getIconType() {
-        return iconType;
-    }
-
     public static String viewMediaType(int mediaType) {
         switch (mediaType) {
             case MEDIA_TYPE_IMG:
@@ -645,6 +639,33 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
         return getMediaType(imageType, hasImageURL() ? null : image);
     }
 
+    public byte[] getIcon() {
+        return this.icon;
+    }
+
+    @Override
+    public ImageIcon getImageIcon() {
+        byte[] icon = getIcon();
+        if (icon == null || icon.length == 0)
+            return null;
+
+        if (hasIconURL()) {
+            URL url = null;
+            try {
+                url = new URL(new String(icon, StandardCharsets.UTF_8));
+                return new ImageIcon(url);
+            } catch (Exception e) {
+                return null;
+            }
+        } else
+            return new ImageIcon(icon);
+    }
+
+
+    public int getIconType() {
+        return iconType;
+    }
+
     public MediaType getIconMediaType() {
         return getMediaType(iconType, hasIconURL() ? null : icon);
     }
@@ -654,7 +675,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
     }
 
     public String getIconURL() {
-        if (iconAsURL) {
+        if (hasIconURL()) {
             // внешняя ссылка - обработаем ее
             return new String(getIcon(), StandardCharsets.UTF_8);
         } else if (getIcon() != null && getIcon().length > 0) {
@@ -713,7 +734,7 @@ public abstract class ItemCls implements Iconable, ExplorerJsonLine, Jsonable {
     }
 
     public String getImageURL() {
-        if (imageAsURL) {
+        if (hasImageURL()) {
             // внешняя ссылка - обработаем ее
             return new String(getImage(), StandardCharsets.UTF_8);
         } else if (getImage() != null && getImage().length > 0) {
