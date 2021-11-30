@@ -2042,6 +2042,13 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             return false;
 
         if (!asTelegram) {
+            // for INVALID SIGNs
+            for (byte[] invalid_item : BlockChain.INVALID_SIGN) {
+                if (Arrays.equals(signature, invalid_item)) {
+                    return false;
+                }
+            }
+
             // for skip NOT VALID SIGNs
             for (byte[] valid_item : BlockChain.VALID_SIGN) {
                 if (Arrays.equals(signature, valid_item)) {

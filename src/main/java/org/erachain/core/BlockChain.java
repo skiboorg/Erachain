@@ -314,6 +314,13 @@ public class BlockChain {
             Base58.decode("3MDpK4MgZKafbaDegMDMgotdbL6eYjHuLRa3Si9oGdRvPiYiPBADbqBjQWcAMK9d4ZhUxobcEc8T5tVQ9raptix9")
     };
 
+    public static final byte[][] INVALID_SIGN = !CLONE_MODE? new byte[][]{} : new byte[][]{
+            // MAIL with AMOUNT = 0
+            Base58.decode("39TctLK2x4Lo5WJCPnG5aYrXYH7H2ADQEeDGL5vohXuC3JN8qVmcfFUstNQKXuia6BRmajXDWTQE8MDv6ZVpJeKm"),
+            Base58.decode("5BUDrUHkELpiNCu1r8nBRKBxsyLPDrGi6a1BAHKdWxnMX5Dv2b2MVPsvVxsmckZqffLzegfR9smDVSzPXTG98ZvK"),
+            Base58.decode("3pH9KKx5EZxKh6Q9Wn7ryctAi1p8BK3PxHym4wHD6PcoCV8kRTzaYr8vQsKJQ6NroMboKSF12kvK68VqUVKn3x7A")
+    };
+
     public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : CLONE_MODE || TEST_MODE ? new byte[][]{} :
             new byte[][]{};
 
