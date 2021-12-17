@@ -36,7 +36,8 @@ public abstract class DAPPFactory {
         }
 
         DAPP dapp = new LeafFall();
-        skocks.put(dapp.stock, dapp.id);
+        if (false)
+            skocks.put(dapp.stock, dapp.id);
 
         dapp = new DogePlanet(0);
         skocks.put(dapp.stock, dapp.id);
@@ -56,7 +57,7 @@ public abstract class DAPPFactory {
     static public DAPP make(Transaction transaction) {
 
         /////////// EVENTS
-        if (BlockChain.TEST_MODE
+        if (false && BlockChain.TEST_MODE
                 && transaction.getType() == Transaction.CREATE_ORDER_TRANSACTION) {
             CreateOrderTransaction createOrder = (CreateOrderTransaction) transaction;
             if (createOrder.getHaveKey() == AssetCls.ERA_KEY
