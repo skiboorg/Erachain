@@ -41,11 +41,16 @@ public class ShibaVerseDAPP extends EpochDAPP {
     static public final String NAME = "Shiba Verse";
 
     final public static byte[] HASH = crypto.digest(Longs.toByteArray(ID));
+    // 7G6sJRb7vf8ABEr3ENvV1fo1hwt197r35e
+    final public static PublicKeyAccount MAKER = new PublicKeyAccount(crypto.digest(Longs.toByteArray(ID)));
     // APPC45p29ZjcEEvSzhgUe8RfUzMZ1i2GFG
-    final public static PublicKeyAccount MAKER = PublicKeyAccount.makeForDApp(crypto.digest(Longs.toByteArray(ID)));
+    // new final public static PublicKeyAccount MAKER = PublicKeyAccount.makeForDApp(crypto.digest(Longs.toByteArray(ID)));
 
-    // APPBttBTR6pSEg6FBny3reRG4rkdp8dtG8
+    // old
     final public static PublicKeyAccount FARM_01_PUBKEY = noncePubKey(HASH, (byte) 1);
+    // APPBttBTR6pSEg6FBny3reRG4rkdp8dtG8
+    // new final public static PublicKeyAccount FARM_01_PUBKEY = noncePubKey(HASH, (byte) 1);
+
     private static JSONObject farm_01_settings = new JSONObject();
 
     public static Farm_01 FARM_01_SERVER = null;
