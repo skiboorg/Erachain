@@ -56,8 +56,11 @@ public abstract class DAPPFactory {
      */
     static public DAPP make(Transaction transaction) {
 
+        if (!BlockChain.TEST_MODE || transaction.getBlockHeight() < 386460)
+            return null;
+
         /////////// EVENTS
-        if (false && BlockChain.TEST_MODE
+        if (false
                 && transaction.getType() == Transaction.CREATE_ORDER_TRANSACTION) {
             CreateOrderTransaction createOrder = (CreateOrderTransaction) transaction;
             if (createOrder.getHaveKey() == AssetCls.ERA_KEY
@@ -97,6 +100,7 @@ public abstract class DAPPFactory {
         }
 
         if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND && txSend.hasAmount()
+                && txSend.getAbsKey() == 1050869L
         ) {
             if (txSend.hasPacket()) {
 
