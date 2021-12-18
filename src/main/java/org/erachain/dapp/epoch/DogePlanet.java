@@ -32,12 +32,12 @@ public class DogePlanet extends EpochDAPP {
     static final Fun.Tuple2 COUNT_KEY = new Fun.Tuple2(ID, "c");
 
     public DogePlanet(int count) {
-        super(ID);
+        super(ID, MAKER);
         this.count = count;
     }
 
     public DogePlanet(int count, long keyEnd) {
-        super(ID);
+        super(ID, MAKER);
         this.count = count;
         this.keyEnd = keyEnd;
     }

@@ -3,6 +3,7 @@ package org.erachain.dapp;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import org.erachain.controller.Controller;
+import org.erachain.core.BlockChain;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Crypto;
@@ -24,7 +25,10 @@ public abstract class DAPP {
 
     protected DAPP(int id, PublicKeyAccount stock) {
         this.id = id;
-        assert (stock.isDAppOwned());
+        if (false && !BlockChain.TEST_MODE) {
+            // старый тип в ДЕМО есть
+            assert (stock.isDAppOwned());
+        }
         this.stock = stock;
     }
 
