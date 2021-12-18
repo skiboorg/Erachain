@@ -75,7 +75,7 @@ public class ShibaVerseDAPP extends EpochDAPP {
     /**
      * admin account
      */
-    final static public Account adminAddress = new Account("7NhZBb8Ce1H2S2MkPerrMnKLZNf9ryNYtP");
+    final static public Account adminAddress = new Account("7C6cEeHw739uQm8PhdnS9yENdLhT8LUERP");
 
     final static public String COMMAND_CATH_COMET = "catch comets";
     final static public String COMMAND_STAKE = "stake";
@@ -787,6 +787,12 @@ public class ShibaVerseDAPP extends EpochDAPP {
         int released = asset.getReleased(DCSet.getInstance()).intValue();
         double rary = Math.sqrt(1.0d / released);
         return "<html>RARY: <b>" + format2.format(rary) + "</b><br>" + description + "</html>";
+    }
+
+    public static void setDAPPFactory(HashMap<Account, Integer> skocks) {
+        for(Account account:accounts){
+            skocks.put(account, ID);
+        }
     }
 
 }

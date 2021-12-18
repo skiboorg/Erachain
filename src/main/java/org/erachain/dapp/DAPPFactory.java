@@ -35,15 +35,7 @@ public abstract class DAPPFactory {
             settingsJSON = new JSONObject();
         }
 
-        DAPP dapp = new LeafFall();
-        if (false)
-            skocks.put(dapp.stock, dapp.id);
-
-        dapp = new DogePlanet(0);
-        skocks.put(dapp.stock, dapp.id);
-
-        dapp = new ShibaVerseDAPP("", "");
-        skocks.put(dapp.stock, dapp.id);
+        ShibaVerseDAPP.setDAPPFactory(skocks);
 
     }
 
