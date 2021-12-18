@@ -1267,9 +1267,6 @@ public class Block implements Closeable, ExplorerJsonLine {
 
     public int isValidHead(DCSet dcSet) {
 
-        if (BlockChain.TEST_MODE && heightBlock > 386501)
-            return INVALID_MAX_COUNT;
-
         if (BlockChain.BLOCK_COUNT > 0 && this.heightBlock > BlockChain.BLOCK_COUNT) {
             LOGGER.debug("*** Block[" + this.heightBlock + "] - Max count reached");
             return INVALID_MAX_COUNT;
