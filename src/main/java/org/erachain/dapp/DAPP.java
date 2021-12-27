@@ -3,6 +3,7 @@ package org.erachain.dapp;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import org.erachain.controller.Controller;
+import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
