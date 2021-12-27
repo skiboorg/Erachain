@@ -12,6 +12,7 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.dapp.epoch.DogePlanet;
 import org.erachain.dapp.epoch.LeafFall;
+import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.utils.FileUtils;
 import org.json.simple.JSONObject;
@@ -36,6 +37,7 @@ public abstract class DAPPFactory {
         }
 
         ShibaVerseDAPP.setDAPPFactory(skocks);
+        MemoCardsDAPP.setDAPPFactory(skocks);
 
     }
 
@@ -87,24 +89,32 @@ public abstract class DAPPFactory {
         if (!txSend.getRecipient().isDAppOwned())
             return null;
 
-        String command;
-        if (txSend.isText() && !txSend.isEncrypted()) {
-            command = new String(txSend.getData(), StandardCharsets.UTF_8).toLowerCase();
-        } else {
-            command = txSend.getTitle();
-            if (command == null) command = "";
+        ///// OLD VERSION
+        if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND && txSend.hasAmount()
+        ) {
+            if (txSend.hasPacket()) {
+
+            } else if (txSend.getAmount().signum() < 0) {
+                return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+            }
         }
+        //////
+
+        /////// NEW VERSION
 
         ///////////////////// CALL DAPPS HERE
         Integer dappID = skocks.get(txSend.getRecipient());
         if (dappID == null)
             return null;
 
+        String dataStr = txSend.isText() && !txSend.isEncrypted() ? new String(txSend.getData(), StandardCharsets.UTF_8).toLowerCase() : null;
+
         switch (dappID) {
             case ShibaVerseDAPP.ID:
-                return ShibaVerseDAPP.make(txSend, command);
+                return ShibaVerseDAPP.make(txSend, dataStr);
+            case MemoCardsDAPP.ID:
+                return MemoCardsDAPP.make(txSend, dataStr);
         }
-
 
         return null;
 
@@ -122,6 +132,8 @@ public abstract class DAPPFactory {
                 return DogePlanet.NAME;
             case ShibaVerseDAPP.ID:
                 return ShibaVerseDAPP.NAME;
+            case MemoCardsDAPP.ID:
+                return MemoCardsDAPP.NAME;
         }
 
         return null;

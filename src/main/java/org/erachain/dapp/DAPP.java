@@ -3,17 +3,21 @@ package org.erachain.dapp;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import org.erachain.controller.Controller;
-import org.erachain.core.BlockChain;
+import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
 import org.erachain.core.block.Block;
 import org.erachain.core.crypto.Crypto;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.dapp.epoch.DogePlanet;
 import org.erachain.dapp.epoch.LeafFall;
+import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.datachain.DCSet;
 import org.erachain.lang.Lang;
 import org.json.simple.JSONObject;
+import org.mapdb.Fun;
+
+import java.math.BigDecimal;
 
 public abstract class DAPP {
 
@@ -79,6 +83,60 @@ public abstract class DAPP {
         return PublicKeyAccount.makeForDApp(hash);
     }
 
+    public static void transfer(DCSet dcSet, Block block, Transaction commandTX,
+                                Account from, Account to, BigDecimal amount, long assetKey, boolean asOrphan,
+                                String memoFrom, String memoTo) {
+        // TRANSFER ASSET
+        from.changeBalance(dcSet, !asOrphan, false, assetKey,
+                amount, false, false, false);
+        to.changeBalance(dcSet, asOrphan, false, assetKey,
+                amount, false, false, false);
+
+        if (block != null) {
+            if (memoFrom != null)
+                block.addCalculated(from, assetKey, amount, memoFrom, commandTX.getDBRef());
+            if (memoTo != null)
+                block.addCalculated(to, assetKey, amount, memoTo, commandTX.getDBRef());
+        }
+
+    }
+
+    /**
+     * save current state values
+     *
+     * @param dcSet
+     * @param values
+     */
+    public void putState(DCSet dcSet, Long seqNo, Object[] values) {
+        dcSet.getSmartContractState().put(new Fun.Tuple2<>(id, seqNo), values);
+    }
+
+    /**
+     * Remove state values
+     *
+     * @param dcSet
+     * @return
+     */
+    public Object[] removeState(DCSet dcSet, Long seqNo) {
+        return dcSet.getSmartContractState().remove(new Fun.Tuple2<>(id, seqNo));
+    }
+
+    public boolean valueSet(DCSet dcSet, Object key, Object value) {
+        return dcSet.getSmartContractValues().set(new Fun.Tuple2(id, key), value);
+    }
+
+    public void valuePut(DCSet dcSet, Object key, Object value) {
+        dcSet.getSmartContractValues().put(new Fun.Tuple2(id, key), value);
+    }
+
+    public void valuesDelete(DCSet dcSet, String key) {
+        dcSet.getSmartContractValues().delete(new Fun.Tuple2(id, key));
+    }
+
+    public Object valuesRemove(DCSet dcSet, String key) {
+        return dcSet.getSmartContractValues().remove(new Fun.Tuple2(id, key));
+    }
+
     public int length(int forDeal) {
         return 4 + 32;
     }
@@ -104,6 +162,8 @@ public abstract class DAPP {
                 return DogePlanet.Parse(data, position, forDeal);
             case ShibaVerseDAPP.ID:
                 return ShibaVerseDAPP.Parse(data, position, forDeal);
+            case MemoCardsDAPP.ID:
+                return MemoCardsDAPP.Parse(data, position, forDeal);
         }
 
         throw new Exception("wrong smart-contract id:" + id);
@@ -126,8 +186,8 @@ public abstract class DAPP {
 
     abstract public boolean processByTime(DCSet dcSet, Block block, Transaction transaction);
 
-    abstract public boolean orphan(DCSet dcSet, Transaction transaction);
+    abstract public void orphan(DCSet dcSet, Transaction transaction);
 
-    abstract public boolean orphanByTime(DCSet dcSet, Block block, Transaction transaction);
+    abstract public void orphanByTime(DCSet dcSet, Block block, Transaction transaction);
 
 }
