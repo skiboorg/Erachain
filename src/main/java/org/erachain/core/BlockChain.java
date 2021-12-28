@@ -573,71 +573,71 @@ public class BlockChain {
         if (CLONE_MODE) {
 
             // Процент за перевод и Минимальная комиссия
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(1L, new BigDecimal("0.005"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(2L, new BigDecimal("0.005"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(3L, new BigDecimal("0.005"));
 
             // BTC
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(12L, new BigDecimal("0.000005"));
 
             // GOLD
-            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(21L, new BigDecimal("0.00005"));
 
             // CURRENCIES
             // UAH
-            ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(82L, new BigDecimal("0.005"));
             // KZT
-            ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(83L, new BigDecimal("0.005"));
             // KFS
-            ASSET_TRANSFER_PERCENTAGE.put(84L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(84L, new BigDecimal("0.005"));
             // BYN
-            ASSET_TRANSFER_PERCENTAGE.put(85L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(85L, new BigDecimal("0.005"));
             // TRY
-            ASSET_TRANSFER_PERCENTAGE.put(86L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(86L, new BigDecimal("0.005"));
             // SGN
-            ASSET_TRANSFER_PERCENTAGE.put(87L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(87L, new BigDecimal("0.005"));
             // AUD
-            ASSET_TRANSFER_PERCENTAGE.put(88L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(88L, new BigDecimal("0.005"));
             // CFH
-            ASSET_TRANSFER_PERCENTAGE.put(89L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(89L, new BigDecimal("0.005"));
             // GBP
-            ASSET_TRANSFER_PERCENTAGE.put(90L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(90L, new BigDecimal("0.005"));
             // JPY
-            ASSET_TRANSFER_PERCENTAGE.put(91L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(91L, new BigDecimal("0.005"));
             // RUB
-            ASSET_TRANSFER_PERCENTAGE.put(92L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(92L, new BigDecimal("0.005"));
             // CNY
-            ASSET_TRANSFER_PERCENTAGE.put(93L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(93L, new BigDecimal("0.005"));
             // EUR
-            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(94L, new BigDecimal("0.005"));
             // USD
-            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(95L, new BigDecimal("0.005"));
 
             // процент сжигания - если тут не задано то берется 1/2
-            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
-            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
         } else if (TEST_MODE) {
 
             // Процент за перевод и Минимальная комиссия
-            ASSET_TRANSFER_PERCENTAGE.put(1L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(2L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
-            ASSET_TRANSFER_PERCENTAGE.put(3L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(1L, new BigDecimal("0.005"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(2L, new BigDecimal("0.005"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(3L, new BigDecimal("0.005"));
 
             // BTC
-            ASSET_TRANSFER_PERCENTAGE.put(12L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.000005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(12L, new BigDecimal("0.000005"));
 
             // GOLD
-            ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.00005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(21L, new BigDecimal("0.00005"));
 
             // EUR
-            ASSET_TRANSFER_PERCENTAGE.put(94L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(94L, new BigDecimal("0.005"));
             // USD
-            ASSET_TRANSFER_PERCENTAGE.put(95L, new Tuple2<>(new BigDecimal("0.01"), new BigDecimal("0.005")));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(95L, new BigDecimal("0.005"));
 
             // процент сжигания - если тут не задано то берется 1/2
-            ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
-            ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
         } else {
             // MAIN MODE
