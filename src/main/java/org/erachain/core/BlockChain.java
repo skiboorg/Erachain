@@ -398,7 +398,7 @@ public class BlockChain {
      * какие проценты сжигаем при переводе активов - Ключ : процент
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE_TAB = new HashMap<>();
-    public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = new BigDecimal("0.5");
+    public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = new BigDecimal("0.05");
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
