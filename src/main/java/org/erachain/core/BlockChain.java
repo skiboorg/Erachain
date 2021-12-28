@@ -370,7 +370,13 @@ public class BlockChain {
     public static final int FEE_FOR_ANONIMOUSE = 33;
     //
 
-    public static final int FREE_FEE_LENGTH = 1 << 13;
+    /**
+     * add to all TX for fee
+     */
+
+    public static final int ADD_FEE_BYTES_FOR_COMMON_TX = 0;
+
+    public static final int FREE_FEE_LENGTH = ADD_FEE_BYTES_FOR_COMMON_TX + (1 << 13);
     public static final int FREE_FEE_TO_SEQNO = 1;
     public static final int FREE_FEE_FROM_HEIGHT = 1;
 
@@ -387,14 +393,21 @@ public class BlockChain {
     public static final long ACTION_ROYALTY_ASSET_2 = AssetCls.BAL_KEY;
 
     /**
-     * какие проценты при переводе каких активов - Ключ : коэффициент комиссии + минималка в абсолютных ед.
-     * Это Доход форжера за минусом Сгорания
+     * какие проценты при переводе каких активов - Ключ : коэффициент комиссии
+     * Это Доход форжера за минусом Сгорания. Обязательно задать ASSET_TRANSFER_PERCENTAGE_MIN_TAB - иначе игнор %%
      */
-    public static final HashMap<Long, Tuple2<BigDecimal, BigDecimal>> ASSET_TRANSFER_PERCENTAGE = new HashMap<>();
+    public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE_TAB = new HashMap<>();
+    public static final BigDecimal ASSET_TRANSFER_PERCENTAGE_DEFAULT = new BigDecimal("0.1");
+
+    /**
+     * минимальная комиссия - бсолютное значение. Эксли не задано то и процент комиссии не берем!
+     */
+    public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE_MIN_TAB = new HashMap<>();
     /**
      * какие проценты сжигаем при переводе активов - Ключ : процент
      */
-    public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE = new HashMap<>();
+    public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE_TAB = new HashMap<>();
+    public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = new BigDecimal("0.5");
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 0; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
@@ -589,6 +602,8 @@ public class BlockChain {
                 ASSET_TRANSFER_PERCENTAGE.put(22L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.001")));
                 ASSET_BURN_PERCENTAGE.put(22L, new BigDecimal("0.5"));
 
+            // GOLD
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(21L, new BigDecimal("0.00005"));
                 // GOLD
                 ASSET_TRANSFER_PERCENTAGE.put(21L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.00015")));
 
@@ -596,6 +611,7 @@ public class BlockChain {
 
             // FIAT CURRENCIES
             // UAH
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(82L, new BigDecimal("0.005"));
             ASSET_TRANSFER_PERCENTAGE.put(82L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
             // KZT
             ASSET_TRANSFER_PERCENTAGE.put(83L, new Tuple2<>(new BigDecimal("0.0025"), new BigDecimal("0.25")));
@@ -817,7 +833,30 @@ public class BlockChain {
     }
 
     public static BigDecimal feeBG(long feeLong) {
-        return BigDecimal.valueOf(feeLong * BlockChain.FEE_PER_BYTE, BlockChain.FEE_SCALE);
+        return BigDecimal.valueOf(feeLong * FEE_PER_BYTE, FEE_SCALE);
+    }
+
+    public static BigDecimal ASSET_TRANSFER_PERCENTAGE_MIN(int height, Long assetKey) {
+        return ASSET_TRANSFER_PERCENTAGE_MIN_TAB.get(assetKey);
+    }
+
+    public static BigDecimal ASSET_TRANSFER_PERCENTAGE(int height, Long assetKey) {
+        BigDecimal percentAsset = ASSET_TRANSFER_PERCENTAGE_TAB.get(assetKey);
+        if (percentAsset == null) {
+            percentAsset = ASSET_TRANSFER_PERCENTAGE_DEFAULT;
+        }
+
+        return percentAsset;
+
+    }
+
+    public static BigDecimal ASSET_BURN_PERCENTAGE(int height, Long assetKey) {
+        if (ASSET_BURN_PERCENTAGE_TAB.isEmpty()
+                || !ASSET_BURN_PERCENTAGE_TAB.containsKey(assetKey))
+            return ASSET_BURN_PERCENTAGE_DEFAULT;
+
+        return ASSET_BURN_PERCENTAGE_TAB.get(assetKey);
+
     }
 
     public static BigDecimal BONUS_FOR_PERSON(int height) {
