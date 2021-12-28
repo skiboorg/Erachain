@@ -395,7 +395,8 @@ public class BlockChain {
      * Это Доход форжера за минусом Сгорания. Обязательно задать ASSET_TRANSFER_PERCENTAGE_MIN_TAB - иначе игнор %%
      */
     public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE_TAB = new HashMap<>();
-    public static final BigDecimal ASSET_TRANSFER_PERCENTAGE_DEFAULT = new BigDecimal("0.25");
+    /// default = 0.1%
+    public static final BigDecimal ASSET_TRANSFER_PERCENTAGE_DEFAULT = new BigDecimal("0.0025");
 
     /**
      * минимальная комиссия - бсолютное значение. Эксли не задано то и процент комиссии не берем!
