@@ -732,17 +732,17 @@ public class Controller extends Observable {
         // START API SERVICE
         if (Settings.getInstance().isRpcEnabled()) {
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Start API Service"));
-            LOGGER.info(Lang.T("Start API Service"));
             this.rpcService = new ApiService();
             this.rpcServiceRestart();
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Start RPC Service on port") + " " + Settings.getInstance().getRpcPort()));
+            LOGGER.info("Start RPC Service on port " + Settings.getInstance().getRpcPort());
         }
 
         // START WEB SERVICE
         if (Settings.getInstance().isWebEnabled()) {
             this.setChanged();
-            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, "Start WEB Service"));
-            LOGGER.info(Lang.T("Start WEB Service"));
+            this.notifyObservers(new ObserverMessage(ObserverMessage.GUI_ABOUT_TYPE, Lang.T("Start WEB & API Service on port") + " " + Settings.getInstance().getWebPort()));
+            LOGGER.info("Start WEB & API Service on port " + Settings.getInstance().getWebPort());
             this.webService = WebService.getInstance();
             this.webService.start();
         }
@@ -2512,12 +2512,12 @@ public class Controller extends Observable {
         return this.network.deleteTelegramsForRecipient(recipient, timestamp, title);
     }
 
-    public List<TelegramMessage> getLastIncomeTelegrams(Account account, long timestamp, String filter) {
-        return this.network.getTelegramsForAddress(account.getAddress(), timestamp, filter);
+    public List<TelegramMessage> getTelegramsForRecipient(Account account, long timestamp, String filter, int limit) {
+        return this.network.getTelegramsForRecipient(account.getAddress(), timestamp, filter, limit);
     }
 
-    public List<TelegramMessage> getLastTelegrams(long timestamp, String recipient, String filter, boolean outcomes) {
-        return this.network.getTelegramsFromTimestamp(timestamp, recipient, filter, outcomes);
+    public List<TelegramMessage> getTelegramsFromTimestamp(long timestamp, String recipient, String filter, boolean outcomes, int limit) {
+        return this.network.getTelegramsFromTimestamp(timestamp, recipient, filter, outcomes, limit);
     }
 
     public TelegramMessage getTelegram(byte[] signature) {
