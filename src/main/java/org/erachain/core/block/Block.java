@@ -24,6 +24,7 @@ import org.erachain.core.transaction.TransactionFactory;
 import org.erachain.dapp.DAPP;
 import org.erachain.datachain.*;
 import org.erachain.dbs.IteratorCloseable;
+import org.erachain.gui.telegrams.TelegramSplitPanel;
 import org.erachain.gui.transaction.OnDealClick;
 import org.erachain.ntp.NTP;
 import org.erachain.utils.NumberAsString;
@@ -1933,16 +1934,42 @@ public class Block implements Closeable, ExplorerJsonLine {
      */
     public void assetsFeeProcess(DCSet dcSet, boolean asOrphan) {
 
-        if (BlockChain.TEST_MODE && heightBlock > 150000) {
-            // EMIT
-            if (earnedAllAssets == null)
-                earnedAllAssets = new HashMap<>();
+        if (BlockChain.TEST_MODE) {
+            if (heightBlock > 150000) {
+                // EMIT
+                if (earnedAllAssets == null)
+                    earnedAllAssets = new HashMap<>();
 
-            BigDecimal emitted = new BigDecimal(25);
-            addAssetFee(BlockChain.ERA_ASSET, emitted, null);
+                BigDecimal emitted = new BigDecimal(25);
+                addAssetFee(BlockChain.ERA_ASSET, emitted, null);
 
-            BlockChain.ERA_ASSET.getMaker().changeBalance(dcSet, !asOrphan, false,
-                    AssetCls.ERA_KEY, emitted, false, false, false);
+                BlockChain.ERA_ASSET.getMaker().changeBalance(dcSet, !asOrphan, false,
+                        AssetCls.ERA_KEY, emitted, false, false, false);
+            }
+
+        } else if (BlockChain.CLONE_MODE) {
+            if (heightBlock > 788640) {
+                // EMIT
+                if (earnedAllAssets == null)
+                    earnedAllAssets = new HashMap<>();
+
+                BigDecimal emitted;
+                if (heightBlock < 1839840) // 1 YEAR
+                    emitted = new BigDecimal(10);
+                else if (heightBlock < 2891040) // 2 YEAR
+                        emitted = new BigDecimal(8);
+                else if (heightBlock < 3942240) // 3 YEAR
+                    emitted = new BigDecimal(6);
+                else if (heightBlock < 4993440) // 4 YEAR
+                    emitted = new BigDecimal(4);
+                else
+                    emitted = new BigDecimal(2);
+
+                addAssetFee(BlockChain.ERA_ASSET, emitted, null);
+
+                BlockChain.ERA_ASSET.getMaker().changeBalance(dcSet, !asOrphan, false,
+                        AssetCls.ERA_KEY, emitted, false, false, false);
+            }
 
         }
 
