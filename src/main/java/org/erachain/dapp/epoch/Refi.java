@@ -23,7 +23,9 @@ public class Refi extends EpochDAPPjson {
 
 
     static public final int ID = 1012;
-    static public final String NAME = "Referal Asset";
+    static public final String NAME = "Referal dApp";
+    static public final String ASSET_NAME = "REFI";
+    static public final long ASSET_QUALITY = 25000000;
 
     // APPBjF5fbGj18aaXKSXemmHConG7JLBiJg
     final public static PublicKeyAccount MAKER = PublicKeyAccount.makeForDApp(crypto.digest(Longs.toByteArray(ID)));
@@ -84,7 +86,7 @@ public class Refi extends EpochDAPPjson {
             return BigDecimal.ZERO;
     }
 
-    private static Object[] makeNewPoin(Long refDB, Integer height,
+    private static Object[] makeNewPoin(Long assetKey, Long refDB, Integer height,
                                         Account account, BigDecimal stake, Object[] point) {
 
         Object[] pointNew;
@@ -101,7 +103,13 @@ public class Refi extends EpochDAPPjson {
             BigDecimal rewardKoeff = (BigDecimal) point[3];
             BigDecimal reward = stake.multiply(new BigDecimal(height - pendingRewardHeight)).multiply(rewardKoeff)
                     .multiply(STAKE_PERIOD_KOEFF).setScale(ASSET_DECIMALS, RoundingMode.HALF_DOWN);
+
             BigDecimal pendingRewardNew = pendingReward.add(reward);
+
+            BigDecimal totalLeft = MAKER.getBalanceForPosition(assetKey, Account.BALANCE_POS_OWN).a;
+            if (totalLeft.compareTo(reward) < 0) {
+                pendingRewardNew = totalLeft;
+            }
 
             pointNew = new Object[]{point[0], pendingRewardNew, height, stakeKoeff(account, stake)};
         }
@@ -128,7 +136,7 @@ public class Refi extends EpochDAPPjson {
             valueSet(dcSet, recipientAddress, state[1]);
 
             BigDecimal stakeReward = (BigDecimal) state[2];
-            if (stakeReward.signum() > 0) {
+            if (stakeReward != null && stakeReward.signum() > 0) {
                 transfer(dcSet, block, rSend, stock, sender, stakeReward, rSend.getAssetKey(), true, null, null);
             }
 
@@ -149,7 +157,7 @@ public class Refi extends EpochDAPPjson {
                 BigDecimal stake = recipient.getBalanceForPosition(assetKey, Account.BALANCE_POS_OWN).b;
                 recipientPoint = (Object[]) valueGet(dcSet, recipientAddress);
 
-                Object[] pointNew = makeNewPoin(refDB, height, recipient, stake, recipientPoint);
+                Object[] pointNew = makeNewPoin(assetKey, refDB, height, recipient, stake, recipientPoint);
 
                 // STORE NEW POINT
                 valuePut(dcSet, recipientAddress, pointNew);
@@ -166,7 +174,7 @@ public class Refi extends EpochDAPPjson {
                 BigDecimal stake = sender.getBalanceForPosition(assetKey, Account.BALANCE_POS_OWN).b;
                 senderPoint = (Object[]) valueGet(dcSet, senderAddress);
 
-                Object[] pointNew = makeNewPoin(refDB, height, sender, stake, senderPoint);
+                Object[] pointNew = makeNewPoin(assetKey, refDB, height, sender, stake, senderPoint);
 
                 int lastHeightAction = (Integer) pointNew[0];
                 if (height - lastHeightAction >= SKIP) {
@@ -229,8 +237,8 @@ public class Refi extends EpochDAPPjson {
                 return false;
             }
 
-            AssetVenture asset = new AssetVenture(null, stock, "NAME", null, null,
-                    null, AssetCls.AS_INSIDE_ASSETS, ASSET_DECIMALS, 0);
+            AssetVenture asset = new AssetVenture(null, stock, ASSET_NAME, null, null,
+                    null, AssetCls.AS_INSIDE_ASSETS, ASSET_DECIMALS, ASSET_QUALITY);
             asset.setReference(commandTX.getSignature(), commandTX.getDBRef());
 
             //INSERT INTO DATABASE
