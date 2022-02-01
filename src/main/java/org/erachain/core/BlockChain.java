@@ -168,7 +168,7 @@ public class BlockChain {
     // need RIGHTS for PERSON account
     public static final BigDecimal MINOR_ERA_BALANCE_BD = BigDecimal.valueOf(MINOR_ERA_BALANCE);
 
-    public static final int MIN_GENERATING_BALANCE = 100000;
+    public static final int MIN_GENERATING_BALANCE = 50000;
     public static final BigDecimal MIN_GENERATING_BALANCE_BD = new BigDecimal(MIN_GENERATING_BALANCE);
 
     public static final int MIN_REGISTERING_BALANCE_OWN = 0;
