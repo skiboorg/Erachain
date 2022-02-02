@@ -87,27 +87,26 @@ public abstract class DAPPFactory {
             }
         }
 
-        if (BlockChain.TEST_MODE) {
+        if (false && BlockChain.TEST_MODE) {
             Refi dapp = Refi.tryMakeJob(txSend);
             if (dapp != null)
                 return dapp;
         }
-        ////////// NEW VERSION
-        if (!txSend.getRecipient().isDAppOwned())
-            return null;
 
-        ///// OLD VERSION
-        if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND && txSend.hasAmount()
-        ) {
-            if (txSend.hasPacket()) {
+        if (!txSend.getRecipient().isDAppOwned()) {
+            ///// OLD VERSION
+            if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND && txSend.hasAmount()
+            ) {
+                if (txSend.hasPacket()) {
 
-            } else if (txSend.getAmount().signum() < 0) {
-                return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+                } else if (txSend.getAmount().signum() < 0) {
+                    return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
+                }
             }
-        }
-        //////
+            //////
 
-        /////// NEW VERSION
+            return null;
+        }
 
         ///////////////////// MAKE DAPPS HERE
         // TRY BY RECIPIENT
@@ -127,6 +126,8 @@ public abstract class DAPPFactory {
 
         switch (dappID) {
             case Refi.ID:
+                if (true)
+                    return null;
                 return Refi.make(txSend, dataStr);
             case ShibaVerseDAPP.ID:
                 return ShibaVerseDAPP.make(txSend, dataStr);
