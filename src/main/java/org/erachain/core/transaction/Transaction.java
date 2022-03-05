@@ -950,6 +950,13 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
         return dApp;
     }
 
+    public void resetEpochDAPP() {
+        if (dApp != null && dApp.isEpoch()) {
+            typeBytes[2] &= ~HAS_SMART_CONTRACT_MASK();
+            dApp = null;
+        }
+    }
+
     public void makeItemsKeys() {
         if (isWiped()) {
             itemsKeys = new Object[][]{};
@@ -1940,13 +1947,11 @@ public abstract class Transaction implements ExplorerJsonLine, Jsonable {
             data = Bytes.concat(data, exLink.toBytes());
         }
 
-        if (dApp != null) {
-            if (forDeal == FOR_DB_RECORD || !dApp.isEpoch()) {
-                typeBytes[2] |= HAS_SMART_CONTRACT_MASK();
-                data = Bytes.concat(data, dApp.toBytes(forDeal));
-            } else {
-                typeBytes[2] &= ~HAS_SMART_CONTRACT_MASK();
-            }
+        if (dApp != null && (forDeal == FOR_DB_RECORD || !dApp.isEpoch())) {
+            typeBytes[2] |= HAS_SMART_CONTRACT_MASK();
+            data = Bytes.concat(data, dApp.toBytes(forDeal));
+        } else {
+            typeBytes[2] &= ~HAS_SMART_CONTRACT_MASK();
         }
 
         if (forDeal > FOR_PACK) {

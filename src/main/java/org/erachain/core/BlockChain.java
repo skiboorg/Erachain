@@ -168,7 +168,7 @@ public class BlockChain {
     // need RIGHTS for PERSON account
     public static final BigDecimal MINOR_ERA_BALANCE_BD = BigDecimal.valueOf(MINOR_ERA_BALANCE);
 
-    public static final int MIN_GENERATING_BALANCE = 100000;
+    public static final int MIN_GENERATING_BALANCE = 50000;
     public static final BigDecimal MIN_GENERATING_BALANCE_BD = new BigDecimal(MIN_GENERATING_BALANCE);
 
     public static final int MIN_REGISTERING_BALANCE_OWN = 0;
@@ -226,7 +226,7 @@ public class BlockChain {
      * Если задан то это режим синхронизации со старым протоколом - значит нам нельзя генерить блоки и транзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = DEMO_MODE ? 66817 : 0; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static int ALL_VALID_BEFORE = DEMO_MODE ? 66817 : 788640; // see in sidePROTOCOL.json as 'allValidBefore'
     public static final int WIN_VAL_ALL_VALID = 0;
     public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 137687 : 0;
     public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 53495 : 0;
