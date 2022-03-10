@@ -13,6 +13,7 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.dapp.epoch.DogePlanet;
 import org.erachain.dapp.epoch.LeafFall;
 import org.erachain.dapp.epoch.Refi;
+import org.erachain.dapp.epoch.memoCards.MemoCards01DAPP;
 import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.utils.FileUtils;
@@ -39,6 +40,7 @@ public abstract class DAPPFactory {
 
         ShibaVerseDAPP.setDAPPFactory(stocks);
         MemoCardsDAPP.setDAPPFactory(stocks);
+        MemoCards01DAPP.setDAPPFactory(stocks);
         Refi.setDAPPFactory(stocks);
 
     }
@@ -124,6 +126,8 @@ public abstract class DAPPFactory {
                 return ShibaVerseDAPP.make(txSend, dataStr);
             case MemoCardsDAPP.ID:
                 return MemoCardsDAPP.make(txSend, dataStr);
+            case MemoCards01DAPP.ID:
+                return MemoCards01DAPP.make(txSend, dataStr);
         }
 
         return null;
@@ -144,6 +148,8 @@ public abstract class DAPPFactory {
                 return ShibaVerseDAPP.NAME;
             case MemoCardsDAPP.ID:
                 return MemoCardsDAPP.NAME;
+            case MemoCards01DAPP.ID:
+                return MemoCards01DAPP.NAME;
         }
 
         return null;

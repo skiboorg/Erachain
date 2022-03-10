@@ -12,6 +12,7 @@ import org.erachain.core.transaction.Transaction;
 import org.erachain.dapp.epoch.DogePlanet;
 import org.erachain.dapp.epoch.LeafFall;
 import org.erachain.dapp.epoch.Refi;
+import org.erachain.dapp.epoch.memoCards.MemoCards01DAPP;
 import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.datachain.DCSet;
@@ -176,6 +177,8 @@ public abstract class DAPP {
                 return ShibaVerseDAPP.Parse(data, position, forDeal);
             case MemoCardsDAPP.ID:
                 return MemoCardsDAPP.Parse(data, position, forDeal);
+            case MemoCards01DAPP.ID:
+                return MemoCards01DAPP.Parse(data, position, forDeal);
             case Refi.ID:
                 return Refi.Parse(data, position, forDeal);
         }
