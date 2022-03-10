@@ -126,7 +126,7 @@ public class Refi extends EpochDAPPjson {
         Object[] pointNew;
 
         if (point == null) {
-            pointNew = new Object[]{height, BigDecimal.ZERO, height, stakeKoeff(null), 0};
+            pointNew = new Object[]{height, BigDecimal.ZERO, height, stakeKoeff(null), null};
         } else if (height.equals(point[2])) {
             // не пересчитываем - только коэффициент
             pointNew = new Object[]{point[0], point[1], height, stakeKoeff((Tuple2<Integer, BigDecimal>) point[4]), point[4]};
@@ -311,7 +311,9 @@ public class Refi extends EpochDAPPjson {
         if (stakeReward.signum() <= 0)
             return null;
 
-        BigInteger referralGift = stakeReward.setScale(royaltyAsset.getScale()).unscaledValue().shiftRight(REFERRAL_SHARE2);
+        BigInteger referralGift = stakeReward.setScale(royaltyAsset.getScale(), BigDecimal.ROUND_DOWN).unscaledValue().shiftRight(REFERRAL_SHARE2);
+        if (referralGift.signum() <= 0)
+            return null;
 
         List<RCalculated> txCalculated = block == null ? null : block.getTXCalculated();
         long royaltyAssetKey = royaltyAsset.getKey();
@@ -349,10 +351,10 @@ public class Refi extends EpochDAPPjson {
             Object[] state = removeState(dcSet, rSend.getDBRef());
 
             // RESTORE OLD POINT
-            valueSet(dcSet, senderAddress, state[0]);
+            valuePut(dcSet, senderAddress, state[0]);
 
             // RESTORE OLD POINT
-            valueSet(dcSet, recipientAddress, state[1]);
+            valuePut(dcSet, recipientAddress, state[1]);
 
             BigDecimal stakeReward = (BigDecimal) state[2];
             if (stakeReward != null && stakeReward.signum() > 0) {
@@ -521,7 +523,7 @@ public class Refi extends EpochDAPPjson {
 
     @Override
     public boolean processByTime(DCSet dcSet, Block block, Transaction transaction) {
-        fail("unknow command");
+        fail("unknown command");
         return false;
     }
 
@@ -536,7 +538,7 @@ public class Refi extends EpochDAPPjson {
         else if ("init".equals(command))
             return init(dcSet, block, commandTX, false);
 
-        fail("unknow command");
+        fail("unknown command");
         return false;
 
     }
