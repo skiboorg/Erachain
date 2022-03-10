@@ -64,7 +64,7 @@ public class Account implements Comparable {
 
     protected String address;
     protected byte[] bytes;
-    protected byte[] shortBytes;
+    protected final byte[] shortBytes;
     // нельзя тут запминать так как при откате данные не будут очищены Tuple4<Long, Integer, Integer, Integer> personDuration;
     Tuple2<Integer, PersonCls> person;
     int viewBalancePosition = 0;
@@ -87,6 +87,9 @@ public class Account implements Comparable {
 
         } else {
             assert (addressBytes.length == ADDRESS_LENGTH);
+            Long error = null;
+            error++;
+            this.shortBytes = null;
         }
     }
 

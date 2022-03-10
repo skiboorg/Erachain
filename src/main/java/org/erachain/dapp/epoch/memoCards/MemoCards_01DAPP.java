@@ -248,24 +248,19 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
             Object[] actions = removeState(dcSet, commandTX.getDBRef());
 
             int index = actions.length;
-            Object[] act;
             Long assetKey;
             ItemCls asset;
 
             while (--index > 0) {
-                act = (Object[]) actions[index];
-
-                assetKey = (Long) act[0];
+                assetKey = (Long) actions[index];
                 transfer(dcSet, null, commandTX, stock, commandTX.getCreator(), BigDecimal.ONE, assetKey, true, null, null);
 
-                if ((boolean) act[1]) {
-                    // DELETE FROM BLOCKCHAIN DATABASE
-                    asset = dcSet.getItemAssetMap().decrementRemove(assetKey);
+                // DELETE FROM BLOCKCHAIN DATABASE
+                asset = dcSet.getItemAssetMap().decrementRemove(assetKey);
 
-                    // DELETE FROM CONTRACT DATABASE
-                    valuesMap.delete(new Tuple2(ID, asset.getName()));
+                // DELETE FROM CONTRACT DATABASE
+                valuesMap.delete(new Tuple2(ID, asset.getName()));
 
-                }
             }
 
             status = "wait";
@@ -307,7 +302,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
     }
 
     private boolean random(DCSet dcSet, Block block, RSend commandTX, boolean asOrphan) {
-        if (commandTX.getAssetKey() == BUSTER_1_KEY)
+        if (true || commandTX.getAssetKey() == BUSTER_1_KEY)
             return openBuster_1(dcSet, block, commandTX, asOrphan);
         return true;
     }
