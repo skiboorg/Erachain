@@ -2,7 +2,6 @@ package org.erachain.dapp.epoch.memoCards;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import com.google.common.primitives.Shorts;
 import org.erachain.core.BlockChain;
 import org.erachain.core.account.Account;
 import org.erachain.core.account.PublicKeyAccount;
@@ -11,29 +10,19 @@ import org.erachain.core.exdata.exLink.ExLinkAddress;
 import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.assets.AssetCls;
 import org.erachain.core.item.assets.AssetUnique;
-import org.erachain.core.item.assets.AssetVenture;
 import org.erachain.core.transaction.RSend;
 import org.erachain.core.transaction.Transaction;
-import org.erachain.dapp.DAPPFactory;
 import org.erachain.dapp.EpochDAPPjson;
-import org.erachain.dapp.epoch.shibaverse.server.Farm_01;
 import org.erachain.datachain.DCSet;
-import org.erachain.datachain.ItemAssetBalanceMap;
 import org.erachain.datachain.SmartContractValues;
-import org.erachain.dbs.IteratorCloseable;
-import org.erachain.webserver.WebResource;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.mapdb.Fun;
 import org.mapdb.Fun.Tuple2;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
 import java.util.*;
 
-public class MemoCards01DAPP extends EpochDAPPjson {
+public class MemoCards_01DAPP extends EpochDAPPjson {
 
     int WAIT_RAND = 3;
 
@@ -42,7 +31,7 @@ public class MemoCards01DAPP extends EpochDAPPjson {
 
     final public static HashSet<PublicKeyAccount> accounts = new HashSet<>();
 
-    // APPBQyonEPbk2ZazbUuHZ2ffN1QJYaK1ow
+    // APPBSN8XzUhdGpZKTvTGUuGLAt1qDcYEjo
     final public static PublicKeyAccount MAKER = PublicKeyAccount.makeForDApp(crypto.digest(Longs.toByteArray(ID)));
 
     static {
@@ -59,15 +48,16 @@ public class MemoCards01DAPP extends EpochDAPPjson {
 
     /**
      * make random from future
+     * Command only in lower case!
      */
-    final static public String COMMAND_RANDOM = "R";
+    final static public String COMMAND_RANDOM = "random";
 
     public static final int RARE_COMMON = 0;
     public static final int RARE_UNCOMMON = 1;
     public static final int RARE_RARE = 2;
     public static final int RARE_EPIC = 3;
 
-    public MemoCards01DAPP(String data, String status) {
+    public MemoCards_01DAPP(String data, String status) {
         super(ID, MAKER, data, status);
     }
 
@@ -75,18 +65,18 @@ public class MemoCards01DAPP extends EpochDAPPjson {
         return NAME;
     }
 
-    public static MemoCards01DAPP make(RSend txSend, String dataStr) {
+    public static MemoCards_01DAPP make(RSend txSend, String dataStr) {
         // dataStr = null
         if (dataStr == null || dataStr.isEmpty())
             return null;
 
-        return new MemoCards01DAPP(dataStr, "");
+        return new MemoCards_01DAPP(dataStr, "");
 
     }
 
     /// PARSE / TOBYTES
 
-    public static MemoCards01DAPP Parse(byte[] bytes, int pos, int forDeal) {
+    public static MemoCards_01DAPP Parse(byte[] bytes, int pos, int forDeal) {
 
         // skip ID
         pos += 4;
@@ -113,7 +103,7 @@ public class MemoCards01DAPP extends EpochDAPPjson {
             status = "";
         }
 
-        return new MemoCards01DAPP(data, status);
+        return new MemoCards_01DAPP(data, status);
     }
 
     ///////// COMMANDS
@@ -135,12 +125,18 @@ public class MemoCards01DAPP extends EpochDAPPjson {
 
     }
 
+    /**
+     * count of items in that RARE Level
+     * @param setID
+     * @param rareLevel
+     * @return
+     */
     private int openBuster_1_getSetCount(int setID, int rareLevel) {
         switch (setID) {
             case 1:
                 switch (rareLevel) {
                     case RARE_COMMON:
-                        return 10;
+                        return 5;
                     case RARE_UNCOMMON:
                         return 3;
                     case RARE_RARE:
@@ -162,22 +158,13 @@ public class MemoCards01DAPP extends EpochDAPPjson {
      */
     private Long makeAsset(DCSet dcSet, Block block, RSend commandTX, int setID, int rareLevel, int charValue) {
         int setCount = openBuster_1_getSetCount(setID, rareLevel);
-        charValue = setCount * (2 * Short.MAX_VALUE - 1) / charValue;
+        charValue = setCount * charValue / (2 * Short.MAX_VALUE);
 
         Long assetBaseKey;
         switch (rareLevel) {
             case RARE_COMMON:
-                if (charValue < Short.MAX_VALUE >> 4) {
-                    assetBaseKey = BlockChain.DEMO_MODE? 1050919L : null;
-                } else if (charValue < Short.MAX_VALUE >> 3) {
-                    assetBaseKey = BlockChain.DEMO_MODE? 1050920L : null;
-                } else if (charValue < Short.MAX_VALUE >> 2) {
-                    assetBaseKey = BlockChain.DEMO_MODE? 1050921L : null;
-                } else if (charValue < Short.MAX_VALUE) {
-                    assetBaseKey = BlockChain.DEMO_MODE? 1050922L : null;
-                } else {
-                    assetBaseKey = BlockChain.DEMO_MODE? 1050922L : null;
-                }
+                assetBaseKey = BlockChain.DEMO_MODE? 1050919L + charValue: null;
+                break;
             default:
                 assetBaseKey = BlockChain.DEMO_MODE? 1050919L : null;
         }
@@ -320,7 +307,7 @@ public class MemoCards01DAPP extends EpochDAPPjson {
     }
 
     private boolean random(DCSet dcSet, Block block, RSend commandTX, boolean asOrphan) {
-        if (commandTX.getAssetKey() == BUSTER_1_KEY)
+        if (true || commandTX.getAssetKey() == BUSTER_1_KEY)
             return openBuster_1(dcSet, block, commandTX, asOrphan);
         return true;
     }
