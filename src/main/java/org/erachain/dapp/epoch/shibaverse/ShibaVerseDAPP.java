@@ -843,7 +843,7 @@ public class ShibaVerseDAPP extends EpochDAPPjson {
             return shopSetPrices(dcSet, block, rSend, false);
         }
 
-        fail("unknow command");
+        fail("unknown command");
         return false;
     }
 
@@ -877,7 +877,7 @@ public class ShibaVerseDAPP extends EpochDAPPjson {
             }
         }
 
-        fail("unknow command");
+        fail("unknown command");
         return false;
 
     }
@@ -891,7 +891,7 @@ public class ShibaVerseDAPP extends EpochDAPPjson {
             return random(dcSet, block, (RSend) transaction, false);
         }
 
-        fail("unknow command");
+        fail("unknown command");
         return false;
 
     }

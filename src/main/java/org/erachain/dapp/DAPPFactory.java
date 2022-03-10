@@ -76,17 +76,6 @@ public abstract class DAPPFactory {
 
         RSend txSend = (RSend) transaction;
 
-        ////////// OLD VERSION
-        if (txSend.balancePosition() == TransactionAmount.ACTION_SPEND && txSend.hasAmount()
-                && txSend.getAbsKey() == 1050869L
-        ) {
-            if (txSend.hasPacket()) {
-
-            } else if (txSend.getAmount().signum() < 0) {
-                return new DogePlanet(Math.abs(transaction.getAmount().intValue()));
-            }
-        }
-
         if (false && BlockChain.TEST_MODE) {
             Refi dapp = Refi.tryMakeJob(txSend);
             if (dapp != null)
@@ -107,6 +96,8 @@ public abstract class DAPPFactory {
 
             return null;
         }
+
+        /////// NEW VERSION
 
         ///////////////////// MAKE DAPPS HERE
         // TRY BY RECIPIENT
