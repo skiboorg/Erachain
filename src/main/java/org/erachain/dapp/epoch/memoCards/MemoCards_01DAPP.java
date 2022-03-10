@@ -158,7 +158,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
      */
     private Long makeAsset(DCSet dcSet, Block block, RSend commandTX, int setID, int rareLevel, int charValue) {
         int setCount = openBuster_1_getSetCount(setID, rareLevel);
-        charValue = setCount * charValue / (2 * Short.MAX_VALUE);
+        charValue = setCount * charValue / (2 * Short.MAX_VALUE + 1);
 
         Long assetBaseKey;
         switch (rareLevel) {
@@ -307,7 +307,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
     }
 
     private boolean random(DCSet dcSet, Block block, RSend commandTX, boolean asOrphan) {
-        if (true || commandTX.getAssetKey() == BUSTER_1_KEY)
+        if (commandTX.getAssetKey() == BUSTER_1_KEY)
             return openBuster_1(dcSet, block, commandTX, asOrphan);
         return true;
     }
