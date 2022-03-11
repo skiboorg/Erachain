@@ -235,21 +235,14 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
         // GET RANDOM
         byte[] randomArray = getRandHash(block, commandTX, nonce);
         int index = 0;
-        if (BlockChain.DEMO_MODE && block != null && block.heightBlock < 824784) {
+        // 5,71% - Uncommon = 100% / 17,51
+        // see in org.erachain.dapp.epoch.memoCards.MemoCards_01DAPPTest.tt
+        int rareVal = Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++]);
+        int rareRes = (int)((long)rareVal * 10000L / (long) (Short.MAX_VALUE * 2));
+        if (rareRes > 571)
             actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-        } else {
-            // 5,71% - Uncommon = 100% / 17,51
-            // see in org.erachain.dapp.epoch.memoCards.MemoCards_01DAPPTest.tt
-            int rareVal = Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++]);
-            int rareRes = (int)((long)rareVal * 10000L / (long) (Short.MAX_VALUE * 2));
-            if (rareRes > 571)
-                actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-            else
-                actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_UNCOMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-        }
+        else
+            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_UNCOMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
 
     }
 
