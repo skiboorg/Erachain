@@ -213,8 +213,13 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
         //INSERT INTO BLOCKCHAIN DATABASE
         assetKey = dcSet.getItemAssetMap().incrementPut(randomAsset);
 
+        // SET AMOUNT
+        stock.changeBalance(dcSet, false, false, assetKey,
+                BigDecimal.ONE, false, false, true, 0);
+
         // TRANSFER ASSET
         transfer(dcSet, block, commandTX, stock, commandTX.getCreator(), BigDecimal.ONE, assetKey, false, null, "buster_01");
+
 
         return assetKey;
 
@@ -267,6 +272,11 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
 
             while (--index > 0) {
                 assetKey = (Long) actions[index];
+
+                // RESET AMOUNT
+                stock.changeBalance(dcSet, true, false, assetKey,
+                        BigDecimal.ONE, false, false, true, 0);
+
                 transfer(dcSet, null, commandTX, stock, commandTX.getCreator(), BigDecimal.ONE, assetKey, true, null, null);
 
                 // DELETE FROM BLOCKCHAIN DATABASE
