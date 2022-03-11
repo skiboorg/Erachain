@@ -131,7 +131,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
      * @param rareLevel
      * @return
      */
-    private int openBuster_1_getSetCount(int setID, int rareLevel) {
+    public static int openBuster_1_getSetCount(int setID, int rareLevel) {
         switch (setID) {
             case 1:
                 switch (rareLevel) {
@@ -157,7 +157,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
      * @param charValue characterictic value
      */
     private Long makeAsset(DCSet dcSet, Block block, RSend commandTX, int setID, int rareLevel, int charValue) {
-        int setCount = openBuster_1_getSetCount(setID, rareLevel) - 1;
+        int setCount = openBuster_1_getSetCount(setID, rareLevel);
         charValue = setCount * charValue / (2 * Short.MAX_VALUE);
 
         Long assetBaseKey;
@@ -244,8 +244,8 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
             // 5,71% - Uncommon = 100% / 17,51
             // see in org.erachain.dapp.epoch.memoCards.MemoCards_01DAPPTest.tt
             int rareVal = Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++]);
-            rareVal = (int)((long)rareVal * 10000L / 1751L / (long)(Short.MAX_VALUE * 2));
-            if (rareVal > 0)
+            int rareRes = (int)((long)rareVal * 10000L / (long) (Short.MAX_VALUE * 2));
+            if (rareRes > 571)
                 actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
             else
                 actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_UNCOMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
