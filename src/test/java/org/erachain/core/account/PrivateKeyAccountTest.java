@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class PrivateKeyAccountTest {
 
     /**
-     * Проверка работы по СИДУ из мобилки
+     * Test for MOBILE
      */
     @Test
     public void mobilePrivateKey() {

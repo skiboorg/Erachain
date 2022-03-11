@@ -121,7 +121,7 @@ public class TransactionFinalMapImplTest {
     }
 
     /**
-     * Проверка Итераторов - были ошибки преобразования типов и двойные Значения в списке итератора
+     * Проверка - были ошибки преобразования типов и двойные Значения в списке итератора
      */
     @Test
     public void findTransactionsKeys() {
@@ -166,10 +166,10 @@ public class TransactionFinalMapImplTest {
                 Iterator<Long> iterator = dcSet.getTransactionFinalMap().findTransactionsKeys(accountA.getAddress(), sender, recipient,
                         null, minHeight, maxHeight, type, service, desc, offset, limit);
 
-                // .size сбрасывает Итератор на конец списка
+                // .size сбрасывает на конец списка
                 assertEquals(3, Iterators.size(iterator));
 
-                /// пошлем сами себе - эта трнзакция будет в обоих Итераторах
+                /// пошлем сами себе - эта трнзакция будет в обоих
                 assetTransfer = new RSend(accountA, FEE_POWER, accountA, 1, amount_asset, timestamp++, 0L);
                 assetTransfer.sign(accountA, Transaction.FOR_NETWORK);
                 assetTransfer.setDC(dcSet, Transaction.FOR_NETWORK, 1, seqNo++, true);
@@ -185,8 +185,8 @@ public class TransactionFinalMapImplTest {
                         null, minHeight, maxHeight, type, service, desc, offset, limit);
 
 
-                // .size сбрасывает Итератор на конец списка
-                /// фигово что тут будут повторения ключей - так как в обоих Итераторах есть значения то они удваиваются в слитом итераторе
+                // .size сбрасывает на конец списка
+                /// фигово что тут будут повторения ключей - так как в обои есть значения то они удваиваются в слитом итераторе
                 assertEquals(4, Iterators.size(iterator));
 
             } finally {
@@ -242,13 +242,13 @@ public class TransactionFinalMapImplTest {
                 List<Transaction> find = dcSet.getTransactionFinalMap().getTransactionsByAddressFromID(
                         recipientAcc.getShortAddressBytes(), null, 0, 5, false, true);
 
-                // .size сбрасывает Итератор на конец списка
+                // .size сбрасывает на конец списка
                 assertEquals(2, find.size());
 
                 find = dcSet.getTransactionFinalMap().getTransactionsByAddressFromID(
                         recipientAcc.getShortAddressBytes(), null, 0, 5, false, false);
 
-                // .size сбрасывает Итератор на конец списка
+                // .size сбрасывае на конец списка
                 assertEquals(2, find.size());
 
 

@@ -136,11 +136,11 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
             case 1:
                 switch (rareLevel) {
                     case RARE_COMMON:
-                        return 5;
+                        return 4;
                     case RARE_UNCOMMON:
-                        return 3;
-                    case RARE_RARE:
                         return 1;
+                    case RARE_RARE:
+                        return 0;
                     case RARE_EPIC:
                         return 0;
                 }
@@ -157,13 +157,16 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
      * @param charValue characterictic value
      */
     private Long makeAsset(DCSet dcSet, Block block, RSend commandTX, int setID, int rareLevel, int charValue) {
-        int setCount = openBuster_1_getSetCount(setID, rareLevel);
-        charValue = setCount * charValue / (2 * Short.MAX_VALUE + 1);
+        int setCount = openBuster_1_getSetCount(setID, rareLevel) - 1;
+        charValue = setCount * charValue / (2 * Short.MAX_VALUE);
 
         Long assetBaseKey;
         switch (rareLevel) {
             case RARE_COMMON:
                 assetBaseKey = BlockChain.DEMO_MODE? 1050919L + charValue: null;
+                break;
+            case RARE_UNCOMMON:
+                assetBaseKey = BlockChain.DEMO_MODE? 1050923L: null;
                 break;
             default:
                 assetBaseKey = BlockChain.DEMO_MODE? 1050919L : null;
@@ -227,10 +230,20 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
         // GET RANDOM
         byte[] randomArray = getRandHash(block, commandTX, nonce);
         int index = 0;
-        actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-        actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-        actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
-        actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+        if (BlockChain.DEMO_MODE && block != null && block.heightBlock < 824784) {
+            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+            actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+        } else {
+            // 5,71% - Uncommon = 100% / 17,51
+            int rareVal = Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++]);
+            rareVal = (int)((long)rareVal * 10000L / 1751L / (long)(Short.MAX_VALUE * 2));
+            if (rareVal > 0)
+                actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+            else
+                actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_UNCOMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
+        }
 
     }
 

@@ -914,7 +914,7 @@ public class TestRecAsset {
         }
     }
 
-    //@Ignore Руслан тут опнаставил Игноров везде
+    //
 ///////TODO actualize the test
     @Test
     public void processMessageTransaction() {
