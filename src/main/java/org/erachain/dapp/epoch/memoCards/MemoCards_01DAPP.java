@@ -237,6 +237,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
             actions.add(makeAsset(dcSet, block, commandTX, 1, RARE_COMMON, Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++])));
         } else {
             // 5,71% - Uncommon = 100% / 17,51
+            // see in org.erachain.dapp.epoch.memoCards.MemoCards_01DAPPTest.tt
             int rareVal = Ints.fromBytes((byte) 0, (byte) 0, randomArray[index++], randomArray[index++]);
             rareVal = (int)((long)rareVal * 10000L / 1751L / (long)(Short.MAX_VALUE * 2));
             if (rareVal > 0)

@@ -6,10 +6,10 @@ import org.junit.Test;
 
 import java.util.Random;
 
-public class MemoCards_01DAPPTest extends TestCase {
+public class MemoCards_01DAPPTest {
 
     @Test
-    void tt() {
+    public void tt() {
 
         int ii = 100;
         Random rand = new Random();
