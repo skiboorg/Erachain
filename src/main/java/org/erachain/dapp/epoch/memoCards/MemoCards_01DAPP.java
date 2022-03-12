@@ -190,7 +190,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
         json.put("rare", rareLevel);
         json.put("set", setID);
         json.put("type", "card");
-        String description = assetBase.getDescription() + "\n" + json.toJSONString();
+        String description = assetBase.getDescription() + "\n@" + json.toJSONString();
 
         boolean iconAsURL = true;
         int iconType = 0;
