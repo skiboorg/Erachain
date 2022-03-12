@@ -12,7 +12,7 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
-import org.erachain.dapp.epoch.memoCards.MemeTheGatheringDAPP;
+import org.erachain.dapp.epoch.memeTheGathering.MemeTheGatheringDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.database.PairMap;
 import org.erachain.datachain.DCSet;

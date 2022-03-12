@@ -1,4 +1,4 @@
-package org.erachain.dapp.epoch.memoCards;
+package org.erachain.dapp.epoch.memeTheGathering;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;

@@ -1,4 +1,4 @@
-package org.erachain.dapp.epoch.memoCards;
+package org.erachain.dapp.epoch.memeTheGathering;
 
 import org.junit.Test;
 
