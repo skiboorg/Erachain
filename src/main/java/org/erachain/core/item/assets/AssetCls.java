@@ -12,7 +12,7 @@ import org.erachain.core.item.ItemCls;
 import org.erachain.core.item.persons.PersonCls;
 import org.erachain.core.transaction.Transaction;
 import org.erachain.core.transaction.TransactionAmount;
-import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
+import org.erachain.dapp.epoch.memoCards.MemeTheGatheringDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.database.PairMap;
 import org.erachain.datachain.DCSet;
@@ -637,8 +637,8 @@ public abstract class AssetCls extends ItemCls {
 
         if (maker.equals(ShibaVerseDAPP.MAKER))
             return ShibaVerseDAPP.viewDescription(this, description);
-        else if (maker.equals(MemoCardsDAPP.MAKER))
-            return MemoCardsDAPP.viewDescription(this, description);
+        else if (maker.equals(MemeTheGatheringDAPP.MAKER))
+            return MemeTheGatheringDAPP.viewDescription(this, description);
 
         return this.description;
     }

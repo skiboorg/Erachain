@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
-public class MemoCards_01DAPPTest {
+public class MemeTheGathering_01DAPPTest {
 
     @Test
     public void tt() {

@@ -13,8 +13,8 @@ import org.erachain.core.transaction.TransactionAmount;
 import org.erachain.dapp.epoch.DogePlanet;
 import org.erachain.dapp.epoch.LeafFall;
 import org.erachain.dapp.epoch.Refi;
-import org.erachain.dapp.epoch.memoCards.MemoCards_01DAPP;
-import org.erachain.dapp.epoch.memoCards.MemoCardsDAPP;
+import org.erachain.dapp.epoch.memoCards.MemeTheGathering_01DAPP;
+import org.erachain.dapp.epoch.memoCards.MemeTheGatheringDAPP;
 import org.erachain.dapp.epoch.shibaverse.ShibaVerseDAPP;
 import org.erachain.utils.FileUtils;
 import org.json.simple.JSONObject;
@@ -39,8 +39,8 @@ public abstract class DAPPFactory {
         }
 
         ShibaVerseDAPP.setDAPPFactory(stocks);
-        MemoCardsDAPP.setDAPPFactory(stocks);
-        MemoCards_01DAPP.setDAPPFactory(stocks);
+        MemeTheGatheringDAPP.setDAPPFactory(stocks);
+        MemeTheGathering_01DAPP.setDAPPFactory(stocks);
         Refi.setDAPPFactory(stocks);
 
     }
@@ -124,10 +124,10 @@ public abstract class DAPPFactory {
                 return Refi.make(txSend, dataStr);
             case ShibaVerseDAPP.ID:
                 return ShibaVerseDAPP.make(txSend, dataStr);
-            case MemoCardsDAPP.ID:
-                return MemoCardsDAPP.make(txSend, dataStr);
-            case MemoCards_01DAPP.ID:
-                return MemoCards_01DAPP.make(txSend, dataStr);
+            case MemeTheGatheringDAPP.ID:
+                return MemeTheGatheringDAPP.make(txSend, dataStr);
+            case MemeTheGathering_01DAPP.ID:
+                return MemeTheGathering_01DAPP.make(txSend, dataStr);
         }
 
         return null;
@@ -146,10 +146,10 @@ public abstract class DAPPFactory {
                 return DogePlanet.NAME;
             case ShibaVerseDAPP.ID:
                 return ShibaVerseDAPP.NAME;
-            case MemoCardsDAPP.ID:
-                return MemoCardsDAPP.NAME;
-            case MemoCards_01DAPP.ID:
-                return MemoCards_01DAPP.NAME;
+            case MemeTheGatheringDAPP.ID:
+                return MemeTheGatheringDAPP.NAME;
+            case MemeTheGathering_01DAPP.ID:
+                return MemeTheGathering_01DAPP.NAME;
         }
 
         return null;

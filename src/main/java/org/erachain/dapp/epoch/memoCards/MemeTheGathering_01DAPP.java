@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class MemoCards_01DAPP extends EpochDAPPjson {
+public class MemeTheGathering_01DAPP extends EpochDAPPjson {
 
     int WAIT_RAND = 3;
 
@@ -57,7 +57,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
     public static final int RARE_RARE = 2;
     public static final int RARE_EPIC = 3;
 
-    public MemoCards_01DAPP(String data, String status) {
+    public MemeTheGathering_01DAPP(String data, String status) {
         super(ID, MAKER, data, status);
     }
 
@@ -65,18 +65,18 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
         return NAME;
     }
 
-    public static MemoCards_01DAPP make(RSend txSend, String dataStr) {
+    public static MemeTheGathering_01DAPP make(RSend txSend, String dataStr) {
         // dataStr = null
         if (dataStr == null || dataStr.isEmpty())
             return null;
 
-        return new MemoCards_01DAPP(dataStr, "");
+        return new MemeTheGathering_01DAPP(dataStr, "");
 
     }
 
     /// PARSE / TOBYTES
 
-    public static MemoCards_01DAPP Parse(byte[] bytes, int pos, int forDeal) {
+    public static MemeTheGathering_01DAPP Parse(byte[] bytes, int pos, int forDeal) {
 
         // skip ID
         pos += 4;
@@ -103,7 +103,7 @@ public class MemoCards_01DAPP extends EpochDAPPjson {
             status = "";
         }
 
-        return new MemoCards_01DAPP(data, status);
+        return new MemeTheGathering_01DAPP(data, status);
     }
 
     ///////// COMMANDS
