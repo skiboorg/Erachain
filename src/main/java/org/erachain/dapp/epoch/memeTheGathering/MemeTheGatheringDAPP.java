@@ -36,7 +36,7 @@ public class MemeTheGatheringDAPP extends EpochDAPPjson {
     int WAIT_RAND = 3;
 
     static public final int ID = 1002;
-    static public final String NAME = "Memo Cards";
+    static public final String NAME = "Meme The Gathering base";
 
     final public static HashSet<PublicKeyAccount> accounts = new HashSet<>();
 
