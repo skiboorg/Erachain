@@ -32,22 +32,36 @@ public class BlocksResource {
     @Context
     HttpServletRequest request;
 
+    /**
+     * @param signature signature or height of block
+     * @return
+     */
     @GET
     @Path("/{signature}")
     public static String getBlock(@PathParam("signature") String signature) {
         //DECODE SIGNATURE
-        byte[] signatureBytes;
-        try {
-            signatureBytes = Base58.decode(signature);
-        } catch (Exception e) {
+        if (Base58.isExtraSymbols(signature))
             throw ApiErrorFactory.getInstance().createError(Transaction.INVALID_SIGNATURE);
-        }
 
-        Block block = Controller.getInstance().getBlock(signatureBytes);
+        Block block;
+
+        try {
+            Integer height = new Integer(signature);
+            block = Controller.getInstance().getBlockByHeight(height);
+        } catch (Exception e1) {
+            byte[] signatureBytes;
+            try {
+                signatureBytes = Base58.decode(signature);
+            } catch (Exception e) {
+                throw ApiErrorFactory.getInstance().createError(Transaction.INVALID_SIGNATURE);
+            }
+
+            block = Controller.getInstance().getBlock(signatureBytes);
+        }
 
         //CHECK IF BLOCK EXISTS
         if (block == null) {
-            throw ApiErrorFactory.getInstance().createError(Transaction.INVALID_BLOCK_HEIGHT);
+            throw ApiErrorFactory.getInstance().createError(Transaction.BLOCK_NOT_EXIST);
         }
 
         return block.toJson().toJSONString();
@@ -90,6 +104,7 @@ public class BlocksResource {
     }
 
     @GET
+    @Deprecated
     @Path("/height/{signature}")
     public static String getHeight(@PathParam("signature") String signature) {
         //DECODE SIGNATURE
@@ -143,6 +158,7 @@ public class BlocksResource {
     }
 
     @GET
+    @Deprecated
     @Path("/byheight/{height}")
     public static String getbyHeight(@PathParam("height") int height) {
         Block block;
