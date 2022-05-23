@@ -130,7 +130,7 @@ public class BlockChain {
     public static final int DEFAULT_WEB_PORT = NETWORK_PORT + 1;
     public static final int DEFAULT_RPC_PORT = NETWORK_PORT + 2;
 
-    public static final String DEFAULT_EXPLORER = "http://explorer.rupay.pro:" + DEFAULT_WEB_PORT;
+    public static final String DEFAULT_EXPLORER = "http://scan.rupay.pro:" + DEFAULT_WEB_PORT;
 
     //public static final String TIME_ZONE = "GMT+3";
     //
