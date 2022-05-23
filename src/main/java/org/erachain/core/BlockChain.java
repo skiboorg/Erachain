@@ -421,10 +421,7 @@ public class BlockChain {
      * Если есть начисления бонусов по ROYALTY то надо его задать
      */
     public static PublicKeyAccount FEE_ASSET_EMITTER = CLONE_MODE ?
-            new PublicKeyAccount(TEST_MODE ?
-                    "AnEbFWkPi9tG9ZPiqVmB4yAri9HBb5D7xUXYhRR58ye6" :
-                    "2Mh5ntMBForLYqwdjugRAGyzepR252ca6ChjQL6EXtYU")
-            : null;
+            Settings.FEE_ASSET_EMITTER : null;
 
 
     /**

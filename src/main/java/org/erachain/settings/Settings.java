@@ -52,7 +52,7 @@ public class Settings {
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
             // ADMIN GENESIS
-            Arrays.asList("7NUQumLwhh5uYo4qYqjZZ9zZjLnbEo967g", 100000000, 10000,
+            Arrays.asList(FEE_ASSET_EMITTER.getAddress(), 100000000, 10000,
                 Arrays.asList(
                         Arrays.asList(2000000, "7JXmTnbwuDnpqQ3NwxwzhfGgDk223j13eP"),
                         Arrays.asList(2000000, "785k4yEF76dx9NWgDQ2crps1HQZhes6PMw"),
