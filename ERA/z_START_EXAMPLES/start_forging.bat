@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=foilchain
+set app=rupay
 set jpars=
 set pars= -pass=123456789 -dbschain=mapdb
 

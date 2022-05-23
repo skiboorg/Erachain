@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=foilchain
-set task=foilchain-demo
+set app=rupay
+set task=rupay-demo
 
 set pars=-pass=1 -dbschain=mapdb -bugs=7 -datachainpath=dataDEMO -testnet=demo
 

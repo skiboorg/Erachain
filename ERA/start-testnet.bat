@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=foilchain
-set task=foilchain-test
+set app=rupay
+set task=rupay-test
 
 set pars=-pass=1 -seed=10:new:1 -datachainpath=dataTEST -testnet
 

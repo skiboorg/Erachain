@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=foilchain
+set app=rupay
 set xms=512
 set xmx=1024
 set pars=-nogui

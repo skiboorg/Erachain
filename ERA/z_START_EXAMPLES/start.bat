@@ -1,7 +1,7 @@
 @ECHO OFF
 
-set app=foilchain
-set task=foilchain
+set app=rupay
+set task=rupay
 
 set pars=
 

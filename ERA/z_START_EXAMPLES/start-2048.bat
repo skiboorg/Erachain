@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=foilchain
+set app=rupay
 set xms=2048
 set xmx=4096
 

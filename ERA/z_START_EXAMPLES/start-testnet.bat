@@ -1,5 +1,5 @@
 @ECHO OFF
-set app=foilchain
+set app=rupay
 set jpars=-Xms512m
 
 // USE new TESTNET chain
