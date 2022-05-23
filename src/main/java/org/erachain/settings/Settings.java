@@ -29,7 +29,7 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1620046800000L; // MAIN Net
+    public static final long DEFAULT_MAINNET_STAMP = 1653310460000L; // MAIN Net
     public static final long DEFAULT_DEMO_NET_STAMP = 1622206800000L; // DEMO Net
 
     public static String FORK_APP_Name = "RU PAY";
@@ -50,146 +50,35 @@ public class Settings {
 
     public final static PublicKeyAccount FEE_ASSET_EMITTER = new PublicKeyAccount("DW21hKJ9CPSWruV7gbuJLdS6AfyG7XWgoKtvst4oDimy");
 
-    /*
-    Evgenii Evgenii Kuzin, [18.04.21 19:32]
-
-
-Evgenii Evgenii Kuzin, [18.04.21 19:32]
-
-
-Evgenii Evgenii Kuzin, [18.04.21 19:33]
-7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5 - admin 1 000 000
-     */
     public final static List<List<Object>> HOLDERS = Arrays.asList(
-            Arrays.asList("7G3XruSQBGsAg4xSs15iFp6bNahRRxurh5", 1000000, 1000000), // ADMIN GENESIS
+            // ADMIN GENESIS
+            Arrays.asList("7NUQumLwhh5uYo4qYqjZZ9zZjLnbEo967g", 100000000, 10000,
+                Arrays.asList(
+                        Arrays.asList(2000000, "7JXmTnbwuDnpqQ3NwxwzhfGgDk223j13eP"),
+                        Arrays.asList(2000000, "785k4yEF76dx9NWgDQ2crps1HQZhes6PMw"),
+                        Arrays.asList(2000000, "7EUyXiVgyoSBDbCLpsWwbwHq53cV5vV5yn"),
+                        Arrays.asList(2000000, "7BhpbWxNAARTKXSp2XuA9cRbvLG2QxFf2v"),
+                        Arrays.asList(2000000, "7NGdEVNsCKtC9oajpsPSNVaDVVzYihAAHC"),
+                        Arrays.asList(2000000, "7CM2Sb13BtiTbhR6tGaAqEHMVdt7G88Bg6"),
+                        Arrays.asList(2000000, "7BhbFCHzsRR9xeu6aRMjQ3jFD6vr4uqPRP"),
+                        Arrays.asList(2000000, "7H18Z3GBZWXT3RtgXWsde9XjRHZybaN3Y4"),
+                        Arrays.asList(2000000, "7FeJGiWmi2iW9pXxd8et2vsSyyuJoqRH9d"),
+                        Arrays.asList(2000000, "76gCdnz6iuBECnRicfnQdqnJspAHPTRE4q"),
 
-            Arrays.asList("78cYzVXM69nsBBcf6hJ8Qpyqfkyy88Kv3N", 1000000), // Presale ICO
-            Arrays.asList("7M3NizXTkJARCnawqvYUHLE9YVfEeaZddy", 1000000), // Presale ICO
-            Arrays.asList("7FHmKh4VsUHQGeGegCLjEJZHCHvYmaZU8H", 1000000), // Presale ICO
-            Arrays.asList("78sz6NAP7GQ43qDH4yxk4mQBpEzSj35X2p", 1000000), // Presale ICO
-            Arrays.asList("75opvfza3w5VyPTKHtboGz8mkpFaA9No5W", 1000000), // Presale ICO
-            Arrays.asList("7QhwTrFctNVqiGHCeSDbvX7cdCSUEAL6dr", 1000000), // Presale ICO
-            Arrays.asList("73CgJma5jahiB2PvjZoLCAhQ8oFm4iHCfM", 1000000), // Presale ICO
-            Arrays.asList("7LYw7kK7SRAvaALJ6MAMUTYP2zgheQYyjN", 1000000), // Presale ICO
-            Arrays.asList("7EZw7aFLpkvHCGjmwiuJHiCiriFpFPhfRv", 1000000), // Presale ICO
-            Arrays.asList("7Dn7oga1VmA8iMGJT8HZRvCf8vdPXvkozK", 1000000), // Presale ICO
+                        Arrays.asList(2000000, "7HqTXzfae3FetgiW2Qo6bVJMD3UtRKhpjV"),
+                        Arrays.asList(2000000, "7GmzrHEysQYKbRshX7RNdQqJWEPgg6iqek"),
+                        Arrays.asList(2000000, "7864yyUK5TWgqkTFdTPfHL8VaLWeFPHTAp"),
+                        Arrays.asList(2000000, "73ZoS662Uf9xFv6dzpDkWNUmw348YDaVL3"),
+                        Arrays.asList(2000000, "7RL8hoSNVjMXYN7ywhFsWTjbF4GJeUabi9"),
+                        Arrays.asList(2000000, "7C6pBaFZ34iQ2EWVJzR4j5u3RACc5Cw3hU"),
+                        Arrays.asList(2000000, "7AraoXqaoe5oMbX8RYN35kkAts26DGaJN4"),
+                        Arrays.asList(2000000, "7DVFxSzKwrppFrb3fugb98bSeTfZzXgxLc"),
+                        Arrays.asList(2000000, "7HGrcBu2AVtgqnbyiVGWvN8qTgkNQ9D2GR"),
+                        Arrays.asList(2000000, "7G9AjVsSVx2BjpJFy9YPofSG3UwDREt9zt"),
 
-            Arrays.asList("7Gsyi9v4k94QGhjYocTe8SiVvpfUGgF229", 1000000), // Presale ICO
-            Arrays.asList("7LxXuGwDUHjjQFjFFUYTih49S5EVHHBXJD", 1000000), // Presale ICO
-            Arrays.asList("7AQmXkyf5VXXCXYcSKNPsRnjirPB6cYEou", 1000000), // Presale ICO
-            Arrays.asList("7DkLcPZVziG9LKaGYW3UFZ8pKbzTLyApdC", 1000000), // Presale ICO
-            Arrays.asList("7GFXSC71vDPzYnfgoV2MqtBdEXFnHfdoD3", 1000000), // Presale ICO
-            Arrays.asList("7D9SQF1GpTs3KRHPEFfGLmtwvSzpmrHy33", 1000000), // Presale ICO
-            Arrays.asList("7PfkTgFtPWtWfeHDiBTLfGFjZ8sNp2nZ5F", 1000000), // Presale ICO
-            Arrays.asList("7RJDsh6EMnLApRHCTrcRdLtkiv3HnhZjCi", 1000000), // Presale ICO
-            Arrays.asList("7N8TqPS91cWDwwjN6iodJivmk2PBbAu4Ht", 1000000), // Presale ICO
-            Arrays.asList("7Euk3sjYrVsnTJtUkemV9aiE3TwDBh6fWs", 1000000), // Presale ICO
-
-            Arrays.asList("7RvLUrfq1theCpqQ4KT1iAvduwD77yiTSW", 1000000), // Binance IDO
-            Arrays.asList("7LgJphKaC9BNQLnvHL47itzxD6aVZy8dFt", 1000000), // Binance IDO
-            Arrays.asList("79eB52TX21TJAW4JkFTrJMZcgEeGnwuEP5", 1000000), // Binance IDO
-            Arrays.asList("7AkpW5KpBPbJX1Sxzgg8ChSUF1376SdsH5", 1000000), // Binance IDO
-            Arrays.asList("7Dcfnigh9EbzjKMCoAz17dm4pdGH6qjSm5", 1000000), // Binance IDO
-            Arrays.asList("7LEP97NL6mAbGgD6wjogPXDKpWPEVyTrH7", 1000000), // Binance IDO
-            Arrays.asList("75mKLwRoCy9H2XrZ8Kc76sfbLc377DrfF2", 1000000), // Binance IDO
-            Arrays.asList("7BGoK2DLDuRy7jLnGE3h69LCn2Q38Ucbjh", 1000000), // Binance IDO
-            Arrays.asList("7QZUmCtnckXcZBviJ5oSq7gCVNCC824w6E", 1000000), // Binance IDO
-            Arrays.asList("75sn62qdVXXEw6qResQtcHLgBvuSKWoeXm", 1000000), // Binance IDO
-
-            // Governance and development
-            Arrays.asList("7PRTfkQf9uB2rJW1fvsxhUR2TP9iFeVqF9", 14400000, 0,
-                    Arrays.asList(
-                            Arrays.asList(600000, "7RmbtrpsAWwiRothUj1en6XCtq1K1Nn2nH"),
-                            Arrays.asList(600000, "799RTqrmrWieKYcqPBtgt6kgBzKLr1Arji"),
-                            Arrays.asList(600000, "79sGZzJAWpfzsHBrES346S68sYS64mHS71"),
-                            Arrays.asList(600000, "7DnypMBhK365tdbjgnhvBxkVt2AsQeXVRP"),
-                            Arrays.asList(600000, "7KGpLnf53RFDC6CaV6CJWsQi8BbjgGuzkG"),
-                            Arrays.asList(600000, "73ziLRA9zkMhWwYQJwh4vLABmf274NuEB8"),
-                            Arrays.asList(600000, "7NDX7s25ZNmHYTPEH6fvmhrKDaBYQZDoZC"),
-                            Arrays.asList(600000, "7Hss4ngAGs5YrLc6pn8t83m1RgEZWLEEQq"),
-                            Arrays.asList(600000, "7RVTMoNxp9YrdQJ493fDY63KCF8tND8H2X"),
-                            Arrays.asList(600000, "77mCKgtBgM4p1bdX8Ym5L79fsMkDJV4nGD"),
-                            Arrays.asList(600000, "7F7q1raAczKnjupY7oFTdcx37KJ7rJfD9K"),
-                            Arrays.asList(600000, "7GyrtYLNMt9t31VqaVuFxeA6Yb6RqnA4JT"),
-                            Arrays.asList(600000, "7MuvguyQLBA4XqCiEUhPor4KG2rRJVZx5a"),
-                            Arrays.asList(600000, "7DSq7fNPghvUCgaz92XFwV6G2Pxc96Uz91"),
-                            Arrays.asList(600000, "73MTRF6R5irAmzGmBdcqnvKUQrtH8dsp9R"),
-                            Arrays.asList(600000, "77MWxrB6BuykCrZrsTqmfgfC3vGTgwFQYS"),
-                            Arrays.asList(600000, "7EyxQxQwuwtbVuya1ZNjCssetsGMFq9vwU"),
-                            Arrays.asList(600000, "7RG5RTbvwvLXsC13vyMHTWurH9uCDsKKkQ"),
-                            Arrays.asList(600000, "7Cs26RSdymfSYj4xF8pu5H8QFfJcEbnNcc"),
-                            Arrays.asList(600000, "7BnFb1tNbLwJijVbyWGUwiqnzajvMFY78y"),
-                            Arrays.asList(600000, "7DVy6Jrep6pqLL6sNfnP2bUVNknb8b3PZG"),
-                            Arrays.asList(600000, "73Q9MDPe2nf1hBzA4BrZiojAhZ4oZFfm1T"),
-                            Arrays.asList(600000, "73MYmBvDmg2Rpk2LMsBG2PtasYPBKeHomD"),
-                            Arrays.asList(600000, "7DSfArGqqD7drmQjpqr1SoXKPojhacLWHh")
-                    )),
-
-            Arrays.asList("79RDQvBkoBgo4LkmiwFXLLK96rHKQhDkzS", 1000000),
-            Arrays.asList("7AC8XtjivSHiH9oQc7gebv7nSPmRusSANV", 1000000),
-            Arrays.asList("7SG8UyJoUvJdp6sxS5UKwyPzVxGc2oEAZd", 1000000),
-            Arrays.asList("77qgDxWoP7SC1yrTSbK2Sk3uNPhMGin4V6", 1000000),
-            Arrays.asList("7PKFgMwmTvkgc3VZxVuiWr3aTUqNc6wCWJ", 1000000),
-            Arrays.asList("7Mwur8LDAWXinQd8BfxmskppRiJAVrzsxa", 1000000),
-            Arrays.asList("7NwssCgT4nN5LSmxMWTeDsVHpUK6VKoZt2", 1000000),
-            Arrays.asList("7MR9BQfWhqF1XfteJKo9RV4e3yn7nLawN9", 1000000),
-            Arrays.asList("7A9SFsHQJsUuKj7YBU4jEim67qpakCYrzz", 1000000),
-            Arrays.asList("7QmQfkHiXqb6ag4dDk39jtwzbHwh4LFjhH", 1000000),
-
-            // Staking rewards pool 2021
-            Arrays.asList("79ZyZzmNj7sgH59H4jH5KdJonk57CNDxnG", 1000000),
-            Arrays.asList("7RyrHxSiUqAQvSR8SqLJ1F9rjw9A3BLazb", 1000000),
-            Arrays.asList("7Heoxd4jhMppGiKSt68Aj9AyMpeQ8oUv2q", 1000000),
-            Arrays.asList("7HsB9inmcW7TktKxQ4LEsi6VGDMMFKEiiJ", 1000000),
-            Arrays.asList("73AdDfXpiE9unN7MGVjF74skzVU6AYTRvk", 1000000),
-            Arrays.asList("7GBAzMTp8LK8pJVyVRAEjuSkeTvMVdRihJ", 1000000),
-            Arrays.asList("7HTBm78z3cbRtveHg5LRzqe9LVN4foneW6", 1000000),
-            Arrays.asList("7KvBpyxHVfkuTbbutBppFJ9gWf2GAQ7DoD", 1000000),
-            Arrays.asList("7H7UXrhjDHfa3MwhGGAaD31Ta59BfuQ3Z9", 1000000),
-            Arrays.asList("7Ny35cioHpx72AtQ1gSRk6rBqq5joUdmyt", 1000000),
-
-            // founder and Co-faunders
-            Arrays.asList("79dSdaY9qFenXUfXzRaiWDuJnoNZw9xjzn", 9600000, 0,
-                    Arrays.asList(
-                            Arrays.asList(600000, "7RDoBrJbk1sUFFHCP3qLVFjQ8wYYQqni9z"),
-                            Arrays.asList(600000, "7HCeSCTsKfzW6fqd8Q1HiY5UDKdMBnyqNw"),
-                            Arrays.asList(600000, "7PXZvW7gUR8F8zBdK6Aay2nk3SZMEvcdVd"),
-                            Arrays.asList(600000, "7GykmeiME8SAEofGhzMnqDeX4xrQmczrbS"),
-                            Arrays.asList(600000, "75hNAQuVmeK5JujJyTkb3zMEQYx21bkaEz"),
-                            Arrays.asList(600000, "78671KhRVfsn93HyhEUoyEiFFFn5oekYta"),
-                            Arrays.asList(600000, "7QMRMdmz9VF2SmjfPGWesmnsqo8Q5a4HPb"),
-                            Arrays.asList(600000, "7Q9P8f7fsMpA4NUZFWyb7on4PC14VG98em"),
-                            Arrays.asList(600000, "7LdXnToCaVpuNX8RNgu6gMGPV6EgzKkDjV"),
-                            Arrays.asList(600000, "7DQTzYvRogxZod1p2BNq4Q5eHj7AD3asdC"),
-                            Arrays.asList(600000, "7EhMaD3TRusQyjDzydjbdbeLMrm4jvnuZR"),
-                            Arrays.asList(600000, "7KpNx2xbDXiytQz5DDiHHJS5e3Dy3nVmBp"),
-                            Arrays.asList(600000, "73tTksVMX6knZtPqKpbtokADWenYNrtN4b"),
-                            Arrays.asList(600000, "7B3JXw7MshpQyy8co4NVB9NdWyRa18Yggq"),
-                            Arrays.asList(600000, "7APZjduaFX14CkfbzpU1WeZpk6APGePpJ2"),
-                            Arrays.asList(600000, "74a92GxQ2qJK6rtMiBAVsSeVQ2LZSjkz1R")
-
-                    )),
-            Arrays.asList("7Rg6NTC7Xfgs9L245y2sCWCJxvnEH7w6Vz", 1000000),
-            Arrays.asList("7CMETneDqG1ZvKfNjLztcpzUqY79qzVT3V", 1000000),
-            Arrays.asList("7CyvhYymFC4cUq4BxnfQ5Z848fU5xb9kw7", 1000000),
-            Arrays.asList("73zje3D3FbvZ34w8YK2LWMFo4UmYWHidnt", 1000000),
-            Arrays.asList("7BbKsfhEzffYsfKUyQePazTYNQwnYpLiJD", 1000000),
-
-            // Marketing and Partnership
-            Arrays.asList("7LJr2XRqb9iyRYrGQgqgYDd5j1P4ZGphpw", 1000000),
-            Arrays.asList("7FeEBwyDCTFyqK9eQcfnmUExtrhirAjSKr", 1000000),
-            Arrays.asList("7JpK4fcG2apy1CHyZ7DeGinC5EuMaKYr6f", 1000000),
-            Arrays.asList("739VSVdoGdGSgnoRKEkcutfxgGjEZ6VUHk", 1000000),
-            Arrays.asList("7S4E3iQra6cNuxjmTBKuzpxLW2pCaZtUoZ", 1000000),
-            Arrays.asList("7DX3CDKE1WoDR78gH4BrFQxdMHYLhCLd7R", 1000000),
-            Arrays.asList("7L7XVkV9mW2RSiq1FJ1pLvgUKUChC43Eqa", 1000000),
-            Arrays.asList("7EkwWUEChUktAsbRjp6srnC17hiJWFP8NR", 1000000),
-            Arrays.asList("74hr4koDVieYEW4Q8RHC8eeyZw8WEhnnTN", 1000000),
-            Arrays.asList("7B1fEsXNdkqn2gqmbmo2cFJyjAGdN87VWY", 1000000),
-
-            // ERACHAIN freeze
-            Arrays.asList("7G1G45RX4td59daBv6PoN84nAJA49NZ47i", 4000000),
-            Arrays.asList("7QTDHp15vcHN3F4zP2BTcDXJkeotzQZkG4", 6000000)
+                        Arrays.asList(2000000, "73JX1CjKaTxtm1DaH3gog8XKZ1hYWjrwPS")
+                        )
+            )
 
     );
 
