@@ -4,7 +4,7 @@
   // Blocks period [sec], minumum: 3, default: 30
   // "blockPeriod": 30,
   // external Block Explorer
-  "explorer": "http://explorer.foil.network:9077",
+  "explorer": "http://explorer.rupay.pro:9077",
 
   "cloneChain": "Chain Licence Agreement.pdf",
 
