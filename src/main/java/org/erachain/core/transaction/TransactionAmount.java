@@ -393,10 +393,10 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
         if (feeKoeff == BigDecimal.ZERO) {
             assetFee = assetFeeMin;
         } else {
-            assetFee = amount.abs().multiply(feeKoeff).setScale(asset.getScale(), RoundingMode.DOWN);
+            assetFee = amount.abs().multiply(feeKoeff).setScale(asset.getScale(), RoundingMode.UP);
             if (assetFee.compareTo(assetFeeMin) < 0) {
                 // USE MINIMAL VALUE
-                assetFee = assetFeeMin.setScale(asset.getScale(), RoundingMode.DOWN);
+                assetFee = assetFeeMin.setScale(asset.getScale(), RoundingMode.UP);
             }
         }
 

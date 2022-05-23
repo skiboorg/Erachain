@@ -396,7 +396,7 @@ public class BlockChain {
      */
     public static final HashMap<Long, BigDecimal> ASSET_TRANSFER_PERCENTAGE_TAB = new HashMap<>();
     /// default = 0.1%
-    public static final BigDecimal ASSET_TRANSFER_PERCENTAGE_DEFAULT = new BigDecimal("0.0025");
+    public static final BigDecimal ASSET_TRANSFER_PERCENTAGE_DEFAULT = new BigDecimal("0.01");
 
     /**
      * минимальная комиссия для актива - абсолютное значение. Если не задано, то и процент комиссии не берется!
@@ -406,7 +406,7 @@ public class BlockChain {
      * какие проценты сжигаем при переводе активов - Ключ : процент
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE_TAB = new HashMap<>();
-    public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = new BigDecimal("0.5");
+    public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = BigDecimal.ZERO; //new BigDecimal("0");
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 0; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
