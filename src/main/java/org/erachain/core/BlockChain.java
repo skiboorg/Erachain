@@ -147,7 +147,7 @@ public class BlockChain {
     /**
      * минимальное расстояние для сборки блоков
      */
-    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 10 : CLONE_MODE ? 30 : 40;
+    public static final int REPEAT_WIN = DEMO_MODE ? 10 : TEST_MODE ? 5 : ERA_COMPU_ALL_UP ? 10 : CLONE_MODE ? 18 : 40;
 
     // RIGHTs
     public static final int GENESIS_ERA_TOTAL = 100000000;
