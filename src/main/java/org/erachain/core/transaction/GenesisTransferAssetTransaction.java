@@ -257,10 +257,6 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
 
         long key = this.key;
 
-        if (recipient.equals("76ACGgH8c63VrrgEw1wQA4Dno1JuPLTsWe")) {
-            boolean test = true;
-        }
-
         //UPDATE RECIPIENT OWN or RENT
         this.recipient.changeBalance(this.dcSet, false, false, key, this.amount,
                 false, false, false);
@@ -287,7 +283,7 @@ public class GenesisTransferAssetTransaction extends GenesisRecord {
 
         } else {
             // CREATOR update
-            if (key == FEE_KEY) {
+            if (key == FEE_KEY && !BlockChain.FEE_ASSET_EMITTER.equals(recipient)) {
                 BlockChain.FEE_ASSET_EMITTER.changeBalance(this.dcSet, true, false, key, this.amount,
                         false, false, false);
 
