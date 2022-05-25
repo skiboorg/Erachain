@@ -332,7 +332,7 @@ public class IssuePersonRecord extends IssueItemRecord {
 
         if (isPersonAlive && height > BlockChain.START_ISSUE_RIGHTS) {
             if (true) {
-                // FOIL PROTOCOL
+                // RUPAY PROTOCOL
                 BigDecimal balERA = this.creator.getBalanceUSE(RIGHTS_KEY, dcSet);
                 int resultERA = BlockChain.VALID_PERSON_REG_ERA(this, height, balERA, null);
                 if (resultERA > 0) {

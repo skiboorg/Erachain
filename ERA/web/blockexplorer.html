@@ -520,7 +520,7 @@ button.white-bgc[disabled]:focus,
                 if (data.aTs[key].accountBalance != '0.00000000') {
                     output += '<b>';
                 }
-                output += addCommas(data.aTs[key].accountBalance) + ' FOIL';
+                output += addCommas(data.aTs[key].accountBalance) + ' RUPAY';
 
                 output += '</table>';
 
@@ -1001,7 +1001,7 @@ button.white-bgc[disabled]:focus,
                 output += '<br><br><b>AT Type:</b> ' + data.at.type;
                 output += '<br><br><b>Description:</b> ' + fformat(data.at.description);
                 output += '<br><br><b>Tags:</b> ' + fformat(data.at.tags);
-                output += '<br><br><b>Min Activation Amount:</b> ' + data.at.minActivation + ' FOIL';
+                output += '<br><br><b>Min Activation Amount:</b> ' + data.at.minActivation + ' RUPAY';
                 output += '<br><br><b>Dead:</b> ' + data.at.state.dead;
                 output += '<br><br><b>Frozen:</b> ' + data.at.state.frozen;
 
@@ -1019,7 +1019,7 @@ button.white-bgc[disabled]:focus,
                     output += '<b>No</b>';
                 }
                 output += '</table>';
-                output += '<br><br><font size="+1"><b>Balance:</b> ' + addCommas(data.at.accountBalance) + ' FOIL</font>';
+                output += '<br><br><font size="+1"><b>Balance:</b> ' + addCommas(data.at.accountBalance) + ' RUPAY</font>';
                 output += '<br><br>';
             }
 
@@ -1082,7 +1082,7 @@ button.white-bgc[disabled]:focus,
                         } else {
                             output += '<td><font color="dimgray">' + data[i].block.generator + '</font></td>';
                         }
-                        output += '<td>' + addCommas(data[i].block.fee) + ' <font size="-2">MVOLT</font>' + '</td>';
+                        output += '<td>' + addCommas(data[i].block.fee) + ' <font size="-2">OLF</font>' + '</td>';
 
                         if (data[i].hasOwnProperty('balance')) {
                             output += '<td>' + printBalance(data[i].balance) + '</td>';
@@ -1230,7 +1230,7 @@ button.white-bgc[disabled]:focus,
                         } else {
                             output += '<td rowspan=2><a href=?address=' + data[i].attransaction.creator + get_lang() + '>' + data[i].attransaction.creator + '</a></td>';
                         }
-                        output += '<td>' + addCommas(data[i].atTransaction.amount) + ' <font size="-2">FOIL</font>';
+                        output += '<td>' + addCommas(data[i].atTransaction.amount) + ' <font size="-2">RUPAY</font>';
 
                         if (data[i].atTransaction.recipient == data.address) {
                             output += '<td><font color="dimgray">' + data[i].atTransaction.recipient + '</font></td>';
@@ -1831,8 +1831,8 @@ button.white-bgc[disabled]:focus,
                       <div class="menu"><span class="glyphicon glyphicon-edit"></span><a href="/index/blog.html">Blog</a></div></a></div>
                   <div class="col-sm-4 col-xs-6"><a href="/index/namestorage.html">
                       <div class="menu"><span class="glyphicon glyphicon-file"></span><a href="/index/namestorage.html">NameStorage</a></div></a></div>
-					<div class="col-sm-4 col-xs-6"><a href="/index/hashtag.html?hashtag=FOIL">
-                      <div class="menu"><span class="glyphicon glyphicon-fire"></span><a href="/index/hashtag.html?hashtag=FOIL">Hashtag</a></div></a></div>
+					<div class="col-sm-4 col-xs-6"><a href="/index/hashtag.html?hashtag=RUPAY">
+                      <div class="menu"><span class="glyphicon glyphicon-fire"></span><a href="/index/hashtag.html?hashtag=RUPAY">Hashtag</a></div></a></div>
                 </div>
               </div>
             </div>

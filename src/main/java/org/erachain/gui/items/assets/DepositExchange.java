@@ -115,7 +115,7 @@ public class DepositExchange extends IconPanel {
         // http://www.mkyong.com/java/how-to-send-http-request-getpost-in-java/
         //String url_string = "https://api.face2face.cash/apipay/index.json";
         //String urlGetRate = "https://api.face2face.cash/apipay/get_rate.json/10/9/1";
-        //String urlGetHistory = "https://api.face2face.cash/apipay/history.json/FOIL/78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5";
+        //String urlGetHistory = "https://api.face2face.cash/apipay/history.json/RUPAY/78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5";
         //String urlGetDetailsTest = "https://api.face2face.cash/apipay/get_uri_in.json/2/3/12/78JFPWVVAVP3WW7S8HPgSkt24QF2vsGiS5/1000";
 
         JSONObject jsonObject;

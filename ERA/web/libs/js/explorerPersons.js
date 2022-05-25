@@ -270,11 +270,11 @@ function person(data, forPrint) {
     output += '<h4>' + item.Label_Gender + ': &nbsp&nbsp<b> ' + item.gender + '</b></h4>';
 
     if (data.era_balance_a) {
-        output += '<h4>FOIL: &nbsp&nbsp<u>A</u>:<b>' + data.era_balance_a + '</b>&nbsp&nbsp<u>B</u>:<b>'
+        output += '<h4>RUPAY: &nbsp&nbsp<u>A</u>:<b>' + data.era_balance_a + '</b>&nbsp&nbsp<u>B</u>:<b>'
             + data.era_balance_b + '</b>&nbsp&nbsp<u>C</u>:<b>' + data.era_balance_c + '</b></h4>';
     }
     if (data.compu_balance) {
-        output += '<h4>MVOLT: &nbsp&nbsp <b>' + data.compu_balance + '</b></h4>';
+        output += '<h4>OLF: &nbsp&nbsp <b>' + data.compu_balance + '</b></h4>';
     }
 
     if (data.lia_balance_a && !forPrint) {
