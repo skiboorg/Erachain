@@ -218,11 +218,6 @@ public class GenesisBlock extends Block {
 
         AssetVenture asset;
 
-        asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, AssetCls.FEE_NAME,
-                null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);
-        transactions.add(new GenesisIssueAssetTransaction(asset));
-
-
         if (BlockChain.ERA_COMPU_ALL_UP) {
             for (String name : BlockChain.NOVA_ASSETS.keySet()) {
                 asset = new AssetVenture((byte) 0, itemAppData, creator, name,
