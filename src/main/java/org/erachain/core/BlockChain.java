@@ -272,7 +272,7 @@ public class BlockChain {
     public static final int MINIMAL_ISSUE_FEE_ACCOUNTING_ASSET = BlockChain.MINIMAL_ISSUE_FEE / 5;
     public static final int MINIMAL_ISSUE_FEE_IMPRINT = BlockChain.MINIMAL_ISSUE_FEE / 20;
 
-    public static final BigDecimal FORGE_BONUS = new BigDecimal("0.00001245");
+    public static final BigDecimal FORGE_BONUS = BigDecimal.ZERO; //new BigDecimal("0.00001245");
 
     /**
      * Включает новые права на выпуск персон и на удостоверение публичных ключей и увеличение Бонуса персоне

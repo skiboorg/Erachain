@@ -1871,23 +1871,7 @@ public class Block implements Closeable, ExplorerJsonLine {
                     this.getBonusFee().unscaledValue().longValue());
         }
 
-        if (BlockChain.ROBINHOOD_USE) {
-            // find rich account
-            byte[] rich = Account.getRichWithForks(dcSet, Transaction.FEE_KEY);
-
-            if (!this.creator.equals(rich)) {
-                emittedFee = this.blockHead.totalFee >> 1;
-
-                Account richAccount = new Account(rich);
-                richAccount.changeBalance(dcSet, !asOrphan, false, Transaction.FEE_KEY,
-                        new BigDecimal(emittedFee).movePointLeft(BlockChain.FEE_SCALE), false, false, true);
-            } else {
-                emittedFee = this.blockHead.emittedFee;
-            }
-
-        } else {
-            emittedFee = this.blockHead.emittedFee;
-        }
+        emittedFee = this.blockHead.emittedFee;
 
         //UPDATE GENERATOR BALANCE WITH FEE
         if (this.blockHead.totalFee > 0) {
@@ -1948,7 +1932,7 @@ public class Block implements Closeable, ExplorerJsonLine {
             }
 
         } else if (BlockChain.CLONE_MODE) {
-            if (heightBlock > 788640) {
+            if (heightBlock > 0) {
                 // EMIT
                 if (earnedAllAssets == null)
                     earnedAllAssets = new HashMap<>();
