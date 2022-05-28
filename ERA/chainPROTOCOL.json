@@ -28,6 +28,12 @@
   "assets": [
     // **** ASSET KEY, NAME, QUALITY, CREATOR ****
     /////// SPECIAL
+    [
+      100,
+      "OLF",
+      25000000,
+      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+    ],
 
     /////// CRYPTOCURRENCY
     [

@@ -32,12 +32,8 @@ ext {
     springbootVersion = '2.0.5.RELEASE'
 }
 
-//String versionEra = "4.11.08-${git.head().abbreviatedId}"
-String versionEra = "2022.03.05"
-archivesBaseName = 'foilnetwork'
+String versionEra = "2022.05 01"
 group 'org.erachain'
-//version versionEra
-sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()

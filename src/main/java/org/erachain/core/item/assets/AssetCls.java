@@ -57,8 +57,8 @@ public abstract class AssetCls extends ItemCls {
     public static final String ERA_DESCR = "";
 
     public static final long FEE_KEY = 2L;
-    public static final String FEE_ABBREV = "OLF"; // COMP (main rights units)
-    public static final String FEE_NAME = "OLF";
+    public static final String FEE_ABBREV = "GAS"; // COMP (main rights units)
+    public static final String FEE_NAME = "GAS";
     public static final String FEE_DESCR = "";
 
     public static final long AS_KEY = 3L;
@@ -71,10 +71,7 @@ public abstract class AssetCls extends ItemCls {
     public static final String LIA_NAME = "LIA";
     public static final String LIA_DESCR = "";
 
-    public static final long BAL_KEY = 7L; // see in chainPROTOCOL.json
-    public static final String BAL_ABBREV = "BAL";
-    public static final String BAL_NAME = "BAL";
-    public static final String BAL_DESCR = "";
+    public static final long BAL_KEY = 0L; // 7L; // see in chainPROTOCOL.json
 
     public static final long BTC_KEY = 12L;
     public static final long USD_KEY = 1840L;
