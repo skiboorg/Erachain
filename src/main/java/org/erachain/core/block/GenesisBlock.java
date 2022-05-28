@@ -167,7 +167,7 @@ public class GenesisBlock extends Block {
             case (int) AssetCls.ERA_KEY:
                 return new AssetVenture(itemAppData, CREATOR, AssetCls.ERA_NAME, icon, image, AssetCls.ERA_DESCR, 0, 8, 0L);
             case (int) AssetCls.FEE_KEY:
-                return new AssetVenture(itemAppData, CREATOR, AssetCls.FEE_NAME, icon, image, AssetCls.FEE_DESCR, 0, 8, 0L);
+                return new AssetVenture(itemAppData, BlockChain.FEE_ASSET_EMITTER, AssetCls.FEE_NAME, icon, image, AssetCls.FEE_DESCR, 0, 8, 25000000L);
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class GenesisBlock extends Block {
             // MAKE OLD STYLE ASSET with DEVISIBLE:
             // PROP1 = 0 (unMOVABLE, SCALE = 8, assetTYPE = 1 (divisible)
             asset = new AssetVenture((byte) 0, itemAppData, asset.getMaker(), asset.getName(),
-                    asset.getIcon(), asset.getImage(), asset.getDescription(), AssetCls.AS_INSIDE_ASSETS, 8, 0L);
+                    asset.getIcon(), asset.getImage(), asset.getDescription(), AssetCls.AS_INSIDE_ASSETS, asset.getScale(), asset.getQuantity());
             transactions.add(new GenesisIssueAssetTransaction(asset));
         }
 
@@ -225,9 +225,6 @@ public class GenesisBlock extends Block {
                 transactions.add(new GenesisIssueAssetTransaction(asset));
             }
         } else {
-            asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "OLF",
-                    null, null, "", AssetCls.AS_INSIDE_ASSETS, 5, 25000000L);
-            transactions.add(new GenesisIssueAssetTransaction(asset));
 
             asset = new AssetVenture((byte) 0, itemAppData, BlockChain.FEE_ASSET_EMITTER, "BTC",
                     null, null, "", AssetCls.AS_INSIDE_ASSETS, 8, 0L);

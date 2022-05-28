@@ -380,12 +380,12 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
      */
     public static Tuple2<BigDecimal, BigDecimal> calcSendTAX(int height, Long key, AssetCls asset, BigDecimal amount) {
 
-        if (key == null || asset == null || amount == null)
+        if (key == null || asset == null || amount == null || key > 10000)
             return null;
 
         BigDecimal assetFeeMin = BlockChain.ASSET_TRANSFER_PERCENTAGE_MIN(height, key);
         if (assetFeeMin == null) {
-            return null;
+            assetFeeMin = BigDecimal.ZERO;
         }
 
         BigDecimal feeKoeff = BlockChain.ASSET_TRANSFER_PERCENTAGE(height, key);
@@ -399,6 +399,9 @@ public abstract class TransactionAmount extends Transaction implements Itemable{
                 assetFee = assetFeeMin.setScale(asset.getScale(), RoundingMode.UP);
             }
         }
+
+        if (assetFee == BigDecimal.ZERO)
+            return null;
 
         BigDecimal burnedFeeKoeff = BlockChain.ASSET_BURN_PERCENTAGE(height, key);
         BigDecimal assetBurned = burnedFeeKoeff == BigDecimal.ZERO ? BigDecimal.ZERO

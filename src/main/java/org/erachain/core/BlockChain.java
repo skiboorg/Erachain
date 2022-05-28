@@ -606,34 +606,10 @@ public class BlockChain {
             }
 
             // FIAT CURRENCIES
-            // UAH
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(82L, new BigDecimal("0.25"));
-            // KZT
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(83L, new BigDecimal("0.25"));
-            // KFS
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(84L, new BigDecimal("0.25"));
-            // BYN
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(85L, new BigDecimal("0.25"));
-            // TRY
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(86L, new BigDecimal("0.25"));
-            // SGN
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(87L, new BigDecimal("0.25"));
-            // AUD
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(88L, new BigDecimal("0.25"));
-            // CFH
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(89L, new BigDecimal("0.25"));
-            // GBP
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(90L, new BigDecimal("0.25"));
-            // JPY
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(91L, new BigDecimal("0.25"));
             // RUB
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(92L, new BigDecimal("0.25"));
-            // CNY
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(93L, new BigDecimal("1.5"));
-            // EUR
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(94L, new BigDecimal("0.25"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(1643L, new BigDecimal("0.25"));
             // USD
-            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(85L, new BigDecimal("0.25"));
+            ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(1840L, new BigDecimal("0.05"));
 
             // процент сжигания - если тут не задано то берется 1/2
             //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);

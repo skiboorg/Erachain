@@ -28,43 +28,37 @@
   "assets": [
     // **** ASSET KEY, NAME, QUALITY, CREATOR ****
     /////// SPECIAL
-    [
-      100,
-      "OLF",
-      25000000,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
-    ],
 
     /////// CRYPTOCURRENCY
     [
       12,
       "BTC",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       14,
       "ETH",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       16,
       "BNB",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       18,
       "DOGE",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       20,
       "LTC",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     /////// FIATCURRENCY
     // https://www.iban.ru/currency-codes
@@ -72,86 +66,86 @@
       1949,
       "TRY",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1702,
       "SGD",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1036,
       "AUD",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1756,
       "CHF",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1826,
       "GBP",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1392,
       "JPY",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1643,
       "RUB",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1156,
       "CNY",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1978,
       "EUR",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       1840,
       "USD",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     /////// COMMODITY
     [
       3003,
       "GOLD",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       3103,
       "OIL",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       3105,
       "GAS",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ],
     [
       3107,
       "BRENT",
       0,
-      "75KN6cA1Rv4snTCnNyuT46ZpVKYib8nUGV"
+      "7PsEDvVphCpXwk7NrZyAyHNR7d6Fp57Xcy"
     ]
   ],
 

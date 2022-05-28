@@ -48,7 +48,7 @@ public class Settings {
     // FOR TEST by default
     public static long genesisStamp = DEFAULT_MAINNET_STAMP;
 
-    public final static PublicKeyAccount FEE_ASSET_EMITTER = new PublicKeyAccount("DW21hKJ9CPSWruV7gbuJLdS6AfyG7XWgoKtvst4oDimy");
+    public final static PublicKeyAccount FEE_ASSET_EMITTER = new PublicKeyAccount("EdV2aazKgRd1yPUnCyfMkcqGNiMW5uhanyqqrQF3Vv1x");
 
     public final static List<List<Object>> HOLDERS = Arrays.asList(
             // ADMIN GENESIS

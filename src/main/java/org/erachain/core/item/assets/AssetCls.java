@@ -57,8 +57,8 @@ public abstract class AssetCls extends ItemCls {
     public static final String ERA_DESCR = "";
 
     public static final long FEE_KEY = 2L;
-    public static final String FEE_ABBREV = "GAS"; // COMP (main rights units)
-    public static final String FEE_NAME = "GAS";
+    public static final String FEE_ABBREV = "OLF"; // COMP (main rights units)
+    public static final String FEE_NAME = "OLF";
     public static final String FEE_DESCR = "";
 
     public static final long AS_KEY = 3L;
