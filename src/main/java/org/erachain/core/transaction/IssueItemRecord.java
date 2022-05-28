@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 
 public abstract class IssueItemRecord extends Transaction implements Itemable {
@@ -233,6 +234,10 @@ public abstract class IssueItemRecord extends Transaction implements Itemable {
                 return INVALID_NAME_LENGTH_MIN;
             }
         }
+
+        BigDecimal balERA = this.creator.getBalance(this.dcSet, RIGHTS_KEY, Account.BALANCE_POS_OWN).b;
+        if (balERA.compareTo(BlockChain.MIN_REGISTERING_BALANCE_1000_BD) < 0)
+            return Transaction.NOT_ENOUGH_ERA_OWN_1000;
 
         return super.isValid(forDeal, checkFlags);
 

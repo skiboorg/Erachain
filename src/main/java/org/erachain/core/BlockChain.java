@@ -176,13 +176,13 @@ public class BlockChain {
     public static final int MIN_REGISTERING_BALANCE_USE = 500000;
     public static final BigDecimal MIN_REGISTERING_BALANCE_USE_BD = new BigDecimal(MIN_REGISTERING_BALANCE_USE);
 
-    public static final int MIN_REGISTERING_BALANCE_10 = 10;
+    public static final int MIN_REGISTERING_BALANCE_10 = 100;
     public static final BigDecimal MIN_REGISTERING_BALANCE_10_BD = new BigDecimal(MIN_REGISTERING_BALANCE_10);
 
-    public static final int MIN_REGISTERING_BALANCE_100 = 100;
+    public static final int MIN_REGISTERING_BALANCE_100 = 1000;
     public static final BigDecimal MIN_REGISTERING_BALANCE_100_BD = new BigDecimal(MIN_REGISTERING_BALANCE_100);
 
-    public static final int MIN_REGISTERING_BALANCE_1000 = 1000;
+    public static final int MIN_REGISTERING_BALANCE_1000 = 10000;
     public static final BigDecimal MIN_REGISTERING_BALANCE_1000_BD = new BigDecimal(MIN_REGISTERING_BALANCE_1000);
 
     public static final int WIN_BLOCK_BROADCAST_WAIT_MS = 10000; //
