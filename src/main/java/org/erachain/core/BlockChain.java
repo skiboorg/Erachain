@@ -226,11 +226,11 @@ public class BlockChain {
      * Если задан то это режим синхронизации со старым протоколом - значит нам нельзя генерить блоки и транзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = DEMO_MODE ? 66817 : 788640; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static int ALL_VALID_BEFORE = DEMO_MODE ? 0 : 0; // see in sidePROTOCOL.json as 'allValidBefore'
     public static final int WIN_VAL_ALL_VALID = 0;
-    public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 137687 : 0;
-    public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 53495 : 0;
-    public static final int AUTO_CANCEL_ORDERS_FROM = TEST_DB > 0? 0 : DEMO_MODE ? 154957 : CLONE_MODE? 226892 : 0;
+    public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 0 : 0;
+    public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 0 : 0;
+    public static final int AUTO_CANCEL_ORDERS_FROM = TEST_DB > 0? 0 : DEMO_MODE ? 0 : CLONE_MODE? 0 : 0;
     /**
      * Включает обработку заявок на бирже по цене рассчитанной по остаткам<bR>
      * !!! ВНИМАНИЕ !!! нельзя изменять походу собранной цепочки - так как съедут цены и индекс не удалится у некоторых ордеров - цена о другая.
@@ -258,7 +258,7 @@ public class BlockChain {
 
     public static final int VERS_5_3 = 0;
 
-    public static final int CLEAR_OLD_ORDERS_HEIGHT = TEST_DB > 0 || !CLONE_MODE ? DEMO_MODE ? 9224733 : Integer.MAX_VALUE : 465000;
+    public static final int CLEAR_OLD_ORDERS_HEIGHT = -1;
     public static final int CLEAR_OLD_ORDERS_PERIOD = 10 * 24 * 60 * 2;
 
     /**
@@ -306,17 +306,15 @@ public class BlockChain {
 
     public static final byte[][] DISCREDIR_ADDRESSES = TEST_DB > 0? new byte[][]{} : new byte[][]{};
 
-    public static final int SKIP_VALID_SIGN_BEFORE = !CLONE_MODE ? 0 : 78500;
+    public static final int SKIP_VALID_SIGN_BEFORE = !CLONE_MODE ? 0 : 0;
     public static final byte[][] VALID_SIGN = !CLONE_MODE? new byte[][]{} : new byte[][]{
             // MAIL with AMOUNT = 0
-            Base58.decode("3MDpK4MgZKafbaDegMDMgotdbL6eYjHuLRa3Si9oGdRvPiYiPBADbqBjQWcAMK9d4ZhUxobcEc8T5tVQ9raptix9")
+            //Base58.decode("3MDpK4MgZKafbaDegMDMgotdbL6eYjHuLRa3Si9oGdRvPiYiPBADbqBjQWcAMK9d4ZhUxobcEc8T5tVQ9raptix9")
     };
 
     public static final byte[][] INVALID_SIGN = !CLONE_MODE? new byte[][]{} : new byte[][]{
             // MAIL with AMOUNT = 0
-            Base58.decode("39TctLK2x4Lo5WJCPnG5aYrXYH7H2ADQEeDGL5vohXuC3JN8qVmcfFUstNQKXuia6BRmajXDWTQE8MDv6ZVpJeKm"),
-            Base58.decode("5BUDrUHkELpiNCu1r8nBRKBxsyLPDrGi6a1BAHKdWxnMX5Dv2b2MVPsvVxsmckZqffLzegfR9smDVSzPXTG98ZvK"),
-            Base58.decode("3pH9KKx5EZxKh6Q9Wn7ryctAi1p8BK3PxHym4wHD6PcoCV8kRTzaYr8vQsKJQ6NroMboKSF12kvK68VqUVKn3x7A")
+            //Base58.decode("3pH9KKx5EZxKh6Q9Wn7ryctAi1p8BK3PxHym4wHD6PcoCV8kRTzaYr8vQsKJQ6NroMboKSF12kvK68VqUVKn3x7A")
     };
 
     public static final byte[][] VALID_BAL = TEST_DB > 0 ? new byte[][]{} : CLONE_MODE || TEST_MODE ? new byte[][]{} :
@@ -338,7 +336,7 @@ public class BlockChain {
 
     public static final int AMOUNT_SCALE_FROM = 0;
     public static final int AMOUNT_DEDAULT_SCALE = 8;
-    public static final int FREEZE_FROM = CLONE_MODE? 547392 : 0;
+    public static final int FREEZE_FROM = Integer.MAX_VALUE;
 
     // только на них можно замороженные средства вернуть из списка FOUNDATION_ADDRESSES (там же и замароженные из-за утраты)
     public static final String[] TRUE_ADDRESSES = TEST_DB > 0 || TEST_MODE? new String[]{} :
@@ -617,26 +615,6 @@ public class BlockChain {
 
             if (CLONE_MODE) {
                 // FREEZED_FORGING.add("");
-                FOUNDATION_ADDRESSES.add("7JdaW3v6Jt89XibGpCB2q3zm4d7njvSBBM");
-
-                FOUNDATION_ADDRESSES.add("7PP46kVHwqkQCqEUhBjSVevQsjT7XgrbLj");
-                FOUNDATION_ADDRESSES.add("76uM1bjTqAV6SrZN5HMMKGrRCEognHWEWo");
-                FOUNDATION_ADDRESSES.add("7GAhKrTv7k65TEbGHnVFN8ypgGJKhGg6fn");
-                FOUNDATION_ADDRESSES.add("7KZy6rg87JyUCixGxeZs6obYkrn58bCMcV");
-                FOUNDATION_ADDRESSES.add("7H7zPwte3qL5CkdnkvsfKjDeH9UJFHeutF");
-                FOUNDATION_ADDRESSES.add("738s3y3M5QsdvhvVbGaY8jfzSoYyi2c25Q");
-                FOUNDATION_ADDRESSES.add("7CP4eso63ZTG9uUeutBFs1N7Q8bP3RG1bq");
-                FOUNDATION_ADDRESSES.add("7NmCBXnKGpb5ha5gBPmRAi8pUtVCFNhmSc");
-                FOUNDATION_ADDRESSES.add("7EMYCpwS183oMDrTbekf2zD74N2AW4KoMy");
-                FOUNDATION_ADDRESSES.add("7AATKxfZrFdT7Ksidvrvq6rJYP3LRizpzE");
-                FOUNDATION_ADDRESSES.add("7Eh6raYUhwGKdV3BntvJZiSB5dvYGNNUqC");
-                FOUNDATION_ADDRESSES.add("74zaQ65ZuDyP1HRzqbd1PVog3WbCLeVMN2");
-                FOUNDATION_ADDRESSES.add("7CmtTjwgwUJk5wgyKfJXhaddQkXyh2UJA2");
-                FOUNDATION_ADDRESSES.add("7NrwisgWgccbHJ7vdWyGq7ss4mKLDRpSQT");
-                FOUNDATION_ADDRESSES.add("7BYWr39hcXtpfM3HgzvfQXW3mVwfCnoNNT");
-
-                FOUNDATION_ADDRESSES.add("7EZ2wbj3Tbv7DQy6vmdvqno2Z5h97vwc4b");
-                FOUNDATION_ADDRESSES.add("7GSCayNRM7PP1sqzZrsS7VePodTpdeVE1Q");
 
             }
         } else {
