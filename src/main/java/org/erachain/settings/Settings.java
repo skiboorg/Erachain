@@ -219,7 +219,7 @@ public class Settings {
         this.localAddress = this.getCurrentIp();
         settingsJSON = read_setting_JSON();
 
-        EXCHANGE_IN_OUT = isCloneNet();
+        EXCHANGE_IN_OUT = false; //isCloneNet();
 
         //TRY READ PEERS.JSON
         try {
