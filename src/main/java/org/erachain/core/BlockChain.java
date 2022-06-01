@@ -610,8 +610,8 @@ public class BlockChain {
             ASSET_TRANSFER_PERCENTAGE_MIN_TAB.put(1840L, new BigDecimal("0.05"));
 
             // процент сжигания - если тут не задано то берется 1/2
-            //ASSET_BURN_PERCENTAGE.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
-            //ASSET_BURN_PERCENTAGE.put(AssetCls.AS_KEY, BigDecimal.ZERO);
+            ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.FEE_KEY, BigDecimal.ONE);
+            //ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.AS_KEY, BigDecimal.ZERO);
 
             if (CLONE_MODE) {
                 // FREEZED_FORGING.add("");
