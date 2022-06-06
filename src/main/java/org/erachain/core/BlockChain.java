@@ -623,7 +623,10 @@ public class BlockChain {
 
             if (CLONE_MODE) {
                 // FREEZED_FORGING.add("");
-                EXCHANGE_MIN_AMOUNT_TAB.put(95L, new BigDecimal(245));
+
+                EXCHANGE_MIN_AMOUNT_TAB.put(1643L, new BigDecimal(245)); // RUB
+                EXCHANGE_MIN_AMOUNT_TAB.put(1978L, new BigDecimal(5)); // EUR
+                EXCHANGE_MIN_AMOUNT_TAB.put(1840L, new BigDecimal(5)); // USD
 
             }
         } else {
