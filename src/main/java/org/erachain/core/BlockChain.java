@@ -413,6 +413,11 @@ public class BlockChain {
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
 
     /**
+     * минимальная ставка на бирже для актива - абсолютное значение!
+     */
+    public static final HashMap<Long, BigDecimal> EXCHANGE_MIN_AMOUNT_TAB = new HashMap<>();
+
+    /**
      * По какому активу считаем дивиденды
      */
     public static final long HOLD_ROYALTY_ASSET = AssetCls.AS_KEY;
@@ -618,6 +623,7 @@ public class BlockChain {
 
             if (CLONE_MODE) {
                 // FREEZED_FORGING.add("");
+                EXCHANGE_MIN_AMOUNT_TAB.put(95L, new BigDecimal(245));
 
             }
         } else {
