@@ -398,10 +398,18 @@ public class BlockChain {
      * какие проценты сжигаем при переводе активов - Ключ : процент
      */
     public static final HashMap<Long, BigDecimal> ASSET_BURN_PERCENTAGE_TAB = new HashMap<>();
+    /**
+     * 1 - all to asset owner; 0 - all to block forger
+     */
     public static final BigDecimal ASSET_BURN_PERCENTAGE_DEFAULT = new BigDecimal("0.5");
 
     public static final int HOLD_ROYALTY_PERIOD_DAYS = 7; // как часто начисляем? Если = 0 - на начислять
     public static final BigDecimal HOLD_ROYALTY_MIN = new BigDecimal("0.00000001"); // если меньше то распределение не делаем
+
+    /**
+     * минимальная ставка на бирже для актива - абсолютное значение!
+     */
+    public static final HashMap<Long, BigDecimal> EXCHANGE_MIN_AMOUNT_TAB = new HashMap<>();
 
     /**
      * По какому активу считаем дивиденды
@@ -645,6 +653,9 @@ public class BlockChain {
             // процент сжигания - если тут не задано то берется 1/2
             ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.ERA_KEY, BigDecimal.ZERO);
             ASSET_BURN_PERCENTAGE_TAB.put(AssetCls.AS_KEY, BigDecimal.ZERO);
+
+            if (false)
+                EXCHANGE_MIN_AMOUNT_TAB.put(95L, new BigDecimal(245));
 
         } else {
             // MAIN MODE
