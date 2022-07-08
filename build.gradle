@@ -32,7 +32,7 @@ ext {
     springbootVersion = '2.0.5.RELEASE'
 }
 
-String versionEra = "2022.06 01"
+String versionEra = "2022.06 02"
 group 'org.erachain'
 
 repositories {

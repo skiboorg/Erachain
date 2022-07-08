@@ -226,7 +226,7 @@ public class BlockChain {
      * Если задан то это режим синхронизации со старым протоколом - значит нам нельзя генерить блоки и транзакции
      * и вести себя тихо - ничего не посылать никуда - чтобы не забанили
      */
-    public static int ALL_VALID_BEFORE = DEMO_MODE ? 0 : 0; // see in sidePROTOCOL.json as 'allValidBefore'
+    public static int ALL_VALID_BEFORE = DEMO_MODE ? 0 : 113917; // see in sidePROTOCOL.json as 'allValidBefore'
     public static final int WIN_VAL_ALL_VALID = 0;
     public static final int ALL_BALANCES_OK_TO = DEMO_MODE? 0 : CLONE_MODE? 0 : 0;
     public static final int CANCEL_ORDERS_ALL_VALID = DEMO_MODE? 0 : CLONE_MODE? 0 : 0;
@@ -374,7 +374,7 @@ public class BlockChain {
 
     public static final int FREE_FEE_LENGTH = ADD_FEE_BYTES_FOR_COMMON_TX + (1 << 13);
     public static final int FREE_FEE_TO_SEQNO = 1;
-    public static final int FREE_FEE_FROM_HEIGHT = 1;
+    public static final int FREE_FEE_FROM_HEIGHT = Integer.MAX_VALUE;
 
 
     /**

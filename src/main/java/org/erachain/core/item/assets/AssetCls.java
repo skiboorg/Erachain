@@ -2480,7 +2480,7 @@ public abstract class AssetCls extends ItemCls {
                             assetRoyalty, false, false, false);
                     if (!asOrphan && block != null)
                         block.addCalculated(dexAward.getAccount(), assetWantKey, assetRoyalty,
-                                "NFT Royalty by Order @" + Transaction.viewDBRef(orderID), orderID);
+                                "Royalty by Order @" + Transaction.viewDBRef(orderID), orderID);
                 }
             }
         }
@@ -2502,9 +2502,24 @@ public abstract class AssetCls extends ItemCls {
             }
 
         } else if (assetWant.getKey() < assetWant.getStartKey()
-                && !isInitiator) {
+                /// с обеих сторон && !isInitiator
+        ) {
+
             // это системные активы - берем комиссию за них
-            forgerFee = tradeAmount.movePointLeft(3).setScale(scale, RoundingMode.DOWN);
+            forgerFee = BigDecimal.ZERO;
+
+            BigDecimal ownerFee = tradeAmount.movePointLeft(3).setScale(scale, RoundingMode.DOWN);
+
+            if (ownerFee.signum() > 0) {
+                tradeAmount = tradeAmount.subtract(ownerFee);
+
+                assetWant.getMaker().changeBalance(dcSet, asOrphan, false, assetWantKey,
+                        ownerFee, false, false, false);
+                if (!asOrphan && block != null)
+                    block.addCalculated(assetWant.getMaker(), assetWantKey, ownerFee,
+                            "Tax from Order @" + Transaction.viewDBRef(orderID), orderID);
+
+            }
 
             // за рефералку тут тоже
             Fun.Tuple4<Long, Integer, Integer, Integer> issuerPersonDuration = receiver.getPersonDuration(dcSet);
@@ -2553,7 +2568,7 @@ public abstract class AssetCls extends ItemCls {
             long inviterRoyaltyLong = inviterRoyalty.setScale(assetWant.getScale()).unscaledValue().longValue();
             Transaction.process_gifts(dcSet, BlockChain.FEE_INVITED_DEEP, inviterRoyaltyLong, inviter, asOrphan,
                     assetWant, block,
-                    "NFT Royalty referral bonus " + "@" + Transaction.viewDBRef(orderID),
+                    "Royalty referral bonus " + "@" + Transaction.viewDBRef(orderID),
                     orderID, timestamp);
         }
 
