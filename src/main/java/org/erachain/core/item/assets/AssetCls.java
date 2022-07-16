@@ -131,14 +131,14 @@ public abstract class AssetCls extends ItemCls {
     public static final int AS_OUTSIDE_SHARE = 13;
 
     /**
-     * outside BILL - вексель
+     * outside BILL - вексель - promissory note
      * +++ вексель на оплату во вне
      * === полный аналог OUTSIDE_CLAIM по действиям в протоколе - чисто для наименования другого
      */
     public static final int AS_OUTSIDE_BILL = 14;
 
     /**
-     * outside BILL - вексель
+     * outside BILL - вексель переводной (тратта) - bill of exchange
      * +++ вексель на оплату во вне
      * === полный аналог OUTSIDE_CLAIM по действиям в протоколе - чисто для наименования другого
      */
@@ -383,6 +383,7 @@ public abstract class AssetCls extends ItemCls {
                 AS_OUTSIDE_CURRENCY,
                 AS_OUTSIDE_SERVICE,
                 AS_OUTSIDE_BILL,
+                AS_OUTSIDE_BILL_EX,
                 AS_OUTSIDE_WORK_TIME_HOURS,
                 AS_OUTSIDE_WORK_TIME_MINUTES,
                 AS_OUTSIDE_SHARE,
@@ -489,6 +490,8 @@ public abstract class AssetCls extends ItemCls {
             case AS_INSIDE_VOTE:
                 return "✋";
             case AS_OUTSIDE_BILL:
+                return "⬖"; // ⬒
+            case AS_OUTSIDE_BILL_EX:
                 return "⬖"; // ⬒
             case AS_OUTSIDE_SERVICE:
                 return "⬔";
@@ -819,7 +822,7 @@ public abstract class AssetCls extends ItemCls {
     }
 
     public boolean isOutsideBill() {
-        return this.assetType == AS_OUTSIDE_BILL;
+        return this.assetType == AS_OUTSIDE_BILL || this.assetType == AS_OUTSIDE_BILL_EX;
     }
 
     public boolean isOutsideBillEx() {
@@ -1050,7 +1053,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_OUTSIDE_BILL:
                 return "AS_OUTSIDE_BILL_N";
             case AS_OUTSIDE_BILL_EX:
-                return "Bill of exchange";
+                return "AS_OUTSIDE_BILL_EX_N";
             case AS_MY_DEBT:
                 return "AS_MY_DEBT_N";
             case AS_OUTSIDE_OTHER_CLAIM:
@@ -1123,7 +1126,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_OUTSIDE_BILL:
                 return "AS_OUTSIDE_BILL_NF";
             case AS_OUTSIDE_BILL_EX:
-                return "Bill of Exchange";
+                return "AS_OUTSIDE_BILL_EX_NF";
             case AS_MY_DEBT:
                 return "AS_MY_DEBT_NF";
             case AS_OUTSIDE_OTHER_CLAIM:
@@ -1276,7 +1279,7 @@ public abstract class AssetCls extends ItemCls {
             case AS_OUTSIDE_BILL:
                 return "AS_OUTSIDE_BILL_D";
             case AS_OUTSIDE_BILL_EX:
-                return "A digital bill of exchange can be called for redemption by external money. You can take it into your hands";
+                return "AS_OUTSIDE_BILL_EX_D";
             case AS_MY_DEBT:
                 return "AS_MY_DEBT_D";
             case AS_OUTSIDE_OTHER_CLAIM:
@@ -1417,7 +1420,6 @@ public abstract class AssetCls extends ItemCls {
                         return null;
                 }
             case AS_OUTSIDE_BILL:
-            case AS_OUTSIDE_BILL_EX:
                 switch (actionType) {
                     case Account.BALANCE_POS_OWN:
                         return backward ? null : "AS_OUTSIDE_BILL_1";
@@ -1426,6 +1428,18 @@ public abstract class AssetCls extends ItemCls {
                                 : "AS_OUTSIDE_BILL_2";
                     case Account.BALANCE_POS_SPEND:
                         return backward ? null : "AS_OUTSIDE_BILL_4";
+                    default:
+                        return null;
+                }
+            case AS_OUTSIDE_BILL_EX:
+                switch (actionType) {
+                    case Account.BALANCE_POS_OWN:
+                        return backward ? null : "AS_OUTSIDE_BILL_EX_1";
+                    case Account.BALANCE_POS_DEBT:
+                        return backward ? "AS_OUTSIDE_BILL_EX_2B"
+                                : "AS_OUTSIDE_BILL_EX_2";
+                    case Account.BALANCE_POS_SPEND:
+                        return backward ? null : "AS_OUTSIDE_BILL_EX_4";
                     default:
                         return null;
                 }
@@ -2450,7 +2464,7 @@ public abstract class AssetCls extends ItemCls {
                             assetRoyalty, false, false, false);
                     if (!asOrphan && block != null)
                         block.addCalculated(dexAward.getAccount(), assetWantKey, assetRoyalty,
-                                "NFT Royalty by Order @" + Transaction.viewDBRef(orderID), orderID);
+                                "Royalty by Order @" + Transaction.viewDBRef(orderID), orderID);
                 }
             }
         }
@@ -2523,7 +2537,7 @@ public abstract class AssetCls extends ItemCls {
             long inviterRoyaltyLong = inviterRoyalty.setScale(assetWant.getScale()).unscaledValue().longValue();
             Transaction.process_gifts(dcSet, BlockChain.FEE_INVITED_DEEP, inviterRoyaltyLong, inviter, asOrphan,
                     assetWant, block,
-                    "NFT Royalty referral bonus " + "@" + Transaction.viewDBRef(orderID),
+                    "Royalty referral bonus " + "@" + Transaction.viewDBRef(orderID),
                     orderID, timestamp);
         }
 
