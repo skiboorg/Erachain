@@ -52,18 +52,18 @@ public abstract class AssetCls extends ItemCls {
 
     // CORE KEY
     public static final long ERA_KEY = 1L;
-    public static final String ERA_ABBREV = "RUPAY"; // ERA (main rights units)
-    public static final String ERA_NAME = "RUPAY";
+    public static final String ERA_ABBREV = "RELA"; // ERA (main rights units)
+    public static final String ERA_NAME = "RELA";
     public static final String ERA_DESCR = "";
 
     public static final long FEE_KEY = 2L;
-    public static final String FEE_ABBREV = "OLF"; // COMP (main rights units)
-    public static final String FEE_NAME = "OLF";
+    public static final String FEE_ABBREV = "LA"; // COMP (main rights units)
+    public static final String FEE_NAME = "LA";
     public static final String FEE_DESCR = "";
 
     public static final long AS_KEY = 3L;
-    public static final String AS_ABBREV = "AS";
-    public static final String AS_NAME = "AS";
+    public static final String AS_ABBREV = "RE";
+    public static final String AS_NAME = "RE";
     public static final String AS_DESCR = "";
 
     public static final long LIA_KEY = 5L;

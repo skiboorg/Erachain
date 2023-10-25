@@ -29,8 +29,8 @@ import java.util.List;
 
 public class Settings {
 
-    public static final long DEFAULT_MAINNET_STAMP = 1653886800000L; // MAIN Net
-    public static final long DEFAULT_DEMO_NET_STAMP = 1622206800000L; // DEMO Net
+    public static final long DEFAULT_MAINNET_STAMP = 1697990400000L; // MAIN Net
+    public static final long DEFAULT_DEMO_NET_STAMP = 1697990400000L; // DEMO Net
 
     public static String FORK_APP_Name = "RU PAY";
     public static String FORK_APP_URL_Name = "RuPay.Pro";
